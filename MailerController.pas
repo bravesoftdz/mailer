@@ -10,13 +10,9 @@ type
   [MVCPath('/')]
   TMailerController = class(TMVCController)
   public
-    [MVCPath('/')]
+    [MVCPath('/sendfrom/($origin)')]
     [MVCHTTPMethod([httpGET])]
-    procedure Index;
-
-    [MVCPath('/hellos/($FirstName)')]
-    [MVCHTTPMethod([httpGET])]
-    procedure GetSpecializedHello(const FirstName: String);
+    procedure SendFrom(const origin: String);
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -27,15 +23,9 @@ implementation
 uses
   MVCFramework.Logger;
 
-procedure TMailerController.Index;
+procedure TMailerController.SendFrom(const origin: String);
 begin
-  //use Context property to access to the HTTP request and response 
-  Render('Hello World');
-end;
-
-procedure TMailerController.GetSpecializedHello(const FirstName: String);
-begin
-  Render('Hello ' + FirstName);
+  Render('Send from ' + origin);
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
