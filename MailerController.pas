@@ -10,9 +10,14 @@ type
   [MVCPath('/')]
   TMailerController = class(TMVCController)
   public
-    [MVCPath('/sendfrom/($origin)')]
+    [MVCPath('/register/($origin)')]
     [MVCHTTPMethod([httpGET])]
-    procedure SendFrom(const origin: String);
+    procedure SendRegistration(const origin: String);
+
+    [MVCPath('/contact/($origin)')]
+    [MVCHTTPMethod([httpGET])]
+    procedure SendContact(const origin: String);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -21,11 +26,20 @@ type
 implementation
 
 uses
-  MVCFramework.Logger;
+  MVCFramework.Logger, MailerResponceInterface, RegistrationResponce;
 
-procedure TMailerController.SendFrom(const origin: String);
+procedure TMailerController.SendContact(const origin: String);
 begin
-  Render('Send from ' + origin);
+
+  Render('Send contact from ' + origin);
+end;
+
+procedure TMailerController.SendRegistration(const origin: String);
+var
+  responce: IMailerResponce;
+begin
+  responce := TRegistrationResponce.Create;
+  Render(responce);
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -41,6 +55,5 @@ begin
     action will not be called }
   inherited;
 end;
-
 
 end.
