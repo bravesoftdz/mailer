@@ -10,13 +10,18 @@ type
   [MVCPath('/')]
   TMailerController = class(TMVCController)
   public
-    [MVCPath('/register/($origin)')]
-    [MVCHTTPMethod([httpGET])]
-    procedure SendRegistration(const origin: String);
+    [MVCPath('/subscribe/($origin)')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure Subscribe(const origin: String);
 
     [MVCPath('/contact/($origin)')]
-    [MVCHTTPMethod([httpGET])]
-    procedure SendContact(const origin: String);
+    [MVCHTTPMethod([httpPOST])]
+    [MVCProduces('application/json')]
+    procedure Contact(const origin: String);
+
+    [MVCPath('/order/($origin)')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure Order(const origin: String);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -26,20 +31,23 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, MailerResponceInterface, RegistrationResponce;
+  MVCFramework.Logger, MailerResponceInterface, RegistrationResponce,
+  SimpleMailerResponce;
 
-procedure TMailerController.SendContact(const origin: String);
+
+procedure TMailerController.Contact(const origin: String);
+var
+  R: TSimpleMailerResponce;
 begin
+  R := TSimpleMailerResponce.Create();
+  R.setMessage(origin);
+  Render(R);
 
-  Render('Send contact from ' + origin);
 end;
 
-procedure TMailerController.SendRegistration(const origin: String);
-var
-  responce: IMailerResponce;
+procedure TMailerController.Subscribe(const origin: String);
 begin
-  responce := TRegistrationResponce.Create;
-  Render(responce);
+
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -54,6 +62,11 @@ begin
     if handled is true (or an exception is raised) the actual
     action will not be called }
   inherited;
+end;
+
+procedure TMailerController.Order(const origin: String);
+begin
+
 end;
 
 end.
