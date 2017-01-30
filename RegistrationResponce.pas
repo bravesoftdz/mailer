@@ -2,11 +2,8 @@ unit RegistrationResponce;
 
 interface
 
-uses
-  MailerResponceInterface;
-
 type
-  TRegistrationResponce = class(TInterfacedObject, IMailerResponce)
+  TRegistrationResponce = class
   const
     FMessage = 'test message';
     function

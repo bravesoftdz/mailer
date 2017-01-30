@@ -13,7 +13,9 @@ uses
   IdHTTPWebBrokerBridge,
   MailerController in 'MailerController.pas',
   MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
-  MailerResponceInterface in 'MailerResponceInterface.pas';
+  MailerResponceInterface in 'MailerResponceInterface.pas',
+  RegistrationResponce in 'RegistrationResponce.pas',
+  SimpleMailerResponce in 'SimpleMailerResponce.pas';
 
 {$R *.res}
 

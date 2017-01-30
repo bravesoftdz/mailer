@@ -31,7 +31,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, MailerResponceInterface, RegistrationResponce,
+  MVCFramework.Logger, RegistrationResponce,
   SimpleMailerResponce;
 
 
@@ -40,8 +40,9 @@ var
   R: TSimpleMailerResponce;
 begin
   R := TSimpleMailerResponce.Create();
-  R.setMessage(origin);
+  R.message := origin;
   Render(R);
+
 
 end;
 
