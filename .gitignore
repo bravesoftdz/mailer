@@ -2,3 +2,5 @@ __history/
 lib/
 Win32/
 *.local
+*.identcache
+*.stat

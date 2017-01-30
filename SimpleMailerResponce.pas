@@ -2,32 +2,20 @@ unit SimpleMailerResponce;
 
 interface
 
-uses
-  MailerResponceInterface;
-
 type
-  TSimpleMailerResponce = class(TInterfacedObject, IMailerResponce)
+
+  [MapperJSONNaming(JSONNameLowerCase)]
+  TSimpleMailerResponce = class
   private
     FMessage: String;
+    procedure SetMessage(const msg: String);
   public
-    function getMessage(): String;
-    procedure setMessage(const msg: String);
-    constructor Create(); overload;
+    property message: String read FMessage write SetMessage;
   end;
 
 implementation
 
 { TSimpleMailerResponce }
-
-constructor TSimpleMailerResponce.Create;
-begin
-  FMessage := 'Start message';
-end;
-
-function TSimpleMailerResponce.getMessage: String;
-begin
-  Result := FMessage;
-end;
 
 procedure TSimpleMailerResponce.setMessage(const msg: String);
 begin
