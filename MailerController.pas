@@ -10,18 +10,26 @@ type
   [MVCPath('/')]
   TMailerController = class(TMVCController)
   public
-    [MVCPath('/subscribe/($origin)')]
-    [MVCHTTPMethod([httpPOST])]
-    procedure Subscribe(const origin: String);
-
-    [MVCPath('/contact/($origin)')]
+    [MVCPath('/subscribe/($path)')]
     [MVCHTTPMethod([httpPOST])]
     [MVCProduces('application/json')]
-    procedure Contact(const origin: String);
+    [MVCConsumes('application/json')]
+    [MVCDoc('Subscribe a user to a requested service')]
+    procedure Subscribe(const origin: String);
 
-    [MVCPath('/order/($origin)')]
+    [MVCPath('/contact/($path)')]
     [MVCHTTPMethod([httpPOST])]
-    procedure Order(const origin: String);
+    [MVCProduces('application/json')]
+    [MVCConsumes('application/json')]
+    [MVCDoc('Request a contact. A user wants to be called.')]
+    procedure RequestContact(Ctx: TWebContext);
+
+    [MVCPath('/order/($path)')]
+    [MVCHTTPMethod([httpPOST])]
+    [MVCProduces('application/json')]
+    [MVCConsumes('application/json')]
+    [MVCDoc('Send an order')]
+    procedure SendOrder(const origin: String);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -32,18 +40,30 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce,
-  SimpleMailerResponce;
+  SimpleMailerResponce, System.JSON, System.SysUtils;
 
-
-procedure TMailerController.Contact(const origin: String);
+procedure TMailerController.RequestContact(Ctx: TWebContext);
+const
+  TOKEN = 'path';
 var
   R: TSimpleMailerResponce;
+  AJson: TJsonObject;
+  path: String;
 begin
+  path := Ctx.request.params[TOKEN];
   R := TSimpleMailerResponce.Create();
-  R.message := origin;
+  try
+    AJSon := Ctx.Request.BodyAsJSONObject;
+    R.message := 'contacting ' + path + ' with json input';
+  except
+    on e: Exception do
+    begin
+      AJSon := nil;
+      R.message := 'contacting ' + path + ' with NO json input';
+    end;
+  end;
+
   Render(R);
-
-
 end;
 
 procedure TMailerController.Subscribe(const origin: String);

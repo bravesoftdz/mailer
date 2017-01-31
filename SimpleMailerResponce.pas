@@ -8,18 +8,26 @@ type
   TSimpleMailerResponce = class
   private
     FMessage: String;
-    procedure SetMessage(const msg: String);
+    FToken: String;
+    procedure SetMessage(const Value: String);
+    procedure SetToken(const Value: String);
   public
     property message: String read FMessage write SetMessage;
+    property token: String read FToken write SetToken;
   end;
 
 implementation
 
 { TSimpleMailerResponce }
 
-procedure TSimpleMailerResponce.setMessage(const msg: String);
+procedure TSimpleMailerResponce.setMessage(const Value: String);
 begin
-  FMessage := msg;
+  FMessage := Value;
+end;
+
+procedure TSimpleMailerResponce.SetToken(const Value: String);
+begin
+  FToken := Value;
 end;
 
 end.
