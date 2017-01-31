@@ -14,7 +14,9 @@ uses
   MailerController in 'MailerController.pas',
   MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
   RegistrationResponce in 'RegistrationResponce.pas',
-  SimpleMailerResponce in 'SimpleMailerResponce.pas';
+  SimpleMailerResponce in 'SimpleMailerResponce.pas',
+  MailerAction in 'MailerAction.pas',
+  TSimpleInputData in 'TSimpleInputData.pas';
 
 {$R *.res}
 

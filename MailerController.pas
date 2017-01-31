@@ -21,7 +21,7 @@ type
     [MVCHTTPMethod([httpPOST])]
     [MVCProduces('application/json')]
     [MVCConsumes('application/json')]
-    [MVCDoc('Request a contact. A user wants to be called.')]
+    [MVCDoc('Contact a user')]
     procedure RequestContact(Ctx: TWebContext);
 
     [MVCPath('/order/($path)')]
@@ -40,30 +40,32 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce,
-  SimpleMailerResponce, System.JSON, System.SysUtils;
+  SimpleMailerResponce, System.JSON, System.SysUtils, MailerAction,
+  SimpleInputData;
 
 procedure TMailerController.RequestContact(Ctx: TWebContext);
 const
   TOKEN = 'path';
 var
-  R: TSimpleMailerResponce;
+  Responce: TSimpleMailerResponce;
   AJson: TJsonObject;
   path: String;
+  Worker: TMailerAction;
+  InputObj: TSimpleInputData;
 begin
   path := Ctx.request.params[TOKEN];
-  R := TSimpleMailerResponce.Create();
+  Worker := TMailerAction.Create;
   try
     AJSon := Ctx.Request.BodyAsJSONObject;
-    R.message := 'contacting ' + path + ' with json input';
+    InputObj := TSimpleInputData.Create('', path, AJson);
+    Responce := Worker.Elaborate(InputObj);
+    Render(Responce);
   except
     on e: Exception do
     begin
       AJSon := nil;
-      R.message := 'contacting ' + path + ' with NO json input';
     end;
   end;
-
-  Render(R);
 end;
 
 procedure TMailerController.Subscribe(const origin: String);
@@ -85,7 +87,7 @@ begin
   inherited;
 end;
 
-procedure TMailerController.Order(const origin: String);
+procedure TMailerController.SendOrder(const origin: String);
 begin
 
 end;
