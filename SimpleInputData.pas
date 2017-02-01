@@ -8,22 +8,20 @@ uses
 type
   TSimpleInputData = class
   private
-    FToken: String;
-    FOrigin: String;
+    FDestination: String;
     FData: TJsonObject;
   public
-    constructor Create(const Token, Origin: String; const Data: TJsonObject);
+    constructor Create(const Destination: String; const Data: TJsonObject);
   end;
 
 implementation
 
 { TSimpleInputData }
 
-constructor TSimpleInputData.Create(const Token, Origin: String;
+constructor TSimpleInputData.Create(const Destination: String;
   const Data: TJsonObject);
 begin
-  FToken := Token;
-  FOrigin := Origin;
+  FDestination := Destination;
   FData := Data;
 end;
 
