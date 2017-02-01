@@ -12,6 +12,7 @@ type
     FData: TJsonObject;
   public
     constructor Create(const Destination: String; const Data: TJsonObject);
+    property Data: TJsonObject read FData;
   end;
 
 implementation

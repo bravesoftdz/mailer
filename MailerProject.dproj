@@ -95,6 +95,8 @@
         <DCCReference Include="SimpleMailerResponce.pas"/>
         <DCCReference Include="MailerAction.pas"/>
         <DCCReference Include="SimpleInputData.pas"/>
+        <DCCReference Include="ActionDispatcher.pas"/>
+        <DCCReference Include="VenditoriOrder.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

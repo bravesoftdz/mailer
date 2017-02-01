@@ -16,7 +16,9 @@ uses
   RegistrationResponce in 'RegistrationResponce.pas',
   SimpleMailerResponce in 'SimpleMailerResponce.pas',
   MailerAction in 'MailerAction.pas',
-  SimpleInputData in 'SimpleInputData.pas';
+  SimpleInputData in 'SimpleInputData.pas',
+  ActionDispatcher in 'ActionDispatcher.pas',
+  VenditoriOrder in 'VenditoriOrder.pas';
 
 {$R *.res}
 

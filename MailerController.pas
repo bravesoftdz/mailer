@@ -31,22 +31,22 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce,
   SimpleMailerResponce, System.JSON, System.SysUtils, MailerAction,
-  SimpleInputData;
+  SimpleInputData, ActionDispatcher;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
   Responce: TSimpleMailerResponce;
   AJson: TJsonObject;
-  Destination, ActionName: String;
+  DestinationName, ActionName: String;
   Worker: TMailerAction;
   InputObj: TSimpleInputData;
 begin
-  Destination := Ctx.request.params[DESTINATION_TOKEN];
+  DestinationName := Ctx.request.params[DESTINATION_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
-  Worker := TMailerAction.Create(destination, ActionName);
   try
     AJSon := Ctx.Request.BodyAsJSONObject;
-    InputObj := TSimpleInputData.Create(Destination, AJson);
+    InputObj := TSimpleInputData.Create(DestinationName, AJson);
+    Worker := TActionDispatcher.FindAction(DestinationName, ActionName);
     Responce := Worker.Elaborate(InputObj);
     Render(Responce);
   except
