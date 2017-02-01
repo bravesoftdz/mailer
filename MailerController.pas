@@ -15,7 +15,7 @@ type
     [MVCProduces('application/json')]
     [MVCConsumes('application/json')]
     [MVCDoc('Subscribe a user to a requested service')]
-    procedure Subscribe(const origin: String);
+    procedure Subscribe(Ctx: TWebContext);
 
     [MVCPath('/contact/($path)')]
     [MVCHTTPMethod([httpPOST])]
@@ -29,7 +29,7 @@ type
     [MVCProduces('application/json')]
     [MVCConsumes('application/json')]
     [MVCDoc('Send an order')]
-    procedure SendOrder(const origin: String);
+    procedure SendOrder(Ctx: TWebContext);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -68,9 +68,29 @@ begin
   end;
 end;
 
-procedure TMailerController.Subscribe(const origin: String);
+procedure TMailerController.Subscribe(Ctx: TWebContext);
+const
+  TOKEN = 'path';
+var
+  Responce: TSimpleMailerResponce;
+  AJson: TJsonObject;
+  path: String;
+  Worker: TMailerAction;
+  InputObj: TSimpleInputData;
 begin
-
+  path := Ctx.request.params[TOKEN];
+  Worker := TMailerAction.Create;
+  try
+    AJSon := Ctx.Request.BodyAsJSONObject;
+    InputObj := TSimpleInputData.Create('', path, AJson);
+    Responce := Worker.Elaborate(InputObj);
+    Render(Responce);
+  except
+    on e: Exception do
+    begin
+      AJSon := nil;
+    end;
+  end;
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
