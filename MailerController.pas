@@ -3,7 +3,8 @@
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons;
+  MVCFramework, MVCFramework.Commons, System.Generics.Collections, MailerAction,
+  ActionDispatcher;
 
 type
 
@@ -13,6 +14,9 @@ type
     const
     ACTION_TOKEN = 'action';
     DESTINATION_TOKEN = 'destination';
+    class var FFactory: TActionDispatcher;
+    class procedure SetupFactory();
+
   public
     [MVCPath('/($' + DESTINATION_TOKEN + ')/($' + ACTION_TOKEN + ')')]
     [MVCHTTPMethod([httpPOST])]
@@ -30,8 +34,8 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce,
-  SimpleMailerResponce, System.JSON, System.SysUtils, MailerAction,
-  SimpleInputData, ActionDispatcher;
+  SimpleMailerResponce, System.JSON, System.SysUtils,
+  SimpleInputData, VenditoriOrder, EmptyAction;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -46,7 +50,7 @@ begin
   try
     AJSon := Ctx.Request.BodyAsJSONObject;
     InputObj := TSimpleInputData.Create(DestinationName, AJson);
-    Worker := TActionDispatcher.FindAction(DestinationName, ActionName);
+    Worker := FFactory.FindAction(DestinationName, ActionName);
     Responce := Worker.Elaborate(InputObj);
     Render(Responce);
   except
@@ -70,5 +74,18 @@ begin
     action will not be called }
   inherited;
 end;
+
+class procedure TMailerController.SetupFactory();
+var
+  actions: TObjectList<TMailerAction>;
+begin
+  actions := TObjectList<TMailerAction>.Create;
+  actions.add(TVenditoriOrder.Create);
+  FFactory := TActionDispatcher.Create(actions, TEmptyAction.Create);
+end;
+
+initialization
+
+TMailerController.SetupFactory();
 
 end.
