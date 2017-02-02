@@ -9,11 +9,20 @@ type
   TVenditoriOrder = class(TMailerAction)
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
+    constructor Create;
+
   end;
 
 implementation
 
 { TVenditoriOrder }
+
+constructor TVenditoriOrder.Create;
+begin
+  inherited;
+  FDestinationName := 'venditori';
+  FActionName := 'order';
+end;
 
 function TVenditoriOrder.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
