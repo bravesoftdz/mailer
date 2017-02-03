@@ -35,7 +35,7 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce,
   SimpleMailerResponce, System.JSON, System.SysUtils,
-  SimpleInputData, VenditoriOrder, EmptyAction;
+  SimpleInputData, VenditoriOrder, EmptyAction, VenditoriRegister;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -80,7 +80,7 @@ var
   actions: TObjectList<TMailerAction>;
 begin
   actions := TObjectList<TMailerAction>.Create;
-  actions.add(TVenditoriOrder.Create);
+  actions.addRange([TVenditoriOrder.Create, TVenditoriRegister.Create]);
   FFactory := TActionDispatcher.Create(actions, TEmptyAction.Create);
 end;
 

@@ -1,4 +1,4 @@
-unit VenditoriOrder;
+unit VenditoriRegister;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   MailerAction, SimpleInputData, SimpleMailerResponce;
 
 type
-  TVenditoriOrder = class(TMailerAction)
+  TVenditoriRegister = class(TMailerAction)
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
     constructor Create;
@@ -14,14 +14,14 @@ type
 
 implementation
 
-{ TVenditoriOrder }
+{ TVenditoriRegister }
 
-constructor TVenditoriOrder.Create;
+constructor TVenditoriRegister.Create;
 begin
-  inherited Create('venditori', 'order');
+  inherited Create('venditori', 'register');
 end;
 
-function TVenditoriOrder.Elaborate(
+function TVenditoriRegister.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
 var
   Msg: String;
@@ -29,7 +29,7 @@ begin
   if (Data.Data = nil) then
     Msg := 'no data'
   else
-    Msg := 'venditori order: ' + Data.Data.ToString;
+    Msg := 'venditori registrazione: ' + Data.Data.ToString;
   Result := TSimpleMailerResponce.Create;
   Result.message := Msg;
 end;
