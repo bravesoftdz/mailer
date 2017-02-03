@@ -18,7 +18,8 @@ uses
   MailerAction in 'MailerAction.pas',
   SimpleInputData in 'SimpleInputData.pas',
   ActionDispatcher in 'ActionDispatcher.pas',
-  VenditoriOrder in 'VenditoriOrder.pas';
+  VenditoriOrder in 'VenditoriOrder.pas',
+  EmptyAction in 'EmptyAction.pas';
 
 {$R *.res}
 

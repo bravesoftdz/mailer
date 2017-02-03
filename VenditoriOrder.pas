@@ -19,9 +19,9 @@ implementation
 
 constructor TVenditoriOrder.Create;
 begin
-  inherited;
-  FDestinationName := 'venditori';
-  FActionName := 'order';
+  inherited Create('venditori', 'order');
+//  FDestinationName := 'venditori';
+//  FActionName := 'order';
 end;
 
 function TVenditoriOrder.Elaborate(

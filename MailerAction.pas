@@ -14,11 +14,18 @@ type
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; virtual; abstract;
     function getDestinationName(): String;
     function getActionName(): String;
+    constructor Create(const DestinationName, ActionName: String); virtual;
   end;
 
 implementation
 
 { TMailerAction }
+
+constructor TMailerAction.Create(const DestinationName, ActionName: String);
+begin
+  FDestinationName := DestinationName;
+  FActionName := ActionName;
+end;
 
 function TMailerAction.getActionName: String;
 begin

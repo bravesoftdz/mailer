@@ -18,9 +18,7 @@ implementation
 
 constructor TEmptyAction.Create;
 begin
-  inherited;
-  FDestinationName := 'no-destination';
-  FActionName := 'no-action';
+  inherited Create('no-destination', 'no-action');
 end;
 
 function TEmptyAction.Elaborate(
