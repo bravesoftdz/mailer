@@ -25,7 +25,7 @@ function TEmptyAction.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
 begin
   Result := TSimpleMailerResponce.Create;
-  Result.message := 'unclear request';
+  Result.message := getDestinationName + ' ' + getActionName + ' -> ' + Data.ToString;
 end;
 
 end.

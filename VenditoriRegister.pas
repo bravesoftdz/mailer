@@ -23,15 +23,9 @@ end;
 
 function TVenditoriRegister.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
-var
-  Msg: String;
 begin
-  if (Data.Data = nil) then
-    Msg := 'no data'
-  else
-    Msg := 'venditori registrazione: ' + Data.Data.ToString;
   Result := TSimpleMailerResponce.Create;
-  Result.message := Msg;
+  Result.message := getDestinationName + ' ' + getActionName + ' -> ' + Data.ToString;
 end;
 
 end.

@@ -26,12 +26,8 @@ function TVenditoriOrder.Elaborate(
 var
   Msg: String;
 begin
-  if (Data.Data = nil) then
-    Msg := 'no data'
-  else
-    Msg := 'venditori order: ' + Data.Data.ToString;
   Result := TSimpleMailerResponce.Create;
-  Result.message := Msg;
+  Result.message := getDestinationName + ' ' + getActionName + ' -> ' + Data.ToString;
 end;
 
 end.

@@ -19,7 +19,8 @@ uses
   SimpleInputData in 'SimpleInputData.pas',
   ActionDispatcher in 'ActionDispatcher.pas',
   VenditoriOrder in 'VenditoriOrder.pas',
-  EmptyAction in 'EmptyAction.pas';
+  EmptyAction in 'EmptyAction.pas',
+  VenditoriRegister in 'VenditoriRegister.pas';
 
 {$R *.res}
 
