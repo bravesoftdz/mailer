@@ -1,4 +1,4 @@
-program MailerProject;
+program Source;
 
  {$APPTYPE CONSOLE}
 

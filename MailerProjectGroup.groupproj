@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="MailerProject.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="MailerTest.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="MailerProject">
+        <MSBuild Projects="MailerProject.dproj"/>
+    </Target>
+    <Target Name="MailerProject:Clean">
+        <MSBuild Projects="MailerProject.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MailerProject:Make">
+        <MSBuild Projects="MailerProject.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="MailerTest">
+        <MSBuild Projects="MailerTest.dproj"/>
+    </Target>
+    <Target Name="MailerTest:Clean">
+        <MSBuild Projects="MailerTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MailerTest:Make">
+        <MSBuild Projects="MailerTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="MailerProject;MailerTest"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="MailerProject:Clean;MailerTest:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="MailerProject:Make;MailerTest:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
