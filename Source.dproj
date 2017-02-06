@@ -93,12 +93,16 @@
         </DCCReference>
         <DCCReference Include="RegistrationResponce.pas"/>
         <DCCReference Include="SimpleMailerResponce.pas"/>
-        <DCCReference Include="MailerAction.pas"/>
+        <DCCReference Include="Provider.pas"/>
         <DCCReference Include="SimpleInputData.pas"/>
-        <DCCReference Include="ActionDispatcher.pas"/>
-        <DCCReference Include="VenditoriOrder.pas"/>
-        <DCCReference Include="EmptyAction.pas"/>
-        <DCCReference Include="VenditoriRegister.pas"/>
+        <DCCReference Include="ProviderFactory.pas"/>
+        <DCCReference Include="VenditoriSimple.pas"/>
+        <DCCReference Include="Action.pas">
+            <Form>ActionSend in &apos;ActionSend.pas&apos;;
+
+{$R *.res</Form>
+        </DCCReference>
+        <DCCReference Include="ActionSend.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

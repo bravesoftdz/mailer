@@ -1,6 +1,7 @@
 program Source;
 
- {$APPTYPE CONSOLE}
+{$APPTYPE CONSOLE}
+
 
 uses
   System.SysUtils,
@@ -15,14 +16,17 @@ uses
   MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
   RegistrationResponce in 'RegistrationResponce.pas',
   SimpleMailerResponce in 'SimpleMailerResponce.pas',
-  MailerAction in 'MailerAction.pas',
+  Provider in 'Provider.pas',
   SimpleInputData in 'SimpleInputData.pas',
-  ActionDispatcher in 'ActionDispatcher.pas',
-  VenditoriOrder in 'VenditoriOrder.pas',
-  EmptyAction in 'EmptyAction.pas',
-  VenditoriRegister in 'VenditoriRegister.pas';
+  ProviderFactory in 'ProviderFactory.pas',
+  VenditoriSimple in 'VenditoriSimple.pas',
+  Action in 'Action.pas' {ActionSend in 'ActionSend.pas';
+
+{$R *.res},
+  ActionSend in 'ActionSend.pas';
 
 {$R *.res}
+
 
 procedure RunServer(APort: Integer);
 var
@@ -39,13 +43,13 @@ begin
     LServer.Active := True;
     LogI(Format('Server started on port %d', [APort]));
     { more info about MaxConnections
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html}
+      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html }
     LServer.MaxConnections := 0;
     { more info about ListenQueue
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html}
+      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html }
     LServer.ListenQueue := 200;
     { Comment the next line to avoid the default browser startup }
-//    ShellExecute(0, 'open', PChar('http://localhost:' + inttostr(APort)), nil, nil, SW_SHOWMAXIMIZED);
+    // ShellExecute(0, 'open', PChar('http://localhost:' + inttostr(APort)), nil, nil, SW_SHOWMAXIMIZED);
     Writeln('Press ESC to stop the server');
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
@@ -72,4 +76,5 @@ begin
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
   end;
+
 end.

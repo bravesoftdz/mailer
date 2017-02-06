@@ -3,10 +3,10 @@
         <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="MailerProject.dproj">
+        <Projects Include="Source.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="MailerTest.dproj">
+        <Projects Include="Test.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -17,32 +17,32 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="MailerProject">
-        <MSBuild Projects="MailerProject.dproj"/>
+    <Target Name="Source">
+        <MSBuild Projects="Source.dproj"/>
     </Target>
-    <Target Name="MailerProject:Clean">
-        <MSBuild Projects="MailerProject.dproj" Targets="Clean"/>
+    <Target Name="Source:Clean">
+        <MSBuild Projects="Source.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="MailerProject:Make">
-        <MSBuild Projects="MailerProject.dproj" Targets="Make"/>
+    <Target Name="Source:Make">
+        <MSBuild Projects="Source.dproj" Targets="Make"/>
     </Target>
-    <Target Name="MailerTest">
-        <MSBuild Projects="MailerTest.dproj"/>
+    <Target Name="Test">
+        <MSBuild Projects="Test.dproj"/>
     </Target>
-    <Target Name="MailerTest:Clean">
-        <MSBuild Projects="MailerTest.dproj" Targets="Clean"/>
+    <Target Name="Test:Clean">
+        <MSBuild Projects="Test.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="MailerTest:Make">
-        <MSBuild Projects="MailerTest.dproj" Targets="Make"/>
+    <Target Name="Test:Make">
+        <MSBuild Projects="Test.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="MailerProject;MailerTest"/>
+        <CallTarget Targets="Source;Test"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="MailerProject:Clean;MailerTest:Clean"/>
+        <CallTarget Targets="Source:Clean;Test:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="MailerProject:Make;MailerTest:Make"/>
+        <CallTarget Targets="Source:Make;Test:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

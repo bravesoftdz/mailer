@@ -3,8 +3,8 @@
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, System.Generics.Collections, MailerAction,
-  ActionDispatcher;
+  MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
+  ProviderFactory;
 
 type
 
@@ -13,12 +13,12 @@ type
   private
     const
     ACTION_TOKEN = 'action';
-    DESTINATION_TOKEN = 'destination';
-    class var FFactory: TActionDispatcher;
+    PROVIDER_TOKEN = 'destination';
+    class var FFactory: TProviderFactory;
     class procedure SetupFactory();
 
   public
-    [MVCPath('/($' + DESTINATION_TOKEN + ')/($' + ACTION_TOKEN + ')')]
+    [MVCPath('/($' + PROVIDER_TOKEN + ')/($' + ACTION_TOKEN + ')')]
     [MVCHTTPMethod([httpPOST])]
     [MVCProduces('application/json')]
     [MVCConsumes('application/json')]
@@ -35,24 +35,33 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce,
   SimpleMailerResponce, System.JSON, System.SysUtils,
-  SimpleInputData, VenditoriOrder, EmptyAction, VenditoriRegister;
+  SimpleInputData, VenditoriSimple, Provider;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
   Responce: TSimpleMailerResponce;
   AJson: TJsonObject;
-  DestinationName, ActionName: String;
-  Worker: TMailerAction;
+  ProviderName, ActionName: String;
+  Provider: TProvider;
+  Action: TAction;
   InputObj: TSimpleInputData;
 begin
-  DestinationName := Ctx.request.params[DESTINATION_TOKEN];
+  ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   try
     AJSon := Ctx.Request.BodyAsJSONObject;
-    InputObj := TSimpleInputData.Create(DestinationName, AJson);
-    Worker := FFactory.FindAction(DestinationName, ActionName);
-    Responce := Worker.Elaborate(InputObj);
-    Render(Responce);
+    InputObj := TSimpleInputData.Create(ProviderName, AJson);
+    Provider := FFactory.FindByName(ProviderName);
+    if Not(Provider = nil) then
+      Action := Provider.FindByName(ActionName);
+    if Not(Action = nil) then
+    begin
+      Responce := Action.Elaborate(InputObj);
+      Render(Responce);
+    end
+    else
+      Render('no action');
+
   except
     on e: Exception do
     begin
@@ -77,11 +86,11 @@ end;
 
 class procedure TMailerController.SetupFactory();
 var
-  actions: TObjectList<TMailerAction>;
+  Providers: TObjectList<TProvider>;
 begin
-  actions := TObjectList<TMailerAction>.Create;
-  actions.addRange([TVenditoriOrder.Create, TVenditoriRegister.Create]);
-  FFactory := TActionDispatcher.Create(actions, TEmptyAction.Create);
+  Providers := TObjectList<TProvider>.Create;
+  Providers.addRange([TVenditoriSimple.Create]);
+  FFactory := TProviderFactory.Create(Providers);
 end;
 
 initialization
