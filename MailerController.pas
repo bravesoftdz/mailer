@@ -35,7 +35,7 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce,
   SimpleMailerResponce, System.JSON, System.SysUtils,
-  SimpleInputData, VenditoriSimple, Provider;
+  SimpleInputData, VenditoriSimple, Provider, SoluzioneAgenti;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -49,6 +49,8 @@ begin
   ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   try
+    Provider := nil;
+    Action := nil;
     AJSon := Ctx.Request.BodyAsJSONObject;
     InputObj := TSimpleInputData.Create(ProviderName, AJson);
     Provider := FFactory.FindByName(ProviderName);
@@ -91,7 +93,7 @@ var
   Providers: TObjectList<TProvider>;
 begin
   Providers := TObjectList<TProvider>.Create;
-  Providers.addRange([TVenditoriSimple.Create]);
+  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
   // Provider :=
   FFactory := TProviderFactory.Create(Providers);
 end;
