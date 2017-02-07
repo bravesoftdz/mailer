@@ -56,12 +56,14 @@ begin
       Action := Provider.FindByName(ActionName);
     if Not(Action = nil) then
     begin
-      Responce := Action.Elaborate(InputObj);
-      Render(Responce);
+      Responce := Action.Elaborate(InputObj)
     end
     else
-      Render('no action');
-
+    begin
+      Responce := TSimpleMailerResponce.Create;
+      Responce.message := 'authorization missing...';
+    end;
+    Render(Responce);
   except
     on e: Exception do
     begin
@@ -90,6 +92,7 @@ var
 begin
   Providers := TObjectList<TProvider>.Create;
   Providers.addRange([TVenditoriSimple.Create]);
+  // Provider :=
   FFactory := TProviderFactory.Create(Providers);
 end;
 

@@ -1,6 +1,7 @@
 __history/
 lib/
 Win32/
+__recovery/
 *.local
 *.identcache
 *.stat
