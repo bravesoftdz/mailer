@@ -31,6 +31,13 @@ type
     constructor Create();
   end;
 
+type
+  TActionOrder = class(TAction)
+  public
+    function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
+    constructor Create();
+  end;
+
 implementation
 
 { TMailerAction }
@@ -72,6 +79,21 @@ begin
   Result := TSimpleMailerResponce.Create;
   Result.message := 'contact action: not implemented yet';
 
+end;
+
+{ TActionOrder }
+
+constructor TActionOrder.Create;
+begin
+  inherited Create('order');
+end;
+
+function TActionOrder.Elaborate(
+  const Data: TSimpleInputData): TSimpleMailerResponce;
+begin
+  /// stub
+  Result := TSimpleMailerResponce.Create;
+  Result.message := 'contact action: not implemented yet';
 end;
 
 end.
