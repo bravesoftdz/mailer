@@ -32,6 +32,8 @@ var
   ActionSend, ActionOrder: TAction;
 begin
   Actions := TObjectList<TAction>.Create();
+  ActionSend := TActionSend.Create;
+  ActionOrder := TActionOrder.Create;
 
   Actions.AddRange([ActionSend, ActionOrder]);
   inherited Create(PATH, Actions);
