@@ -10,7 +10,7 @@ type
 
 type
 
-  { Information that the sender program requires }
+  { Input data for a program that sends emails }
   [MapperJSONNaming(JSONNameLowerCase)]
   TSenderInputData = class
   private
@@ -46,21 +46,34 @@ type
     property Sender: String read FSender;
     // Mail server, i.e. "10.341.32.21", "goo.mailer.com"
     property Server: String read FServer;
+    // port number, i.e. 25
     property Port: Integer read FPort;
+    // whether the user authentification is required
     property UseAuth: Boolean read FUseAuth;
+    // user name in case the authentification is required
     property User: String read FUser;
+    // the password in case the authentification is required
     property Password: String read FPassword;
+    // whether to use SSL
     property UseSSL: Boolean read FUseSSL;
+    // type of the message to send: there are two different options for sending
+    // emails: a plain text and an html
     property MsgType: TMsgTypes read FMsgType;
+    // email content
     property Body: String read FBody;
+    // list of email addresses of the recipients (to)
     property RecipTo: TStringList read FRecipTo;
+    // list of email addresses of the recipients (cc)
     property RecipCc: TStringList read FRecipCc;
+    // list of email addresses of the recipients (bcc)
     property RecipBcc: TStringList read FRecipBcc;
+    // list of attachment contents
     property Attach: TStringList read FAttach;
 
   end;
 
 type
+  { Builder for a type that collects input data for a program that sends emails }
   TSenderInputDataBuilder = class
   private
     FFRom: String;
@@ -77,15 +90,12 @@ type
     FRecipCc: TStringList;
     FRecipBcc: TStringList;
     FAttach: TStringList;
-
   public
     function SetFrom(const aFrom: String): TSenderInputDataBuilder;
     function SetSender(const aSender: String): TSenderInputDataBuilder;
     function SetServer(const aServer: String): TSenderInputDataBuilder;
     function SetPort(const aPort: Integer): TSenderInputDataBuilder;
-    function SetUseAuth(const aUseAuth: Boolean): TSenderInputDataBuilder;
-    function SetUser(const aUser: String): TSenderInputDataBuilder;
-    function SetPassword(const aPassword: String): TSenderInputDataBuilder;
+    function SetAuthentification(const aLogin, aPassword: String): TSenderInputDataBuilder;
     function SetUseSSL(const aUseSSL: Boolean): TSenderInputDataBuilder;
     function SetMsgType(const aMsgType: TMsgTypes): TSenderInputDataBuilder;
     function SetBody(const aBody: String): TSenderInputDataBuilder;
@@ -94,6 +104,7 @@ type
     function SetRecipBcc(const aRecipBcc: TStringList): TSenderInputDataBuilder;
     function SetAttach(const aAttach: TStringList): TSenderInputDataBuilder;
     function Build(): TSenderInputData;
+    constructor Create();
   end;
 
 implementation
@@ -107,11 +118,24 @@ begin
     FRecipTo, FRecipCc, FRecipBcc, FAttach);
 end;
 
+constructor TSenderInputDataBuilder.Create;
+begin
+  FUseAuth := False;
+end;
+
 function TSenderInputDataBuilder.SetAttach(
   const aAttach: TStringList): TSenderInputDataBuilder;
 begin
   FAttach := aAttach;
   Result := Self;
+end;
+
+function TSenderInputDataBuilder.SetAuthentification(const aLogin,
+  aPassword: String): TSenderInputDataBuilder;
+begin
+  FUseAuth := True;
+  FUser := aLogin;
+  FPassword := aPassword;
 end;
 
 function TSenderInputDataBuilder.SetBody(
@@ -132,13 +156,6 @@ function TSenderInputDataBuilder.SetMsgType(
   const aMsgType: TMsgTypes): TSenderInputDataBuilder;
 begin
   FMsgType := aMsgType;
-  Result := Self;
-end;
-
-function TSenderInputDataBuilder.SetPassword(
-  const aPassword: String): TSenderInputDataBuilder;
-begin
-  FPassword := aPassword;
   Result := Self;
 end;
 
@@ -182,21 +199,6 @@ function TSenderInputDataBuilder.SetServer(
   const aServer: String): TSenderInputDataBuilder;
 begin
   FServer := aServer;
-  Result := Self;
-end;
-
-function TSenderInputDataBuilder.SetUseAuth(
-  const aUseAuth: Boolean): TSenderInputDataBuilder;
-begin
-  FUseAuth := aUseAuth;
-  Result := Self;
-
-end;
-
-function TSenderInputDataBuilder.SetUser(
-  const aUser: String): TSenderInputDataBuilder;
-begin
-  FUser := aUser;
   Result := Self;
 end;
 
