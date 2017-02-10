@@ -3,7 +3,7 @@ unit Action;
 interface
 
 uses
-  SimpleMailerResponce, SimpleInputData, SenderInputData;
+  SimpleMailerResponce, SimpleInputData, OutputData, REST.JSON;
 
 type
   TAction = class
@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  Credentials;
+  Credentials, System.JSON;
 
 { TMailerAction }
 
@@ -64,17 +64,16 @@ function TActionSend.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
 var
   builder:
-    TSenderInputDataBuilder;
+    TOutputDataBuilder;
 begin
-  /// stub
   Result := TSimpleMailerResponce.Create;
-  builder := TSenderInputDataBuilder.Create();
+  builder := TOutputDataBuilder.Create();
   builder.SetFrom(TVenditoriCredentials.From())
     .SetSender(TVenditoriCredentials.Name())
     .SetBody(Data.Data.GetValue('text').Value)
     .SetRecipTo(TVenditoriCredentials.Recipients);
 
-  Result.message := 'send action: not implemented yet';
+  Result.message := TJson.ObjectToJsonString(builder.Build);
 end;
 
 { TActionContact }

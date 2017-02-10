@@ -1,4 +1,4 @@
-unit SenderInputData;
+unit OutputData;
 
 interface
 
@@ -12,7 +12,7 @@ type
 
   { Input data for a program that sends emails }
   [MapperJSONNaming(JSONNameLowerCase)]
-  TSenderInputData = class
+  TOutputData = class
   private
     FFRom: String;
     FSender: String;
@@ -74,7 +74,7 @@ type
 
 type
   { Builder for a type that collects input data for a program that sends emails }
-  TSenderInputDataBuilder = class
+  TOutputDataBuilder = class
   private
     FFRom: String;
     FSender: String;
@@ -91,19 +91,19 @@ type
     FRecipBcc: TStringList;
     FAttach: TStringList;
   public
-    function SetFrom(const aFrom: String): TSenderInputDataBuilder;
-    function SetSender(const aSender: String): TSenderInputDataBuilder;
-    function SetServer(const aServer: String): TSenderInputDataBuilder;
-    function SetPort(const aPort: Integer): TSenderInputDataBuilder;
-    function SetAuthentification(const aLogin, aPassword: String): TSenderInputDataBuilder;
-    function SetUseSSL(const aUseSSL: Boolean): TSenderInputDataBuilder;
-    function SetMsgType(const aMsgType: TMsgTypes): TSenderInputDataBuilder;
-    function SetBody(const aBody: String): TSenderInputDataBuilder;
-    function SetRecipTo(const aRecipTo: TStringList): TSenderInputDataBuilder;
-    function SetRecipCc(const aRecipCc: TStringList): TSenderInputDataBuilder;
-    function SetRecipBcc(const aRecipBcc: TStringList): TSenderInputDataBuilder;
-    function SetAttach(const aAttach: TStringList): TSenderInputDataBuilder;
-    function Build(): TSenderInputData;
+    function SetFrom(const aFrom: String): TOutputDataBuilder;
+    function SetSender(const aSender: String): TOutputDataBuilder;
+    function SetServer(const aServer: String): TOutputDataBuilder;
+    function SetPort(const aPort: Integer): TOutputDataBuilder;
+    function SetAuthentification(const aLogin, aPassword: String): TOutputDataBuilder;
+    function SetUseSSL(const aUseSSL: Boolean): TOutputDataBuilder;
+    function SetMsgType(const aMsgType: TMsgTypes): TOutputDataBuilder;
+    function SetBody(const aBody: String): TOutputDataBuilder;
+    function SetRecipTo(const aRecipTo: TStringList): TOutputDataBuilder;
+    function SetRecipCc(const aRecipCc: TStringList): TOutputDataBuilder;
+    function SetRecipBcc(const aRecipBcc: TStringList): TOutputDataBuilder;
+    function SetAttach(const aAttach: TStringList): TOutputDataBuilder;
+    function Build(): TOutputData;
     constructor Create();
   end;
 
@@ -111,99 +111,99 @@ implementation
 
 { TSenderInputDataBuilder }
 
-function TSenderInputDataBuilder.Build: TSenderInputData;
+function TOutputDataBuilder.Build: TOutputData;
 begin
-  Result := TSenderInputData.Create(FFrom, Fsender, Fserver,
+  Result := TOutputData.Create(FFrom, Fsender, Fserver,
     FPort, FUseAuth, FUser, FPassword, FUseSSL, FMsgType, FBody,
     FRecipTo, FRecipCc, FRecipBcc, FAttach);
 end;
 
-constructor TSenderInputDataBuilder.Create;
+constructor TOutputDataBuilder.Create;
 begin
   FUseAuth := False;
 end;
 
-function TSenderInputDataBuilder.SetAttach(
-  const aAttach: TStringList): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetAttach(
+  const aAttach: TStringList): TOutputDataBuilder;
 begin
   FAttach := aAttach;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetAuthentification(const aLogin,
-  aPassword: String): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetAuthentification(const aLogin,
+  aPassword: String): TOutputDataBuilder;
 begin
   FUseAuth := True;
   FUser := aLogin;
   FPassword := aPassword;
 end;
 
-function TSenderInputDataBuilder.SetBody(
-  const aBody: String): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetBody(
+  const aBody: String): TOutputDataBuilder;
 begin
   FBody := aBody;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetFrom(
-  const aFrom: String): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetFrom(
+  const aFrom: String): TOutputDataBuilder;
 begin
   FFrom := aFrom;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetMsgType(
-  const aMsgType: TMsgTypes): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetMsgType(
+  const aMsgType: TMsgTypes): TOutputDataBuilder;
 begin
   FMsgType := aMsgType;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetPort(
-  const aPort: Integer): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetPort(
+  const aPort: Integer): TOutputDataBuilder;
 begin
   FPort := aPort;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetRecipBcc(
-  const aRecipBcc: TStringList): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetRecipBcc(
+  const aRecipBcc: TStringList): TOutputDataBuilder;
 begin
   FRecipBcc := aRecipBcc;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetRecipCc(
-  const aRecipCc: TStringList): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetRecipCc(
+  const aRecipCc: TStringList): TOutputDataBuilder;
 begin
   FRecipCc := aRecipCc;
   Result := Self;
 
 end;
 
-function TSenderInputDataBuilder.SetRecipTo(
-  const aRecipTo: TStringList): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetRecipTo(
+  const aRecipTo: TStringList): TOutputDataBuilder;
 begin
   FRecipTo := aRecipTo;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetSender(
-  const aSender: String): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetSender(
+  const aSender: String): TOutputDataBuilder;
 begin
   FSender := aSender;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetServer(
-  const aServer: String): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetServer(
+  const aServer: String): TOutputDataBuilder;
 begin
   FServer := aServer;
   Result := Self;
 end;
 
-function TSenderInputDataBuilder.SetUseSSL(
-  const aUseSSL: Boolean): TSenderInputDataBuilder;
+function TOutputDataBuilder.SetUseSSL(
+  const aUseSSL: Boolean): TOutputDataBuilder;
 begin
   FUseSSL := aUseSSL;
   Result := Self;
@@ -211,7 +211,7 @@ end;
 
 { TSenderInputData }
 
-constructor TSenderInputData.Create(const aFrom, aSender, aServer: String;
+constructor TOutputData.Create(const aFrom, aSender, aServer: String;
   const aPort: Integer; const aUseAuth: Boolean; const aUser, aPassword: String;
   const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody: String;
   const aRecipTo, aRecipCc, aRecipBcc, aAttach: TStringList);
