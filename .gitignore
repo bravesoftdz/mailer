@@ -1,6 +1,7 @@
 __history/
 lib/
 Win32/
+Data/
 __recovery/
 *.local
 *.identcache

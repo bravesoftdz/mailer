@@ -13,17 +13,19 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   MailerController in 'MailerController.pas',
-  MailerDispatcher in 'MailerDispatcher.pas',
+  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
   RegistrationResponce in 'RegistrationResponce.pas',
   SimpleMailerResponce in 'SimpleMailerResponce.pas',
   Provider in 'Provider.pas',
   SimpleInputData in 'SimpleInputData.pas',
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
-  Action in 'Actions\Action.pas',
-  SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
-  SenderInputData in 'SenderInputData.pas';
+  Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
 
+{$R *.res},
+  SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
+  SenderInputData in 'SenderInputData.pas',
+  Credentials in 'Data\Credentials.pas';
 
 procedure RunServer(APort: Integer);
 var
