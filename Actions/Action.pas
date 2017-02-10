@@ -13,7 +13,6 @@ type
     FName: String;
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; virtual; abstract;
-    procedure SetData(const Data: TSenderInputData); virtual; abstract;
     property Name: String read GetName;
     constructor Create(const Name: String);
   end;
@@ -22,7 +21,6 @@ type
   TActionSend = class(TAction)
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
-    procedure SetData(const Data: TSenderInputData); override;
     constructor Create();
   end;
 
@@ -30,7 +28,6 @@ type
   TActionContact = class(TAction)
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
-    procedure SetData(const Data: TSenderInputData); override;
     constructor Create();
   end;
 
@@ -38,11 +35,13 @@ type
   TActionOrder = class(TAction)
   public
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
-    procedure SetData(const Data: TSenderInputData); override;
     constructor Create();
   end;
 
 implementation
+
+uses
+  Credentials;
 
 { TMailerAction }
 
@@ -63,15 +62,19 @@ end;
 
 function TActionSend.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
+var
+  builder:
+    TSenderInputDataBuilder;
 begin
   /// stub
   Result := TSimpleMailerResponce.Create;
-  Result.message := 'send action: not implemented yet';
-end;
+  builder := TSenderInputDataBuilder.Create();
+  builder.SetFrom(TVenditoriCredentials.From())
+    .SetSender(TVenditoriCredentials.Name())
+    .SetBody(Data.Data.GetValue('text').Value)
+    .SetRecipTo(TVenditoriCredentials.Recipients);
 
-procedure TActionSend.SetData(const Data: TSenderInputData);
-begin
-  /// stub
+  Result.message := 'send action: not implemented yet';
 end;
 
 { TActionContact }
@@ -90,11 +93,6 @@ begin
 
 end;
 
-procedure TActionContact.SetData(const Data: TSenderInputData);
-begin
-  /// stub
-end;
-
 { TActionOrder }
 
 constructor TActionOrder.Create;
@@ -108,11 +106,6 @@ begin
   /// stub
   Result := TSimpleMailerResponce.Create;
   Result.message := 'contact action: not implemented yet';
-end;
-
-procedure TActionOrder.SetData(const Data: TSenderInputData);
-begin
-  /// stub
 end;
 
 end.

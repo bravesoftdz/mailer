@@ -3,7 +3,7 @@ unit VenditoriSimple;
 interface
 
 uses
-  Provider, Action, SenderInputData;
+  Provider, Action;
 
 type
   { Perform the operations related to the site "venditori.com".
@@ -22,28 +22,19 @@ type
 implementation
 
 uses
-  System.Generics.Collections, System.Classes, Credentials;
+  System.Generics.Collections, System.Classes;
 
 { TVenditoriOrder }
 
 constructor TVenditoriSimple.Create;
 var
   Actions: TObjectList<TAction>;
-  ActionSend, ActionOrder: TAction;
-  builder: TSenderInputDataBuilder;
+  ActionSend: TAction;
+
 begin
   Actions := TObjectList<TAction>.Create();
   ActionSend := TActionSend.Create;
-  builder := TSenderInputDataBuilder.Create();
-  builder.SetFrom(TVenditoriCredentials.From())
-    .SetSender(TVenditoriCredentials.Name())
-    .SetBody('ciao')
-    .SetRecipTo(TStringList.Create(['']));
-
-  ActionSend.SetData(builder.build);
-  ActionOrder := TActionOrder.Create;
-
-  Actions.AddRange([ActionSend, ActionOrder]);
+  Actions.AddRange([ActionSend]);
   inherited Create(PATH, Actions);
 end;
 
