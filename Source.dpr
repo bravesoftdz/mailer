@@ -21,11 +21,11 @@ uses
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
   Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-
-{$R *.res},
+    {$R *.res},
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
-  SenderInputData in 'SenderInputData.pas',
-  Credentials in 'Data\Credentials.pas';
+  Credentials in 'Data\Credentials.pas',
+  OutputData in 'OutputData.pas',
+  SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas';
 
 procedure RunServer(APort: Integer);
 var

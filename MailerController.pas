@@ -23,6 +23,14 @@ type
     [MVCProduces('application/json')]
     [MVCConsumes('application/json')]
     [MVCDoc('Elaborate the request. The action that should be performed is to be decided based on provided destination and action token.')]
+    /// <summary>  An entry point to the server.
+    /// This method handles requests of the form  "/provider/action", i.e.
+    /// "/venditori/send", "/soluzioniagenti/contact".
+    /// The requests must be done by means of a POST method.
+    /// It accepts a json object with the following structure:
+    /// {'msg': 'some string'}
+    /// </summary>
+    ///  <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
 
   protected

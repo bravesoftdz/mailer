@@ -12,8 +12,17 @@ type
   protected
     FName: String;
   public
+    /// <summary>A virtual method that i ssupposed to be overwritten in classes
+    /// that inherit from this one.</summary>
+    /// <returns>a responce as a TSimpleMailerResponce instance</returns>
     function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; virtual; abstract;
+    /// <summary>A name of the operation that this action performs.
+    /// The operation name is used in order to find an action that is able
+    /// to do a requested operation.
+    /// </summary>
     property Name: String read GetName;
+    /// <summary> Constructor.</summary>
+    /// <param name="Name">a name to be given to the operation</param>
     constructor Create(const Name: String);
   end;
 
@@ -41,7 +50,8 @@ type
 implementation
 
 uses
-  Credentials, System.JSON;
+  Credentials, System.JSON, MVCFramework.RESTAdapter,
+  SendServerProxy.interfaces;
 
 { TMailerAction }
 
@@ -63,17 +73,24 @@ end;
 function TActionSend.Elaborate(
   const Data: TSimpleInputData): TSimpleMailerResponce;
 var
-  builder:
-    TOutputDataBuilder;
+  builder: TOutputDataBuilder;
+  adapter: TRestAdapter<ISendServerProxy>;
+  server: ISendServerProxy;
+  dataTmp: TJSONObject;
+  output: TJSONObject;
 begin
   Result := TSimpleMailerResponce.Create;
   builder := TOutputDataBuilder.Create();
-  builder.SetFrom(TVenditoriCredentials.From())
-    .SetSender(TVenditoriCredentials.Name())
-    .SetBody(Data.Data.GetValue('text').Value)
-    .SetRecipTo(TVenditoriCredentials.Recipients);
+  // builder.SetFrom(TVenditoriCredentials.From())
+  // .SetSender(TVenditoriCredentials.Name())
+  // .SetBody(Data.Data.GetValue('text').Value)
+  // .SetRecipTo(TVenditoriCredentials.Recipients);
 
-  Result.message := TJson.ObjectToJsonString(builder.Build);
+  adapter := TRestAdapter<ISendServerProxy>.Create();
+  server := adapter.Build('http://192.168.5.226', 8080);
+  dataTmp := TJSonObject.Create;
+  output := server.send(nil);
+  Result.message := 'result ' + output.ToString;
 end;
 
 { TActionContact }
@@ -84,7 +101,9 @@ begin
 end;
 
 function TActionContact.Elaborate(
-  const Data: TSimpleInputData): TSimpleMailerResponce;
+  const
+  Data:
+  TSimpleInputData): TSimpleMailerResponce;
 begin
   /// stub
   Result := TSimpleMailerResponce.Create;
@@ -100,7 +119,9 @@ begin
 end;
 
 function TActionOrder.Elaborate(
-  const Data: TSimpleInputData): TSimpleMailerResponce;
+  const
+  Data:
+  TSimpleInputData): TSimpleMailerResponce;
 begin
   /// stub
   Result := TSimpleMailerResponce.Create;
