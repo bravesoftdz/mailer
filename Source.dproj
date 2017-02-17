@@ -92,7 +92,7 @@
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="RegistrationResponce.pas"/>
-        <DCCReference Include="SimpleMailerResponce.pas"/>
+        <DCCReference Include="FrontEndResponce.pas"/>
         <DCCReference Include="Provider.pas"/>
         <DCCReference Include="SimpleInputData.pas"/>
         <DCCReference Include="ProviderFactory.pas"/>
@@ -105,6 +105,7 @@
         <DCCReference Include="Data\Credentials.pas"/>
         <DCCReference Include="OutputData.pas"/>
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
+        <DCCReference Include="BackEndResponce.pas"/>
         <None Include="ModelSupport_Source\default.txaPackage"/>
         <None Include="ModelSupport_Source\default.txvpck"/>
         <None Include="ModelSupport_Source\MailerController\default.txvpck"/>

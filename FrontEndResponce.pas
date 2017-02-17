@@ -1,4 +1,4 @@
-unit SimpleMailerResponce;
+unit FrontEndResponce;
 
 interface
 

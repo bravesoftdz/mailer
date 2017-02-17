@@ -3,16 +3,19 @@ unit OutputData;
 interface
 
 uses
-  System.Classes;
+  System.Classes, System.JSON,
+  System.Generics.Collections;
 
 type
   TMsgTypes = (text, html);
 
 type
 
-  { Input data for a program that sends emails }
+  /// <summary>
+  /// Object containing data to be sent to the back-end.
+  /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TOutputData = class
+  TBackEndRequest = class
   private
     FFRom: String;
     FSender: String;
@@ -24,86 +27,91 @@ type
     FUseSSL: Boolean;
     FMsgType: TMsgTypes;
     FBody: String;
-    FRecipTo: TStringList;
-    FRecipCc: TStringList;
-    FRecipBcc: TStringList;
-    FAttach: TStringList;
-    { Make the constructor private in order to discourage its usage in favour of
-      the TSenderInputDataBuilder }
+    FSubject: String;
+    FRecipTo: String;
+    FRecipCc: String;
+    FRecipBcc: String;
+    FAttach: String;
+    /// <summary> Constructor. It is made private in order to discourage its
+    /// usage in favour of the TBackEndRequestBuilder </summary>
     constructor Create(const aFrom, aSender, aServer: String; const aPort: Integer;
       const aUseAuth: Boolean;
       const aUser, aPassword: String;
       const aUseSSL: Boolean;
       const aMsgType: TMsgTypes;
-      const aBody: String;
-      const aRecipTo, aRecipCc, aRecipBcc, aAttach: TStringList
+      const aBody, aSubject: String;
+      const aRecipTo, aRecipCc, aRecipBcc, aAttach: String
       );
 
   public
-    // sender email, i.e: support@google.com
+    /// <summary> sender email, i.e: support@google.com</summary>
     property From: String read FFrom;
-    // sender name, i.e: "Google Support Team"
+    /// <summary>  sender name, i.e: "Google Support Team" </summary>
     property Sender: String read FSender;
-    // Mail server, i.e. "10.341.32.21", "goo.mailer.com"
+    /// <summary>  Mail server, i.e. "10.341.32.21", "goo.mailer.com"  </summary>
     property Server: String read FServer;
-    // port number, i.e. 25
+    /// <summary> port number, i.e. 25  </summary>
     property Port: Integer read FPort;
-    // whether the user authentification is required
-    property UseAuth: Boolean read FUseAuth;
-    // user name in case the authentification is required
+    /// <summary> whether the user authentification is required  </summary>
+    property Useauth: Boolean read FUseAuth;
+    /// <summary> user name in case the authentification is required </summary>
     property User: String read FUser;
-    // the password in case the authentification is required
+    /// <summary> the password in case the authentification is required </summary>
     property Password: String read FPassword;
-    // whether to use SSL
-    property UseSSL: Boolean read FUseSSL;
-    // type of the message to send: there are two different options for sending
-    // emails: a plain text and an html
-    property MsgType: TMsgTypes read FMsgType;
-    // email content
+    /// <summary> whether to use SSL       </summary>
+    property Usessl: Boolean read FUseSSL;
+    /// <summary> type of the message to send: there are two different options for sending
+    /// emails: a plain text and an html  </summary>
+    property Msgtype: TMsgTypes read FMsgType;
+    /// <summary> email content </summary>
     property Body: String read FBody;
-    // list of email addresses of the recipients (to)
-    property RecipTo: TStringList read FRecipTo;
-    // list of email addresses of the recipients (cc)
-    property RecipCc: TStringList read FRecipCc;
-    // list of email addresses of the recipients (bcc)
-    property RecipBcc: TStringList read FRecipBcc;
-    // list of attachment contents
-    property Attach: TStringList read FAttach;
+    /// <summary>email subject, i.e. "News for you" </summary>
+    property Subject: String read FSubject;
+    /// <summary> list of email addresses of the recipients (to) </summary>
+    property Recipto: String read FRecipTo;
+    /// <summary> list of email addresses of the recipients (cc) </summary>
+    property Recipcc: String read FRecipCc;
+    /// <summary> list of email addresses of the recipients (bcc) </summary>
+    property Recipbcc: String read FRecipBcc;
+    /// <summary> list of attachment contents </summary>
+    property Attach: String read FAttach;
 
   end;
 
 type
   { Builder for a type that collects input data for a program that sends emails }
-  TOutputDataBuilder = class
+  TBackEndRequestBuilder = class
   private
     FFRom: String;
     FSender: String;
     FServer: String;
     FPort: Integer;
     FUseAuth: Boolean;
+    FSubject: String;
     FUser: String;
     FPassword: String;
     FUseSSL: Boolean;
     FMsgType: TMsgTypes;
     FBody: String;
-    FRecipTo: TStringList;
-    FRecipCc: TStringList;
-    FRecipBcc: TStringList;
-    FAttach: TStringList;
+    FRecipTo: String;
+    FRecipCc: String;
+    FRecipBcc: String;
+    FAttach: String;
   public
-    function SetFrom(const aFrom: String): TOutputDataBuilder;
-    function SetSender(const aSender: String): TOutputDataBuilder;
-    function SetServer(const aServer: String): TOutputDataBuilder;
-    function SetPort(const aPort: Integer): TOutputDataBuilder;
-    function SetAuthentification(const aLogin, aPassword: String): TOutputDataBuilder;
-    function SetUseSSL(const aUseSSL: Boolean): TOutputDataBuilder;
-    function SetMsgType(const aMsgType: TMsgTypes): TOutputDataBuilder;
-    function SetBody(const aBody: String): TOutputDataBuilder;
-    function SetRecipTo(const aRecipTo: TStringList): TOutputDataBuilder;
-    function SetRecipCc(const aRecipCc: TStringList): TOutputDataBuilder;
-    function SetRecipBcc(const aRecipBcc: TStringList): TOutputDataBuilder;
-    function SetAttach(const aAttach: TStringList): TOutputDataBuilder;
-    function Build(): TOutputData;
+    function SetFrom(const aFrom: String): TBackEndRequestBuilder;
+    function SetSender(const aSender: String): TBackEndRequestBuilder;
+    function SetServer(const aServer: String): TBackEndRequestBuilder;
+    function SetPort(const aPort: Integer): TBackEndRequestBuilder;
+    function SetAuthentification(const aLogin, aPassword: String): TBackEndRequestBuilder;
+    function SetUseSSL(const aUseSSL: Boolean): TBackEndRequestBuilder;
+    function SetMsgType(const aMsgType: TMsgTypes): TBackEndRequestBuilder;
+    function SetBody(const aBody: String): TBackEndRequestBuilder;
+    function SetRecipTo(const aRecipTo: String): TBackEndRequestBuilder;
+    function SetRecipCc(const aRecipCc: String): TBackEndRequestBuilder;
+    function SetRecipBcc(const aRecipBcc: String): TBackEndRequestBuilder;
+    function SetAttach(const aAttach: String): TBackEndRequestBuilder;
+    function SetSubject(const aSubject: String): TBackEndRequestBuilder;
+    function Build(): TBackEndRequest;
     constructor Create();
   end;
 
@@ -111,99 +119,114 @@ implementation
 
 { TSenderInputDataBuilder }
 
-function TOutputDataBuilder.Build: TOutputData;
+function TBackEndRequestBuilder.Build: TBackEndRequest;
 begin
-  Result := TOutputData.Create(FFrom, Fsender, Fserver,
-    FPort, FUseAuth, FUser, FPassword, FUseSSL, FMsgType, FBody,
+  Result := TBackEndRequest.Create(FFrom, Fsender, Fserver,
+    FPort, FUseAuth, FUser, FPassword, FUseSSL, FMsgType, FBody, FSubject,
     FRecipTo, FRecipCc, FRecipBcc, FAttach);
 end;
 
-constructor TOutputDataBuilder.Create;
+constructor TBackEndRequestBuilder.Create;
 begin
   FUseAuth := False;
 end;
 
-function TOutputDataBuilder.SetAttach(
-  const aAttach: TStringList): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetAttach(
+  const aAttach: String): TBackEndRequestBuilder;
+var
+  item: String;
 begin
   FAttach := aAttach;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetAuthentification(const aLogin,
-  aPassword: String): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetAuthentification(const aLogin,
+  aPassword: String): TBackEndRequestBuilder;
 begin
   FUseAuth := True;
   FUser := aLogin;
   FPassword := aPassword;
 end;
 
-function TOutputDataBuilder.SetBody(
-  const aBody: String): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetBody(
+  const aBody: String): TBackEndRequestBuilder;
 begin
   FBody := aBody;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetFrom(
-  const aFrom: String): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetFrom(
+  const aFrom: String): TBackEndRequestBuilder;
 begin
   FFrom := aFrom;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetMsgType(
-  const aMsgType: TMsgTypes): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetMsgType(
+  const aMsgType: TMsgTypes): TBackEndRequestBuilder;
 begin
   FMsgType := aMsgType;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetPort(
-  const aPort: Integer): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetPort(
+  const aPort: Integer): TBackEndRequestBuilder;
 begin
   FPort := aPort;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetRecipBcc(
-  const aRecipBcc: TStringList): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetRecipBcc(
+  const aRecipBcc: String): TBackEndRequestBuilder;
+var
+  item: String;
 begin
   FRecipBcc := aRecipBcc;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetRecipCc(
-  const aRecipCc: TStringList): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetRecipCc(
+  const aRecipCc: String): TBackEndRequestBuilder;
+var
+  item: String;
 begin
   FRecipCc := aRecipCc;
   Result := Self;
 
 end;
 
-function TOutputDataBuilder.SetRecipTo(
-  const aRecipTo: TStringList): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetRecipTo(
+  const aRecipTo: String): TBackEndRequestBuilder;
+var
+  item: String;
 begin
   FRecipTo := aRecipTo;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetSender(
-  const aSender: String): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetSender(
+  const aSender: String): TBackEndRequestBuilder;
 begin
   FSender := aSender;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetServer(
-  const aServer: String): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetServer(
+  const aServer: String): TBackEndRequestBuilder;
 begin
   FServer := aServer;
   Result := Self;
 end;
 
-function TOutputDataBuilder.SetUseSSL(
-  const aUseSSL: Boolean): TOutputDataBuilder;
+function TBackEndRequestBuilder.SetSubject(
+  const aSubject: String): TBackEndRequestBuilder;
+begin
+  FSubject := aSubject;
+  Result := Self;
+end;
+
+function TBackEndRequestBuilder.SetUseSSL(
+  const aUseSSL: Boolean): TBackEndRequestBuilder;
 begin
   FUseSSL := aUseSSL;
   Result := Self;
@@ -211,10 +234,10 @@ end;
 
 { TSenderInputData }
 
-constructor TOutputData.Create(const aFrom, aSender, aServer: String;
+constructor TBackEndRequest.Create(const aFrom, aSender, aServer: String;
   const aPort: Integer; const aUseAuth: Boolean; const aUser, aPassword: String;
-  const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody: String;
-  const aRecipTo, aRecipCc, aRecipBcc, aAttach: TStringList);
+  const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody, aSubject: String;
+  const aRecipTo, aRecipCc, aRecipBcc, aAttach: String);
 begin
   FFrom := aFrom;
   FSender := aSender;
@@ -226,6 +249,7 @@ begin
   FUseSSL := aUseSSL;
   FMsgType := aMsgType;
   FBody := aBody;
+  FSubject := aSubject;
   FRecipTo := aRecipTo;
   FRecipCc := aRecipCc;
   FRecipBcc := aRecipBcc;

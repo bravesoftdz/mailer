@@ -3,7 +3,9 @@ unit SendServerProxy.interfaces;
 interface
 
 uses
-  MVCFramework.RESTAdapter, MVCFramework.Commons, System.Classes, System.JSON;
+  MVCFramework.RESTAdapter, MVCFramework.Commons, System.Classes,
+  SimpleInputData, OutputData, SimpleMailerResponce, System.JSON,
+  BackEndResponce;
 
 type
   ISendServerProxy = interface(IInvokable)
@@ -13,7 +15,7 @@ type
     function index(): string;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/send')]
-    function Send([Body] input: TJSONObject): TJSonObject;
+    function Send([Body] input: TBackEndRequest): TBackEndResponce;
   end;
 
 implementation

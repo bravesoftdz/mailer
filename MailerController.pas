@@ -47,7 +47,7 @@ uses
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
-  Responce: TSimpleMailerResponce;
+  Responce: TFrontEndResponce;
   AJson: TJsonObject;
   ProviderName, ActionName: String;
   Provider: TProvider;
@@ -70,8 +70,8 @@ begin
     end
     else
     begin
-      Responce := TSimpleMailerResponce.Create;
-      Responce.message := 'authorization missing...';
+      Responce := TFrontEndResponce.Create;
+      Responce.msg := 'authorization missing...';
     end;
     Render(Responce);
   except

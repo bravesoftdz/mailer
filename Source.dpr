@@ -15,7 +15,7 @@ uses
   MailerController in 'MailerController.pas',
   MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
   RegistrationResponce in 'RegistrationResponce.pas',
-  SimpleMailerResponce in 'SimpleMailerResponce.pas',
+  FrontEndResponce in 'FrontEndResponce.pas',
   Provider in 'Provider.pas',
   SimpleInputData in 'SimpleInputData.pas',
   ProviderFactory in 'ProviderFactory.pas',
@@ -25,7 +25,8 @@ uses
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   OutputData in 'OutputData.pas',
-  SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas';
+  SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
+  BackEndResponce in 'BackEndResponce.pas';
 
 procedure RunServer(APort: Integer);
 var

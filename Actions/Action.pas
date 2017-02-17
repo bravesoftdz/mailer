@@ -15,7 +15,7 @@ type
     /// <summary>A virtual method that i ssupposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; virtual; abstract;
+    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -29,29 +29,29 @@ type
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
+    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
+    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TSimpleMailerResponce; override;
+    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
     constructor Create();
   end;
 
 implementation
 
 uses
-  Credentials, System.JSON, MVCFramework.RESTAdapter,
-  SendServerProxy.interfaces;
+  Credentials, System.JSON, MVCFramework.RESTAdapter, BackEndResponce,
+  SendServerProxy.interfaces, System.SysUtils;
 
 { TMailerAction }
 
@@ -71,26 +71,36 @@ begin
 end;
 
 function TActionSend.Elaborate(
-  const Data: TSimpleInputData): TSimpleMailerResponce;
+  const Data: TSimpleInputData): TFrontEndResponce;
 var
-  builder: TOutputDataBuilder;
+  builder: TBackEndRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
   server: ISendServerProxy;
-  dataTmp: TJSONObject;
-  output: TJSONObject;
+  Responce: TBackEndResponce;
+  Request: TBackEndRequest;
 begin
-  Result := TSimpleMailerResponce.Create;
-  builder := TOutputDataBuilder.Create();
-  // builder.SetFrom(TVenditoriCredentials.From())
-  // .SetSender(TVenditoriCredentials.Name())
-  // .SetBody(Data.Data.GetValue('text').Value)
-  // .SetRecipTo(TVenditoriCredentials.Recipients);
-
+  Result := TFrontEndResponce.Create;
+  builder := TBackEndRequestBuilder.Create();
+  builder.SetFrom(TVenditoriCredentials.From())
+    .SetSender(TVenditoriCredentials.Name())
+    .SetSubject(TVenditoriCredentials.Subject())
+    .SetBody('message body')
+    .SetPort(25)
+    .setServer(TVenditoriCredentials.Server())
+    .SetRecipTo(TVenditoriCredentials.Recipients);
+  Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
   server := adapter.Build('http://192.168.5.226', 8080);
-  dataTmp := TJSonObject.Create;
-  output := server.send(nil);
-  Result.message := 'result ' + output.ToString;
+  try
+    Responce := server.send(Request);
+    Result.msg := 'responce from server ' + Responce.status.ToString;
+  except
+    on E: Exception do
+    begin
+      Result.msg := E.Message;
+    end;
+  end;
+
 end;
 
 { TActionContact }
@@ -103,11 +113,11 @@ end;
 function TActionContact.Elaborate(
   const
   Data:
-  TSimpleInputData): TSimpleMailerResponce;
+  TSimpleInputData): TFrontEndResponce;
 begin
   /// stub
-  Result := TSimpleMailerResponce.Create;
-  Result.message := 'contact action: not implemented yet';
+  Result := TFrontEndResponce.Create;
+  Result.msg := 'contact action: not implemented yet';
 
 end;
 
@@ -121,11 +131,11 @@ end;
 function TActionOrder.Elaborate(
   const
   Data:
-  TSimpleInputData): TSimpleMailerResponce;
+  TSimpleInputData): TFrontEndResponce;
 begin
   /// stub
-  Result := TSimpleMailerResponce.Create;
-  Result.message := 'contact action: not implemented yet';
+  Result := TFrontEndResponce.Create;
+  Result.msg := 'contact action: not implemented yet';
 end;
 
 end.
