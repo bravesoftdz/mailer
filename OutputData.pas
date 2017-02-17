@@ -129,6 +129,21 @@ end;
 constructor TBackEndRequestBuilder.Create;
 begin
   FUseAuth := False;
+  FPort := 25; // default port number
+  FFrom := '';
+  FSender := '';
+  FServer := '';
+  FSubject := '';
+  FUser := '';
+  FPassword := '';
+  FUseSSL := false;
+  FMsgType := TMsgTypes.text;
+  FBody := '';
+  FRecipTo := '';
+  FRecipCc := '';
+  FRecipBcc := '';
+  FAttach := '';
+
 end;
 
 function TBackEndRequestBuilder.SetAttach(
