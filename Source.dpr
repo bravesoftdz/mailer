@@ -20,8 +20,7 @@ uses
   SimpleInputData in 'SimpleInputData.pas',
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
-  Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-    {$R *.res},
+  Action in 'Actions\Action.pas',
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   OutputData in 'OutputData.pas',

@@ -84,16 +84,20 @@ begin
   builder.SetFrom(TVenditoriCredentials.From())
     .SetSender(TVenditoriCredentials.Name())
     .SetSubject(TVenditoriCredentials.Subject())
-    .SetBody('message body')
-    .SetPort(25)
+    .SetPort(TVenditoriCredentials.Port)
     .setServer(TVenditoriCredentials.Server())
     .SetRecipTo(TVenditoriCredentials.Recipients);
+  if (Data <> nil) then
+    builder.SetBody(Data.ToString);
   Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
   server := adapter.Build('http://192.168.5.226', 8080);
   try
     Responce := server.send(Request);
-    Result.msg := 'responce from server ' + Responce.status.ToString;
+    if Responce.status then
+      Result.msg := 'OK'
+    else
+      Result.msg := Responce.msgstat;
   except
     on E: Exception do
     begin
