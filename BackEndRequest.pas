@@ -45,35 +45,35 @@ type
 
   public
     /// <summary> sender email, i.e: support@google.com</summary>
-    property From: String read FFrom;
+    property from: String read FFrom;
     /// <summary>  sender name, i.e: "Google Support Team" </summary>
-    property Sender: String read FSender;
+    property sender: String read FSender;
     /// <summary>  Mail server, i.e. "10.341.32.21", "goo.mailer.com"  </summary>
-    property Server: String read FServer;
+    property server: String read FServer;
     /// <summary> port number, i.e. 25  </summary>
-    property Port: Integer read FPort;
+    property port: Integer read FPort;
     /// <summary> whether the user authentification is required  </summary>
-    property Useauth: Boolean read FUseAuth;
+    property useauth: Boolean read FUseAuth;
     /// <summary> user name in case the authentification is required </summary>
-    property User: String read FUser;
+    property user: String read FUser;
     /// <summary> the password in case the authentification is required </summary>
-    property Password: String read FPassword;
+    property password: String read FPassword;
     /// <summary> whether to use SSL       </summary>
-    property Usessl: Boolean read FUseSSL;
+    property usessl: Boolean read FUseSSL;
     /// <summary> html version of the message to send </summary>
     property html: TMsgTypes read FMsgType;
     /// <summary> plain text version of the message to send </summary>
     property text: String read FBody;
     /// <summary>email subject, i.e. "News for you" </summary>
-    property Subject: String read FSubject;
+    property subject: String read FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
-    property Recipto: String read FRecipTo;
+    property recipto: String read FRecipTo;
     /// <summary> list of email addresses of the recipients (cc) </summary>
-    property Recipcc: String read FRecipCc;
+    property recipcc: String read FRecipCc;
     /// <summary> list of email addresses of the recipients (bcc) </summary>
-    property Recipbcc: String read FRecipBcc;
+    property recipbcc: String read FRecipBcc;
     /// <summary> list of attachment contents </summary>
-    property Attach: String read FAttach;
+    property attach: String read FAttach;
 
   end;
 
