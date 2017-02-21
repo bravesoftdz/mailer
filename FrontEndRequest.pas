@@ -1,4 +1,4 @@
-unit SimpleInputData;
+unit FrontEndRequest;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   System.JSON;
 
 type
-  TSimpleInputData = class
+  TFrontEndRequest = class
   private
     FDestination: String;
     FData: TJsonObject;
@@ -23,14 +23,14 @@ uses
 
 { TSimpleInputData }
 
-constructor TSimpleInputData.Create(const Destination: String;
+constructor TFrontEndRequest.Create(const Destination: String;
   const Data: TJsonObject);
 begin
   FDestination := Destination;
   FData := Data;
 end;
 
-function TSimpleInputData.ToString: String;
+function TFrontEndRequest.ToString: String;
 var
   Builder: TStringBuilder;
   item: TJsonPair;

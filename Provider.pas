@@ -3,7 +3,7 @@ unit Provider;
 interface
 
 uses
-  SimpleMailerResponce, SimpleInputData, System.Generics.Collections, Action;
+  FrontEndResponce, FrontEndRequest, System.Generics.Collections, Action;
 
 type
   TProvider = class

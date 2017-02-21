@@ -3,7 +3,7 @@ unit Action;
 interface
 
 uses
-  SimpleMailerResponce, SimpleInputData, OutputData, REST.JSON;
+  FrontEndResponce, FrontEndRequest, BackEndRequest, REST.JSON;
 
 type
   TAction = class
@@ -15,7 +15,7 @@ type
     /// <summary>A virtual method that i ssupposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; virtual; abstract;
+    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -29,21 +29,21 @@ type
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TSimpleInputData): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
     constructor Create();
   end;
 
@@ -71,7 +71,7 @@ begin
 end;
 
 function TActionSend.Elaborate(
-  const Data: TSimpleInputData): TFrontEndResponce;
+  const Data: TFrontEndRequest): TFrontEndResponce;
 var
   builder: TBackEndRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -117,7 +117,7 @@ end;
 function TActionContact.Elaborate(
   const
   Data:
-  TSimpleInputData): TFrontEndResponce;
+  TFrontEndRequest): TFrontEndResponce;
 begin
   /// stub
   Result := TFrontEndResponce.Create;
@@ -135,7 +135,7 @@ end;
 function TActionOrder.Elaborate(
   const
   Data:
-  TSimpleInputData): TFrontEndResponce;
+  TFrontEndRequest): TFrontEndResponce;
 begin
   /// stub
   Result := TFrontEndResponce.Create;

@@ -42,8 +42,8 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce,
-  SimpleMailerResponce, System.JSON, System.SysUtils,
-  SimpleInputData, VenditoriSimple, Provider, SoluzioneAgenti;
+  FrontEndResponce, System.JSON, System.SysUtils,
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -52,7 +52,7 @@ var
   ProviderName, ActionName: String;
   Provider: TProvider;
   Action: TAction;
-  InputObj: TSimpleInputData;
+  InputObj: TFrontEndRequest;
 begin
   ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
@@ -60,7 +60,7 @@ begin
     Provider := nil;
     Action := nil;
     AJSon := Ctx.Request.BodyAsJSONObject;
-    InputObj := TSimpleInputData.Create(ProviderName, AJson);
+    InputObj := TFrontEndRequest.Create(ProviderName, AJson);
     Provider := FFactory.FindByName(ProviderName);
     if Not(Provider = nil) then
       Action := Provider.FindByName(ActionName);

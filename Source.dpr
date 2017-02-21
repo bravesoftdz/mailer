@@ -17,13 +17,14 @@ uses
   RegistrationResponce in 'RegistrationResponce.pas',
   FrontEndResponce in 'FrontEndResponce.pas',
   Provider in 'Provider.pas',
-  SimpleInputData in 'SimpleInputData.pas',
+  FrontEndRequest in 'FrontEndRequest.pas',
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
-  Action in 'Actions\Action.pas',
+  Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
+    {$R *.res},
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
-  OutputData in 'OutputData.pas',
+  BackEndRequest in 'BackEndRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   BackEndResponce in 'BackEndResponce.pas';
 
