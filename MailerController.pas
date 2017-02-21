@@ -30,7 +30,7 @@ type
     /// It accepts a json object with the following structure:
     /// {'msg': 'some string'}
     /// </summary>
-    ///  <param name="Ctx">a context of the request</param>
+    /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
 
   protected
@@ -51,21 +51,21 @@ var
   ProviderName, ActionName: String;
   Provider: TProvider;
   Action: TAction;
-  InputObj: TFrontEndRequest;
+  Request: TFrontEndRequest;
 begin
   ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   try
     Provider := nil;
     Action := nil;
-    AJSon := Ctx.Request.Body as TFrontEndRequest;
-    InputObj := TFrontEndRequest.Create(ProviderName, AJson);
+    AJSon := Ctx.Request.BodyAsJSONObject;
+    Request := TFrontEndRequest.Create(ProviderName, AJSon);
     Provider := FFactory.FindByName(ProviderName);
-    if Not(Provider = nil) then
+    if (Provider <> nil) then
       Action := Provider.FindByName(ActionName);
-    if Not(Action = nil) then
+    if (Action <> nil) then
     begin
-      Responce := Action.Elaborate(InputObj)
+      Responce := Action.Elaborate(request)
     end
     else
     begin
