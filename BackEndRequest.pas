@@ -60,11 +60,10 @@ type
     property Password: String read FPassword;
     /// <summary> whether to use SSL       </summary>
     property Usessl: Boolean read FUseSSL;
-    /// <summary> type of the message to send: there are two different options for sending
-    /// emails: a plain text and an html  </summary>
-    property Msgtype: TMsgTypes read FMsgType;
-    /// <summary> email content </summary>
-    property Body: String read FBody;
+    /// <summary> html version of the message to send </summary>
+    property html: TMsgTypes read FMsgType;
+    /// <summary> plain text version of the message to send </summary>
+    property text: String read FBody;
     /// <summary>email subject, i.e. "News for you" </summary>
     property Subject: String read FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>

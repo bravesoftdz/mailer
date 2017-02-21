@@ -9,10 +9,10 @@ type
   TFrontEndRequest = class
   private
     FDestination: String;
-    FData: TJsonObject;
+    FData: String;
   public
-    constructor Create(const Destination: String; const Data: TJsonObject);
-    property Data: TJsonObject read FData;
+    constructor Create(const Destination: String; const Data: TFrontEndRequest);
+    property Data: String read FData;
     function ToString(): String;
   end;
 
@@ -24,29 +24,21 @@ uses
 { TSimpleInputData }
 
 constructor TFrontEndRequest.Create(const Destination: String;
-  const Data: TJsonObject);
+  const Data: TFrontEndRequest);
 begin
   FDestination := Destination;
-  FData := Data;
+  FData := Data.ToString;
 end;
 
 function TFrontEndRequest.ToString: String;
 var
   Builder: TStringBuilder;
-  item: TJsonPair;
 begin
   Builder := TStringBuilder.Create;
   Builder.Append('destination: ');
   Builder.Append(Fdestination);
-  Builder.Append(', data: [');
-  for item in FData do
-  begin
-    Builder.Append(item.JsonString.Value);
-    Builder.Append(': ');
-    Builder.Append(item.JsonValue.Value);
-    Builder.Append(', ');
-  end;
-  Builder.Append(']');
+  Builder.Append(', data: ');
+  Builder.Append(Data);
   Result := Builder.ToString;
   Builder.DisposeOf;
 end;

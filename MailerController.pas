@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
-  ProviderFactory;
+  ProviderFactory, FrontEndResponce;
 
 type
 
@@ -41,8 +41,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, RegistrationResponce,
-  FrontEndResponce, System.JSON, System.SysUtils,
+  MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
@@ -59,7 +58,7 @@ begin
   try
     Provider := nil;
     Action := nil;
-    AJSon := Ctx.Request.BodyAsJSONObject;
+    AJSon := Ctx.Request.Body as TFrontEndRequest;
     InputObj := TFrontEndRequest.Create(ProviderName, AJson);
     Provider := FFactory.FindByName(ProviderName);
     if Not(Provider = nil) then
