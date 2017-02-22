@@ -3,8 +3,7 @@ unit BackEndRequest;
 interface
 
 uses
-  System.JSON,
-  System.Generics.Collections, System.Classes;
+  System.JSON, System.Classes, System.Generics.Collections, Attachment;
 
 type
   TMsgTypes = (text, html);
@@ -31,7 +30,7 @@ type
     FRecipTo: String;
     FRecipCc: String;
     FRecipBcc: String;
-    FAttach: TStringList;
+    FAttach: TObjectList<TAttachment>;
     /// <summary> Constructor. It is made private in order to discourage its
     /// usage in favour of the TBackEndRequestBuilder </summary>
     constructor Create(const aFrom, aSender, aServer: String; const aPort: Integer;
@@ -40,8 +39,7 @@ type
       const aUseSSL: Boolean;
       const aMsgType: TMsgTypes;
       const aBody, aSubject: String;
-      const aRecipTo, aRecipCc, aRecipBcc: String;
-      const aAttach: TStringList
+      const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TObjectList<TAttachment>
       );
 
   public
@@ -74,7 +72,7 @@ type
     /// <summary> list of email addresses of the recipients (bcc) </summary>
     property recipbcc: String read FRecipBcc;
     /// <summary> list of attachment contents </summary>
-    property attach: TStringList read FAttach;
+    property attach: TObjectList<TAttachment> read FAttach;
 
   end;
 
@@ -109,7 +107,7 @@ type
     function SetRecipTo(const aRecipTo: String): TBackEndRequestBuilder;
     function SetRecipCc(const aRecipCc: String): TBackEndRequestBuilder;
     function SetRecipBcc(const aRecipBcc: String): TBackEndRequestBuilder;
-    function SetAttach(const aAttach: String): TBackEndRequestBuilder;
+    function addAttach(const anAttach: TAttachment): TBackEndRequestBuilder;
     function SetSubject(const aSubject: String): TBackEndRequestBuilder;
     function Build(): TBackEndRequest;
     constructor Create();
@@ -117,7 +115,10 @@ type
 
 implementation
 
-{ TSenderInputDataBuilder }
+{ TSendern
+
+  uses
+  System.Generics.Collections;nputDataBuilder }
 
 function TBackEndRequestBuilder.Build: TBackEndRequest;
 begin
@@ -142,16 +143,16 @@ begin
   FRecipTo := '';
   FRecipCc := '';
   FRecipBcc := '';
-  FAttach := TStringList.Create;
+  FAttach := TObjectList<TAttachment>.Create;
 
 end;
 
-function TBackEndRequestBuilder.SetAttach(
-  const aAttach: String): TBackEndRequestBuilder;
+function TBackEndRequestBuilder.addAttach(
+  const anAttach: TAttachment): TBackEndRequestBuilder;
 var
   item: String;
 begin
-  FAttach.Add(aAttach);
+  FAttach.Add(anAttach);
   Result := Self;
 end;
 
@@ -252,7 +253,7 @@ end;
 constructor TBackEndRequest.Create(const aFrom, aSender, aServer: String;
   const aPort: Integer; const aUseAuth: Boolean; const aUser, aPassword: String;
   const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody, aSubject: String;
-  const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TStringList);
+  const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TObjectList<TAttachment>);
 begin
   FFrom := aFrom;
   FSender := aSender;

@@ -51,7 +51,7 @@ implementation
 
 uses
   Credentials, System.JSON, MVCFramework.RESTAdapter, BackEndResponce,
-  SendServerProxy.interfaces, System.SysUtils;
+  SendServerProxy.interfaces, System.SysUtils, Attachment;
 
 { TMailerAction }
 
@@ -86,7 +86,10 @@ begin
     .SetSubject(TVenditoriCredentials.Subject())
     .SetPort(TVenditoriCredentials.Port)
     .setServer(TVenditoriCredentials.Server())
-    .SetRecipTo(TVenditoriCredentials.Recipients);
+    .SetRecipTo(TVenditoriCredentials.Recipients)
+    .addAttach(TAttachment.Create('file1.jpg', 'content of the file 1'))
+    .addAttach(TAttachment.Create('file2.jpg', 'content of the file 2'));
+
   if (Data <> nil) then
     builder.SetBody(Data.ToString);
   Request := builder.build;

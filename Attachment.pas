@@ -23,4 +23,12 @@ type
 
 implementation
 
+{ TAttachment }
+
+constructor TAttachment.Create(const aName, aContent: String);
+begin
+  FName := aName;
+  FContent := aContent;
+end;
+
 end.
