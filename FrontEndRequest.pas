@@ -3,23 +3,31 @@ unit FrontEndRequest;
 interface
 
 uses
-  System.JSON;
+  System.JSON, System.Generics.Collections, Attachment;
 
 type
+
   /// <summary> A request that arrives from the front end.
   /// It is elaborated and a responce is returned.</summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TFrontEndRequest = class
+  const
+    MSG_TOKEN = 'message';
+    ATTACHMENTS_TOKEN = 'attachments';
+
   private
     FOrigin: String;
     FData: String;
+    // FAttachments: TObjectList<TAttachment>;
   public
     /// <summary> Constructor</summary>
     /// <param name="Origin">origin of the request</param>
     /// <param name="Data">data associated with the request. It is a json object
     /// from which actually only a key 'message' is taken into account.</param>
-    constructor Create(const Origin: String; const Data: TJSonObject);
+    constructor Create(const Origin: String; const aData: TJSonObject);
     property Data: String read FData;
     property Origin: String read FOrigin;
+    // property Attachments: TObjectList<TAttachment> read FAttachments;
     function ToString(): String;
   end;
 
@@ -31,17 +39,15 @@ uses
 { TSimpleInputData }
 
 constructor TFrontEndRequest.Create(const Origin: String;
-  const Data: TJSonObject);
-const
-  MSG_TOKEN = 'message';
+  const aData: TJSonObject);
 var
   msg: String;
   val: TJsonValue;
 begin
   FOrigin := Origin;
-  if (Data <> nil) then
+  if (aData <> nil) then
   begin
-    val := Data.GetValue(MSG_TOKEN);
+    val := aData.GetValue(MSG_TOKEN);
     if val <> nil then
       FData := val.Value;
   end;
@@ -55,7 +61,7 @@ begin
   Builder.Append('destination: ');
   Builder.Append(FOrigin);
   Builder.Append(', data: ');
-  Builder.Append(Data);
+  Builder.Append(FData);
   Result := Builder.ToString;
   Builder.DisposeOf;
 end;
