@@ -3,8 +3,8 @@ unit BackEndRequest;
 interface
 
 uses
-  System.Classes, System.JSON,
-  System.Generics.Collections;
+  System.JSON,
+  System.Generics.Collections, System.Classes;
 
 type
   TMsgTypes = (text, html);
@@ -31,7 +31,7 @@ type
     FRecipTo: String;
     FRecipCc: String;
     FRecipBcc: String;
-    FAttach: String;
+    FAttach: TStringList;
     /// <summary> Constructor. It is made private in order to discourage its
     /// usage in favour of the TBackEndRequestBuilder </summary>
     constructor Create(const aFrom, aSender, aServer: String; const aPort: Integer;
@@ -40,7 +40,8 @@ type
       const aUseSSL: Boolean;
       const aMsgType: TMsgTypes;
       const aBody, aSubject: String;
-      const aRecipTo, aRecipCc, aRecipBcc, aAttach: String
+      const aRecipTo, aRecipCc, aRecipBcc: String;
+      const aAttach: TStringList
       );
 
   public
@@ -73,7 +74,7 @@ type
     /// <summary> list of email addresses of the recipients (bcc) </summary>
     property recipbcc: String read FRecipBcc;
     /// <summary> list of attachment contents </summary>
-    property attach: String read FAttach;
+    property attach: TStringList read FAttach;
 
   end;
 
@@ -95,7 +96,7 @@ type
     FRecipTo: String;
     FRecipCc: String;
     FRecipBcc: String;
-    FAttach: String;
+    FAttach: TObjectList<TAttachment>;
   public
     function SetFrom(const aFrom: String): TBackEndRequestBuilder;
     function SetSender(const aSender: String): TBackEndRequestBuilder;
@@ -141,7 +142,7 @@ begin
   FRecipTo := '';
   FRecipCc := '';
   FRecipBcc := '';
-  FAttach := '';
+  FAttach := TStringList.Create;
 
 end;
 
@@ -150,7 +151,7 @@ function TBackEndRequestBuilder.SetAttach(
 var
   item: String;
 begin
-  FAttach := aAttach;
+  FAttach.Add(aAttach);
   Result := Self;
 end;
 
@@ -251,7 +252,7 @@ end;
 constructor TBackEndRequest.Create(const aFrom, aSender, aServer: String;
   const aPort: Integer; const aUseAuth: Boolean; const aUser, aPassword: String;
   const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody, aSubject: String;
-  const aRecipTo, aRecipCc, aRecipBcc, aAttach: String);
+  const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TStringList);
 begin
   FFrom := aFrom;
   FSender := aSender;

@@ -26,7 +26,8 @@ uses
   Credentials in 'Data\Credentials.pas',
   BackEndRequest in 'BackEndRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
-  BackEndResponce in 'BackEndResponce.pas';
+  BackEndResponce in 'BackEndResponce.pas',
+  Attachment in 'Attachment.pas';
 
 procedure RunServer(APort: Integer);
 var
