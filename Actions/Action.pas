@@ -3,7 +3,7 @@ unit Action;
 interface
 
 uses
-  FrontEndResponce, FrontEndRequest, BackEndRequest, REST.JSON;
+  FrontEndResponce, FrontEndRequest, BackEndRequest, REST.JSON, REST.Json.Types;
 
 type
   TAction = class
@@ -87,11 +87,14 @@ begin
     .SetPort(TVenditoriCredentials.Port)
     .setServer(TVenditoriCredentials.Server())
     .SetRecipTo(TVenditoriCredentials.Recipients)
-    .addAttach(TAttachment.Create('file1.jpg', 'content of the file 1'))
-    .addAttach(TAttachment.Create('file2.jpg', 'content of the file 2'));
+    .addAttachments(Data.Attachments);
 
   if (Data <> nil) then
-    builder.SetBody(Data.ToString);
+  begin
+    builder.SetText(Data.Text);
+    builder.SetHtml(Data.Html);
+  end;
+
   Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
   server := adapter.Build('http://192.168.5.226', 8080);

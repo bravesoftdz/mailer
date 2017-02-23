@@ -6,9 +6,6 @@ uses
   System.JSON, System.Classes, System.Generics.Collections, Attachment;
 
 type
-  TMsgTypes = (text, html);
-
-type
 
   /// <summary>
   /// Object containing data to be sent to the back-end.
@@ -24,8 +21,10 @@ type
     FUser: String;
     FPassword: String;
     FUseSSL: Boolean;
-    FMsgType: TMsgTypes;
-    FBody: String;
+    [JSonName('bodyhtml')]
+    FHtml: String;
+    [JSonName('bodytext')]
+    FText: String;
     FSubject: String;
     FRecipTo: String;
     FRecipCc: String;
@@ -33,14 +32,9 @@ type
     FAttach: TObjectList<TAttachment>;
     /// <summary> Constructor. It is made private in order to discourage its
     /// usage in favour of the TBackEndRequestBuilder </summary>
-    constructor Create(const aFrom, aSender, aServer: String; const aPort: Integer;
-      const aUseAuth: Boolean;
-      const aUser, aPassword: String;
-      const aUseSSL: Boolean;
-      const aMsgType: TMsgTypes;
-      const aBody, aSubject: String;
-      const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TObjectList<TAttachment>
-      );
+    constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
+      const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
+      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
 
   public
     /// <summary> sender email, i.e: support@google.com</summary>
@@ -59,10 +53,10 @@ type
     property password: String read FPassword;
     /// <summary> whether to use SSL       </summary>
     property usessl: Boolean read FUseSSL;
-    /// <summary> html version of the message to send </summary>
-    property html: TMsgTypes read FMsgType;
+    /// <summary> html text version of the message to send </summary>
+    property html: String read FHtml;
     /// <summary> plain text version of the message to send </summary>
-    property text: String read FBody;
+    property text: String read FText;
     /// <summary>email subject, i.e. "News for you" </summary>
     property subject: String read FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
@@ -89,8 +83,8 @@ type
     FUser: String;
     FPassword: String;
     FUseSSL: Boolean;
-    FMsgType: TMsgTypes;
-    FBody: String;
+    FHtml: String;
+    FText: String;
     FRecipTo: String;
     FRecipCc: String;
     FRecipBcc: String;
@@ -102,12 +96,13 @@ type
     function SetPort(const aPort: Integer): TBackEndRequestBuilder;
     function SetAuthentification(const aLogin, aPassword: String): TBackEndRequestBuilder;
     function SetUseSSL(const aUseSSL: Boolean): TBackEndRequestBuilder;
-    function SetMsgType(const aMsgType: TMsgTypes): TBackEndRequestBuilder;
-    function SetBody(const aBody: String): TBackEndRequestBuilder;
+    function SetText(const aText: String): TBackEndRequestBuilder;
+    function SetHtml(const aHtml: String): TBackEndRequestBuilder;
     function SetRecipTo(const aRecipTo: String): TBackEndRequestBuilder;
     function SetRecipCc(const aRecipCc: String): TBackEndRequestBuilder;
     function SetRecipBcc(const aRecipBcc: String): TBackEndRequestBuilder;
     function addAttach(const anAttach: TAttachment): TBackEndRequestBuilder;
+    function addAttachments(const items: TObjectList<TAttachment>): TBackEndRequestBuilder;
     function SetSubject(const aSubject: String): TBackEndRequestBuilder;
     function Build(): TBackEndRequest;
     constructor Create();
@@ -120,11 +115,17 @@ implementation
   uses
   System.Generics.Collections;nputDataBuilder }
 
+function TBackEndRequestBuilder.addAttachments(
+  const items: TObjectList<TAttachment>): TBackEndRequestBuilder;
+begin
+  FAttach.AddRange(items);
+end;
+
 function TBackEndRequestBuilder.Build: TBackEndRequest;
 begin
-  Result := TBackEndRequest.Create(FFrom, Fsender, Fserver,
-    FPort, FUseAuth, FUser, FPassword, FUseSSL, FMsgType, FBody, FSubject,
-    FRecipTo, FRecipCc, FRecipBcc, FAttach);
+  Result := TBackEndRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
+    FUser, FPassword, FUseSSL, FText, FHtml, FSubject, FRecipTo,
+    FRecipCc, FRecipBcc, FAttach);
 end;
 
 constructor TBackEndRequestBuilder.Create;
@@ -138,19 +139,15 @@ begin
   FUser := '';
   FPassword := '';
   FUseSSL := false;
-  FMsgType := TMsgTypes.text;
-  FBody := '';
+  FHtml := '';
   FRecipTo := '';
   FRecipCc := '';
   FRecipBcc := '';
   FAttach := TObjectList<TAttachment>.Create;
-
 end;
 
 function TBackEndRequestBuilder.addAttach(
   const anAttach: TAttachment): TBackEndRequestBuilder;
-var
-  item: String;
 begin
   FAttach.Add(anAttach);
   Result := Self;
@@ -164,10 +161,10 @@ begin
   FPassword := aPassword;
 end;
 
-function TBackEndRequestBuilder.SetBody(
-  const aBody: String): TBackEndRequestBuilder;
+function TBackEndRequestBuilder.SetText(
+  const aText: String): TBackEndRequestBuilder;
 begin
-  FBody := aBody;
+  FText := aText;
   Result := Self;
 end;
 
@@ -178,10 +175,10 @@ begin
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetMsgType(
-  const aMsgType: TMsgTypes): TBackEndRequestBuilder;
+function TBackEndRequestBuilder.SetHtml(
+  const aHtml: String): TBackEndRequestBuilder;
 begin
-  FMsgType := aMsgType;
+  FHtml := aHtml;
   Result := Self;
 end;
 
@@ -250,10 +247,13 @@ end;
 
 { TSenderInputData }
 
-constructor TBackEndRequest.Create(const aFrom, aSender, aServer: String;
-  const aPort: Integer; const aUseAuth: Boolean; const aUser, aPassword: String;
-  const aUseSSL: Boolean; const aMsgType: TMsgTypes; const aBody, aSubject: String;
-  const aRecipTo, aRecipCc, aRecipBcc: String; const aAttach: TObjectList<TAttachment>);
+constructor TBackEndRequest.Create(const aFrom: string; const aSender: string;
+  const aServer: string; const aPort: Integer; const aUseAuth: Boolean;
+  const aUser: string; const aPassword: string; const aUseSSL: Boolean;
+  const aHtml: string; const aText: string; const aSubject: string;
+  const aRecipTo: string; const aRecipCc: string;
+  const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
+
 begin
   FFrom := aFrom;
   FSender := aSender;
@@ -263,8 +263,8 @@ begin
   FUser := aUser;
   FPassword := aPassword;
   FUseSSL := aUseSSL;
-  FMsgType := aMsgType;
-  FBody := aBody;
+  FHtml := aHtml;
+  FText := aText;
   FSubject := aSubject;
   FRecipTo := aRecipTo;
   FRecipCc := aRecipCc;

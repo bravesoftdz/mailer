@@ -60,13 +60,12 @@ begin
     Action := nil;
     AJSon := Ctx.Request.BodyAsJSONObject;
     Request := TJson.JsonToObject<TFrontEndRequest>(AJSon);
-//    Request := TFrontEndRequest.Create(ProviderName, AJSon);
     Provider := FFactory.FindByName(ProviderName);
     if (Provider <> nil) then
       Action := Provider.FindByName(ActionName);
     if (Action <> nil) then
     begin
-      Responce := Action.Elaborate(request)
+      Responce := Action.Elaborate(Request)
     end
     else
     begin

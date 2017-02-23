@@ -11,9 +11,6 @@ type
   /// It is elaborated and a responce is returned.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TFrontEndRequest = class
-  const
-    MSG_TOKEN = 'message';
-    ATTACHMENTS_TOKEN = 'attachments';
   private
     [JSONMarshalled(True)]
     [JSonName('html')]
