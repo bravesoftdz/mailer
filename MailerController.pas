@@ -42,7 +42,7 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, REST.Json;
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -59,7 +59,7 @@ begin
     Provider := nil;
     Action := nil;
     AJSon := Ctx.Request.BodyAsJSONObject;
-    Request := TJson.JsonToObject<TFrontEndRequest>(AJSon);
+    Request := Mapper.JSONObjectToObject<TFrontEndRequest>(AJSon);
     Provider := FFactory.FindByName(ProviderName);
     if (Provider <> nil) then
       Action := Provider.FindByName(ActionName);

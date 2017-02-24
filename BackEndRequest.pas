@@ -3,7 +3,7 @@ unit BackEndRequest;
 interface
 
 uses
-  System.JSON, System.Classes, System.Generics.Collections, Attachment;
+  System.JSON, System.Classes, System.Generics.Collections, Attachment, ObjectsMappers;
 
 type
 
@@ -21,9 +21,7 @@ type
     FUser: String;
     FPassword: String;
     FUseSSL: Boolean;
-    [JSonName('bodyhtml')]
     FHtml: String;
-    [JSonName('bodytext')]
     FText: String;
     FSubject: String;
     FRecipTo: String;
@@ -54,8 +52,10 @@ type
     /// <summary> whether to use SSL       </summary>
     property usessl: Boolean read FUseSSL;
     /// <summary> html text version of the message to send </summary>
+    [MapperColumnAttribute('bodyhtml')]
     property html: String read FHtml;
     /// <summary> plain text version of the message to send </summary>
+    [MapperColumnAttribute('bodytext')]
     property text: String read FText;
     /// <summary>email subject, i.e. "News for you" </summary>
     property subject: String read FSubject;

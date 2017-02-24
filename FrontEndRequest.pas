@@ -3,7 +3,7 @@ unit FrontEndRequest;
 interface
 
 uses
-  System.JSON, System.Generics.Collections, Attachment, REST.Json.Types;
+  System.JSON, System.Generics.Collections, Attachment, ObjectsMappers;
 
 type
 
@@ -12,24 +12,22 @@ type
   [MapperJSONNaming(JSONNameLowerCase)]
   TFrontEndRequest = class
   private
-    [JSONMarshalled(True)]
-    [JSonName('html')]
     FHtml: String;
-
-    [JSONMarshalled(True)]
-    [JSonName('text')]
     FText: String;
-
-    [JSONMarshalled(True)]
-    [JSonName('attachments')]
     FAttachments: TObjectList<TAttachment>;
+    procedure SetAttachments(const Value: TObjectList<TAttachment>);
   public
     /// <summary> Constructor</summary>
     /// <param name="aData">data associated with the request.</param>
-    constructor Create(const aText, anHtml: String; const Attachs: TObjectList<TAttachment>);
-    property Html: String read FHtml;
-    property Text: String read FText;
-    property Attachments: TObjectList<TAttachment> read FAttachments;
+    constructor Create(const aText, anHtml: String; const Attachs: TObjectList<TAttachment>); overload;
+    constructor Create(); overload;
+    [MapperColumnAttribute('html')]
+    property Html: String read FHtml write FHtml;
+    [MapperColumnAttribute('text')]
+    property Text: String read FText write FText;
+    [MapperColumnAttribute('attachments')]
+    [MapperItemsClassType(TAttachment)]
+    property Attachments: TObjectList<TAttachment> read FAttachments write SetAttachments;
     function ToString(): String;
   end;
 
@@ -46,6 +44,19 @@ begin
   FText := aText;
   FHtml := anHtml;
   FAttachments := Attachs;
+end;
+
+constructor TFrontEndRequest.Create;
+begin
+  FText := '';
+  FHTml := '';
+  FAttachments := TObjectList<TAttachment>.Create;
+end;
+
+procedure TFrontEndRequest.SetAttachments(
+  const Value: TObjectList<TAttachment>);
+begin
+  FAttachments := Value;
 end;
 
 function TFrontEndRequest.ToString: String;
