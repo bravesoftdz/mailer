@@ -1,6 +1,7 @@
 program BackEndMock;
 
- {$APPTYPE CONSOLE}
+{$APPTYPE CONSOLE}
+
 
 uses
   System.SysUtils,
@@ -12,9 +13,14 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   BackEndMockController in 'BackEndMockController.pas',
+  SendServerProxy.interfaces in '..\SendServerProxy.interfaces.pas',
+  BackEndRequest in '..\BackEndRequest.pas',
+  BackEndResponce in '..\BackEndResponce.pas',
+  Attachment in '..\Attachment.pas',
   BackEndMockWebModule in 'BackEndMockWebModule.pas' {BackEndWebModule: TWebModule};
 
 {$R *.res}
+
 
 procedure RunServer(APort: Integer);
 var
@@ -31,13 +37,13 @@ begin
     LServer.Active := True;
     LogI(Format('Server started on port 8080', [APort]));
     { more info about MaxConnections
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html}
+      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html }
     LServer.MaxConnections := 0;
     { more info about ListenQueue
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html}
+      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html }
     LServer.ListenQueue := 200;
     { Comment the next line to avoid the default browser startup }
-    ShellExecute(0, 'open', PChar('http://localhost:' + inttostr(APort)), nil, nil, SW_SHOWMAXIMIZED);
+//    ShellExecute(0, 'open', PChar('http://localhost:' + inttostr(APort)), nil, nil, SW_SHOWMAXIMIZED);
     Writeln('Press ESC to stop the server');
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
@@ -64,4 +70,5 @@ begin
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
   end;
+
 end.

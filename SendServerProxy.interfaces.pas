@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework.RESTAdapter, MVCFramework.Commons, System.Classes,
-  FrontEndRequest, BackEndRequest, FrontEndResponce, System.JSON,
+  BackEndRequest, System.JSON,
   BackEndResponce;
 
 type
