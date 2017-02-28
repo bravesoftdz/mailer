@@ -49,15 +49,13 @@ type
     property user: String read FUser;
     /// <summary> the password in case the authentification is required </summary>
     property password: String read FPassword;
-    /// <summary> whether to use SSL       </summary>
+    /// <summary> whether to use SSL </summary>
     property usessl: Boolean read FUseSSL;
     /// <summary> html text version of the message to send </summary>
-    [MapperColumnAttribute('bodyhtml')]
-    property html: String read FHtml;
+    property bodyhtml: String read FHtml;
     /// <summary> plain text version of the message to send </summary>
-    [MapperColumnAttribute('bodytext')]
-    property text: String read FText;
-    /// <summary>email subject, i.e. "News for you" </summary>
+    property bodytext: String read FText write FText;
+    /// <summary> email subject, i.e. "News for you" </summary>
     property subject: String read FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
     property recipto: String read FRecipTo;

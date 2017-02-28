@@ -97,7 +97,8 @@ begin
 
   Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
-  server := adapter.Build('http://192.168.5.226', 8080);
+  // server := adapter.Build('http://192.168.5.226', 8080);
+  server := adapter.Build('localhost', 8080);
   try
     Responce := server.send(Request);
     if Responce.status then

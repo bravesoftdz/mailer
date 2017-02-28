@@ -9,6 +9,9 @@
         <Projects Include="Test.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="SenderMock\BackEndMock.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="Test:Make">
         <MSBuild Projects="Test.dproj" Targets="Make"/>
     </Target>
+    <Target Name="BackEndMock">
+        <MSBuild Projects="SenderMock\BackEndMock.dproj"/>
+    </Target>
+    <Target Name="BackEndMock:Clean">
+        <MSBuild Projects="SenderMock\BackEndMock.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BackEndMock:Make">
+        <MSBuild Projects="SenderMock\BackEndMock.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Source;Test"/>
+        <CallTarget Targets="Source;Test;BackEndMock"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Source:Clean;Test:Clean"/>
+        <CallTarget Targets="Source:Clean;Test:Clean;BackEndMock:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Source:Make;Test:Make"/>
+        <CallTarget Targets="Source:Make;Test:Make;BackEndMock:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

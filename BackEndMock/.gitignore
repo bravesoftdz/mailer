@@ -1,0 +1,14 @@
+__history/
+lib/
+Win32/
+Win64/
+Data/
+LibrarySupport/
+ModelSupport_Source
+out/
+__history/
+__recovery/
+*.tvsconfig
+*.local
+*.identcache
+*.stat

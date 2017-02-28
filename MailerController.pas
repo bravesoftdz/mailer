@@ -20,7 +20,7 @@ type
   public
     [MVCPath('/($' + PROVIDER_TOKEN + ')/($' + ACTION_TOKEN + ')')]
     [MVCHTTPMethod([httpPOST])]
-    [MVCProduces('application/json')]
+    [MVCProduces('application/json', 'UTF-8')]
     [MVCConsumes('application/json')]
     [MVCDoc('Elaborate the request. The action that should be performed is to be decided based on provided destination and action token.')]
     /// <summary>  An entry point to the server.
