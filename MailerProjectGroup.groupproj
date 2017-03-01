@@ -6,10 +6,10 @@
         <Projects Include="Source.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Test.dproj">
+        <Projects Include="BackEndMock\BackEndMock.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="SenderMock\BackEndMock.dproj">
+        <Projects Include="Tests\Tests.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -29,32 +29,32 @@
     <Target Name="Source:Make">
         <MSBuild Projects="Source.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Test">
-        <MSBuild Projects="Test.dproj"/>
-    </Target>
-    <Target Name="Test:Clean">
-        <MSBuild Projects="Test.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Test:Make">
-        <MSBuild Projects="Test.dproj" Targets="Make"/>
-    </Target>
     <Target Name="BackEndMock">
-        <MSBuild Projects="SenderMock\BackEndMock.dproj"/>
+        <MSBuild Projects="BackEndMock\BackEndMock.dproj"/>
     </Target>
     <Target Name="BackEndMock:Clean">
-        <MSBuild Projects="SenderMock\BackEndMock.dproj" Targets="Clean"/>
+        <MSBuild Projects="BackEndMock\BackEndMock.dproj" Targets="Clean"/>
     </Target>
     <Target Name="BackEndMock:Make">
-        <MSBuild Projects="SenderMock\BackEndMock.dproj" Targets="Make"/>
+        <MSBuild Projects="BackEndMock\BackEndMock.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Tests">
+        <MSBuild Projects="Tests\Tests.dproj"/>
+    </Target>
+    <Target Name="Tests:Clean">
+        <MSBuild Projects="Tests\Tests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Tests:Make">
+        <MSBuild Projects="Tests\Tests.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Source;Test;BackEndMock"/>
+        <CallTarget Targets="Source;BackEndMock;Tests"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Source:Clean;Test:Clean;BackEndMock:Clean"/>
+        <CallTarget Targets="Source:Clean;BackEndMock:Clean;Tests:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Source:Make;Test:Make;BackEndMock:Make"/>
+        <CallTarget Targets="Source:Make;BackEndMock:Make;Tests:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

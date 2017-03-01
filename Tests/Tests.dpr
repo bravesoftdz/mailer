@@ -1,4 +1,4 @@
-program Test;
+program Tests;
 
 {$IFNDEF TESTINSIGHT}
 {$APPTYPE CONSOLE}
@@ -11,8 +11,8 @@ uses
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  TestActionDispatcher in 'C:\Users\User\Documents\Embarcadero\Studio\Projects\TestActionDispatcher.pas';
-
+  UnitTests in 'UnitTests.pas',
+  Action in '..\Actions\Action.pas';
 var
   runner : ITestRunner;
   results : IRunResults;

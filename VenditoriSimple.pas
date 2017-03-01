@@ -3,7 +3,7 @@ unit VenditoriSimple;
 interface
 
 uses
-  SimpleInputData, SimpleMailerResponce, Provider, Action;
+  Provider;
 
 type
   TVenditoriSimple = class(TProvider)
@@ -14,7 +14,7 @@ type
 implementation
 
 uses
-  System.Generics.Collections, ActionSend;
+  System.Generics.Collections, Action;
 
 { TVenditoriOrder }
 
