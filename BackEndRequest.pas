@@ -52,9 +52,11 @@ type
     /// <summary> whether to use SSL </summary>
     property usessl: Boolean read FUseSSL;
     /// <summary> html text version of the message to send </summary>
-    property bodyhtml: String read FHtml;
+    [MapperJSONSer('bodyhtml')]
+    property html: String read FHtml;
     /// <summary> plain text version of the message to send </summary>
-    property bodytext: String read FText write FText;
+    [MapperJSONSer('bodytext')]
+    property text: String read FText write FText;
     /// <summary> email subject, i.e. "News for you" </summary>
     property subject: String read FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
