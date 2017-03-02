@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, SendServerProxy.interfaces,
-  BackEndResponce, BackEndRequest;
+  BackEndResponce, BackEndRequest, FrontEndRequest;
 
 type
 
@@ -23,32 +23,35 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, System.JSON, ObjectsMappers;
+  MVCFramework.Logger, System.JSON, ObjectsMappers, System.Classes;
 
 procedure TBackEndMockController.send(const Ctx: TWebContext);
 var
   responce: TBackEndResponce;
+  Ajson: TJsonObject;
+  request: TBackEndRequest;
+  list: TStringList;
+  data: String;
 begin
   responce := TBackEndResponce.Create;
   responce.status := false;
-  responce.msgstat := Ctx.Request.BodyAsJSONObject.ToString;
+  Ajson := Ctx.Request.BodyAsJSONObject;
+  request := Mapper.JSONObjectToObject<TBackEndRequest>(Ajson);
+  list := TStringList.Create();
+  list.loadfromstream(request.data);
+
+
+  responce.msgstat := Ajson.ToString + ' ---> ' + list.text;
   Render(Mapper.ObjectToJSONObject(responce));
 end;
 
-procedure TBackEndMockController.OnAfterAction(Context: TWebContext;
-
-  const
-  AActionName: string);
+procedure TBackEndMockController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
 end;
 
-procedure TBackEndMockController.OnBeforeAction(Context: TWebContext;
-
-  const
-  AActionName: string;
-
+procedure TBackEndMockController.OnBeforeAction(Context: TWebContext; const AActionName: string;
   var
   Handled:
   Boolean);

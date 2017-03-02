@@ -3,7 +3,8 @@ unit BackEndRequest;
 interface
 
 uses
-  System.JSON, System.Classes, System.Generics.Collections, Attachment, ObjectsMappers;
+  System.JSON, System.Generics.Collections, Attachment, ObjectsMappers,
+  System.Classes;
 
 type
 
@@ -28,11 +29,12 @@ type
     FRecipCc: String;
     FRecipBcc: String;
     FAttach: TObjectList<TAttachment>;
+    FData: TStringStream;
     /// <summary> Constructor. It is made private in order to discourage its
     /// usage in favour of the TBackEndRequestBuilder </summary>
     constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
       const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
-      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
+      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>); overload;
 
   public
     /// <summary> sender email, i.e: support@google.com</summary>
@@ -67,6 +69,9 @@ type
     property recipbcc: String read FRecipBcc;
     /// <summary> list of attachment contents </summary>
     property attach: TObjectList<TAttachment> read FAttach;
+    [MapperJSONSer('file')]
+    property data: TStringStream read FData write FData;
+    constructor Create(); overload;
 
   end;
 
@@ -109,6 +114,9 @@ type
   end;
 
 implementation
+
+uses
+  System.SysUtils;
 
 { TSendern
 
@@ -270,6 +278,15 @@ begin
   FRecipCc := aRecipCc;
   FRecipBcc := aRecipBcc;
   FAttach := aAttach;
+
+  Fdata := TStringStream.Create();
+  FData.LoadFromFile('c:\Users\User\Documents\tmp.txt');
+end;
+
+constructor TBackEndRequest.Create;
+begin
+  Fdata := TStringStream.Create;
+  FAttach := TObjectList<TAttachment>.Create;
 end;
 
 end.
