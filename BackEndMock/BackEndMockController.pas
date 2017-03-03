@@ -23,25 +23,40 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, System.JSON, ObjectsMappers, System.Classes;
+  MVCFramework.Logger, System.JSON, ObjectsMappers, System.Classes,
+  System.SysUtils;
 
 procedure TBackEndMockController.send(const Ctx: TWebContext);
 var
   responce: TBackEndResponce;
   Ajson: TJsonObject;
   request: TBackEndRequest;
-  list: TStringList;
-  data: String;
+  reader: TStreamReader;
+  data: UTF8String;
+  builder: TStringBuilder;
 begin
   responce := TBackEndResponce.Create;
   responce.status := false;
   Ajson := Ctx.Request.BodyAsJSONObject;
   request := Mapper.JSONObjectToObject<TBackEndRequest>(Ajson);
-  list := TStringList.Create();
-  list.loadfromstream(request.data);
-
-
-  responce.msgstat := Ajson.ToString + ' ---> ' + list.text;
+  builder := TStringBuilder.Create;
+  builder.append(Ajson.toString);
+  if (request.data <> nil) then
+  begin
+    request.data.Position := 0;
+    reader := TStreamReader.Create(request.data);
+    try
+      builder.append(reader.ReadToEnd);
+    finally
+      reader.Close;
+    end;
+  end
+  else
+  begin
+    builder.append('data is nil');
+  end;
+  responce.msgstat := builder.toString;
+  builder.DisposeOf;
   Render(Mapper.ObjectToJSONObject(responce));
 end;
 

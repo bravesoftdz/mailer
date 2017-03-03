@@ -29,7 +29,7 @@ type
     FRecipCc: String;
     FRecipBcc: String;
     FAttach: TObjectList<TAttachment>;
-    FData: TStringStream;
+    FData: TMemoryStream;
     /// <summary> Constructor. It is made private in order to discourage its
     /// usage in favour of the TBackEndRequestBuilder </summary>
     constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
@@ -70,7 +70,7 @@ type
     /// <summary> list of attachment contents </summary>
     property attach: TObjectList<TAttachment> read FAttach;
     [MapperJSONSer('file')]
-    property data: TStringStream read FData write FData;
+    property data: TMemoryStream read FData write FData;
     constructor Create(); overload;
 
   end;
@@ -261,7 +261,8 @@ constructor TBackEndRequest.Create(const aFrom: string; const aSender: string;
   const aHtml: string; const aText: string; const aSubject: string;
   const aRecipTo: string; const aRecipCc: string;
   const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
-
+var
+  fs: TFileStream;
 begin
   FFrom := aFrom;
   FSender := aSender;
@@ -279,14 +280,26 @@ begin
   FRecipBcc := aRecipBcc;
   FAttach := aAttach;
 
-  Fdata := TStringStream.Create();
-  FData.LoadFromFile('c:\Users\User\Documents\tmp.txt');
+  fs := TFileStream.Create('c:\Users\User\Documents\tmp.txt', fmOpenRead);
+
+  try
+    FData := TMemoryStream.Create();
+    try
+      FData.CopyFrom(fs, fs.Size);
+    except
+      FData.Destroy;
+      raise;
+    end;
+  finally
+    fs.Destroy;
+  end;
+
 end;
 
 constructor TBackEndRequest.Create;
 begin
-  Fdata := TStringStream.Create;
   FAttach := TObjectList<TAttachment>.Create;
+  FData := TMemoryStream.Create();
 end;
 
 end.
