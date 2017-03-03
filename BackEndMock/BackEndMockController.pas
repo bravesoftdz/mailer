@@ -24,7 +24,7 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, ObjectsMappers, System.Classes,
-  System.SysUtils;
+  System.SysUtils, Attachment;
 
 procedure TBackEndMockController.send(const Ctx: TWebContext);
 var
@@ -34,6 +34,7 @@ var
   reader: TStreamReader;
   data: UTF8String;
   builder: TStringBuilder;
+  attach: TAttachment;
 begin
   responce := TBackEndResponce.Create;
   responce.status := false;
@@ -41,19 +42,16 @@ begin
   request := Mapper.JSONObjectToObject<TBackEndRequest>(Ajson);
   builder := TStringBuilder.Create;
   builder.append(Ajson.toString);
-  if (request.data <> nil) then
+  for attach in request.attachment do
   begin
-    request.data.Position := 0;
-    reader := TStreamReader.Create(request.data);
+    builder.Append(attach.Name);
+    attach.Content.Position := 0;
+    reader := TStreamReader.Create(attach.Content);
     try
       builder.append(reader.ReadToEnd);
     finally
       reader.Close;
     end;
-  end
-  else
-  begin
-    builder.append('data is nil');
   end;
   responce.msgstat := builder.toString;
   builder.DisposeOf;

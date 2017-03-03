@@ -68,9 +68,10 @@ type
     /// <summary> list of email addresses of the recipients (bcc) </summary>
     property recipbcc: String read FRecipBcc;
     /// <summary> list of attachment contents </summary>
-    property attach: TObjectList<TAttachment> read FAttach;
-    [MapperJSONSer('file')]
-    property data: TMemoryStream read FData write FData;
+    [MapperJSONSer('attach')]
+    property attachment: TObjectList<TAttachment> read FAttach;
+    // [MapperJSONSer('file')]
+    // property data: TMemoryStream read FData write FData;
     constructor Create(); overload;
 
   end;
@@ -261,8 +262,7 @@ constructor TBackEndRequest.Create(const aFrom: string; const aSender: string;
   const aHtml: string; const aText: string; const aSubject: string;
   const aRecipTo: string; const aRecipCc: string;
   const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
-var
-  fs: TFileStream;
+
 begin
   FFrom := aFrom;
   FSender := aSender;
@@ -279,27 +279,12 @@ begin
   FRecipCc := aRecipCc;
   FRecipBcc := aRecipBcc;
   FAttach := aAttach;
-
-  fs := TFileStream.Create('c:\Users\User\Documents\tmp.txt', fmOpenRead);
-
-  try
-    FData := TMemoryStream.Create();
-    try
-      FData.CopyFrom(fs, fs.Size);
-    except
-      FData.Destroy;
-      raise;
-    end;
-  finally
-    fs.Destroy;
-  end;
-
 end;
 
 constructor TBackEndRequest.Create;
 begin
   FAttach := TObjectList<TAttachment>.Create;
-  FData := TMemoryStream.Create();
+  // FData := TMemoryStream.Create();
 end;
 
 end.
