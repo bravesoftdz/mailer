@@ -18,14 +18,13 @@ type
     procedure SetAttachments(const Value: TObjectList<TAttachment>);
   public
     /// <summary> Constructor</summary>
-    /// <param name="aData">data associated with the request.</param>
     constructor Create(const aText, anHtml: String; const Attachs: TObjectList<TAttachment>); overload;
     constructor Create(); overload;
-    [MapperColumnAttribute('html')]
+    [MapperJSONSer('html')]
     property Html: String read FHtml write FHtml;
-    [MapperColumnAttribute('text')]
+    [MapperJSONSer('text')]
     property Text: String read FText write FText;
-    [MapperColumnAttribute('attachments')]
+    [MapperJSONSer('attachments')]
     [MapperItemsClassType(TAttachment)]
     property Attachments: TObjectList<TAttachment> read FAttachments write SetAttachments;
     function ToString(): String;

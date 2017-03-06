@@ -6,16 +6,17 @@ program Tests;
 
 uses
   System.SysUtils,
-{$IFDEF TESTINSIGHT}
+  {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-{$ENDIF }
+  {$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
   TestActionDispatcher in 'TestActionDispatcher.pas',
   Action in '..\Actions\Action.pas',
   TestBackEndRequestBuilder in 'TestBackEndRequestBuilder.pas',
-  TestBackEndRequestToJson in 'TestBackEndRequestToJson.pas';
+  TestBackEndRequestToJson in 'TestBackEndRequestToJson.pas',
+  TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas';
 
 var
   runner: ITestRunner;
