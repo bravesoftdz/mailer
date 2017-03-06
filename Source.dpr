@@ -27,7 +27,8 @@ uses
   BackEndRequest in 'BackEndRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   BackEndResponce in 'BackEndResponce.pas',
-  Attachment in 'Attachment.pas';
+  Attachment in 'Attachment.pas',
+  TestBackEndRequestBuilder in 'Tests\TestBackEndRequestBuilder.pas';
 
 procedure RunServer(APort: Integer);
 var

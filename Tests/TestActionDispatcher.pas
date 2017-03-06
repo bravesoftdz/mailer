@@ -3,8 +3,7 @@ unit TestActionDispatcher;
 interface
 
 uses
-  DUnitX.TestFramework, ProviderFactory, Action,
-  System.Generics.Collections;
+  DUnitX.TestFramework, Action, System.Generics.Collections, ProviderFactory, Provider, VenditoriSimple, SoluzioneAgenti;
 
 type
 
@@ -76,48 +75,50 @@ begin
 end;
 
 procedure TTestActionDispatcher.FindActionFromOnePresent;
+var
+  Providers: TObjectList<TProvider>;
 begin
-  actions := TObjectList<TAction>.Create();
-  actions.add(action1);
-  factory := TProviderFactory.Create(actions, action2);
-  Assert.AreEqual(action2, factory.FindAction('not', 'exist'));
+//  Providers := TObjectList<TProvider>.Create;
+//  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
+//  actions := TObjectList<TAction>.Create();
+//  Assert.isTrue(action2 = factory.FindByName('not exist'));
 end;
 
 procedure TTestActionDispatcher.FindActionFromThreeNotPresent;
 begin
-  actions.addRange([action1, action2, action3]);
-  factory := TActionDispatcher.Create(actions, defaultAction);
-  Assert.AreEqual(defaultAction, factory.FindAction('not', 'exist'));
+//  actions.addRange([action1, action2, action3]);
+//  factory := TProviderFactory.Create(actions, defaultAction);
+//  Assert.AreEqual(defaultAction, factory.FindByName('not', 'exist'));
 end;
 
 procedure TTestActionDispatcher.FindActionFromThreePresentInMiddle;
 begin
-  actions.addRange([action1, action2, action3]);
-  factory := TActionDispatcher.Create(actions, defaultAction);
-  Assert.AreEqual(action2, factory.FindAction('name2', 'action2'));
+//  actions.addRange([action1, action2, action3]);
+//  factory := TProviderFactory.Create(actions, defaultAction);
+//  Assert.AreEqual(action2, factory.FindByName('name2', 'action2'));
 end;
 
 procedure TTestActionDispatcher.FindActionFromTwoPresentAtBeginning;
 begin
-  actions.addRange([action1, action2, action3]);
-  factory := TActionDispatcher.Create(actions, defaultAction);
-  Assert.AreEqual(action1, factory.FindAction('name1', 'action1'));
+//  actions.addRange([action1, action2, action3]);
+//  factory := TProviderFactory.Create(actions, defaultAction);
+//  Assert.AreEqual(action1, factory.FindByName('name1', 'action1'));
 end;
 
 procedure TTestActionDispatcher.FindActionFromTwoPresentAtEnd;
 begin
-  actions.addRange([action1, action2]);
-  factory := TActionDispatcher.Create(actions, action3);
-  Assert.AreEqual(action2, factory.FindAction('name2', 'action2'));
+//  actions.addRange([action1, action2]);
+//  factory := TProviderFactory.Create(actions, action3);
+//  Assert.AreEqual(action2, factory.FindByName('name2', 'action2'));
 end;
 
 procedure TTestActionDispatcher.Setup;
 begin
-  action1 := TAction.Create('name1', 'action1');
-  action2 := TAction.Create('name2', 'action2');
-  action3 := TAction.Create('name3', 'action3');
-  action4 := TAction.Create('name4', 'action4');
-  actions := TObjectList<TAction>.Create();
+//  action1 := TAction.Create('name1', 'action1');
+//  action2 := TAction.Create('name2', 'action2');
+//  action3 := TAction.Create('name3', 'action3');
+//  action4 := TAction.Create('name4', 'action4');
+//  actions := TObjectList<TAction>.Create();
 end;
 
 procedure TTestActionDispatcher.TearDown;
@@ -127,8 +128,8 @@ end;
 
 procedure TTestActionDispatcher.FindActionFromEmpty;
 begin
-  factory := TActionDispatcher.Create(actions, action3);
-  Assert.AreEqual(action3, factory.FindAction('whatever name', 'whatever action'));
+//  factory := TProviderFactory.Create(actions, action3);
+//  Assert.AreEqual(action3, factory.FindByName('whatever name', 'whatever action'));
 end;
 
 initialization

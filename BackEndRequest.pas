@@ -30,11 +30,6 @@ type
     FRecipBcc: String;
     FAttach: TObjectList<TAttachment>;
     FData: TMemoryStream;
-    /// <summary> Constructor. It is made private in order to discourage its
-    /// usage in favour of the TBackEndRequestBuilder </summary>
-    constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
-      const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
-      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>); overload;
 
   public
     /// <summary> sender email, i.e: support@google.com</summary>
@@ -70,8 +65,12 @@ type
     /// <summary> list of attachment contents </summary>
     [MapperJSONSer('attach')]
     property attachment: TObjectList<TAttachment> read FAttach;
-    // [MapperJSONSer('file')]
-    // property data: TMemoryStream read FData write FData;
+    /// <summary> Multi argument constructor. It is recommended to use
+    /// the TBackEndRequestBuilder. </summary>
+    constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
+      const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
+      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>); overload;
+    /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
 
   end;
@@ -133,7 +132,7 @@ end;
 function TBackEndRequestBuilder.Build: TBackEndRequest;
 begin
   Result := TBackEndRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
-    FUser, FPassword, FUseSSL, FText, FHtml, FSubject, FRecipTo,
+    FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
     FRecipCc, FRecipBcc, FAttach);
 end;
 

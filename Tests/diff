@@ -1,0 +1,9 @@
+Confronto in corso dei file TestActionDispatcher.pas e UNITTESTS.PAS
+***** TestActionDispatcher.pas
+unit TestActionDispatcher;
+
+***** UNITTESTS.PAS
+unit UnitTests;
+
+*****
+
