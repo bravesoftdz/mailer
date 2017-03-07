@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   MailerController in 'MailerController.pas',
-  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
+  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule} ,
   RegistrationResponce in 'RegistrationResponce.pas',
   FrontEndResponce in 'FrontEndResponce.pas',
   Provider in 'Provider.pas',
@@ -21,14 +21,13 @@ uses
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
   Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-    {$R *.res},
+    {$R *.res} ,
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   BackEndRequest in 'BackEndRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   BackEndResponce in 'BackEndResponce.pas',
-  Attachment in 'Attachment.pas',
-  TestBackEndRequestBuilder in 'Tests\TestBackEndRequestBuilder.pas';
+  Attachment in 'Attachment.pas';
 
 procedure RunServer(APort: Integer);
 var

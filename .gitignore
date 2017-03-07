@@ -10,3 +10,4 @@ __recovery/
 *.local
 *.identcache
 *.stat
+Delphi-Code-Coverage-Debug.log
