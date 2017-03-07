@@ -29,8 +29,7 @@ type
     FRecipCc: String;
     FRecipBcc: String;
     FAttach: TObjectList<TAttachment>;
-    FData: TMemoryStream;
-
+    FToken: String;
   public
     /// <summary> sender email, i.e: support@google.com</summary>
     property from: String read FFrom;
@@ -65,11 +64,14 @@ type
     /// <summary> list of attachment contents </summary>
     [MapperJSONSer('attach')]
     property attachment: TObjectList<TAttachment> read FAttach;
+    [MapperJSONSer('token')]
+    property token: String read FToken;
+
     /// <summary> Multi argument constructor. It is recommended to use
     /// the TBackEndRequestBuilder. </summary>
     constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
       const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
-      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>); overload;
+      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>; const aToken: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
 
@@ -94,6 +96,7 @@ type
     FRecipCc: String;
     FRecipBcc: String;
     FAttach: TObjectList<TAttachment>;
+    FToken: String;
   public
     function SetFrom(const aFrom: String): TBackEndRequestBuilder;
     function SetSender(const aSender: String): TBackEndRequestBuilder;
@@ -109,6 +112,7 @@ type
     function addAttach(const anAttach: TAttachment): TBackEndRequestBuilder;
     function addAttachments(const items: TObjectList<TAttachment>): TBackEndRequestBuilder;
     function SetSubject(const aSubject: String): TBackEndRequestBuilder;
+    function setToken(const aToken: String): TBackEndRequestBuilder;
     function Build(): TBackEndRequest;
     constructor Create();
   end;
@@ -133,7 +137,7 @@ function TBackEndRequestBuilder.Build: TBackEndRequest;
 begin
   Result := TBackEndRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
     FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
-    FRecipCc, FRecipBcc, FAttach);
+    FRecipCc, FRecipBcc, FAttach, FToken);
 end;
 
 constructor TBackEndRequestBuilder.Create;
@@ -151,6 +155,7 @@ begin
   FRecipTo := '';
   FRecipCc := '';
   FRecipBcc := '';
+  FToken := '';
   FAttach := TObjectList<TAttachment>.Create;
 end;
 
@@ -174,6 +179,12 @@ function TBackEndRequestBuilder.SetText(
 begin
   FText := aText;
   Result := Self;
+end;
+
+function TBackEndRequestBuilder.setToken(
+  const aToken: String): TBackEndRequestBuilder;
+begin
+  FToken := aToken;
 end;
 
 function TBackEndRequestBuilder.SetFrom(
@@ -260,7 +271,7 @@ constructor TBackEndRequest.Create(const aFrom: string; const aSender: string;
   const aUser: string; const aPassword: string; const aUseSSL: Boolean;
   const aHtml: string; const aText: string; const aSubject: string;
   const aRecipTo: string; const aRecipCc: string;
-  const aRecipBcc: string; const aAttach: TObjectList<TAttachment>);
+  const aRecipBcc: string; const aAttach: TObjectList<TAttachment>; const aToken: String);
 
 begin
   FFrom := aFrom;
@@ -278,6 +289,7 @@ begin
   FRecipCc := aRecipCc;
   FRecipBcc := aRecipBcc;
   FAttach := aAttach;
+  FToken := aToken
 end;
 
 constructor TBackEndRequest.Create;

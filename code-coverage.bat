@@ -1,0 +1,1 @@
+..\CodeCoverage.exe -e Tests\Win32\Debug\Tests.exe -m Tests\Win32\Debug\Tests.map -od out\report\ -html -lt -u FrontEndRequest BackEndRequest

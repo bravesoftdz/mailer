@@ -25,7 +25,8 @@ type
     procedure KeyBodytextIsPresent;
     [Test]
     procedure KeyAttachIsPresent;
-
+    [Test]
+    procedure KeyTokenIsPresent;
   end;
 
 implementation
@@ -36,6 +37,11 @@ uses
 procedure TTestBackEndRequestToJson.KeyHtmlIsPresent;
 begin
   Assert.AreEqual(json.GetValue('bodyhtml').Value, 'html content');
+end;
+
+procedure TTestBackEndRequestToJson.KeyTokenIsPresent;
+begin
+  Assert.IsNotNull(json.GetValue('token'));
 end;
 
 procedure TTestBackEndRequestToJson.KeyBodytextIsPresent;
@@ -49,6 +55,7 @@ begin
     .SetFrom('admin@google.com')
     .SetText('text content')
     .setHtml('html content')
+    .setToken('token')
     .Build;
   json := Mapper.ObjectToJSonObject(request);
 end;
