@@ -14,14 +14,15 @@ type
     const
     ACTION_TOKEN = 'action';
     PROVIDER_TOKEN = 'destination';
+    DATA_TOKEN = 'data';
     class var FFactory: TProviderFactory;
     class procedure SetupFactory();
 
   public
     [MVCPath('/($' + PROVIDER_TOKEN + ')/($' + ACTION_TOKEN + ')')]
     [MVCHTTPMethod([httpPOST])]
-    [MVCProduces('application/json', 'UTF-8')]
-    [MVCConsumes('application/json')]
+    // [MVCProduces('application/json')]
+    // [MVCConsumes('application/json')]
     [MVCDoc('Elaborate the request. The action that should be performed is to be decided based on provided destination and action token.')]
     /// <summary>  An entry point to the server.
     /// This method handles requests of the form  "/provider/action", i.e.
@@ -32,6 +33,10 @@ type
     /// </summary>
     /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
+
+    [MVCPath('/a')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure test();
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -55,15 +60,22 @@ var
   Request: TFrontEndRequest;
   fs: TFileStream;
   ms: TMemoryStream;
+  Data: String;
 begin
   ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   try
     Provider := nil;
     Action := nil;
-    AJSon := Ctx.Request.BodyAsJSONObject;
-    Request := Mapper.JSONObjectToObject<TFrontEndRequest>(AJSon);
-
+    Data := Ctx.Request.ContentParam(DATA_TOKEN);
+    // AJSon := Ctx.Request.BodyAsJSONObject;
+    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Data), 0) as TJSONObject;
+    if (AJson <> nil) then
+    begin
+      Request := Mapper.JSONObjectToObject<TFrontEndRequest>(AJSon);
+    end;
+    if (Request = nil) then
+      Request := TFrontEndRequest.Create();
     // add a fake attachment
     fs := TFileStream.Create('c:\Users\User\Documents\image.jpg', fmOpenRead);
     try
@@ -123,6 +135,11 @@ begin
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
   // Provider :=
   FFactory := TProviderFactory.Create(Providers);
+end;
+
+procedure TMailerController.test;
+begin
+  Render('Ciao');
 end;
 
 initialization
