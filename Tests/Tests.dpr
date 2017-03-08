@@ -16,7 +16,8 @@ uses
   Action in '..\Actions\Action.pas',
   TestBackEndRequestBuilder in 'TestBackEndRequestBuilder.pas',
   TestBackEndRequestToJson in 'TestBackEndRequestToJson.pas',
-  TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas';
+  TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
+  TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas';
 
 var
   runner: ITestRunner;

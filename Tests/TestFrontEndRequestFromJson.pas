@@ -105,8 +105,8 @@ var
   request: TFrontEndRequest;
 begin
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, '');
-  Assert.AreEqual(request.Text, '');
+  Assert.AreEqual(request.Data.Html, '');
+  Assert.AreEqual(request.Data.Text, '');
   Assert.AreEqual(request.Attachments.Count, 0);
 end;
 
@@ -117,8 +117,8 @@ begin
   json.AddPair(pairHtml);
   json.AddPair(pairText);
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, 'an html content');
-  Assert.AreEqual(request.text, 'a text content');
+  Assert.AreEqual(request.Data.Html, 'an html content');
+  Assert.AreEqual(request.Data.Text, 'a text content');
   Assert.AreEqual(request.Attachments.Count, 0);
 end;
 
@@ -134,8 +134,8 @@ begin
   arr.AddElement(attach2);
   json.AddPair(TJSONPair.Create('attachments', arr));
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, 'an html content');
-  Assert.AreEqual(request.text, 'a text content');
+  Assert.AreEqual(request.Data.Html, 'an html content');
+  Assert.AreEqual(request.Data.text, 'a text content');
   Assert.AreEqual(request.Attachments.Count, 2);
 end;
 
@@ -148,8 +148,8 @@ begin
   arr.AddElement(attach2);
   json.AddPair(TJSONPair.Create('attachments', arr));
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, '');
-  Assert.AreEqual(request.text, '');
+  Assert.AreEqual(request.Data.Html, '');
+  Assert.AreEqual(request.Data.text, '');
   Assert.AreEqual(request.Attachments.Count, 1);
   Assert.AreEqual(request.Attachments.Items[0].name, 'attachment 2');
 end;
@@ -160,8 +160,8 @@ var
 begin
   json.AddPair(pairHtml);
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, 'an html content');
-  Assert.AreEqual(request.text, '');
+  Assert.AreEqual(request.Data.Html, 'an html content');
+  Assert.AreEqual(request.Data.Text, '');
   Assert.AreEqual(request.Attachments.Count, 0);
 end;
 
@@ -171,8 +171,8 @@ var
 begin
   json.AddPair(pairText);
   request := Mapper.JSONObjectToObject<TFrontEndRequest>(json);
-  Assert.AreEqual(request.Html, '');
-  Assert.AreEqual(request.text, 'a text content');
+  Assert.AreEqual(request.Data.Html, '');
+  Assert.AreEqual(request.Data.Text, 'a text content');
   Assert.AreEqual(request.Attachments.Count, 0);
 end;
 

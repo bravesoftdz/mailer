@@ -91,8 +91,8 @@ begin
 
   if (Data <> nil) then
   begin
-    builder.SetText(Data.Text);
-    builder.SetHtml(Data.Html);
+    builder.SetText(Data.Data.Text);
+    builder.SetHtml(Data.Data.Html);
   end;
 
   Request := builder.build;

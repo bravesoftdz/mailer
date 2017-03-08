@@ -47,8 +47,8 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers,
-  System.Classes, Attachment;
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
+  System.Classes, Attachment, Web.HTTPApp;
 
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
@@ -61,6 +61,7 @@ var
   fs: TFileStream;
   ms: TMemoryStream;
   Data: String;
+  input: TFrontEndData;
 begin
   ProviderName := Ctx.request.params[PROVIDER_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
@@ -69,28 +70,13 @@ begin
     Action := nil;
     Data := Ctx.Request.ContentParam(DATA_TOKEN);
     // AJSon := Ctx.Request.BodyAsJSONObject;
+
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Data), 0) as TJSONObject;
     if (AJson <> nil) then
     begin
-      Request := Mapper.JSONObjectToObject<TFrontEndRequest>(AJSon);
+      input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
     end;
-    if (Request = nil) then
-      Request := TFrontEndRequest.Create();
-    // add a fake attachment
-    fs := TFileStream.Create('c:\Users\User\Documents\image.jpg', fmOpenRead);
-    try
-      ms := TMemoryStream.Create();
-      try
-        ms.CopyFrom(fs, fs.Size);
-        Request.Attachments.Add(TAttachment.Create('img.jpg', ms));
-      except
-        ms.Destroy;
-        raise;
-      end;
-    finally
-      fs.Destroy;
-    end;
-    /// end adding the fake attachment
+    Request := TFrontEndRequest.Create(input, Ctx.Request.Files);
 
     Provider := FFactory.FindByName(ProviderName);
     if (Provider <> nil) then
