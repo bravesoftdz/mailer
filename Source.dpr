@@ -27,7 +27,13 @@ uses
   BackEndRequest in 'BackEndRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   BackEndResponce in 'BackEndResponce.pas',
-  Attachment in 'Attachment.pas';
+  Attachment in 'Attachment.pas',
+  BackEndSettings in 'BackEndSettings.pas';
+
+const
+  BACKEND_URL_SWITCH = 'u';
+  BACKEND_PORT_SWITCH = 'p';
+  SWITCH_CHAR = '-';
 
 procedure RunServer(APort: Integer);
 var
@@ -35,9 +41,27 @@ var
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
+  BackEndUrl, BackEndPortStr: String;
+  BackEndPort: Integer;
+  IsPortValid: Boolean;
 begin
   Writeln('** DMVCFramework Server **');
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
+
+  BackEndPort := -1;
+  FindCmdLineSwitch(BACKEND_URL_SWITCH, BackEndUrl, False);
+  FindCmdLineSwitch(BACKEND_PORT_SWITCH, BackEndPortStr, False);
+  try
+    BackEndPort := StrToInt(BackEndPortStr);
+  except
+    on E: Exception do
+    begin
+      Writeln('Error: ' + E.Message);
+      Exit();
+    end
+  end;
+  TMailerController.SetBackEnd(TBackEndSettings.Create(BackEndUrl, BackEndPort));
+
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;

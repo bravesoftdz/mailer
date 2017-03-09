@@ -3,7 +3,7 @@ unit Action;
 interface
 
 uses
-  FrontEndResponce, FrontEndRequest, BackEndRequest;
+  FrontEndResponce, FrontEndRequest, BackEndRequest, BackEndSettings;
 
 type
   TAction = class
@@ -15,7 +15,7 @@ type
     /// <summary>A virtual method that i ssupposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; virtual; abstract;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -29,21 +29,21 @@ type
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest): TFrontEndResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce; override;
     constructor Create();
   end;
 
@@ -71,7 +71,7 @@ begin
 end;
 
 function TActionSend.Elaborate(
-  const Data: TFrontEndRequest): TFrontEndResponce;
+  const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce;
 var
   builder: TBackEndRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -97,8 +97,7 @@ begin
 
   Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
-  server := adapter.Build('http://192.168.5.226', 8080);
-  // server := adapter.Build('localhost', 8080);
+  server := adapter.Build(Settings.Url, Settings.Port);
   try
     Responce := server.send(Request);
     if Responce.status then
@@ -121,10 +120,7 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.Elaborate(
-  const
-  Data:
-  TFrontEndRequest): TFrontEndResponce;
+function TActionContact.Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce;
 begin
   /// stub
   Result := TFrontEndResponce.Create;
@@ -139,10 +135,7 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.Elaborate(
-  const
-  Data:
-  TFrontEndRequest): TFrontEndResponce;
+function TActionOrder.Elaborate(const Data: TFrontEndRequest; const Settings: TBackEndSettings): TFrontEndResponce;
 begin
   /// stub
   Result := TFrontEndResponce.Create;

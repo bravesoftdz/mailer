@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
-  ProviderFactory, FrontEndResponce;
+  ProviderFactory, FrontEndResponce, BackEndSettings;
 
 type
 
@@ -17,6 +17,7 @@ type
     DATA_TOKEN = 'data';
     class var FFactory: TProviderFactory;
     class procedure SetupFactory();
+    class var FSettings: TBackEndSettings;
 
   public
     [MVCPath('/($' + PROVIDER_TOKEN + ')/($' + ACTION_TOKEN + ')')]
@@ -34,9 +35,8 @@ type
     /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
 
-    [MVCPath('/a')]
-    [MVCHTTPMethod([httpPOST])]
-    procedure test();
+    /// <summary>Set up a global (i.e., static) object for the back end settings</summary>
+    class procedure SetBackEnd(const aSettings: TBackEndSettings);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -69,21 +69,18 @@ begin
     Provider := nil;
     Action := nil;
     Data := Ctx.Request.ContentParam(DATA_TOKEN);
-    // AJSon := Ctx.Request.BodyAsJSONObject;
-
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Data), 0) as TJSONObject;
     if (AJson <> nil) then
     begin
       input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
     end;
     Request := TFrontEndRequest.Create(input, Ctx.Request.Files);
-
     Provider := FFactory.FindByName(ProviderName);
     if (Provider <> nil) then
       Action := Provider.FindByName(ActionName);
     if (Action <> nil) then
     begin
-      Responce := Action.Elaborate(Request)
+      Responce := Action.Elaborate(Request, FSettings);
     end
     else
     begin
@@ -113,19 +110,18 @@ begin
   inherited;
 end;
 
+class procedure TMailerController.SetBackEnd(const aSettings: TBackEndSettings);
+begin
+  FSettings := aSettings;
+end;
+
 class procedure TMailerController.SetupFactory();
 var
   Providers: TObjectList<TProvider>;
 begin
   Providers := TObjectList<TProvider>.Create;
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
-  // Provider :=
   FFactory := TProviderFactory.Create(Providers);
-end;
-
-procedure TMailerController.test;
-begin
-  Render('Ciao');
 end;
 
 initialization
