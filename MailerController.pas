@@ -17,11 +17,7 @@ type
     ACTION_TOKEN = 'action';
     REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
-    // class var FFactory: TProviderFactory;
     class var FSettings: TBackEndSettings;
-
-    // private
-    // class procedure SetupFactory();
 
   public
     [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
@@ -57,14 +53,8 @@ uses
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
   Responce: TFrontEndResponce;
-  // AJson: TJsonObject;
-  RequestorName, ActionName: String;
-  // Provider: TProvider;
-  // Action: TAction;
+  RequestorName, ActionName, Data: String;
   Request: TFrontEndRequest;
-  Data: String;
-  Input: TFrontEndData;
-
 begin
   RequestorName := Ctx.request.params[REQUESTOR_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
@@ -92,18 +82,8 @@ begin
   FSettings := aSettings;
 end;
 
-// class procedure TMailerController.SetupFactory();
-// var
-// Providers: TObjectList<TProvider>;
-// begin
-// Providers := TObjectList<TProvider>.Create;
-// Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
-// FFactory := TProviderFactory.Create(Providers);
-// end;
-
 initialization
 
-// TMailerController.SetupFactory();
 TMailerController.Model := TMailerModel.Create();
 
 finalization

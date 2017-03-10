@@ -11,7 +11,15 @@ type
   strict private
     class var FFactory: TProviderFactory;
   public
-    class function Elaborate(const aRequestor: string; const anAction: string;
+    /// <summary>
+    /// Elaborate an action from a requestor. The request might contain a plain
+    /// text data and attachments.</summary>
+    /// <param name="Requestor">who requests the action</param>
+    /// <param name="anAction">what action should be performed</param>
+    /// <param name="aData">a string version of a json to be passed to the action executor</param>
+    /// <param name="AttachedFiles">provided files to be passed to the executor</param>
+    /// <param name="ASettings">Settings for the back end server</param>
+    class function Elaborate(const Requestor: string; const anAction: string;
       const aData: String; const AttachedFiles: TAbstractWebRequestFiles;
       const ASettings: TBackEndSettings): TFrontEndResponce;
     constructor Create();
@@ -35,7 +43,7 @@ begin
   FFactory := TProviderFactory.Create(Providers);
 end;
 
-class function TMailerModel.Elaborate(const aRequestor, anAction, aData: String;
+class function TMailerModel.Elaborate(const Requestor, anAction, aData: String;
   const AttachedFiles: TAbstractWebRequestFiles;
   const ASettings: TBackEndSettings): TFrontEndResponce;
 var
@@ -60,7 +68,7 @@ begin
     end;
   end;
   Request := TFrontEndRequest.Create(Input, AttachedFiles);
-  Provider := FFactory.FindByName(aRequestor);
+  Provider := FFactory.FindByName(Requestor);
   if (Provider <> nil) then
   begin
     Action := Provider.FindByName(anAction);

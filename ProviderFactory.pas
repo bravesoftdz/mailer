@@ -26,7 +26,7 @@ type
     /// If those ways are not correlated, no one action can be found to manage
     /// the requests from the controller. </summary>
     /// <param name="Provider">data provider</param>
-    /// <param name=Action">action to be performed</param>
+    /// <param name="Action">action to be performed</param>
     function CreateKey(const Provider: TProvider; const Action: TAction): String;
   public
     /// <summary> Find a provider that should manage the request. If no provider
