@@ -50,8 +50,6 @@ begin
 end;
 
 function TProvider.FindByName(const Name: String): TAction;
-var
-  Action: TAction;
 begin
   if FIndex.ContainsKey(Name) then
     Result := FIndex[Name]

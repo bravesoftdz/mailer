@@ -13,7 +13,7 @@ type
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TBackEndRequest = class
-  private
+  strict private
     FFRom: String;
     FSender: String;
     FServer: String;
@@ -69,9 +69,9 @@ type
 
     /// <summary> Multi argument constructor. It is recommended to use
     /// the TBackEndRequestBuilder. </summary>
-    constructor Create(const aFrom: string; const aSender: string; const aServer: string; const aPort: Integer; const aUseAuth: Boolean; const aUser: string;
-      const aPassword: string; const aUseSSL: Boolean; const aHtml: string; const aText: string; const aSubject: string; const aRecipTo: string; const aRecipCc: string;
-      const aRecipBcc: string; const aAttach: TObjectList<TAttachment>; const aToken: String); overload;
+    constructor Create(const AFrom: string; const ASender: string; const AServer: string; const APort: Integer; const AUseAuth: Boolean; const aUser: string;
+      const APassword: string; const AUseSSL: Boolean; const AnHtml: string; const AText: string; const ASubject: string; const ARecipTo: string; const aRecipCc: string;
+      const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
 
@@ -80,7 +80,7 @@ type
 type
   { Builder for a type that collects input data for a program that sends emails }
   TBackEndRequestBuilder = class
-  private
+  strict private
     FFRom: String;
     FSender: String;
     FServer: String;
@@ -98,21 +98,21 @@ type
     FAttach: TObjectList<TAttachment>;
     FToken: String;
   public
-    function SetFrom(const aFrom: String): TBackEndRequestBuilder;
-    function SetSender(const aSender: String): TBackEndRequestBuilder;
-    function SetServer(const aServer: String): TBackEndRequestBuilder;
-    function SetPort(const aPort: Integer): TBackEndRequestBuilder;
-    function SetAuthentification(const aLogin, aPassword: String): TBackEndRequestBuilder;
-    function SetUseSSL(const aUseSSL: Boolean): TBackEndRequestBuilder;
-    function SetText(const aText: String): TBackEndRequestBuilder;
-    function SetHtml(const aHtml: String): TBackEndRequestBuilder;
-    function SetRecipTo(const aRecipTo: String): TBackEndRequestBuilder;
-    function SetRecipCc(const aRecipCc: String): TBackEndRequestBuilder;
-    function SetRecipBcc(const aRecipBcc: String): TBackEndRequestBuilder;
-    function addAttach(const anAttach: TAttachment): TBackEndRequestBuilder;
-    function addAttachments(const items: TObjectList<TAttachment>): TBackEndRequestBuilder;
-    function SetSubject(const aSubject: String): TBackEndRequestBuilder;
-    function setToken(const aToken: String): TBackEndRequestBuilder;
+    function SetFrom(const AFrom: String): TBackEndRequestBuilder;
+    function SetSender(const ASender: String): TBackEndRequestBuilder;
+    function SetServer(const AServer: String): TBackEndRequestBuilder;
+    function SetPort(const APort: Integer): TBackEndRequestBuilder;
+    function SetAuthentification(const ALogin, APassword: String): TBackEndRequestBuilder;
+    function SetUseSSL(const AUseSSL: Boolean): TBackEndRequestBuilder;
+    function SetText(const AText: String): TBackEndRequestBuilder;
+    function SetHtml(const AHtml: String): TBackEndRequestBuilder;
+    function SetRecipTo(const ARecipTo: String): TBackEndRequestBuilder;
+    function SetRecipCc(const ARecipCc: String): TBackEndRequestBuilder;
+    function SetRecipBcc(const ARecipBcc: String): TBackEndRequestBuilder;
+    function addAttach(const AnAttach: TAttachment): TBackEndRequestBuilder;
+    function addAttachments(const Items: TObjectList<TAttachment>): TBackEndRequestBuilder;
+    function SetSubject(const ASubject: String): TBackEndRequestBuilder;
+    function setToken(const AToken: String): TBackEndRequestBuilder;
     function Build(): TBackEndRequest;
     constructor Create();
   end;
@@ -128,9 +128,9 @@ uses
   System.Generics.Collections;nputDataBuilder }
 
 function TBackEndRequestBuilder.addAttachments(
-  const items: TObjectList<TAttachment>): TBackEndRequestBuilder;
+  const Items: TObjectList<TAttachment>): TBackEndRequestBuilder;
 begin
-  FAttach.AddRange(items);
+  FAttach.AddRange(Items);
 end;
 
 function TBackEndRequestBuilder.Build: TBackEndRequest;
@@ -160,136 +160,130 @@ begin
 end;
 
 function TBackEndRequestBuilder.addAttach(
-  const anAttach: TAttachment): TBackEndRequestBuilder;
+  const AnAttach: TAttachment): TBackEndRequestBuilder;
 begin
-  FAttach.Add(anAttach);
+  FAttach.Add(AnAttach);
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetAuthentification(const aLogin,
-  aPassword: String): TBackEndRequestBuilder;
+function TBackEndRequestBuilder.SetAuthentification(const ALogin,
+  APassword: String): TBackEndRequestBuilder;
 begin
   FUseAuth := True;
-  FUser := aLogin;
-  FPassword := aPassword;
+  FUser := ALogin;
+  FPassword := APassword;
 end;
 
 function TBackEndRequestBuilder.SetText(
-  const aText: String): TBackEndRequestBuilder;
+  const AText: String): TBackEndRequestBuilder;
 begin
-  FText := aText;
+  FText := AText;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.setToken(
-  const aToken: String): TBackEndRequestBuilder;
+  const AToken: String): TBackEndRequestBuilder;
 begin
-  FToken := aToken;
+  FToken := AToken;
 end;
 
 function TBackEndRequestBuilder.SetFrom(
-  const aFrom: String): TBackEndRequestBuilder;
+  const AFrom: String): TBackEndRequestBuilder;
 begin
-  FFrom := aFrom;
+  FFrom := AFrom;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetHtml(
-  const aHtml: String): TBackEndRequestBuilder;
+  const AHtml: String): TBackEndRequestBuilder;
 begin
-  FHtml := aHtml;
+  FHtml := AHtml;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetPort(
-  const aPort: Integer): TBackEndRequestBuilder;
+  const APort: Integer): TBackEndRequestBuilder;
 begin
-  FPort := aPort;
+  FPort := APort;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetRecipBcc(
-  const aRecipBcc: String): TBackEndRequestBuilder;
-var
-  item: String;
+  const ARecipBcc: String): TBackEndRequestBuilder;
 begin
-  FRecipBcc := aRecipBcc;
+  FRecipBcc := ARecipBcc;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetRecipCc(
-  const aRecipCc: String): TBackEndRequestBuilder;
-var
-  item: String;
+  const ARecipCc: String): TBackEndRequestBuilder;
 begin
-  FRecipCc := aRecipCc;
+  FRecipCc := ARecipCc;
   Result := Self;
 
 end;
 
 function TBackEndRequestBuilder.SetRecipTo(
-  const aRecipTo: String): TBackEndRequestBuilder;
-var
-  item: String;
+  const ARecipTo: String): TBackEndRequestBuilder;
 begin
-  FRecipTo := aRecipTo;
+  FRecipTo := ARecipTo;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetSender(
-  const aSender: String): TBackEndRequestBuilder;
+  const ASender: String): TBackEndRequestBuilder;
 begin
-  FSender := aSender;
+  FSender := ASender;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetServer(
-  const aServer: String): TBackEndRequestBuilder;
+  const AServer: String): TBackEndRequestBuilder;
 begin
-  FServer := aServer;
+  FServer := AServer;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetSubject(
-  const aSubject: String): TBackEndRequestBuilder;
+  const ASubject: String): TBackEndRequestBuilder;
 begin
-  FSubject := aSubject;
+  FSubject := ASubject;
   Result := Self;
 end;
 
 function TBackEndRequestBuilder.SetUseSSL(
-  const aUseSSL: Boolean): TBackEndRequestBuilder;
+  const AUseSSL: Boolean): TBackEndRequestBuilder;
 begin
-  FUseSSL := aUseSSL;
+  FUseSSL := AUseSSL;
   Result := Self;
 end;
 
 { TSenderInputData }
 
-constructor TBackEndRequest.Create(const aFrom: string; const aSender: string;
-  const aServer: string; const aPort: Integer; const aUseAuth: Boolean;
-  const aUser: string; const aPassword: string; const aUseSSL: Boolean;
-  const aHtml: string; const aText: string; const aSubject: string;
-  const aRecipTo: string; const aRecipCc: string;
-  const aRecipBcc: string; const aAttach: TObjectList<TAttachment>; const aToken: String);
+constructor TBackEndRequest.Create(const AFrom: string; const ASender: string;
+  const AServer: string; const APort: Integer; const AUseAuth: Boolean;
+  const aUser: string; const APassword: string; const AUseSSL: Boolean;
+  const AnHtml: string; const AText: string; const ASubject: string;
+  const ARecipTo: string; const aRecipCc: string;
+  const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String);
 
 begin
-  FFrom := aFrom;
-  FSender := aSender;
-  FServer := aServer;
-  FPort := aPort;
-  FUseAuth := aUseAuth;
+  FFrom := AFrom;
+  FSender := ASender;
+  FServer := AServer;
+  FPort := APort;
+  FUseAuth := AUseAuth;
   FUser := aUser;
-  FPassword := aPassword;
-  FUseSSL := aUseSSL;
-  FHtml := aHtml;
-  FText := aText;
-  FSubject := aSubject;
-  FRecipTo := aRecipTo;
+  FPassword := APassword;
+  FUseSSL := AUseSSL;
+  FHtml := AnHtml;
+  FText := AText;
+  FSubject := ASubject;
+  FRecipTo := ARecipTo;
   FRecipCc := aRecipCc;
-  FRecipBcc := aRecipBcc;
-  FAttach := aAttach;
-  FToken := aToken
+  FRecipBcc := ARecipBcc;
+  FAttach := AnAttach;
+  FToken := AToken
 end;
 
 constructor TBackEndRequest.Create;

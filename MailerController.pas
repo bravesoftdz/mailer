@@ -4,23 +4,27 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
-  ProviderFactory, FrontEndResponce, BackEndSettings;
+  ProviderFactory, FrontEndResponce, BackEndSettings, MailerModel;
 
 type
 
   [MVCPath('/')]
   TMailerController = class(TMVCController)
   private
-    const
+    class var Model: TMailerModel;
+  strict private
+  const
     ACTION_TOKEN = 'action';
-    PROVIDER_TOKEN = 'destination';
+    REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
     class var FFactory: TProviderFactory;
-    class procedure SetupFactory();
     class var FSettings: TBackEndSettings;
 
+    // private
+    // class procedure SetupFactory();
+
   public
-    [MVCPath('/($' + PROVIDER_TOKEN + ')/($' + ACTION_TOKEN + ')')]
+    [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
     [MVCHTTPMethod([httpPOST])]
     // [MVCProduces('application/json')]
     // [MVCConsumes('application/json')]
@@ -54,46 +58,33 @@ procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
   Responce: TFrontEndResponce;
   AJson: TJsonObject;
-  ProviderName, ActionName: String;
-  Provider: TProvider;
-  Action: TAction;
+  RequestorName, ActionName: String;
+  // Provider: TProvider;
+  // Action: TAction;
   Request: TFrontEndRequest;
-  fs: TFileStream;
-  ms: TMemoryStream;
   Data: String;
-  input: TFrontEndData;
+  Input: TFrontEndData;
+
 begin
-  ProviderName := Ctx.request.params[PROVIDER_TOKEN];
+  RequestorName := Ctx.request.params[REQUESTOR_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   try
-    Provider := nil;
-    Action := nil;
     Data := Ctx.Request.ContentParam(DATA_TOKEN);
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Data), 0) as TJSONObject;
     if (AJson <> nil) then
     begin
-      input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
+      Input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
     end;
-    Request := TFrontEndRequest.Create(input, Ctx.Request.Files);
-    Provider := FFactory.FindByName(ProviderName);
-    if (Provider <> nil) then
-      Action := Provider.FindByName(ActionName);
-    if (Action <> nil) then
-    begin
-      Responce := Action.Elaborate(Request, FSettings);
-    end
-    else
-    begin
-      Responce := TFrontEndResponce.Create;
-      Responce.msg := 'authorization missing...';
-    end;
-    Render(Responce);
   except
-    on e: Exception do
+    on E: Exception do
     begin
       AJSon := nil;
     end;
   end;
+  Request := TFrontEndRequest.Create(Input, Ctx.Request.Files);
+  Responce := Model.Elaborate(RequestorName, ActionName, Request, FSettings);
+  Render(Responce);
+
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -115,17 +106,22 @@ begin
   FSettings := aSettings;
 end;
 
-class procedure TMailerController.SetupFactory();
-var
-  Providers: TObjectList<TProvider>;
-begin
-  Providers := TObjectList<TProvider>.Create;
-  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
-  FFactory := TProviderFactory.Create(Providers);
-end;
+// class procedure TMailerController.SetupFactory();
+// var
+// Providers: TObjectList<TProvider>;
+// begin
+// Providers := TObjectList<TProvider>.Create;
+// Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
+// FFactory := TProviderFactory.Create(Providers);
+// end;
 
 initialization
 
-TMailerController.SetupFactory();
+// TMailerController.SetupFactory();
+TMailerController.Model := TMailerModel.Create();
+
+finalization
+
+TMailerController.Model.DisposeOf;
 
 end.

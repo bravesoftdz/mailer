@@ -10,7 +10,7 @@ type
   /// <summary>Immutable type to represent a single attachment</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TAttachment = class(TObject)
-  private
+  strict private
     FName: String;
     FContent: TMemoryStream;
   public
@@ -23,17 +23,17 @@ type
     /// <summary> constructor </summary>
     /// <param name="aName"> name of the attachment</param>
     /// <param name="aContent"> content of the attachment</param>
-    constructor Create(const aName: String; const aContent: TMemoryStream);
+    constructor Create(const AName: String; const AContent: TMemoryStream);
   end;
 
 implementation
 
 { TAttachment }
 
-constructor TAttachment.Create(const aName: String; const aContent: TMemoryStream);
+constructor TAttachment.Create(const AName: String; const AContent: TMemoryStream);
 begin
-  FName := aName;
-  FContent := aContent;
+  FName := AName;
+  FContent := AContent;
 end;
 
 end.

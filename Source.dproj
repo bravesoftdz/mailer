@@ -110,6 +110,7 @@
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
         <DCCReference Include="BackEndResponce.pas"/>
         <DCCReference Include="Attachment.pas"/>
+        <DCCReference Include="MailerModel.pas"/>
         <DCCReference Include="BackEndSettings.pas"/>
         <None Include="ModelSupport_Source\default.txaPackage"/>
         <None Include="ModelSupport_Source\default.txvpck"/>

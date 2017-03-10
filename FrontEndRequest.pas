@@ -34,7 +34,6 @@ uses
 
 constructor TFrontEndRequest.Create(const aData: TFrontEndData; const AttachedFiles: TAbstractWebRequestFiles);
 var
-  aFile: TAbstractWebRequestFile;
   anAttachment: TAttachment;
   Len, I: Integer;
   Stream: TStream;
@@ -49,7 +48,7 @@ begin
     MemStream := TMemoryStream.Create();
     MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
     FAttachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
-//    MemStream.Destroy;
+    // MemStream.Destroy;
   end;
 
 
