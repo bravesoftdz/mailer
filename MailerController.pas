@@ -17,7 +17,7 @@ type
     ACTION_TOKEN = 'action';
     REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
-    class var FFactory: TProviderFactory;
+    // class var FFactory: TProviderFactory;
     class var FSettings: TBackEndSettings;
 
     // private
@@ -57,7 +57,7 @@ uses
 procedure TMailerController.Elaborate(Ctx: TWebContext);
 var
   Responce: TFrontEndResponce;
-  AJson: TJsonObject;
+  // AJson: TJsonObject;
   RequestorName, ActionName: String;
   // Provider: TProvider;
   // Action: TAction;
@@ -68,23 +68,9 @@ var
 begin
   RequestorName := Ctx.request.params[REQUESTOR_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
-  try
-    Data := Ctx.Request.ContentParam(DATA_TOKEN);
-    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Data), 0) as TJSONObject;
-    if (AJson <> nil) then
-    begin
-      Input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
-    end;
-  except
-    on E: Exception do
-    begin
-      AJSon := nil;
-    end;
-  end;
-  Request := TFrontEndRequest.Create(Input, Ctx.Request.Files);
-  Responce := Model.Elaborate(RequestorName, ActionName, Request, FSettings);
+  Data := Ctx.Request.ContentParam(DATA_TOKEN);
+  Responce := Model.Elaborate(RequestorName, ActionName, Data, Ctx.Request.Files, FSettings);
   Render(Responce);
-
 end;
 
 procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
