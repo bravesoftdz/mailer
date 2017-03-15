@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   MailerController in 'MailerController.pas',
-  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
+  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule} ,
   RegistrationResponce in 'RegistrationResponce.pas',
   FrontEndResponce in 'FrontEndResponce.pas',
   Provider in 'Provider.pas',
@@ -21,7 +21,7 @@ uses
   ProviderFactory in 'ProviderFactory.pas',
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
   Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-    {$R *.res},
+    {$R *.res} ,
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   BackEndRequest in 'BackEndRequest.pas',
@@ -29,7 +29,8 @@ uses
   BackEndResponce in 'BackEndResponce.pas',
   Attachment in 'Attachment.pas',
   MailerModel in 'MailerModel.pas',
-  BackEndSettings in 'BackEndSettings.pas';
+  BackEndSettings in 'BackEndSettings.pas',
+  BackEndProxy in 'BackEndProxy.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
@@ -45,6 +46,7 @@ var
   BackEndUrl, BackEndPortStr: String;
   BackEndPort: Integer;
   Settings: TBackEndSettings;
+  BackEndServer: TBackEndProxy;
 begin
   Writeln('** DMVCFramework Server **');
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
@@ -61,6 +63,8 @@ begin
     end
   end;
   Settings := TBackEndSettings.Create(BackEndUrl, BackEndPort);
+  BackEndServer := TBackEndProxy.getInstance();
+  BackEndServer.setSettings(Settings);
   Writeln('Back end server url: ' + Settings.Summary);
 
   TMailerController.SetBackEnd(Settings);
