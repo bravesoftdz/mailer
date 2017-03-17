@@ -22,9 +22,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger;
-
-
+  MVCFramework.Logger, BackEndResponce;
 
 procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
@@ -41,8 +39,13 @@ begin
 end;
 
 procedure TActiveQueueController.Subscribe;
+var
+  responce: TBackEndResponce;
 begin
-  Render('True');
+  responce := TBackEndResponce.Create();
+  responce.status := True;
+  responce.msgstat := 'Welcome';
+  Render(responce);
 end;
 
 end.

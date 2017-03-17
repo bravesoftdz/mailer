@@ -4,7 +4,7 @@ interface
 
 uses
   System.JSON, System.Generics.Collections, Attachment, FrontEndData,
-  Web.HTTPApp;
+  Web.HTTPApp, ObjectsMappers;
 
 type
 
@@ -12,6 +12,7 @@ type
   /// by combining a textual request and an attachment-related one that arrive
   /// from the front end.
   /// </summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TFrontEndRequest = class
   private
     FData: TFrontEndData;
@@ -19,7 +20,9 @@ type
     procedure SetAttachments(const Value: TObjectList<TAttachment>);
   public
     /// <summary> Constructor</summary>
-    constructor Create(const aData: TFrontEndData; const AttachedFiles: TAbstractWebRequestFiles);
+    constructor Create(const aData: TFrontEndData; const AttachedFiles: TAbstractWebRequestFiles); overload;
+    constructor Create(); overload;
+    [MapperJSONSer('data')]
     property Data: TFrontEndData read FData;
     property Attachments: TObjectList<TAttachment> read FAttachments;
     function ToString(): String;
@@ -48,28 +51,13 @@ begin
     MemStream := TMemoryStream.Create();
     MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
     FAttachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
-    // MemStream.Destroy;
   end;
+end;
 
-
-  // FAttachments := Attachs;
-  //
-  // add a fake attachment
-  // fs := TFileStream.Create('c:\Users\User\Documents\image.jpg', fmOpenRead);
-  // try
-  // ms := TMemoryStream.Create();
-  // try
-  // ms.CopyFrom(fs, fs.Size);
-  // Request.Attachments.Add(TAttachment.Create('img.jpg', ms));
-  // except
-  // ms.Destroy;
-  // raise;
-  // end;
-  // finally
-  // fs.Destroy;
-  // end;
-  /// end adding the fake attachment
-
+constructor TFrontEndRequest.Create;
+begin
+  FData := TFrontEndData.Create();
+  FAttachments := TObjectList<TAttachment>.Create;
 end;
 
 procedure TFrontEndRequest.SetAttachments(
