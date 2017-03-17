@@ -18,7 +18,8 @@ uses
   TestBackEndRequestToJson in 'TestBackEndRequestToJson.pas',
   TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
   TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas',
-  TestBackEndResponceToJson in 'TestBackEndResponceToJson.pas';
+  TestBackEndResponceToJson in 'TestBackEndResponceToJson.pas',
+  TestBackEndResponceFromJson in 'TestBackEndResponceFromJson.pas';
 
 var
   runner: ITestRunner;

@@ -114,7 +114,7 @@ begin
   jo.AddPair(TJsonPair.Create('msgstat', 'some string'));
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
   Assert.IsFalse(obj.status);
-  Assert.AreEqual(obj.Msg, 'some string');
+  Assert.AreEqual('some string', obj.Msg);
 end;
 
 procedure TTestBackEndResponceFromJson.createFromNoStatusNoMsgstat;
@@ -135,8 +135,8 @@ begin
   jo.AddPair(TJsonPair.Create('msgstat', 'a string'));
   jo.AddPair(TJsonPair.Create('status', TJSONBool.Create(status)));
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
-  Assert.AreEqual(obj.status, status);
-  Assert.AreEqual(obj.Msg, 'a string');
+  Assert.AreEqual(status, obj.status);
+  Assert.AreEqual('a string', obj.Msg);
 end;
 
 procedure TTestBackEndResponceFromJson.Setup;

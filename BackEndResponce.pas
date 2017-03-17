@@ -7,7 +7,7 @@ uses
 
 type
 
-  /// <summary>An immutable data type to represent the responces from the
+  /// <summary>Abstract data type to represent the responces from the
   /// back end server corresponding to previously made requests.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TBackEndResponce = class
@@ -17,11 +17,11 @@ type
   public
     /// <param name="status">A status of the previously made request.</param>
     [MapperJSONSer('status')]
-    property status: Boolean read FStatus;
+    property status: Boolean read FStatus write FStatus;
     /// <param name="Msg">Additional info concerning the outcome of the
     /// previously made request</param>
     [MapperJSONSer('msgstat')]
-    property Msg: String read FMessage;
+    property Msg: String read FMessage write FMessage;
     constructor Create(const Status: Boolean; const Msg: String); overload;
     constructor Create(); overload;
 
