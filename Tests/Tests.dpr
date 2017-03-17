@@ -17,7 +17,8 @@ uses
   TestBackEndRequestBuilder in 'TestBackEndRequestBuilder.pas',
   TestBackEndRequestToJson in 'TestBackEndRequestToJson.pas',
   TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
-  TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas';
+  TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas',
+  TestBackEndResponceToJson in 'TestBackEndResponceToJson.pas';
 
 var
   runner: ITestRunner;

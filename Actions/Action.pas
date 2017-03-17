@@ -103,7 +103,7 @@ begin
     if Responce.status then
       Result.msg := 'OK'
     else
-      Result.msg := Responce.msgstat;
+      Result.msg := Responce.Msg;
   except
     on E: Exception do
     begin
