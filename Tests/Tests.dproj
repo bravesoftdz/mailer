@@ -134,6 +134,7 @@
         <DCCReference Include="TestBackEndRequestToJson.pas"/>
         <DCCReference Include="TestFrontEndRequestFromJson.pas"/>
         <DCCReference Include="TestFrontEndDataFromJson.pas"/>
+        <DCCReference Include="TestBackEndResponceToJson.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
