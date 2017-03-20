@@ -93,7 +93,7 @@
             <Form>ActiveQueueModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\BackEndResponce.pas"/>
+        <DCCReference Include="..\ActiveQueueResponce.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

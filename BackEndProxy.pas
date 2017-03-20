@@ -3,7 +3,7 @@ unit BackEndProxy;
 interface
 
 uses
-  BackEndRequest, BackEndResponce, BackEndSettings;
+  ReceptionRequest, ActiveQueueResponce, ActiveQueueSettings;
 
 type
   TBackEndProxy = class
@@ -12,12 +12,12 @@ type
     constructor Create();
 
   var
-    FSettings: TBackEndSettings;
+    FSettings: TActiveQueueSettings;
 
   public
-    function Send(const Request: TBackEndRequest): TBackEndResponce;
+    function Send(const Request: TBackEndRequest): TActiveQueueResponce;
     class function getInstance(): TBackEndProxy;
-    procedure SetSettings(const Settings: TBackEndSettings);
+    procedure SetSettings(const Settings: TActiveQueueSettings);
 
   end;
 
@@ -40,19 +40,19 @@ begin
   Result := Self.FInstance;
 end;
 
-function TBackEndProxy.Send(const Request: TBackEndRequest): TBackEndResponce;
+function TBackEndProxy.Send(const Request: TBackEndRequest): TActiveQueueResponce;
 var
   adapter: TRestAdapter<ISendServerProxy>;
   server: ISendServerProxy;
-  Responce: TBackEndResponce;
+  Responce: TActiveQueueResponce;
 begin
   adapter := TRestAdapter<ISendServerProxy>.Create();
    server := adapter.Build(FSettings.Url, FSettings.Port);
 end;
 
-procedure TBackEndProxy.SetSettings(const Settings: TBackEndSettings);
+procedure TBackEndProxy.SetSettings(const Settings: TActiveQueueSettings);
 begin
-  FSettings := TBackEndSettings.Create(Settings.Url, Settings.Port);
+  FSettings := TActiveQueueSettings.Create(Settings.Url, Settings.Port);
 end;
 
 end.

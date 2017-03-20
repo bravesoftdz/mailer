@@ -3,7 +3,7 @@ unit TestBackEndRequestToJson;
 interface
 
 uses
-  DUnitX.TestFramework, BackEndRequest, System.JSON;
+  DUnitX.TestFramework, ReceptionRequest, System.JSON;
 
 type
 
@@ -51,7 +51,7 @@ end;
 
 procedure TTestBackEndRequestToJson.Setup;
 begin
-  request := TBackEndRequestBuilder.Create()
+  request := TReceptionRequestBuilder.Create()
     .SetFrom('admin@google.com')
     .SetText('text content')
     .setHtml('html content')

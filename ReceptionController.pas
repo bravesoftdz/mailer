@@ -1,23 +1,23 @@
-﻿unit MailerController;
+﻿unit ReceptionController;
 
 interface
 
 uses
   MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
-  ProviderFactory, FrontEndResponce, BackEndSettings, MailerModel;
+  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel;
 
 type
 
   [MVCPath('/')]
-  TMailerController = class(TMVCController)
+  TReceptionController = class(TMVCController)
   private
-    class var Model: TMailerModel;
+    class var Model: TReceptionModel;
   strict private
   const
     ACTION_TOKEN = 'action';
     REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
-    class var FSettings: TBackEndSettings;
+    class var FSettings: TActiveQueueSettings;
 
   public
     [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
@@ -36,7 +36,7 @@ type
     procedure Elaborate(Ctx: TWebContext);
 
     /// <summary>Set up a global (i.e., static) object for the back end settings</summary>
-    class procedure SetBackEnd(const aSettings: TBackEndSettings);
+    class procedure SetBackEnd(const aSettings: TActiveQueueSettings);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -50,9 +50,9 @@ uses
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
   System.Classes, Attachment, Web.HTTPApp;
 
-procedure TMailerController.Elaborate(Ctx: TWebContext);
+procedure TReceptionController.Elaborate(Ctx: TWebContext);
 var
-  Responce: TFrontEndResponce;
+  Responce: TReceptionResponce;
   RequestorName, ActionName, Data: String;
   Request: TFrontEndRequest;
 begin
@@ -63,13 +63,13 @@ begin
   Render(Responce);
 end;
 
-procedure TMailerController.OnAfterAction(Context: TWebContext; const AActionName: string);
+procedure TReceptionController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
 end;
 
-procedure TMailerController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
+procedure TReceptionController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
 begin
   { Executed before each action
     if handled is true (or an exception is raised) the actual
@@ -77,17 +77,17 @@ begin
   inherited;
 end;
 
-class procedure TMailerController.SetBackEnd(const aSettings: TBackEndSettings);
+class procedure TReceptionController.SetBackEnd(const aSettings: TActiveQueueSettings);
 begin
   FSettings := aSettings;
 end;
 
 initialization
 
-TMailerController.Model := TMailerModel.Create();
+TReceptionController.Model := TReceptionModel.Create();
 
 finalization
 
-TMailerController.Model.DisposeOf;
+TReceptionController.Model.DisposeOf;
 
 end.

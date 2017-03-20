@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, SendServerProxy.interfaces,
-  BackEndResponce, BackEndRequest, FrontEndRequest;
+  ReceptionResponce, ReceptionRequest, FrontEndRequest;
 
 type
 
@@ -24,11 +24,11 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, ObjectsMappers, System.Classes,
-  System.SysUtils, Attachment;
+  System.SysUtils, Attachment, ActiveQueueResponce;
 
 procedure TBackEndMockController.send(const Ctx: TWebContext);
 var
-  responce: TBackEndResponce;
+  responce: TActiveQueueResponce;
   Ajson: TJsonObject;
   request: TBackEndRequest;
   reader: TStreamReader;
@@ -36,7 +36,7 @@ var
   builder: TStringBuilder;
   attach: TAttachment;
 begin
-  responce := TBackEndResponce.Create;
+  responce := TActiveQueueResponce.Create;
   responce.status := false;
   Ajson := Ctx.Request.BodyAsJSONObject;
   request := Mapper.JSONObjectToObject<TBackEndRequest>(Ajson);
@@ -53,7 +53,7 @@ begin
       reader.Close;
     end;
   end;
-  responce.msgstat := builder.toString;
+  responce.Msg := builder.toString;
   builder.DisposeOf;
   Render(Mapper.ObjectToJSONObject(responce));
 end;

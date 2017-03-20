@@ -1,13 +1,13 @@
-unit MailerModel;
+unit ReceptionModel;
 
 interface
 
 uses
-  FrontEndResponce, ProviderFactory, FrontEndRequest, BackEndSettings,
+  ReceptionResponce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
   Web.HTTPApp;
 
 type
-  TMailerModel = class
+  TReceptionModel = class
   strict private
     class var FFactory: TProviderFactory;
   public
@@ -21,7 +21,7 @@ type
     /// <param name="ASettings">Settings for the back end server</param>
     class function Elaborate(const Requestor: string; const anAction: string;
       const aData: String; const AttachedFiles: TAbstractWebRequestFiles;
-      const ASettings: TBackEndSettings): TFrontEndResponce;
+      const ASettings: TActiveQueueSettings): TReceptionResponce;
     constructor Create();
   end;
 
@@ -34,7 +34,7 @@ uses
 
 { TMailerModel }
 
-constructor TMailerModel.Create;
+constructor TReceptionModel.Create;
 var
   Providers: TObjectList<TProvider>;
 begin
@@ -43,15 +43,15 @@ begin
   FFactory := TProviderFactory.Create(Providers);
 end;
 
-class function TMailerModel.Elaborate(const Requestor, anAction, aData: String;
+class function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
   const AttachedFiles: TAbstractWebRequestFiles;
-  const ASettings: TBackEndSettings): TFrontEndResponce;
+  const ASettings: TActiveQueueSettings): TReceptionResponce;
 var
   AJson: TJsonObject;
   Request: TFrontEndRequest;
   Provider: TProvider;
   Action: TAction;
-  Responce: TFrontEndResponce;
+  Responce: TReceptionResponce;
   Input: TFrontEndData;
 
 begin
@@ -79,7 +79,7 @@ begin
   end
   else
   begin
-    Responce := TFrontEndResponce.Create;
+    Responce := TReceptionResponce.Create;
     Responce.msg := 'authorization missing...';
   end;
   Result := Responce;

@@ -23,14 +23,14 @@ type
 implementation
 
 uses
-  BackEndRequest, System.JSON, ObjectsMappers;
+  ReceptionRequest, System.JSON, ObjectsMappers;
 
 procedure TTestBackEndRequestBuilder.SetText;
 var
   request: TBackEndRequest;
-  builder: TBackEndRequestBuilder;
+  builder: TReceptionRequestBuilder;
 begin
-  builder := TBackEndRequestBuilder.Create;
+  builder := TReceptionRequestBuilder.Create;
   builder.SetText('a text');
   request := builder.Build;
   Assert.AreEqual(request.text, 'a text');
@@ -47,9 +47,9 @@ end;
 procedure TTestBackEndRequestBuilder.SetHtml;
 var
   request: TBackEndRequest;
-  builder: TBackEndRequestBuilder;
+  builder: TReceptionRequestBuilder;
 begin
-  builder := TBackEndRequestBuilder.Create;
+  builder := TReceptionRequestBuilder.Create;
   builder.SetHtml('some string');
   request := builder.Build;
   Assert.AreEqual(request.html, 'some string');

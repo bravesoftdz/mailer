@@ -1,4 +1,4 @@
-unit FrontEndResponce;
+unit ReceptionResponce;
 
 interface
 
@@ -8,7 +8,7 @@ type
   ///  A front-end responce.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TFrontEndResponce = class
+  TReceptionResponce = class
   private
     FMessage: String;
     FToken: String;
@@ -23,12 +23,12 @@ implementation
 
 { TSimpleMailerResponce }
 
-procedure TFrontEndResponce.setMessage(const Value: String);
+procedure TReceptionResponce.setMessage(const Value: String);
 begin
   FMessage := Value;
 end;
 
-procedure TFrontEndResponce.SetToken(const Value: String);
+procedure TReceptionResponce.SetToken(const Value: String);
 begin
   FToken := Value;
 end;

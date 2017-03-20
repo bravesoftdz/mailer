@@ -3,7 +3,7 @@ unit TestBackEndResponceFromJson;
 interface
 
 uses
-  DUnitX.TestFramework, System.JSON, BackEndResponce;
+  DUnitX.TestFramework, System.JSON, ActiveQueueResponce;
 
 type
 
@@ -74,13 +74,13 @@ uses
 procedure TTestBackEndResponceFromJson.createAbsentMsgstat(
   const status: Boolean);
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   input: String;
   jo: TJsonObject;
 begin
   input := '{"status": ' + BoolToStr(status, True).ToLower + '}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndResponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.IsEmpty(obj.Msg);
 end;
@@ -88,14 +88,14 @@ end;
 procedure TTestBackEndResponceFromJson.createEmptyMsgstat(
   const status: Boolean);
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   input: String;
   jo: TJsonObject;
 
 begin
   input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":""}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.IsEmpty(obj.Msg);
 end;
@@ -103,38 +103,38 @@ end;
 procedure TTestBackEndResponceFromJson.createFromNoStatusEmptyMsgstat;
 var
   input: String;
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   jo: TJsonObject;
 begin
   input := '{"msgstat":""}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.IsFalse(obj.status);
   Assert.IsEmpty(obj.Msg);
 end;
 
 procedure TTestBackEndResponceFromJson.createFromNoStatusMsgstat;
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   input: String;
   jo: TJsonObject;
 begin
   input := '{"msgstat":"some string"}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.IsFalse(obj.status);
   Assert.AreEqual('some string', obj.Msg);
 end;
 
 procedure TTestBackEndResponceFromJson.createFromNoStatusNoMsgstat;
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   input: String;
   jo: TJsonObject;
 begin
   input := '{}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.IsNotNull(obj);
   Assert.IsFalse(obj.status);
   Assert.IsEmpty(obj.Msg);
@@ -143,13 +143,13 @@ end;
 procedure TTestBackEndResponceFromJson.createNonEmptyMsgstat(
   const status: Boolean);
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   input: String;
   jo: TJsonObject;
 begin
   input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":"a string"}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TBackEndResponce>(jo);
+  obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.AreEqual('a string', obj.Msg);
 end;

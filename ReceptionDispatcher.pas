@@ -1,4 +1,4 @@
-unit MailerDispatcher;
+unit ReceptionDispatcher;
 
 interface
 
@@ -8,7 +8,7 @@ uses System.SysUtils,
      MVCFramework;
 
 type
-  TMailerWebModule = class(TWebModule)
+  TReceptionWebModule = class(TWebModule)
     procedure WebModuleCreate(Sender: TObject);
     procedure WebModuleDestroy(Sender: TObject);
   private
@@ -18,15 +18,15 @@ type
   end;
 
 var
-  WebModuleClass: TComponentClass = TMailerWebModule;
+  WebModuleClass: TComponentClass = TReceptionWebModule;
 
 implementation
 
 {$R *.dfm}
 
-uses MailerController, MVCFramework.Commons;
+uses ReceptionController, MVCFramework.Commons;
 
-procedure TMailerWebModule.WebModuleCreate(Sender: TObject);
+procedure TReceptionWebModule.WebModuleCreate(Sender: TObject);
 begin
   FMVC := TMVCEngine.Create(Self,
     procedure(Config: TMVCConfig)
@@ -52,10 +52,10 @@ begin
       // Define a default URL for requests that don't map to a route or a file (useful for client side web app)
       Config[TMVCConfigKey.FallbackResource] := 'index.html';
     end);
-  FMVC.AddController(TMailerController);
+  FMVC.AddController(TReceptionController);
 end;
 
-procedure TMailerWebModule.WebModuleDestroy(Sender: TObject);
+procedure TReceptionWebModule.WebModuleDestroy(Sender: TObject);
 begin
   FMVC.Free;
 end;
