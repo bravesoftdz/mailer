@@ -14,8 +14,8 @@ uses
   IdHTTPWebBrokerBridge,
   BackEndMockController in 'BackEndMockController.pas',
   SendServerProxy.interfaces in '..\SendServerProxy.interfaces.pas',
-  BackEndRequest in '..\BackEndRequest.pas',
-  BackEndResponce in '..\BackEndResponce.pas',
+  ReceptionRequest in '..\ReceptionRequest.pas',
+  ActiveQueueResponce in '..\ActiveQueueResponce.pas',
   Attachment in '..\Attachment.pas',
   BackEndMockWebModule in 'BackEndMockWebModule.pas' {BackEndWebModule: TWebModule};
 

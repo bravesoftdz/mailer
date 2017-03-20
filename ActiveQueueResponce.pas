@@ -1,4 +1,4 @@
-unit BackEndResponce;
+unit ActiveQueueResponce;
 
 interface
 
@@ -10,7 +10,7 @@ type
   /// <summary>Abstract data type to represent the responces from the
   /// back end server corresponding to previously made requests.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TBackEndResponce = class
+  TActiveQueueResponce = class
   private
     FStatus: Boolean;
     FMessage: String;
@@ -31,13 +31,13 @@ implementation
 
 { TBackEndResponce }
 
-constructor TBackEndResponce.Create;
+constructor TActiveQueueResponce.Create;
 begin
   FStatus := False;
   FMessage := '';
 end;
 
-constructor TBackEndResponce.Create(const Status: Boolean; const Msg: String);
+constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg: String);
 begin
   FStatus := Status;
   FMessage := Msg;

@@ -1,4 +1,4 @@
-program Source;
+program Reception;
 
 {$APPTYPE CONSOLE}
 
@@ -12,10 +12,10 @@ uses
   Web.WebReq,
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
-  MailerController in 'MailerController.pas',
-  MailerDispatcher in 'MailerDispatcher.pas' {MailerWebModule: TWebModule},
+  ReceptionController in 'ReceptionController.pas',
+  ReceptionDispatcher in 'ReceptionDispatcher.pas' {ReceptionWebModule: TWebModule},
   RegistrationResponce in 'RegistrationResponce.pas',
-  FrontEndResponce in 'FrontEndResponce.pas',
+  ReceptionResponce in 'ReceptionResponce.pas',
   Provider in 'Provider.pas',
   FrontEndRequest in 'FrontEndRequest.pas',
   ProviderFactory in 'ProviderFactory.pas',
@@ -24,12 +24,12 @@ uses
     {$R *.res},
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
-  BackEndRequest in 'BackEndRequest.pas',
+  ReceptionRequest in 'ReceptionRequest.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
-  BackEndResponce in 'BackEndResponce.pas',
+  ActiveQueueResponce in 'ActiveQueueResponce.pas',
   Attachment in 'Attachment.pas',
-  MailerModel in 'MailerModel.pas',
-  BackEndSettings in 'BackEndSettings.pas',
+  ReceptionModel in 'ReceptionModel.pas',
+  ActiveQueueSettings in 'ActiveQueueSettings.pas',
   BackEndProxy in 'BackEndProxy.pas',
   FrontEndData in 'FrontEndData.pas';
 
@@ -46,7 +46,7 @@ var
   LServer: TIdHTTPWebBrokerBridge;
   BackEndUrl, BackEndPortStr: String;
   BackEndPort: Integer;
-  Settings: TBackEndSettings;
+  Settings: TActiveQueueSettings;
   BackEndServer: TBackEndProxy;
 begin
   Writeln('** DMVCFramework Server **');
@@ -63,12 +63,12 @@ begin
       Exit();
     end
   end;
-  Settings := TBackEndSettings.Create(BackEndUrl, BackEndPort);
+  Settings := TActiveQueueSettings.Create(BackEndUrl, BackEndPort);
   BackEndServer := TBackEndProxy.getInstance();
   BackEndServer.setSettings(Settings);
   Writeln('Back end server url: ' + Settings.Summary);
 
-  TMailerController.SetBackEnd(Settings);
+  TReceptionController.SetBackEnd(Settings);
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try

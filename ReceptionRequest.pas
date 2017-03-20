@@ -1,4 +1,4 @@
-unit BackEndRequest;
+unit ReceptionRequest;
 
 interface
 
@@ -79,7 +79,7 @@ type
 
 type
   { Builder for a type that collects input data for a program that sends emails }
-  TBackEndRequestBuilder = class
+  TReceptionRequestBuilder = class
   strict private
     FFRom: String;
     FSender: String;
@@ -98,21 +98,21 @@ type
     FAttach: TObjectList<TAttachment>;
     FToken: String;
   public
-    function SetFrom(const AFrom: String): TBackEndRequestBuilder;
-    function SetSender(const ASender: String): TBackEndRequestBuilder;
-    function SetServer(const AServer: String): TBackEndRequestBuilder;
-    function SetPort(const APort: Integer): TBackEndRequestBuilder;
-    function SetAuthentification(const ALogin, APassword: String): TBackEndRequestBuilder;
-    function SetUseSSL(const AUseSSL: Boolean): TBackEndRequestBuilder;
-    function SetText(const AText: String): TBackEndRequestBuilder;
-    function SetHtml(const AHtml: String): TBackEndRequestBuilder;
-    function SetRecipTo(const ARecipTo: String): TBackEndRequestBuilder;
-    function SetRecipCc(const ARecipCc: String): TBackEndRequestBuilder;
-    function SetRecipBcc(const ARecipBcc: String): TBackEndRequestBuilder;
-    function addAttach(const AnAttach: TAttachment): TBackEndRequestBuilder;
-    function addAttachments(const Items: TObjectList<TAttachment>): TBackEndRequestBuilder;
-    function SetSubject(const ASubject: String): TBackEndRequestBuilder;
-    function setToken(const AToken: String): TBackEndRequestBuilder;
+    function SetFrom(const AFrom: String): TReceptionRequestBuilder;
+    function SetSender(const ASender: String): TReceptionRequestBuilder;
+    function SetServer(const AServer: String): TReceptionRequestBuilder;
+    function SetPort(const APort: Integer): TReceptionRequestBuilder;
+    function SetAuthentification(const ALogin, APassword: String): TReceptionRequestBuilder;
+    function SetUseSSL(const AUseSSL: Boolean): TReceptionRequestBuilder;
+    function SetText(const AText: String): TReceptionRequestBuilder;
+    function SetHtml(const AHtml: String): TReceptionRequestBuilder;
+    function SetRecipTo(const ARecipTo: String): TReceptionRequestBuilder;
+    function SetRecipCc(const ARecipCc: String): TReceptionRequestBuilder;
+    function SetRecipBcc(const ARecipBcc: String): TReceptionRequestBuilder;
+    function addAttach(const AnAttach: TAttachment): TReceptionRequestBuilder;
+    function addAttachments(const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
+    function SetSubject(const ASubject: String): TReceptionRequestBuilder;
+    function setToken(const AToken: String): TReceptionRequestBuilder;
     function Build(): TBackEndRequest;
     constructor Create();
   end;
@@ -127,20 +127,20 @@ uses
   uses
   System.Generics.Collections;nputDataBuilder }
 
-function TBackEndRequestBuilder.addAttachments(
-  const Items: TObjectList<TAttachment>): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.addAttachments(
+  const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
 begin
   FAttach.AddRange(Items);
 end;
 
-function TBackEndRequestBuilder.Build: TBackEndRequest;
+function TReceptionRequestBuilder.Build: TBackEndRequest;
 begin
   Result := TBackEndRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
     FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
     FRecipCc, FRecipBcc, FAttach, FToken);
 end;
 
-constructor TBackEndRequestBuilder.Create;
+constructor TReceptionRequestBuilder.Create;
 begin
   FUseAuth := False;
   FPort := 25; // default port number
@@ -159,100 +159,100 @@ begin
   FAttach := TObjectList<TAttachment>.Create;
 end;
 
-function TBackEndRequestBuilder.addAttach(
-  const AnAttach: TAttachment): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.addAttach(
+  const AnAttach: TAttachment): TReceptionRequestBuilder;
 begin
   FAttach.Add(AnAttach);
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetAuthentification(const ALogin,
-  APassword: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetAuthentification(const ALogin,
+  APassword: String): TReceptionRequestBuilder;
 begin
   FUseAuth := True;
   FUser := ALogin;
   FPassword := APassword;
 end;
 
-function TBackEndRequestBuilder.SetText(
-  const AText: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetText(
+  const AText: String): TReceptionRequestBuilder;
 begin
   FText := AText;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.setToken(
-  const AToken: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.setToken(
+  const AToken: String): TReceptionRequestBuilder;
 begin
   FToken := AToken;
 end;
 
-function TBackEndRequestBuilder.SetFrom(
-  const AFrom: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetFrom(
+  const AFrom: String): TReceptionRequestBuilder;
 begin
   FFrom := AFrom;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetHtml(
-  const AHtml: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetHtml(
+  const AHtml: String): TReceptionRequestBuilder;
 begin
   FHtml := AHtml;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetPort(
-  const APort: Integer): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetPort(
+  const APort: Integer): TReceptionRequestBuilder;
 begin
   FPort := APort;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetRecipBcc(
-  const ARecipBcc: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetRecipBcc(
+  const ARecipBcc: String): TReceptionRequestBuilder;
 begin
   FRecipBcc := ARecipBcc;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetRecipCc(
-  const ARecipCc: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetRecipCc(
+  const ARecipCc: String): TReceptionRequestBuilder;
 begin
   FRecipCc := ARecipCc;
   Result := Self;
 
 end;
 
-function TBackEndRequestBuilder.SetRecipTo(
-  const ARecipTo: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetRecipTo(
+  const ARecipTo: String): TReceptionRequestBuilder;
 begin
   FRecipTo := ARecipTo;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetSender(
-  const ASender: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetSender(
+  const ASender: String): TReceptionRequestBuilder;
 begin
   FSender := ASender;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetServer(
-  const AServer: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetServer(
+  const AServer: String): TReceptionRequestBuilder;
 begin
   FServer := AServer;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetSubject(
-  const ASubject: String): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetSubject(
+  const ASubject: String): TReceptionRequestBuilder;
 begin
   FSubject := ASubject;
   Result := Self;
 end;
 
-function TBackEndRequestBuilder.SetUseSSL(
-  const AUseSSL: Boolean): TBackEndRequestBuilder;
+function TReceptionRequestBuilder.SetUseSSL(
+  const AUseSSL: Boolean): TReceptionRequestBuilder;
 begin
   FUseSSL := AUseSSL;
   Result := Self;

@@ -1,10 +1,10 @@
-unit BackEndSettings;
+unit ActiveQueueSettings;
 
 interface
 
 type
   /// <summary>Immutable class for storing the back end server url and port.</summary>
-  TBackEndSettings = class
+  TActiveQueueSettings = class
   strict private
     FUrl: String;
     FPort: Integer;
@@ -27,7 +27,7 @@ uses
 
 { TBackEndSettings }
 
-constructor TBackEndSettings.Create(const Url: String; const Port: Integer);
+constructor TActiveQueueSettings.Create(const Url: String; const Port: Integer);
 begin
   FUrl := Url;
   FPort := Port;

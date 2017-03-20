@@ -13,7 +13,7 @@ uses
   IdHTTPWebBrokerBridge,
   ActiveQueueController in 'ActiveQueueController.pas',
   ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
-  BackEndResponce in '..\BackEndResponce.pas';
+  ActiveQueueResponce in '..\ActiveQueueResponce.pas';
 
 {$R *.res}
 

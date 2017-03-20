@@ -3,7 +3,7 @@ unit TestBackEndResponceToJson;
 interface
 
 uses
-  DUnitX.TestFramework, BackEndResponce;
+  DUnitX.TestFramework, ActiveQueueResponce;
 
 type
 
@@ -49,10 +49,10 @@ uses
 procedure TTestBackEndResponceToJson.SerializeNonEmptyMsg(
   const status: Boolean; const msg: String);
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   jo: TJsonObject;
 begin
-  obj := TBackEndResponce.Create(Status, msg);
+  obj := TActiveQueueResponce.Create(Status, msg);
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.AreEqual((jo.GetValue('status') as TJsonBool).asBoolean, Status);
   Assert.AreEqual(jo.GetValue('msgstat').value, msg);
@@ -68,11 +68,11 @@ end;
 
 procedure TTestBackEndResponceToJson.SerializeJustMessageIsSetToEmpty(const status: Boolean);
 var
-  obj: TBackEndResponce;
+  obj: TActiveQueueResponce;
   jo: TJsonObject;
   value: TJsonValue;
 begin
-  obj := TBackEndResponce.Create(Status, '');
+  obj := TActiveQueueResponce.Create(Status, '');
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.AreEqual((jo.GetValue('status') as TJsonBool).asBoolean, Status);
   value := jo.GetValue('msgstat');

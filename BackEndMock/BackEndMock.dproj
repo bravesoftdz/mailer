@@ -90,8 +90,8 @@
         </DelphiCompile>
         <DCCReference Include="BackEndMockController.pas"/>
         <DCCReference Include="..\SendServerProxy.interfaces.pas"/>
-        <DCCReference Include="..\BackEndRequest.pas"/>
-        <DCCReference Include="..\BackEndResponce.pas"/>
+        <DCCReference Include="..\ReceptionRequest.pas"/>
+        <DCCReference Include="..\ActiveQueueResponce.pas"/>
         <DCCReference Include="..\Attachment.pas"/>
         <DCCReference Include="BackEndMockWebModule.pas">
             <Form>BackEndWebModule</Form>

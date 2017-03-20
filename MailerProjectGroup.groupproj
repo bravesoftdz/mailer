@@ -3,7 +3,7 @@
         <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="Source.dproj">
+        <Projects Include="Reception.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="BackEndMock\BackEndMock.dproj">
@@ -23,14 +23,14 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="Source">
-        <MSBuild Projects="Source.dproj"/>
+    <Target Name="Reception">
+        <MSBuild Projects="Reception.dproj"/>
     </Target>
-    <Target Name="Source:Clean">
-        <MSBuild Projects="Source.dproj" Targets="Clean"/>
+    <Target Name="Reception:Clean">
+        <MSBuild Projects="Reception.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="Source:Make">
-        <MSBuild Projects="Source.dproj" Targets="Make"/>
+    <Target Name="Reception:Make">
+        <MSBuild Projects="Reception.dproj" Targets="Make"/>
     </Target>
     <Target Name="BackEndMock">
         <MSBuild Projects="BackEndMock\BackEndMock.dproj"/>
@@ -60,13 +60,13 @@
         <MSBuild Projects="ActiveQueue\ActiveQueue.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Source;BackEndMock;Tests;ActiveQueue"/>
+        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Source:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean"/>
+        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Source:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make"/>
+        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

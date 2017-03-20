@@ -1,4 +1,4 @@
-object MailerWebModule: TMailerWebModule
+object ReceptionWebModule: TReceptionWebModule
   OldCreateOrder = False
   OnCreate = WebModuleCreate
   OnDestroy = WebModuleDestroy

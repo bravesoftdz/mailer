@@ -4,8 +4,8 @@ interface
 
 uses
   MVCFramework.RESTAdapter, MVCFramework.Commons, System.Classes,
-  BackEndRequest, System.JSON,
-  BackEndResponce;
+  ReceptionRequest, System.JSON,
+  ActiveQueueResponce;
 
 type
   ISendServerProxy = interface(IInvokable)
@@ -15,7 +15,7 @@ type
     function index(): string;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/send')]
-    function Send([Body] input: TBackEndRequest): TBackEndResponce;
+    function Send([Body] input: TBackEndRequest): TActiveQueueResponce;
   end;
 
 implementation
