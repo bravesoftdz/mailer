@@ -9,15 +9,7 @@ type
 
   [TestFixture]
   TTestBackEndResponceFromJson = class(TObject)
-  private
-    jo: TJsonObject;
-    pairStatus, pairMsg: TJsonPair;
-
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
     /// Test suit for constructring the instance from a json
     /// Partition the input as follows:
     /// 1. key status: absent, true, false
@@ -43,33 +35,33 @@ type
     /// Cover
     /// 1. key status: true
     /// 2. key msgstat: absent
-    [TestCase('Create with empty msgstat', 'True')]
+    [TestCase('Create with empty msgstat, status true', 'True')]
     /// Cover
     /// 1. key status: false
     /// 2. key msgstat: absent
-    [TestCase('Create with empty msgstat', 'False')]
+    [TestCase('Create with empty msgstat, status false', 'False')]
     procedure createEmptyMsgstat(const status: Boolean);
 
     [Test]
     /// Cover
     /// 1. key status: true
     /// 2. key msgstat: absent
-    [TestCase('Create with non-empty msgstat', 'True')]
+    [TestCase('Create with msgstat="a string", status=true', 'True')]
     /// Cover
     /// 1. key status: false
     /// 2. key msgstat: absent
-    [TestCase('Create with non-empty msgstat', 'False')]
+    [TestCase('Create with msgstat="a string", status=false', 'False')]
     procedure createNonEmptyMsgstat(const status: Boolean);
 
     [Test]
     /// Cover
     /// 1. key status: true
     /// 2. key msgstat: absent
-    [TestCase('Create with absent msgstat', 'True')]
+    [TestCase('Create with absent msgstat, status=true', 'True')]
     /// Cover
     /// 1. key status: false
     /// 2. key msgstat: absent
-    [TestCase('Create with absent msgstat', 'False')]
+    [TestCase('Create with absent msgstat, status=false', 'False')]
     procedure createAbsentMsgstat(const status: Boolean);
 
   end;
@@ -77,21 +69,32 @@ type
 implementation
 
 uses
-  ObjectsMappers;
+  ObjectsMappers, System.SysUtils;
 
 procedure TTestBackEndResponceFromJson.createAbsentMsgstat(
   const status: Boolean);
-
+var
+  obj: TBackEndResponce;
+  input: String;
+  jo: TJsonObject;
 begin
+  input := '{"status": ' + BoolToStr(status, True).ToLower + '}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TBackEndResponce>(jo);
+  Assert.AreEqual(status, obj.status);
+  Assert.IsEmpty(obj.Msg);
 end;
 
 procedure TTestBackEndResponceFromJson.createEmptyMsgstat(
   const status: Boolean);
 var
   obj: TBackEndResponce;
+  input: String;
+  jo: TJsonObject;
+
 begin
-  jo.AddPair(TJsonPair.Create('msgstat', ''));
-  jo.AddPair(TJsonPair.Create('status', TJSONBool.Create(status)));
+  input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":""}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.IsEmpty(obj.Msg);
@@ -99,9 +102,12 @@ end;
 
 procedure TTestBackEndResponceFromJson.createFromNoStatusEmptyMsgstat;
 var
+  input: String;
   obj: TBackEndResponce;
+  jo: TJsonObject;
 begin
-  jo.AddPair(TJsonPair.Create('msgstat', ''));
+  input := '{"msgstat":""}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
   Assert.IsFalse(obj.status);
   Assert.IsEmpty(obj.Msg);
@@ -110,8 +116,11 @@ end;
 procedure TTestBackEndResponceFromJson.createFromNoStatusMsgstat;
 var
   obj: TBackEndResponce;
+  input: String;
+  jo: TJsonObject;
 begin
-  jo.AddPair(TJsonPair.Create('msgstat', 'some string'));
+  input := '{"msgstat":"some string"}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
   Assert.IsFalse(obj.status);
   Assert.AreEqual('some string', obj.Msg);
@@ -120,7 +129,11 @@ end;
 procedure TTestBackEndResponceFromJson.createFromNoStatusNoMsgstat;
 var
   obj: TBackEndResponce;
+  input: String;
+  jo: TJsonObject;
 begin
+  input := '{}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
   Assert.IsNotNull(obj);
   Assert.IsFalse(obj.status);
@@ -131,27 +144,14 @@ procedure TTestBackEndResponceFromJson.createNonEmptyMsgstat(
   const status: Boolean);
 var
   obj: TBackEndResponce;
+  input: String;
+  jo: TJsonObject;
 begin
-  jo.AddPair(TJsonPair.Create('msgstat', 'a string'));
-  jo.AddPair(TJsonPair.Create('status', TJSONBool.Create(status)));
-  obj := Mapper.JSONObjectToObject<TBackEndresponce>(jo);
+  input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":"a string"}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TBackEndResponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.AreEqual('a string', obj.Msg);
-end;
-
-procedure TTestBackEndResponceFromJson.Setup;
-begin
-  jo := TJsonObject.Create;
-  // pairStatus := TJsonPair.Create('status', TJsonTrue);
-  pairMsg := TJsonPair.Create('text', 'a text content');
-
-end;
-
-procedure TTestBackEndResponceFromJson.TearDown;
-begin
-  jo := nil;
-  pairStatus := nil;
-  pairMsg := nil;
 end;
 
 initialization
