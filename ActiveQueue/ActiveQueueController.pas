@@ -44,7 +44,7 @@ var
 begin
   responce := TBackEndResponce.Create();
   responce.status := True;
-  responce.msgstat := 'Welcome';
+  responce.Msg := 'Welcome';
   Render(responce);
 end;
 
