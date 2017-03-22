@@ -11,7 +11,7 @@ uses
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  Unit4 in 'C:\Users\User\Documents\Embarcadero\Studio\Projects\Unit4.pas';
+  SubscriptionDataTest in 'SubscriptionDataTest.pas';
 
 var
   runner : ITestRunner;
