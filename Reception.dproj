@@ -97,7 +97,6 @@
         </DCCReference>
         <DCCReference Include="Providers\SoluzioneAgenti.pas"/>
         <DCCReference Include="Data\Credentials.pas"/>
-        <DCCReference Include="ActiveQueue\ActiveQueueResponce.pas"/>
         <DCCReference Include="Attachment.pas"/>
         <DCCReference Include="ActiveQueueProxy.pas"/>
         <DCCReference Include="FrontEndData.pas"/>
@@ -115,6 +114,7 @@
         <DCCReference Include="ReceptionResponce.pas"/>
         <DCCReference Include="RegistrationResponce.pas"/>
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
+        <DCCReference Include="SubscriptionData.pas"/>
         <None Include="ModelSupport_Source\default.txvpck"/>
         <None Include="ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="ModelSupport_Source\Source\default.txvpck"/>

@@ -17,7 +17,6 @@ uses
     {$R *.res},
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
-  ActiveQueueResponce in 'ActiveQueue\ActiveQueueResponce.pas',
   Attachment in 'Attachment.pas',
   ActiveQueueProxy in 'ActiveQueueProxy.pas',
   FrontEndData in 'FrontEndData.pas',
@@ -31,7 +30,8 @@ uses
   ReceptionResponce in 'ReceptionResponce.pas',
   RegistrationResponce in 'RegistrationResponce.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
-  ActiveQueueSettings;
+  ActiveQueueSettings,
+  SubscriptionData in 'SubscriptionData.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';

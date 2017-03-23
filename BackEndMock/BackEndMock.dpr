@@ -15,7 +15,7 @@ uses
   BackEndMockController in 'BackEndMockController.pas',
   SendServerProxy.interfaces in '..\SendServerProxy.interfaces.pas',
   ReceptionRequest in '..\ReceptionRequest.pas',
-  ActiveQueueResponce in '..\ActiveQueueResponce.pas',
+  ActiveQueueResponce in '..\ActiveQueue\ActiveQueueResponce.pas',
   Attachment in '..\Attachment.pas',
   BackEndMockWebModule in 'BackEndMockWebModule.pas' {BackEndWebModule: TWebModule};
 

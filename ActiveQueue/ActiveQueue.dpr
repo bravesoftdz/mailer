@@ -13,7 +13,9 @@ uses
   IdHTTPWebBrokerBridge,
   ActiveQueueController in 'ActiveQueueController.pas',
   ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
-  ActiveQueueResponce in '..\ActiveQueueResponce.pas';
+  ActiveQueueResponce in 'ActiveQueueResponce.pas',
+  ActiveQueueSettings in 'ActiveQueueSettings.pas',
+  ActiveQueueModel in 'ActiveQueueModel.pas';
 
 {$R *.res}
 

@@ -3,17 +3,30 @@ unit ActiveQueueController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons;
+  MVCFramework, MVCFramework.Commons, ActiveQueueModel;
 
 type
 
   [MVCPath('/')]
   TActiveQueueController = class(TMVCController)
 
+  strict private
+    class var Model: TActiveQueueModel;
+
   public
+    /// <summary> Initialize the model. Since this controller is added in a static manner,
+    /// I have to create a static method that instantiate a static reference
+    /// corresponding to the model
+    /// </summary>
+    class procedure Setup();
+    /// <summary> Release the reference to the model instantiated during the initialization
+    /// </summary>
+    class procedure Teardown();
+
     [MVCPath('/subscribe')]
     [MVCHTTPMethod([httpPUT])]
-    procedure Subscribe();
+    procedure Subscribe(const Context: TWebContext);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -22,7 +35,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce;
+  MVCFramework.Logger, ActiveQueueResponce, System.JSON;
 
 procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
@@ -38,14 +51,35 @@ begin
   inherited;
 end;
 
-procedure TActiveQueueController.Subscribe;
+class procedure TActiveQueueController.Setup;
+begin
+  Model := TActiveQueueModel.Create;
+end;
+
+procedure TActiveQueueController.Subscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
+  json: TJsonObject;
 begin
+  json := Context.Request.BodyAsJSONObject;
+
   responce := TActiveQueueResponce.Create();
   responce.status := True;
   responce.Msg := 'Welcome';
   Render(responce);
 end;
+
+class procedure TActiveQueueController.Teardown;
+begin
+  Model.DisposeOf;
+end;
+
+initialization
+
+TActiveQueueController.Setup;
+
+finalization
+
+TActiveQueueController.Teardown;
 
 end.

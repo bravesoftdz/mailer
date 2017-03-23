@@ -15,6 +15,9 @@
         <Projects Include="ActiveQueue\ActiveQueue.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="ActiveQueueTests.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -59,14 +62,23 @@
     <Target Name="ActiveQueue:Make">
         <MSBuild Projects="ActiveQueue\ActiveQueue.dproj" Targets="Make"/>
     </Target>
+    <Target Name="ActiveQueueTests">
+        <MSBuild Projects="ActiveQueueTests.dproj"/>
+    </Target>
+    <Target Name="ActiveQueueTests:Clean">
+        <MSBuild Projects="ActiveQueueTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ActiveQueueTests:Make">
+        <MSBuild Projects="ActiveQueueTests.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue"/>
+        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue;ActiveQueueTests"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean"/>
+        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean;ActiveQueueTests:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make"/>
+        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make;ActiveQueueTests:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

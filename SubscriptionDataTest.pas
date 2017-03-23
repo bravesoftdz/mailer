@@ -21,28 +21,41 @@ type
     // 1. key "url": absent
     // 2. key "port": absent
     // 3. key "path": absent
+    // 4. extra key: present, absent
     [TestCase('Construct from an empty json', '{}')]
     // Cover
     // 1. key "url": "www.google.com"
     // 2. key "port": 12345
     // 3. key "path": "/manage/notify"
+    // 4. extra key: absent
     [TestCase('Construct from a complete json', '{"url": "www.google.com", "port": 12345, "path": "/manage/notify"}', '')]
     // Cover
     // 1. key "url": "www.google.com"
     // 2. key "port": absent
     // 3. key "path": absent
+    // 4. extra key: absent
     [TestCase('Construct from the url', '{"url": "www.google.com"}')]
     // Cover
     // 1. key "url": absent
     // 2. key "port": 80
     // 3. key "path":
+    // 4. extra key: absent
     [TestCase('Construct from the port', '{"port": 80}')]
     // Cover
     // 1. key "url": absent
     // 2. key "port": absent
     // 3. key "path": "/manage/notify"
+    // 4. extra key: absent
     [TestCase('Construct from the path', '{"path": "/manage/notify"}')]
     procedure testCreateFromJson(const input: String);
+
+    [Test]
+    // Cover
+    // 1. key "url": absent
+    // 2. key "port": absent
+    // 3. key "path": "/manage/notify"
+    // 4. extra key: presnt
+    procedure testCreateFromJsonWithExtraField;
 
     [Test]
     // Test suit for converting the instance into json
@@ -80,6 +93,18 @@ var
   jo: TJsonObject;
   obj: TSubscriptionData;
 begin
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+  Assert.IsNotNull(obj);
+end;
+
+procedure TSubscriptionDataTest.testCreateFromJsonWithExtraField;
+var
+  jo: TJsonObject;
+  obj: TSubscriptionData;
+  input: String;
+begin
+  input := '{"url": "www.google.com", "port": 12345, "path": "/manage/notify", "extra": true}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
   Assert.IsNotNull(obj);
