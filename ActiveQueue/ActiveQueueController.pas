@@ -23,9 +23,15 @@ type
     /// </summary>
     class procedure Teardown();
 
+    /// request a subscription to the ActiveQueue events
     [MVCPath('/subscribe')]
     [MVCHTTPMethod([httpPUT])]
     procedure Subscribe(const Context: TWebContext);
+
+    /// request a cancellation of the subscription to the ActiveQueue events
+    [MVCPath('/unsubscribe')]
+    [MVCHTTPMethod([httpPUT])]
+    procedure unsubscribe(const Context: TWebContext);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -35,7 +41,8 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce, System.JSON;
+  MVCFramework.Logger, ActiveQueueResponce, System.JSON, ObjectsMappers, SubscriptionData,
+  System.SysUtils;
 
 procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
@@ -59,19 +66,38 @@ end;
 procedure TActiveQueueController.Subscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
-  json: TJsonObject;
+  SubscriptionData: TSubscriptionData;
+  Ip: String;
+  jo: TJsonObject;
 begin
-  json := Context.Request.BodyAsJSONObject;
-
-  responce := TActiveQueueResponce.Create();
-  responce.status := True;
-  responce.Msg := 'Welcome';
+  ip := Context.Request.ClientIP;
+  jo := Context.Request.BodyAsJSONObject;
+  if (Assigned(jo)) then
+  begin
+    try
+      SubscriptionData := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+    except
+      on e: Exception do
+        SubscriptionData := nil;
+    end;
+  end;
+  responce := Model.AddSubscription(ip, SubscriptionData);
   Render(responce);
 end;
 
 class procedure TActiveQueueController.Teardown;
 begin
   Model.DisposeOf;
+end;
+
+procedure TActiveQueueController.unsubscribe(const Context: TWebContext);
+var
+  responce: TActiveQueueResponce;
+  Ip: String;
+begin
+  ip := Context.Request.ClientIP;
+  responce := Model.CancelSubscription(ip);
+  Render(responce);
 end;
 
 initialization
