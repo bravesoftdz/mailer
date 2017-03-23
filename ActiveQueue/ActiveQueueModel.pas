@@ -60,8 +60,21 @@ end;
 function TActiveQueueModel.CancelSubscription(
   const Ip: String): TActiveQueueResponce;
 begin
-  Result := TActiveQueueResponce.Create(true, 'request to cancel your subscription (' + Ip + ') is accepted.');
-
+  TMonitor.Enter(FLock);
+  try
+    if (SubscriptionMap.ContainsKey(Ip)) then
+    begin
+      SubscriptionMap[Ip].DisposeOf;
+      SubscriptionMap.Remove(Ip);
+      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.');
+    end
+    else
+    begin
+      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.');
+    end;
+  finally
+    TMonitor.Exit(FLock);
+  end;
 end;
 
 constructor TActiveQueueModel.Create;
@@ -71,8 +84,14 @@ begin
 end;
 
 destructor TActiveQueueModel.Destroy;
+var
+  ItemKey: String;
 begin
   FLock.DisposeOf;
+  for ItemKey in SubscriptionMap.Keys do
+  begin
+    SubscriptionMap[ItemKey].DisposeOf;
+  end;
   SubscriptionMap.Clear;
   SubscriptionMap.DisposeOf;
 end;
