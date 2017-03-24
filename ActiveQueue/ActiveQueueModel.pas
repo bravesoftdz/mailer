@@ -15,14 +15,17 @@ type
     /// a dumb lock object
     FLock: TObject;
     SubscriptionMap: TDictionary<String, TSubscriptionData>;
+    function GetNumOfSubscriptions: Integer;
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Ip">ip of the computer from which the subscription request comes from</param>
     /// <param name="Data">subscription infomation (port, path etc)</param>
     function AddSubscription(const Ip: String; const Data: TSubscriptionData): TActiveQueueResponce;
-    /// <summary> Cancel the subscription corrsponding to given ip</summary>
+    /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     function CancelSubscription(const Ip: String): TActiveQueueResponce;
+    /// <summary> the number of subscriptions </summary>
+    property numOfSubscriptions: Integer read GetNumOfSubscriptions;
 
     constructor Create();
     destructor Destroy();
@@ -36,8 +39,6 @@ uses
 
 function TActiveQueueModel.AddSubscription(const Ip: String;
   const data: TSubscriptionData): TActiveQueueResponce;
-var
-  dataCopy: TSubscriptionData;
 begin
   TMonitor.Enter(FLock);
   try
@@ -47,8 +48,8 @@ begin
     end
     else
     begin
-      dataCopy := TSubscriptionData.Create(data.Url, data.Port, data.Path);
-      SubscriptionMap.Add(Ip, dataCopy);
+      // create a copy of the object
+      SubscriptionMap.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
       Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port));
     end;
   finally
@@ -94,6 +95,13 @@ begin
   end;
   SubscriptionMap.Clear;
   SubscriptionMap.DisposeOf;
+end;
+
+function TActiveQueueModel.GetNumOfSubscriptions: Integer;
+begin
+  TMonitor.Enter(FLock);
+  Result := SubscriptionMap.Count;
+  TMonitor.Exit(FLock);
 end;
 
 end.

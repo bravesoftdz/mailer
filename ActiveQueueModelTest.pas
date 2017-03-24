@@ -36,11 +36,80 @@ type
     /// 2. previously unsubscribed: true
     [Test]
     procedure TestReactivateSubscription;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: 0, 1, > 1
+    /// 2. subscribe requests: all unique, repeated
+    /// 3. # unsubscribe requests: 0, 1, > 1
+    /// 4. unsubscribe requests: all unique, repeated
+    /// 5. overlapping: 0, 1, > 1
+
+    /// Cover
+    /// 1. # subscribe requests: 0
+    /// 3. # unsubscribe requests: 0
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionEmpty;
+    /// Cover
+    /// 1. # subscribe requests: 1
+    /// 3. # unsubscribe requests: 0
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionOneSub;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: 1
+    /// 3. # unsubscribe requests: 1
+    /// 5. overlapping: 0
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionOneSubOneUnsub;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: 1
+    /// 3. # unsubscribe requests: 1
+    /// 5. overlapping: 1
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionOneSubThenUnsub;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: > 1
+    /// 2. subscribe requests: repeated
+    /// 3. # unsubscribe requests: 0
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionThreeSubAllSame;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: > 1
+    /// 2. subscribe requests: all unique
+    /// 3. # unsubscribe requests: 0
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionTwoSubAllUnique;
+
+    /// Test suit for the number of subscriptions
+    /// Partition the input as follows
+    /// 1. # subscribe requests: > 1
+    /// 2. subscribe requests: all unique
+    /// 3. # unsubscribe requests: > 1
+    /// 4. unsubscribe requests: all unique
+    /// 5. overlapping: > 1
+    [Test]
+    [Ignore]
+    procedure TestNumOfSubscriptionMixed;
+
   end;
 
 implementation
 
-uses ActiveQueueModel, SubscriptionData, ActiveQueueResponce;
+uses ActiveQueueModel, SubscriptionData, ActiveQueueResponce, System.SysUtils;
 
 procedure TActiveQueueModelTest.Setup;
 begin
@@ -62,6 +131,41 @@ begin
   Assert.IsTrue(responce.status);
 end;
 
+procedure TActiveQueueModelTest.TestNumOfSubscriptionEmpty;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionMixed;
+begin
+  raise Exception.Create('Not implemented');
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSub;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubOneUnsub;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubThenUnsub;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionThreeSubAllSame;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestNumOfSubscriptionTwoSubAllUnique;
+begin
+
+end;
+
 procedure TActiveQueueModelTest.TestReactivateSubscription;
 var
   model: TActiveQueueModel;
@@ -76,6 +180,7 @@ begin
   responce := model.AddSubscription('ip', data2);
   Assert.IsTrue(responce.status);
 end;
+
 procedure TActiveQueueModelTest.TestSecondSubscription;
 var
   model: TActiveQueueModel;
