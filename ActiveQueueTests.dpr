@@ -11,7 +11,8 @@ uses
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  SubscriptionDataTest in 'SubscriptionDataTest.pas';
+  SubscriptionDataTest in 'SubscriptionDataTest.pas',
+  ActiveQueueModelTest in 'ActiveQueueModelTest.pas';
 
 var
   runner : ITestRunner;
