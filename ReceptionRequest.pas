@@ -12,7 +12,7 @@ type
   /// Object containing data to be sent to the back-end.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TBackEndRequest = class
+  TReceptionRequest = class
   strict private
     FFRom: String;
     FSender: String;
@@ -113,7 +113,7 @@ type
     function addAttachments(const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
     function SetSubject(const ASubject: String): TReceptionRequestBuilder;
     function setToken(const AToken: String): TReceptionRequestBuilder;
-    function Build(): TBackEndRequest;
+    function Build(): TReceptionRequest;
     constructor Create();
   end;
 
@@ -133,9 +133,9 @@ begin
   FAttach.AddRange(Items);
 end;
 
-function TReceptionRequestBuilder.Build: TBackEndRequest;
+function TReceptionRequestBuilder.Build: TReceptionRequest;
 begin
-  Result := TBackEndRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
+  Result := TReceptionRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
     FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
     FRecipCc, FRecipBcc, FAttach, FToken);
 end;
@@ -260,7 +260,7 @@ end;
 
 { TSenderInputData }
 
-constructor TBackEndRequest.Create(const AFrom: string; const ASender: string;
+constructor TReceptionRequest.Create(const AFrom: string; const ASender: string;
   const AServer: string; const APort: Integer; const AUseAuth: Boolean;
   const aUser: string; const APassword: string; const AUseSSL: Boolean;
   const AnHtml: string; const AText: string; const ASubject: string;
@@ -286,7 +286,7 @@ begin
   FToken := AToken
 end;
 
-constructor TBackEndRequest.Create;
+constructor TReceptionRequest.Create;
 begin
   FAttach := TObjectList<TAttachment>.Create;
   // FData := TMemoryStream.Create();

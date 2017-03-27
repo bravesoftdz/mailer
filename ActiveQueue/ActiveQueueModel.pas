@@ -3,7 +3,7 @@ unit ActiveQueueModel;
 interface
 
 uses
-  ActiveQueueResponce, SubscriptionData, System.Generics.Collections;
+  ActiveQueueResponce, SubscriptionData, System.Generics.Collections, ReceptionRequest;
 
 type
   /// <summary>
@@ -12,9 +12,13 @@ type
   TActiveQueueModel = class
   strict private
   var
-    /// a dumb lock object
-    FLock: TObject;
-    SubscriptionMap: TDictionary<String, TSubscriptionData>;
+    /// a dumb lock object for managing the access to the  subscription register
+    FSubscriptionLock: TObject;
+    /// a dumb lock object for managing the access to the queue items
+    FQueueLock: TObject;
+    FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
+    /// items of the queue
+    FQueue: TObjectList<TReceptionRequest>;
     function GetNumOfSubscriptions: Integer;
   public
     /// <summary>Create a subscription </summary>
@@ -24,6 +28,9 @@ type
     /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     function CancelSubscription(const Ip: String): TActiveQueueResponce;
+    /// get N items from the queue
+    function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
 
@@ -40,20 +47,20 @@ uses
 function TActiveQueueModel.AddSubscription(const Ip: String;
   const data: TSubscriptionData): TActiveQueueResponce;
 begin
-  TMonitor.Enter(FLock);
+  TMonitor.Enter(FSubscriptionLock);
   try
-    if SubscriptionMap.ContainsKey(Ip) then
+    if FSubscriptionRegister.ContainsKey(Ip) then
     begin
-      Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(SubscriptionMap[Ip].Port));
+      Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port));
     end
     else
     begin
       // create a copy of the object
-      SubscriptionMap.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
+      FSubscriptionRegister.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
       Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port));
     end;
   finally
-    TMonitor.Exit(FLock);
+    TMonitor.Exit(FSubscriptionLock);
   end;
 
 end;
@@ -61,12 +68,12 @@ end;
 function TActiveQueueModel.CancelSubscription(
   const Ip: String): TActiveQueueResponce;
 begin
-  TMonitor.Enter(FLock);
+  TMonitor.Enter(FSubscriptionLock);
   try
-    if (SubscriptionMap.ContainsKey(Ip)) then
+    if (FSubscriptionRegister.ContainsKey(Ip)) then
     begin
-      SubscriptionMap[Ip].DisposeOf;
-      SubscriptionMap.Remove(Ip);
+      FSubscriptionRegister[Ip].DisposeOf;
+      FSubscriptionRegister.Remove(Ip);
       Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.');
     end
     else
@@ -74,34 +81,40 @@ begin
       Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.');
     end;
   finally
-    TMonitor.Exit(FLock);
+    TMonitor.Exit(FSubscriptionLock);
   end;
 end;
 
 constructor TActiveQueueModel.Create;
 begin
-  FLock := TObject.Create;
-  SubscriptionMap := TDictionary<String, TSubscriptionData>.Create;
+  FSubscriptionLock := TObject.Create;
+  FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
 end;
 
 destructor TActiveQueueModel.Destroy;
 var
   ItemKey: String;
 begin
-  FLock.DisposeOf;
-  for ItemKey in SubscriptionMap.Keys do
+  FSubscriptionLock.DisposeOf;
+  for ItemKey in FSubscriptionRegister.Keys do
   begin
-    SubscriptionMap[ItemKey].DisposeOf;
+    FSubscriptionRegister[ItemKey].DisposeOf;
   end;
-  SubscriptionMap.Clear;
-  SubscriptionMap.DisposeOf;
+  FSubscriptionRegister.Clear;
+  FSubscriptionRegister.DisposeOf;
+end;
+
+function TActiveQueueModel.getData(const Ip: String;
+  const N: Integer): TObjectList<TReceptionRequest>;
+begin
+
 end;
 
 function TActiveQueueModel.GetNumOfSubscriptions: Integer;
 begin
-  TMonitor.Enter(FLock);
-  Result := SubscriptionMap.Count;
-  TMonitor.Exit(FLock);
+  TMonitor.Enter(FSubscriptionLock);
+  Result := FSubscriptionRegister.Count;
+  TMonitor.Exit(FSubscriptionLock);
 end;
 
 end.

@@ -3,7 +3,7 @@ unit ActiveQueueController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, ActiveQueueModel;
+  MVCFramework, MVCFramework.Commons, ActiveQueueModel, ReceptionRequest;
 
 type
 
@@ -33,6 +33,11 @@ type
     [MVCHTTPMethod([httpPUT])]
     procedure unsubscribe(const Context: TWebContext);
 
+    /// request given number of data
+    [MVCPath('/data/($n)')]
+    [MVCHTTPMethod([httpGET])]
+    procedure getData(const Context: TWebContext);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -42,7 +47,19 @@ implementation
 
 uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, ObjectsMappers, SubscriptionData,
-  System.SysUtils;
+  System.SysUtils, System.Generics.Collections;
+
+procedure TActiveQueueController.getData(const Context: TWebContext);
+var
+  Ip: String;
+  Items: TObjectList<TReceptionRequest>;
+  N: Integer;
+begin
+  N := Context.Request.Params['n'].ToInteger;
+  ip := Context.Request.ClientIP;
+  Items := Model.getData(Ip, N);
+  Render(Items);
+end;
 
 procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin

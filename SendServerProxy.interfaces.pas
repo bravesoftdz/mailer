@@ -15,7 +15,7 @@ type
     function index(): string;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/send')]
-    function Send([Body] input: TBackEndRequest): TActiveQueueResponce;
+    function Send([Body] input: TReceptionRequest): TActiveQueueResponce;
   end;
 
 implementation

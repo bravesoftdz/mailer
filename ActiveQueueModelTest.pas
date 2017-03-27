@@ -143,27 +143,27 @@ end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSub;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubOneUnsub;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubThenUnsub;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionThreeSubAllSame;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionTwoSubAllUnique;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 procedure TActiveQueueModelTest.TestReactivateSubscription;

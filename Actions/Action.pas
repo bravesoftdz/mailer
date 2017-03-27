@@ -77,7 +77,7 @@ var
   adapter: TRestAdapter<ISendServerProxy>;
   server: ISendServerProxy;
   Responce: TActiveQueueResponce;
-  Request: TBackEndRequest;
+  Request: TReceptionRequest;
 begin
   Result := TReceptionResponce.Create;
   builder := TReceptionRequestBuilder.Create();

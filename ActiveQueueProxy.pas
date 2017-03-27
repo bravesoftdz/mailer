@@ -15,7 +15,7 @@ type
     FSettings: TActiveQueueSettings;
 
   public
-    function Send(const Request: TBackEndRequest): TActiveQueueResponce;
+    function Send(const Request: TReceptionRequest): TActiveQueueResponce;
     class function getInstance(): TBackEndProxy;
     procedure SetSettings(const Settings: TActiveQueueSettings);
 
@@ -40,7 +40,7 @@ begin
   Result := Self.FInstance;
 end;
 
-function TBackEndProxy.Send(const Request: TBackEndRequest): TActiveQueueResponce;
+function TBackEndProxy.Send(const Request: TReceptionRequest): TActiveQueueResponce;
 var
   adapter: TRestAdapter<ISendServerProxy>;
   server: ISendServerProxy;
