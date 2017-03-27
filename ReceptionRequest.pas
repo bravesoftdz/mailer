@@ -75,6 +75,8 @@ type
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
 
+    function Clone(): TReceptionRequest;
+
   end;
 
 type
@@ -284,6 +286,12 @@ begin
   FRecipBcc := ARecipBcc;
   FAttach := AnAttach;
   FToken := AToken
+end;
+
+function TReceptionRequest.Clone: TReceptionRequest;
+begin
+  /// stub
+  Result := TReceptionRequestBuilder.Create.SetFrom('from').Build;
 end;
 
 constructor TReceptionRequest.Create;

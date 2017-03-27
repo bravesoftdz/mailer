@@ -1,4 +1,4 @@
-unit TestBackEndRequestBuilder;
+unit TestReceptionRequestBuilder;
 
 interface
 
@@ -8,12 +8,8 @@ uses
 type
 
   [TestFixture]
-  TTestBackEndRequestBuilder = class(TObject)
+  TTestReceptionRequestBuilder = class(TObject)
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
     [Test]
     procedure SetHtml;
     [Test]
@@ -25,9 +21,9 @@ implementation
 uses
   ReceptionRequest, System.JSON, ObjectsMappers;
 
-procedure TTestBackEndRequestBuilder.SetText;
+procedure TTestReceptionRequestBuilder.SetText;
 var
-  request: TBackEndRequest;
+  request: TReceptionRequest;
   builder: TReceptionRequestBuilder;
 begin
   builder := TReceptionRequestBuilder.Create;
@@ -36,17 +32,10 @@ begin
   Assert.AreEqual(request.text, 'a text');
 end;
 
-procedure TTestBackEndRequestBuilder.Setup;
-begin
-end;
 
-procedure TTestBackEndRequestBuilder.TearDown;
-begin
-end;
-
-procedure TTestBackEndRequestBuilder.SetHtml;
+procedure TTestReceptionRequestBuilder.SetHtml;
 var
-  request: TBackEndRequest;
+  request: TReceptionRequest;
   builder: TReceptionRequestBuilder;
 begin
   builder := TReceptionRequestBuilder.Create;
@@ -58,6 +47,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestBackEndRequestBuilder);
+TDUnitX.RegisterTestFixture(TTestReceptionRequestBuilder);
 
 end.

@@ -18,7 +18,7 @@ type
     FQueueLock: TObject;
     FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
     /// items of the queue
-    FQueue: TObjectList<TReceptionRequest>;
+    FQueue: TQueue<TReceptionRequest>;
     function GetNumOfSubscriptions: Integer;
   public
     /// <summary>Create a subscription </summary>
@@ -28,8 +28,11 @@ type
     /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     function CancelSubscription(const Ip: String): TActiveQueueResponce;
-    /// get N items from the queue
+    /// get not more that N items from the queue.
     function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+
+    /// <summary>Add an item to the pull</summary>
+    procedure add(const Item: TReceptionRequest);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -43,6 +46,16 @@ implementation
 uses
   System.SysUtils;
 { TActiveQueueModel }
+
+procedure TActiveQueueModel.add(const Item: TReceptionRequest);
+begin
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    FQueue.add(item.Clone);
+  finally
+    TMonitor.Exit(FSubscriptionLock);
+  end;
+end;
 
 function TActiveQueueModel.AddSubscription(const Ip: String;
   const data: TSubscriptionData): TActiveQueueResponce;
@@ -88,25 +101,55 @@ end;
 constructor TActiveQueueModel.Create;
 begin
   FSubscriptionLock := TObject.Create;
+  FQueueLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
+  FQueue := TQueue<TReceptionRequest>.Create;
 end;
 
 destructor TActiveQueueModel.Destroy;
 var
   ItemKey: String;
+  I: Integer;
 begin
   FSubscriptionLock.DisposeOf;
+  FQueueLock.DisposeOf;
+  // remove objects from the register and clean the register afterwards
   for ItemKey in FSubscriptionRegister.Keys do
   begin
     FSubscriptionRegister[ItemKey].DisposeOf;
   end;
   FSubscriptionRegister.Clear;
   FSubscriptionRegister.DisposeOf;
+  // remove objects from the queue and clean the queue afterwards
+  for I := 0 to FQueue.Count - 1 do
+    FQueue.Dequeue.Disposeof;
+  FQueue.Clear;
+  FQueue.DisposeOf;
+
 end;
 
 function TActiveQueueModel.getData(const Ip: String;
   const N: Integer): TObjectList<TReceptionRequest>;
+var
+  Size, ReturnSize, I: Integer;
 begin
+  Result := TObjectList<TReceptionRequest>.Create(True);
+  if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
+  begin
+    TMonitor.Enter(FQueueLock);
+    Size := FQueue.Count;
+    if Size < N then
+      ReturnSize := Size
+    else
+      ReturnSize := N;
+    for I := 0 to ReturnSize - 1 do
+    begin
+      Result.Add(FQueue[I]);
+      FQueue.Delete(0);
+    end;
+    TMonitor.Exit(FQueueLock);
+
+  end;
 
 end;
 

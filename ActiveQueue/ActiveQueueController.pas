@@ -3,7 +3,7 @@ unit ActiveQueueController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, ActiveQueueModel, ReceptionRequest;
+  MVCFramework, MVCFramework.Commons, ActiveQueueModel, ReceptionRequest, ObjectsMappers;
 
 type
 
@@ -36,6 +36,7 @@ type
     /// request given number of data
     [MVCPath('/data/($n)')]
     [MVCHTTPMethod([httpGET])]
+    [MVCProduces('application/json')]
     procedure getData(const Context: TWebContext);
 
   protected
@@ -46,7 +47,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce, System.JSON, ObjectsMappers, SubscriptionData,
+  MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
   System.SysUtils, System.Generics.Collections;
 
 procedure TActiveQueueController.getData(const Context: TWebContext);
@@ -58,7 +59,7 @@ begin
   N := Context.Request.Params['n'].ToInteger;
   ip := Context.Request.ClientIP;
   Items := Model.getData(Ip, N);
-  Render(Items);
+  Render<TReceptionRequest>(Items);
 end;
 
 procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
