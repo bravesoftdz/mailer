@@ -32,40 +32,40 @@ type
     FToken: String;
   public
     /// <summary> sender email, i.e: support@google.com</summary>
-    property from: String read FFrom;
+    property from: String read FFrom write FFrom;
     /// <summary>  sender name, i.e: "Google Support Team" </summary>
-    property sender: String read FSender;
+    property sender: String read FSender write FSender;
     /// <summary>  Mail server, i.e. "10.341.32.21", "goo.mailer.com"  </summary>
-    property server: String read FServer;
+    property server: String read FServer write FServer;
     /// <summary> port number, i.e. 25  </summary>
-    property port: Integer read FPort;
+    property port: Integer read FPort write FPort;
     /// <summary> whether the user authentification is required  </summary>
-    property useauth: Boolean read FUseAuth;
+    property useauth: Boolean read FUseAuth write FUseAuth;
     /// <summary> user name in case the authentification is required </summary>
-    property user: String read FUser;
+    property user: String read FUser write FUser;
     /// <summary> the password in case the authentification is required </summary>
-    property password: String read FPassword;
+    property password: String read FPassword write FPassword;
     /// <summary> whether to use SSL </summary>
-    property usessl: Boolean read FUseSSL;
+    property usessl: Boolean read FUseSSL write FUseSSL;
     /// <summary> html text version of the message to send </summary>
     [MapperJSONSer('bodyhtml')]
-    property html: String read FHtml;
+    property html: String read FHtml write FHtml;
     /// <summary> plain text version of the message to send </summary>
     [MapperJSONSer('bodytext')]
     property text: String read FText write FText;
     /// <summary> email subject, i.e. "News for you" </summary>
-    property subject: String read FSubject;
+    property subject: String read FSubject write FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
-    property recipto: String read FRecipTo;
+    property recipto: String read FRecipTo write FRecipTo;
     /// <summary> list of email addresses of the recipients (cc) </summary>
-    property recipcc: String read FRecipCc;
+    property recipcc: String read FRecipCc write FRecipCc;
     /// <summary> list of email addresses of the recipients (bcc) </summary>
-    property recipbcc: String read FRecipBcc;
+    property recipbcc: String read FRecipBcc write FRecipBcc;
     /// <summary> list of attachment contents </summary>
     [MapperJSONSer('attach')]
-    property attachment: TObjectList<TAttachment> read FAttach;
+    property attachment: TObjectList<TAttachment> read FAttach write FAttach;
     [MapperJSONSer('token')]
-    property token: String read FToken;
+    property token: String read FToken write FToken;
 
     /// <summary> Multi argument constructor. It is recommended to use
     /// the TBackEndRequestBuilder. </summary>
@@ -74,8 +74,6 @@ type
       const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
-
-    function Clone(): TReceptionRequest;
 
   end;
 
@@ -286,12 +284,6 @@ begin
   FRecipBcc := ARecipBcc;
   FAttach := AnAttach;
   FToken := AToken
-end;
-
-function TReceptionRequest.Clone: TReceptionRequest;
-begin
-  /// stub
-  Result := TReceptionRequestBuilder.Create.SetFrom('from').Build;
 end;
 
 constructor TReceptionRequest.Create;

@@ -51,7 +51,7 @@ procedure TActiveQueueModel.add(const Item: TReceptionRequest);
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
-    FQueue.add(item.Clone);
+    FQueue.Enqueue(item);
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
@@ -132,23 +132,27 @@ function TActiveQueueModel.getData(const Ip: String;
   const N: Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
+  IsSubScribed: Boolean;
 begin
   Result := TObjectList<TReceptionRequest>.Create(True);
-  if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
-  begin
-    TMonitor.Enter(FQueueLock);
-    Size := FQueue.Count;
-    if Size < N then
-      ReturnSize := Size
-    else
-      ReturnSize := N;
-    for I := 0 to ReturnSize - 1 do
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
     begin
-      Result.Add(FQueue[I]);
-      FQueue.Delete(0);
+      TMonitor.Enter(FQueueLock);
+      Size := FQueue.Count;
+      if Size < N then
+        ReturnSize := Size
+      else
+        ReturnSize := N;
+      for I := 0 to ReturnSize - 1 do
+      begin
+        Result.Add(FQueue.Dequeue);
+      end;
+      TMonitor.Exit(FQueueLock);
     end;
-    TMonitor.Exit(FQueueLock);
-
+  finally
+    TMonitor.Exit(FSubscriptionLock);
   end;
 
 end;

@@ -130,8 +130,8 @@
         </DelphiCompile>
         <DCCReference Include="TestActionDispatcher.pas"/>
         <DCCReference Include="..\Actions\Action.pas"/>
-        <DCCReference Include="TestBackEndRequestBuilder.pas"/>
-        <DCCReference Include="TestBackEndRequestToJson.pas"/>
+        <DCCReference Include="TestReceptionRequestBuilder.pas"/>
+        <DCCReference Include="TestReceptionRequest.pas"/>
         <DCCReference Include="TestFrontEndRequestFromJson.pas"/>
         <DCCReference Include="TestFrontEndDataFromJson.pas"/>
         <DCCReference Include="TestBackEndResponceToJson.pas"/>

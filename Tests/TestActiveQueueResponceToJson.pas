@@ -1,4 +1,4 @@
-unit TestBackEndResponceToJson;
+unit TestActiveQueueResponceToJson;
 
 interface
 
@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TTestBackEndResponceToJson = class(TObject)
+  TTestActiveQueueResponceToJson = class(TObject)
   public
     [Setup]
     procedure Setup;
@@ -46,7 +46,7 @@ implementation
 uses
   ObjectsMappers, System.JSON;
 
-procedure TTestBackEndResponceToJson.SerializeNonEmptyMsg(
+procedure TTestActiveQueueResponceToJson.SerializeNonEmptyMsg(
   const status: Boolean; const msg: String);
 var
   obj: TActiveQueueResponce;
@@ -58,15 +58,15 @@ begin
   Assert.AreEqual(jo.GetValue('msgstat').value, msg);
 end;
 
-procedure TTestBackEndResponceToJson.Setup;
+procedure TTestActiveQueueResponceToJson.Setup;
 begin
 end;
 
-procedure TTestBackEndResponceToJson.TearDown;
+procedure TTestActiveQueueResponceToJson.TearDown;
 begin
 end;
 
-procedure TTestBackEndResponceToJson.SerializeJustMessageIsSetToEmpty(const status: Boolean);
+procedure TTestActiveQueueResponceToJson.SerializeJustMessageIsSetToEmpty(const status: Boolean);
 var
   obj: TActiveQueueResponce;
   jo: TJsonObject;
@@ -82,6 +82,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestBackEndResponceToJson);
+TDUnitX.RegisterTestFixture(TTestActiveQueueResponceToJson);
 
 end.

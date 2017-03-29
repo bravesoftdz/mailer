@@ -22,19 +22,19 @@ type
     /// Cover
     /// 1. already subscribed: false
     /// 2. previously unsubscribed: false
-    [Test]
+//    [Test]
     procedure TestFirstSubscription;
 
     /// Cover
     /// 1. already subscribed: true
     /// 2. previously unsubscribed: false
-    [Test]
+//    [Test]
     procedure TestSecondSubscription;
 
     /// Cover
     /// 1. already subscribed: false
     /// 2. previously unsubscribed: true
-    [Test]
+//    [Test]
     procedure TestReactivateSubscription;
 
     /// Test suit for the number of subscriptions

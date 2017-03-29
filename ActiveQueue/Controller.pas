@@ -1,4 +1,4 @@
-unit ActiveQueueController;
+unit Controller;
 
 interface
 
@@ -8,7 +8,7 @@ uses
 type
 
   [MVCPath('/')]
-  TActiveQueueController = class(TMVCController)
+  TController = class(TMVCController)
 
   strict private
     class var Model: TActiveQueueModel;
@@ -33,11 +33,16 @@ type
     [MVCHTTPMethod([httpPUT])]
     procedure unsubscribe(const Context: TWebContext);
 
-    /// request given number of data
-    [MVCPath('/data/($n)')]
+    /// request given number of items from the ActiveQueue.
+    [MVCPath('/items/get/($n)')]
     [MVCHTTPMethod([httpGET])]
     [MVCProduces('application/json')]
-    procedure getData(const Context: TWebContext);
+    procedure GetItems(const Context: TWebContext);
+
+    /// add items to the ActiveQueue.
+    [MVCPath('/items/post')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure PutItems(const Context: TWebContext);
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -50,7 +55,7 @@ uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
   System.SysUtils, System.Generics.Collections;
 
-procedure TActiveQueueController.getData(const Context: TWebContext);
+procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
   Items: TObjectList<TReceptionRequest>;
@@ -62,13 +67,13 @@ begin
   Render<TReceptionRequest>(Items);
 end;
 
-procedure TActiveQueueController.OnAfterAction(Context: TWebContext; const AActionName: string);
+procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
 end;
 
-procedure TActiveQueueController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
+procedure TController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
 begin
   { Executed before each action
     if handled is true (or an exception is raised) the actual
@@ -76,12 +81,32 @@ begin
   inherited;
 end;
 
-class procedure TActiveQueueController.Setup;
+procedure TController.PutItems(const Context: TWebContext);
+var
+  items: TObjectList<TReceptionRequest>;
+begin
+  if not Context.Request.ThereIsRequestBody then
+    raise Exception.Create('Invalid request: Expected request body');
+  if Context.Request.BodyAsJSONObject = nil then
+    raise Exception.Create('Invalid request, Missing JSON object in parameter');
+
+//  items := Context.Request.BodyAs<TReceptionRequest>;
+
+  // Mapper.JSONArrayToObjectList<TToDo>(ctx.Request.BodyAsJSONObject.Get('todos')
+  // .JsonValue as TJSONArray, false);
+  //
+  if Context.Request.ThereIsRequestBody then
+    items := Context.Request.BodyAsListOf<TReceptionRequest>;
+  Writeln(items.Count);
+end;
+
+class
+  procedure TController.Setup;
 begin
   Model := TActiveQueueModel.Create;
 end;
 
-procedure TActiveQueueController.Subscribe(const Context: TWebContext);
+procedure TController.Subscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
   SubscriptionData: TSubscriptionData;
@@ -103,12 +128,13 @@ begin
   Render(responce);
 end;
 
-class procedure TActiveQueueController.Teardown;
+class
+  procedure TController.Teardown;
 begin
   Model.DisposeOf;
 end;
 
-procedure TActiveQueueController.unsubscribe(const Context: TWebContext);
+procedure TController.unsubscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
   Ip: String;
@@ -120,10 +146,10 @@ end;
 
 initialization
 
-TActiveQueueController.Setup;
+TController.Setup;
 
 finalization
 
-TActiveQueueController.Teardown;
+TController.Teardown;
 
 end.
