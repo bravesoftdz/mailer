@@ -1,4 +1,4 @@
-unit ActiveQueueModel;
+unit Model;
 
 interface
 
@@ -31,8 +31,10 @@ type
     /// get not more that N items from the queue.
     function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
 
-    /// <summary>Add an item to the pull</summary>
-    procedure add(const Item: TReceptionRequest);
+    /// <summary>Add many items to the pull</summary>
+    /// <param name="Items">list of elements to be added to the queue</param>
+    /// <returns>True in case of success, False otherwise</returns>
+    function addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -47,14 +49,26 @@ uses
   System.SysUtils;
 { TActiveQueueModel }
 
-procedure TActiveQueueModel.add(const Item: TReceptionRequest);
+function TActiveQueueModel.addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
+var
+  item: TReceptionRequest;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FQueueLock);
   try
-    FQueue.Enqueue(item);
+    try
+      for item in Items do
+      begin
+        FQueue.Enqueue(item);
+      end;
+      Result := True;
+    except
+      on E: Exception do
+        Result := False;
+    end;
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FQueueLock);
   end;
+
 end;
 
 function TActiveQueueModel.AddSubscription(const Ip: String;

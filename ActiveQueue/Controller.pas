@@ -3,7 +3,7 @@ unit Controller;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, ActiveQueueModel, ReceptionRequest, ObjectsMappers;
+  MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers;
 
 type
 
@@ -84,20 +84,16 @@ end;
 procedure TController.PutItems(const Context: TWebContext);
 var
   items: TObjectList<TReceptionRequest>;
+  Outcome: Boolean;
 begin
-  if not Context.Request.ThereIsRequestBody then
-    raise Exception.Create('Invalid request: Expected request body');
-  if Context.Request.BodyAsJSONObject = nil then
-    raise Exception.Create('Invalid request, Missing JSON object in parameter');
-
-//  items := Context.Request.BodyAs<TReceptionRequest>;
-
-  // Mapper.JSONArrayToObjectList<TToDo>(ctx.Request.BodyAsJSONObject.Get('todos')
-  // .JsonValue as TJSONArray, false);
-  //
   if Context.Request.ThereIsRequestBody then
+  begin
     items := Context.Request.BodyAsListOf<TReceptionRequest>;
-  Writeln(items.Count);
+    Outcome := Model.addAll(Items);
+  end
+  else
+    Outcome := False;
+  Render(Outcome.ToString(False));
 end;
 
 class
