@@ -110,12 +110,36 @@ begin
   jo.AddPair(TJsonPair.Create('from', '@e.mail.c.m'));
   jo.AddPair(TJsonPair.Create('server', 'server ip'));
   jo.AddPair(TJsonPair.Create('sender', 'Somebody'));
-  jo.AddPair(TJsonPair.Create('port', '63'));
+  jo.AddPair(TJsonPair.Create('port', TJSONNumber.Create(63)));
+  jo.AddPair(TJsonPair.Create('useauth', TJSONTrue.Create));
+  jo.AddPair(TJsonPair.Create('user', 'login user name'));
+  jo.AddPair(TJsonPair.Create('password', 'my secure pswd'));
+  jo.AddPair(TJsonPair.Create('usessl', TJsonFalse.Create));
+  jo.AddPair(TJsonPair.Create('bodyhtml', 'html<br>part'));
+  jo.AddPair(TJsonPair.Create('bodytext', 'text version'));
+  jo.AddPair(TJsonPair.Create('subject', 'a subject'));
+  jo.AddPair(TJsonPair.Create('recipto', 'email1@a.com, email2@bbb.com'));
+  jo.AddPair(TJsonPair.Create('recipcc', 'aaa@bbb.ccc, vvv@rrr.eee'));
+  jo.AddPair(TJsonPair.Create('recipbcc', '1@, a@b.c'));
+  jo.AddPair(TJsonPair.Create('attachment', TJsonArray.Create));
+  jo.AddPair(TJsonPair.Create('token', 'a token'));
+
   obj := Mapper.JSONObjectToObject<TReceptionRequest>(jo);
   Assert.AreEqual('@e.mail.c.m', obj.from);
   Assert.AreEqual('server ip', obj.server);
   Assert.AreEqual('Somebody', obj.sender);
   Assert.AreEqual(63, obj.port);
+  Assert.IsTrue(obj.useauth);
+  Assert.AreEqual('my secure pswd', obj.password);
+  Assert.IsFalse(obj.usessl);
+  Assert.AreEqual('html<br>part', obj.html);
+  Assert.AreEqual('text version', obj.text);
+  Assert.AreEqual('a subject', obj.subject);
+  Assert.AreEqual('email1@a.com, email2@bbb.com', obj.recipto);
+  Assert.AreEqual('aaa@bbb.ccc, vvv@rrr.eee', obj.recipcc);
+  Assert.AreEqual('1@, a@b.c', obj.recipbcc);
+  Assert.AreEqual(0, obj.attachment.Count);
+  Assert.AreEqual('a token', obj.token);
 end;
 
 procedure TTestReceptionRequest.ObjToJsonKeyAttachIsPresent;
