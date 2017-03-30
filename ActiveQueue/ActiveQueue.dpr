@@ -39,7 +39,7 @@ var
   Usage: TArray<TCliParam>;
   Config: TAQConfig;
 
-procedure RunServer(APort: Integer);
+procedure RunServer(APort: Integer; const IPs: TArray<String>);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -50,15 +50,12 @@ begin
   Writeln('** DMVCFramework Server **');
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
+  TController.SetIps(IPs);
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
-    LogI(Format('Server started on port 8070', [APort]));
-    { more info about MaxConnections
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html }
+    LogI(Format('Server started on port %d', [APort]));
     LServer.MaxConnections := 0;
-    { more info about ListenQueue
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html }
     LServer.ListenQueue := 200;
     Writeln('Press ESC to stop the server');
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
@@ -96,17 +93,15 @@ begin
   end;
   if Assigned(JsonConfig) then
   begin
-    Port := JsonConfig.getValue('port').Value.ToInteger;
-
+    Config := TAQConfig.LoadFromJson(JsonConfig);
   end;
-  Config := TAQConfig.LoadFromJson(JsonConfig);
   if Config.Port > 0 then
   begin
     try
       if WebRequestHandler <> nil then
         WebRequestHandler.WebModuleClass := WebModuleClass;
       WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(Config.Port);
+      RunServer(Config.Port, Config.IPS);
     except
       on E: Exception do
         Writeln(E.ClassName, ': ', E.Message);

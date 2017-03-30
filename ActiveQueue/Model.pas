@@ -3,7 +3,8 @@ unit Model;
 interface
 
 uses
-  ActiveQueueResponce, SubscriptionData, System.Generics.Collections, ReceptionRequest;
+  ActiveQueueResponce, SubscriptionData, System.Generics.Collections, ReceptionRequest,
+  System.Classes;
 
 type
   /// <summary>
@@ -19,7 +20,9 @@ type
     FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
     /// items of the queue
     FQueue: TQueue<TReceptionRequest>;
+    FIPs: TArray<String>;
     function GetNumOfSubscriptions: Integer;
+
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Ip">ip of the computer from which the subscription request comes from</param>
@@ -30,11 +33,12 @@ type
     function CancelSubscription(const Ip: String): TActiveQueueResponce;
     /// get not more that N items from the queue.
     function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
-
     /// <summary>Add many items to the pull</summary>
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <returns>True in case of success, False otherwise</returns>
     function addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
+    function GetIPs: TArray<String>;
+    procedure SetIPs(const IPs: TArray<String>);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -171,11 +175,36 @@ begin
 
 end;
 
+function TActiveQueueModel.GetIPs: TArray<String>;
+var
+  I, S: Integer;
+begin
+  If Assigned(FIPs) then
+    S := Length(FIPs)
+  else
+    S := 0;
+  Result := TArray<String>.Create();
+  SetLength(Result, S);
+  for I := 0 to S - 1 do
+    Result[I] := FIPs[I];
+end;
+
 function TActiveQueueModel.GetNumOfSubscriptions: Integer;
 begin
   TMonitor.Enter(FSubscriptionLock);
   Result := FSubscriptionRegister.Count;
   TMonitor.Exit(FSubscriptionLock);
+end;
+
+procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
+var
+  I, S: Integer;
+begin
+  FIPs := TArray<String>.Create();
+  S := Length(IPs);
+  SetLength(FIPs, S);
+  for I := 0 to S - 1 do
+    FIPs[I] := IPs[I];
 end;
 
 end.

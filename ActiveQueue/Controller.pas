@@ -14,6 +14,7 @@ type
     class var Model: TActiveQueueModel;
 
   public
+    class procedure SetIPs(const IPs: TArray<String>);
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference
     /// corresponding to the model
@@ -94,6 +95,12 @@ begin
   else
     Outcome := False;
   Render(Outcome.ToString(False));
+end;
+
+class procedure TController.SetIPs(const IPs: TArray<String>);
+begin
+  if Assigned(Model) then
+    Model.SetIPs(IPs);
 end;
 
 class
