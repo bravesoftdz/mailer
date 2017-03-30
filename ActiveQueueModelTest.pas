@@ -22,19 +22,19 @@ type
     /// Cover
     /// 1. already subscribed: false
     /// 2. previously unsubscribed: false
-//    [Test]
+    // [Test]
     procedure TestFirstSubscription;
 
     /// Cover
     /// 1. already subscribed: true
     /// 2. previously unsubscribed: false
-//    [Test]
+    // [Test]
     procedure TestSecondSubscription;
 
     /// Cover
     /// 1. already subscribed: false
     /// 2. previously unsubscribed: true
-//    [Test]
+    // [Test]
     procedure TestReactivateSubscription;
 
     /// Test suit for the number of subscriptions
@@ -105,11 +105,52 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionMixed;
 
+    /// Test suit for IsSubscribable
+    /// Partition the input as follows:
+    /// 1. list of IPs: not initialized, empty, 1 elem, > 1 elem
+    /// 2. sought ip: is not in the list, is at the beginning, in the middle, at the end
+
+    /// Cover
+    /// 1. list of IPs: not initialized
+    /// 2. sought ip: is not in the list
+    [Test]
+    procedure TestIsSubsNotInit();
+
+    /// Cover
+    /// 1. list of IPs: empty
+    /// 2. sought ip: is not in the list
+    [Test]
+    procedure TestIsSubsInit();
+
+    /// Cover
+    /// 1. list of IPs: 1 elem
+    /// 2. sought ip: is at the beginning = in the middle = at the end
+    [Test]
+    procedure TestIsSubsOneIpIsPresnt();
+
+    /// Cover
+    /// 1. list of IPs: > 1 elem
+    /// 2. sought ip: at the start
+    [Test]
+    procedure TestIsSubs2ElemStart();
+
+    /// Cover
+    /// 1. list of IPs: > 1 elem
+    /// 2. sought ip: in the middle
+    [Test]
+    procedure TestIsSubs3ElemMiddle();
+
+    /// Cover
+    /// 1. list of IPs: > 1 elem
+    /// 2. sought ip: at the end
+    [Test]
+    procedure TestIsSubs3ElemEnd();
+
   end;
 
 implementation
 
-uses ActiveQueueModel, SubscriptionData, ActiveQueueResponce, System.SysUtils;
+uses Model, SubscriptionData, ActiveQueueResponce, System.SysUtils;
 
 procedure TActiveQueueModelTest.Setup;
 begin
@@ -129,6 +170,51 @@ begin
   data := TSubscriptionData.Create('an url', 2345, 'news/');
   responce := model.AddSubscription('my ip', data);
   Assert.IsTrue(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestIsSubs2ElemStart;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestIsSubs3ElemEnd;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestIsSubs3ElemMiddle;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.TestIsSubsInit;
+var
+  model: TActiveQueueModel;
+begin
+  model := TActiveQueueModel.Create;
+  model.SetIPs(TArray<String>.Create());
+  Assert.IsFalse(Model.IsSubscribable('112.112.252.441'));
+end;
+
+procedure TActiveQueueModelTest.TestIsSubsNotInit;
+var
+  model: TActiveQueueModel;
+begin
+  model := TActiveQueueModel.Create;
+  Assert.IsFalse(Model.IsSubscribable('1.1.1.1'));
+end;
+
+procedure TActiveQueueModelTest.TestIsSubsOneIpIsPresnt;
+var
+  model: TActiveQueueModel;
+  ips: TArray<String>;
+begin
+  model := TActiveQueueModel.Create;
+  ips := TArray<String>.Create();
+  SetLength(ips, 1);
+  ips[0] := '127.0.0.7';
+  model.SetIPs(ips);
+  Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
 procedure TActiveQueueModelTest.TestNumOfSubscriptionEmpty;

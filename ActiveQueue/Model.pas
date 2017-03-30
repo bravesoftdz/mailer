@@ -20,6 +20,7 @@ type
     FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
     /// items of the queue
     FQueue: TQueue<TReceptionRequest>;
+    /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FIPs: TArray<String>;
     function GetNumOfSubscriptions: Integer;
 
@@ -37,8 +38,13 @@ type
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <returns>True in case of success, False otherwise</returns>
     function addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
+    /// <summary>Get the IPs from which the subscriptions can be accepted.</summary>
     function GetIPs: TArray<String>;
+    /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     procedure SetIPs(const IPs: TArray<String>);
+
+    /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
+    function IsSubscribable(const IP: String): Boolean;
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -72,7 +78,6 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
-
 end;
 
 function TActiveQueueModel.AddSubscription(const Ip: String;
@@ -122,12 +127,14 @@ begin
   FQueueLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FQueue := TQueue<TReceptionRequest>.Create;
+  FIPs := TArray<String>.Create();
+  SetLength(FIPs, 0);
 end;
 
 destructor TActiveQueueModel.Destroy;
 var
   ItemKey: String;
-  I: Integer;
+  I, S: Integer;
 begin
   FSubscriptionLock.DisposeOf;
   FQueueLock.DisposeOf;
@@ -139,7 +146,8 @@ begin
   FSubscriptionRegister.Clear;
   FSubscriptionRegister.DisposeOf;
   // remove objects from the queue and clean the queue afterwards
-  for I := 0 to FQueue.Count - 1 do
+  S := FQueue.Count;
+  for I := 0 to S - 1 do
     FQueue.Dequeue.Disposeof;
   FQueue.Clear;
   FQueue.DisposeOf;
@@ -193,6 +201,20 @@ function TActiveQueueModel.GetNumOfSubscriptions: Integer;
 begin
   TMonitor.Enter(FSubscriptionLock);
   Result := FSubscriptionRegister.Count;
+  TMonitor.Exit(FSubscriptionLock);
+end;
+
+function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
+var
+  I, S: Integer;
+begin
+  TMonitor.Enter(FSubscriptionLock);
+  Result := False;
+  for I := 0 to S - 1 do
+  begin
+    Result := True;
+    break;
+  end;
   TMonitor.Exit(FSubscriptionLock);
 end;
 
