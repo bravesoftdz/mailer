@@ -31,7 +31,8 @@ uses
   RegistrationResponce in 'RegistrationResponce.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   ActiveQueueSettings,
-  SubscriptionData in 'SubscriptionData.pas';
+  SubscriptionData in 'SubscriptionData.pas',
+  CliParam in 'CliParam.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
@@ -97,6 +98,10 @@ begin
     LServer.Free;
   end;
 end;
+
+{ TCliParam }
+
+
 
 begin
   ReportMemoryLeaksOnShutdown := True;

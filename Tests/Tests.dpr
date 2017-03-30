@@ -18,7 +18,7 @@ uses
   TestReceptionRequest in 'TestReceptionRequest.pas',
   TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
   TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas',
-  TestBackEndResponceToJson in 'TestBackEndResponceToJson.pas',
+  TestActiveQueueResponceToJson in 'TestActiveQueueResponceToJson.pas',
   TestBackEndResponceFromJson in 'TestBackEndResponceFromJson.pas';
 
 var
