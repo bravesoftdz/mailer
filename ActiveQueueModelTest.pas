@@ -14,92 +14,88 @@ type
     procedure Setup;
     [TearDown]
     procedure TearDown;
-    /// Test suit for checking the subscription
+
+    /// Test suit for adding a subscription
     /// Partition the input as follows:
     /// 1. already subscribed: true, false
-    /// 2. previously unsubscribed: true, false
+    /// 2. ip is allowed: true, false
+    /// 3. # already present subscriptions: 0,  > 0
 
     /// Cover
     /// 1. already subscribed: false
-    /// 2. previously unsubscribed: false
-    // [Test]
-    procedure TestFirstSubscription;
+    /// 2. ip is allowed: true
+    /// 3. # already present subscriptions: 0
+    [Test]
+    procedure TestFirstSubscriptionAllowed;
+
+    /// Cover
+    /// 1. already subscribed: false
+    /// 2. ip is allowed: false
+    /// 3. # already present subscriptions: 0
+    [Test]
+    procedure TestFirstSubscriptionNonAllowed;
+
+    /// Cover
+    /// 1. already subscribed: false
+    /// 2. ip is allowed: true
+    /// 3. # already present subscriptions: > 0
+    [Test]
+    procedure TestAddAllowedSubscriptionToThree;
+
+    /// Cover
+    /// 1. already subscribed: false
+    /// 2. ip is allowed: false
+    /// 3. # already present subscriptions: > 0
+    [Test]
+    procedure TestAddNonAllowedSubscriptionToThree;
 
     /// Cover
     /// 1. already subscribed: true
-    /// 2. previously unsubscribed: false
-    // [Test]
-    procedure TestSecondSubscription;
-
-    /// Cover
-    /// 1. already subscribed: false
-    /// 2. previously unsubscribed: true
-    // [Test]
-    procedure TestReactivateSubscription;
+    /// 2. ip is allowed: true
+    /// 3. # already present subscriptions: > 0
+    [Test]
+    procedure TestAddAlreadySubscribedToTwo;
 
     /// Test suit for the number of subscriptions
     /// Partition the input as follows
-    /// 1. # subscribe requests: 0, 1, > 1
-    /// 2. subscribe requests: all unique, repeated
-    /// 3. # unsubscribe requests: 0, 1, > 1
-    /// 4. unsubscribe requests: all unique, repeated
-    /// 5. overlapping: 0, 1, > 1
+    /// 1. # present subscriptions: 0, 1, > 1
+    /// 2. allowed: true, false
 
-    /// Cover
-    /// 1. # subscribe requests: 0
-    /// 3. # unsubscribe requests: 0
+    /// Cover:
+    /// 1. # present subscriptions: 0
+    /// 2. allowed: true
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionEmpty;
+    procedure TestNumberAddAllowedSubscriptionToZero;
 
-    /// Cover
-    /// 1. # subscribe requests: 1
-    /// 3. # unsubscribe requests: 0
+    /// Cover:
+    /// 1. # present subscriptions: 0
+    /// 2. allowed: false
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionOneSub;
+    procedure TestNumberAddNonAllowedSubscriptionToZero;
 
-    /// Cover
-    /// 1. # subscribe requests: 1
-    /// 3. # unsubscribe requests: 1
-    /// 5. overlapping: 0
+    /// Cover:
+    /// 1. # present subscriptions: 1
+    /// 2. allowed: true
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionOneSubOneUnsub;
+    procedure TestNumberAddAllowedSubscriptionToOne;
 
-    /// Cover
-    /// 1. # subscribe requests: 1
-    /// 3. # unsubscribe requests: 1
-    /// 5. overlapping: 1
+    /// Cover:
+    /// 1. # present subscriptions: 1
+    /// 2. allowed: false
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionOneSubThenUnsub;
+    procedure TestNumberAddNonAllowedSubscriptionToOne;
 
-    /// Cover
-    /// 1. # subscribe requests: > 1
-    /// 2. subscribe requests: repeated
-    /// 3. # unsubscribe requests: 0
+    /// Cover:
+    /// 1. # present subscriptions: > 1
+    /// 2. allowed: true
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionThreeSubAllSame;
+    procedure TestNumberAddAllowedSubscriptionToThree;
 
-    /// Cover
-    /// 1. # subscribe requests: > 1
-    /// 2. subscribe requests: all unique
-    /// 3. # unsubscribe requests: 0
+    /// Cover:
+    /// 1. # present subscriptions: > 1
+    /// 2. allowed: false
     [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionTwoSubAllUnique;
-
-    /// Cover
-    /// 1. # subscribe requests: > 1
-    /// 2. subscribe requests: all unique
-    /// 3. # unsubscribe requests: > 1
-    /// 4. unsubscribe requests: all unique
-    /// 5. overlapping: > 1
-    [Test]
-    [Ignore]
-    procedure TestNumOfSubscriptionMixed;
+    procedure TestNumberAddNonAllowedSubscriptionToThree;
 
     /// Test suit for IsSubscribable
     /// Partition the input as follows:
@@ -162,16 +158,96 @@ procedure TActiveQueueModelTest.TearDown;
 begin
 end;
 
-procedure TActiveQueueModelTest.TestFirstSubscription;
+procedure TActiveQueueModelTest.TestAddAllowedSubscriptionToThree;
 var
-  model: TActiveQueueModel;
   data: TSubscriptionData;
   responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
-  model := TActiveQueueModel.Create;
-  data := TSubscriptionData.Create('an url', 2345, 'news/');
-  responce := model.AddSubscription('my ip', data);
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 4);
+  IPs[0] := '1.1.1.1';
+  IPs[1] := '1.1.1.2';
+  IPs[2] := '1.1.1.3';
+  IPs[3] := '1.1.1.4';
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
+  model.AddSubscription('1.1.1.3', TSubscriptionData.Create('an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription('1.1.1.4', TSubscriptionData.Create('an url 4', 2345, 'news/'));
   Assert.IsTrue(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestAddAlreadySubscribedToTwo;
+var
+  data: TSubscriptionData;
+  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 2);
+  IPs[0] := '1.1.1.1';
+  IPs[1] := '1.1.1.2';
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
+  responce := model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url', 2345, 'news/'));
+  Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestAddNonAllowedSubscriptionToThree;
+var
+  data: TSubscriptionData;
+  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 3);
+  IPs[0] := '1.1.1.1';
+  IPs[1] := '1.1.1.2';
+  IPs[2] := '1.1.1.3';
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
+  model.AddSubscription('1.1.1.3', TSubscriptionData.Create('an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription('1.1.1.4', TSubscriptionData.Create('an url 4', 2345, 'news/'));
+  Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestFirstSubscriptionAllowed;
+var
+  data: TSubscriptionData;
+  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 1);
+  IPs[0] := '5.5.5.5';
+  Model.SetIPs(IPs);
+  data := TSubscriptionData.Create('an url', 2345, 'news/');
+  responce := model.AddSubscription('5.5.5.5', data);
+  Assert.IsTrue(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestFirstSubscriptionNonAllowed;
+var
+  data: TSubscriptionData;
+  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+begin
+  Model := TActiveQueueModel.Create();
+  Model.SetIPs(TArray<String>.Create());
+  data := TSubscriptionData.Create('an url', 2345, 'news/');
+  responce := model.AddSubscription('no such ip', data);
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs2ElemStart;
@@ -264,68 +340,113 @@ begin
   Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
-procedure TActiveQueueModelTest.TestNumOfSubscriptionEmpty;
-begin
-
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionMixed;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSub;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubOneUnsub;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionOneSubThenUnsub;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionThreeSubAllSame;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestNumOfSubscriptionTwoSubAllUnique;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TActiveQueueModelTest.TestReactivateSubscription;
+procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToOne;
 var
-  model: TActiveQueueModel;
-  data1, data2: TSubscriptionData;
-  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
-  model := TActiveQueueModel.Create;
-  data1 := TSubscriptionData.Create('url 1', 2345, 'news/');
-  data2 := TSubscriptionData.Create('url 2', 567, 'archive/to/old');
-  model.AddSubscription('ip', data1);
-  model.CancelSubscription('ip');
-  responce := model.AddSubscription('ip', data2);
-  Assert.IsTrue(responce.status);
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 2);
+  IPs[0] := 'ip 1';
+  IPs[1] := 'ip 2';
+  Model.SetIPs(Ips);
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
+  Assert.AreEqual(2, Model.numOfSubscriptions);
 end;
 
-procedure TActiveQueueModelTest.TestSecondSubscription;
+procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToThree;
 var
-  model: TActiveQueueModel;
-  data1, data2: TSubscriptionData;
-  responce: TActiveQueueResponce;
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
-  model := TActiveQueueModel.Create;
-  data1 := TSubscriptionData.Create('url 1', 2345, 'news/');
-  data2 := TSubscriptionData.Create('url 2', 567, 'archive/to/old');
-  model.AddSubscription('ip', data1);
-  responce := model.AddSubscription('ip', data2);
-  Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 4);
+  IPs[0] := 'ip 1';
+  IPs[1] := 'ip 2';
+  IPs[2] := 'ip 3';
+  IPs[3] := 'ip 4';
+  Model.SetIPs(Ips);
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+
+  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
+  Model.AddSubscription('ip 3', TSubscriptionData.Create('url 3', 2023, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  Model.AddSubscription('ip 4', TSubscriptionData.Create('url 4', 2024, 'path3'));
+  Assert.AreEqual(4, Model.numOfSubscriptions);
+end;
+
+procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToZero;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 1);
+  IPs[0] := 'ip 1';
+  Model.SetIPs(IPs);
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+end;
+
+procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToOne;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 2);
+  IPs[0] := 'ip 1';
+  IPs[1] := 'ip 2';
+  Model.SetIPs(IPs);
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 1, 'a path 1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model.AddSubscription('non-allowed-ip', TSubscriptionData.Create('url 2', 2, 'a path 2'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+end;
+
+procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToThree;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 3);
+  IPs[0] := 'ip 1';
+  IPs[1] := 'ip 2';
+  IPs[2] := 'ip 3';
+
+  Model.SetIPs(Ips);
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+
+  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
+  Model.AddSubscription('ip 3', TSubscriptionData.Create('url 3', 2023, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  Model.AddSubscription('non-allowed-ip', TSubscriptionData.Create('url 4', 2024, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+end;
+
+procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToZero;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create;
+  Model.SetIPs(TArray<String>.Create());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription('some non allowed ip', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Assert.AreEqual(0, Model.numOfSubscriptions);
 end;
 
 initialization

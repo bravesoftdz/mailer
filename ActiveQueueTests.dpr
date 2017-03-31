@@ -4,15 +4,16 @@ program ActiveQueueTests;
 {$APPTYPE CONSOLE}
 {$ENDIF}{$STRONGLINKTYPES ON}
 
+
 uses
   System.SysUtils,
-  {$IFDEF TESTINSIGHT}
+{$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-  {$ENDIF }
+{$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  SubscriptionDataTest in 'SubscriptionDataTest.pas' {/  ActiveQueueModelTest in 'ActiveQueueModelTest.pas';},
+  SubscriptionDataTest in 'SubscriptionDataTest.pas',
   ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
   ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas';
 

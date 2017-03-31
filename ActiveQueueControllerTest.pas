@@ -29,10 +29,6 @@ type
     [Ignore]
     procedure ListFromThreeItemsJsonArray;
 
-    [Test]
-    [Ignore]
-    procedure AAAA;
-
   end;
 
 implementation
@@ -40,21 +36,6 @@ implementation
 uses
   System.JSON, ReceptionRequest, System.SysUtils, ObjectsMappers,
   System.Generics.Collections;
-
-procedure TActiveQueueControllerTest.AAAA;
-var
-  request: TReceptionRequest;
-  json: TJsonObject;
-begin
-  request := TReceptionRequestBuilder.Create()
-    .SetFrom('admin@google.com')
-    .SetText('text content')
-    .setHtml('html content')
-    .setToken('token')
-    .Build;
-  json := Mapper.ObjectToJSonObject(request);
-  Assert.IsNotNull(json.GetValue('attach'));
-end;
 
 procedure TActiveQueueControllertest.ListFromEmptyJsonArray;
 var

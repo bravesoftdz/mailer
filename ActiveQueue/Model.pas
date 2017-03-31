@@ -85,15 +85,20 @@ function TActiveQueueModel.AddSubscription(const Ip: String;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
-    if FSubscriptionRegister.ContainsKey(Ip) then
-    begin
-      Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port));
-    end
+    if Not(IsSubscribable(Ip)) then
+      Result := TActiveQueueResponce.Create(False, 'not authorized')
     else
     begin
-      // create a copy of the object
-      FSubscriptionRegister.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
-      Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port));
+      if FSubscriptionRegister.ContainsKey(Ip) then
+      begin
+        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port));
+      end
+      else
+      begin
+        // create a copy of the object
+        FSubscriptionRegister.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
+        Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port));
+      end;
     end;
   finally
     TMonitor.Exit(FSubscriptionLock);
@@ -155,7 +160,9 @@ begin
 end;
 
 function TActiveQueueModel.getData(const Ip: String;
-  const N: Integer): TObjectList<TReceptionRequest>;
+  const
+  N:
+  Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
   IsSubScribed: Boolean;
@@ -204,7 +211,10 @@ begin
   TMonitor.Exit(FSubscriptionLock);
 end;
 
-function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
+function TActiveQueueModel.IsSubscribable(
+  const
+  IP:
+  String): Boolean;
 var
   I, S: Integer;
 begin
