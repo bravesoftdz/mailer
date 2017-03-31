@@ -17,7 +17,6 @@ type
     // Cover:
     // Size of items: 0
     [Test]
-    [Ignore]
     procedure ListFromEmptyJsonArray;
     // Cover:
     // Size of items: 1
@@ -26,7 +25,6 @@ type
     // Cover:
     // Size of items: > 1
     [Test]
-    [Ignore]
     procedure ListFromThreeItemsJsonArray;
 
   end;
@@ -79,28 +77,49 @@ end;
 
 procedure TActiveQueueControllerTest.ListFromThreeItemsJsonArray;
 var
-  str: String;
+  str1, str2, str3: String;
   jo: TJSONArray;
   obj: TObjectList<TReceptionRequest>;
 begin
-  str := '{"from":"info@mail.com","port":25,"useauth":false,"usessl":false,"bodyhtml":"html content","bodytext":"text content","attach":[],"token":"token"}';
-
-  // '[{"from":"info@mail.com","sender":"a person", "server":"127.0.1"},' +
-  // ' {"from":"bill@microsoft.com", "sender":"Bill Gates", "bodyhtml":"hi, how are you?" }, ' +
-  // '{"from":"mark@fb.com", "recipcc":"one, two" } ]'
-  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes('[' + str + ',' + str + ',' + str + ']'), 0) as TJSONArray;
+  str1 := '{"from":"info1@mail.com","sender":"John","port":25,"useauth":false,"usessl":false,' +
+    '"bodyhtml":"html content 1","bodytext":"text content 1","server":"127.10.10.10", "attach":[],"token":"token 1"}';
+  str2 := '{"from":"info2@mail.com","sender":"Bob","port":26,"useauth":false,"usessl":true,' +
+    '"bodyhtml":"html content 2","bodytext":"text content 2","server":"127.10.10.11", "attach":[],"token":"token 2"}';
+  str3 := '{"from":"info3@mail.com","sender":"Alice","port":27,"useauth":true,"usessl":false,' +
+    '"bodyhtml":"html content 3","bodytext":"text content 3","server":"127.10.10.12", "attach":[],"token":"token 3"}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes('[' + str1 + ',' + str2 + ',' + str3 + ']'), 0) as TJSONArray;
   obj := Mapper.JSONArrayToObjectList<TReceptionRequest>(jo);
   Assert.AreEqual(3, obj.Count);
-  Assert.AreEqual('info@mail.com', obj[0].from);
-  Assert.AreEqual('a person', obj[0].sender);
-  Assert.AreEqual('127.0.1', obj[0].server);
 
-  Assert.AreEqual('bill@microsoft.com', obj[1].from);
-  Assert.AreEqual('Bill Gates', obj[1].sender);
-  Assert.AreEqual('hi, how are you?', obj[1].html);
+  Assert.AreEqual('info1@mail.com', obj[0].from);
+  Assert.AreEqual('John', obj[0].sender);
+  Assert.IsFalse(obj[0].useauth);
+  Assert.IsFalse(obj[0].usessl);
+  Assert.AreEqual('html content 1', obj[0].html);
+  Assert.AreEqual('text content 1', obj[0].text);
+  Assert.AreEqual('127.10.10.10', obj[0].server);
+  Assert.AreEqual(0, obj[0].attachment.Count);
+  Assert.AreEqual('token 1', obj[0].token);
 
-  Assert.AreEqual('mark@fb.com', obj[0].from);
-  Assert.AreEqual('one, two', obj[0].recipcc);
+  Assert.AreEqual('info2@mail.com', obj[1].from);
+  Assert.AreEqual('Bob', obj[1].sender);
+  Assert.IsFalse(obj[1].useauth);
+  Assert.IsTrue(obj[1].usessl);
+  Assert.AreEqual('html content 2', obj[1].html);
+  Assert.AreEqual('text content 2', obj[1].text);
+  Assert.AreEqual('127.10.10.11', obj[1].server);
+  Assert.AreEqual(0, obj[1].attachment.Count);
+  Assert.AreEqual('token 2', obj[1].token);
+
+  Assert.AreEqual('info3@mail.com', obj[2].from);
+  Assert.AreEqual('Alice', obj[2].sender);
+  Assert.IsTrue(obj[2].useauth);
+  Assert.IsFalse(obj[2].usessl);
+  Assert.AreEqual('html content 3', obj[2].html);
+  Assert.AreEqual('text content 3', obj[2].text);
+  Assert.AreEqual('127.10.10.12', obj[2].server);
+  Assert.AreEqual(0, obj[2].attachment.Count);
+  Assert.AreEqual('token 3', obj[2].token);
 
 end;
 

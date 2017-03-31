@@ -10,7 +10,6 @@ type
   [TestFixture]
   TSubscriptionDataTest = class(TObject)
   public
-//    [Test]
     // Test suit for creating an instance from json
     // Partition the input as follows:
     // 1. key "url": absent, "" (empty), "www.google.com"
@@ -49,7 +48,7 @@ type
     [TestCase('Construct from the path', '{"path": "/manage/notify"}')]
     procedure testCreateFromJson(const input: String);
 
-//    [Test]
+    // [Test]
     // Cover
     // 1. key "url": absent
     // 2. key "port": absent
@@ -57,7 +56,7 @@ type
     // 4. extra key: presnt
     procedure testCreateFromJsonWithExtraField;
 
-//    [Test]
+    // [Test]
     // Test suit for converting the instance into json
     // Partition the input as follows
     // 1. field "url": "" (empty), "http://www.example.com"
@@ -69,13 +68,13 @@ type
     // 2. field "port": 0
     // 3. field "path": "" (empty)
     procedure testObjectToJsonFromDefault;
-//    [Test]
+    // [Test]
     // Cover
     // 1. field "url": "" (empty)
     // 2. field "port": 0
     // 3. field "path": "news/"
     procedure testObjectToJsonFromPath;
-//    [Test]
+    // [Test]
     // 1. field "url": "" (empty)
     // 2. field "port": 0
     // 3. field "path": "news/"
