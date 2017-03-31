@@ -210,10 +210,14 @@ var
 begin
   TMonitor.Enter(FSubscriptionLock);
   Result := False;
+  S := Length(FIPs);
   for I := 0 to S - 1 do
   begin
-    Result := True;
-    break;
+    if (FIPs[I].Equals(IP)) then
+    begin
+      Result := True;
+      break;
+    end;
   end;
   TMonitor.Exit(FSubscriptionLock);
 end;

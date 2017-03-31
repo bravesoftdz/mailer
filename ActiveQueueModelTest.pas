@@ -51,6 +51,7 @@ type
     [Test]
     [Ignore]
     procedure TestNumOfSubscriptionEmpty;
+
     /// Cover
     /// 1. # subscribe requests: 1
     /// 3. # unsubscribe requests: 0
@@ -58,8 +59,7 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionOneSub;
 
-    /// Test suit for the number of subscriptions
-    /// Partition the input as follows
+    /// Cover
     /// 1. # subscribe requests: 1
     /// 3. # unsubscribe requests: 1
     /// 5. overlapping: 0
@@ -67,8 +67,7 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionOneSubOneUnsub;
 
-    /// Test suit for the number of subscriptions
-    /// Partition the input as follows
+    /// Cover
     /// 1. # subscribe requests: 1
     /// 3. # unsubscribe requests: 1
     /// 5. overlapping: 1
@@ -76,8 +75,7 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionOneSubThenUnsub;
 
-    /// Test suit for the number of subscriptions
-    /// Partition the input as follows
+    /// Cover
     /// 1. # subscribe requests: > 1
     /// 2. subscribe requests: repeated
     /// 3. # unsubscribe requests: 0
@@ -85,8 +83,7 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionThreeSubAllSame;
 
-    /// Test suit for the number of subscriptions
-    /// Partition the input as follows
+    /// Cover
     /// 1. # subscribe requests: > 1
     /// 2. subscribe requests: all unique
     /// 3. # unsubscribe requests: 0
@@ -94,8 +91,7 @@ type
     [Ignore]
     procedure TestNumOfSubscriptionTwoSubAllUnique;
 
-    /// Test suit for the number of subscriptions
-    /// Partition the input as follows
+    /// Cover
     /// 1. # subscribe requests: > 1
     /// 2. subscribe requests: all unique
     /// 3. # unsubscribe requests: > 1
@@ -108,7 +104,7 @@ type
     /// Test suit for IsSubscribable
     /// Partition the input as follows:
     /// 1. list of IPs: not initialized, empty, 1 elem, > 1 elem
-    /// 2. sought ip: is not in the list, is at the beginning, in the middle, at the end
+    /// 2. sought ip: not present, is at the beginning, in the middle, at the end
 
     /// Cover
     /// 1. list of IPs: not initialized
@@ -127,6 +123,12 @@ type
     /// 2. sought ip: is at the beginning = in the middle = at the end
     [Test]
     procedure TestIsSubsOneIpIsPresnt();
+
+    /// Cover
+    /// 1. list of IPs: > 1 elem
+    /// 2. sought ip: not present
+    [Test]
+    procedure TestIsSubs4ElemNotPresent();
 
     /// Cover
     /// 1. list of IPs: > 1 elem
@@ -173,18 +175,63 @@ begin
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs2ElemStart;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
-
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(ips, 2);
+  ips[0] := '127.0.0.7';
+  ips[1] := '175.112.32.211';
+  model.SetIPs(ips);
+  Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs3ElemEnd;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
-
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(ips, 3);
+  ips[0] := '175.112.32.211';
+  ips[1] := '216.87.22.99';
+  ips[2] := '175.112.32.222';
+  model.SetIPs(ips);
+  Assert.IsTrue(Model.IsSubscribable('175.112.32.222'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs3ElemMiddle;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
 begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(ips, 3);
+  ips[0] := '175.112.32.211';
+  ips[1] := '216.87.22.99';
+  ips[2] := '175.112.32.222';
+  model.SetIPs(ips);
+  Assert.IsTrue(Model.IsSubscribable('216.87.22.99'));
+end;
 
+procedure TActiveQueueModelTest.TestIsSubs4ElemNotPresent;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(ips, 4);
+  ips[0] := '175.112.32.211';
+  ips[1] := '216.87.22.99';
+  ips[2] := '175.112.32.222';
+  ips[3] := '15.12.32.20';
+  model.SetIPs(ips);
+  Assert.IsFalse(Model.IsSubscribable('16.7.2.9'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubsInit;
@@ -209,7 +256,7 @@ var
   model: TActiveQueueModel;
   ips: TArray<String>;
 begin
-  model := TActiveQueueModel.Create;
+  Model := TActiveQueueModel.Create;
   ips := TArray<String>.Create();
   SetLength(ips, 1);
   ips[0] := '127.0.0.7';

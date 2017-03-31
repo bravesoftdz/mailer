@@ -79,18 +79,19 @@ begin
   request := TReceptionRequestBuilder.Create()
     .SetFrom('info@mail.com')
     .SetText('text content')
+    .SetSender('Google')
     .setHtml('html content')
     .setToken('token')
+    .SetServer('01.02.03.04')
     .SetPort(28)
     .Build;
   obj := Mapper.ObjectToJSonObject(request);
   JArray := TJsonArray.Create();
   JArray.AddElement(obj);
 
-  // JArray := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes('[' + str + ']'), 0) as TJSONArray;
   list := Mapper.JSONArrayToObjectList<TReceptionRequest>(JArray);
   Assert.AreEqual(1, list.Count);
-  Assert.AreEqual('p@gmail.com', list[0].from);
+  Assert.AreEqual('info@mail.com', list[0].from);
   Assert.AreEqual('Google', list[0].sender);
   Assert.AreEqual('01.02.03.04', list[0].server);
 end;
