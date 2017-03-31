@@ -56,6 +56,41 @@ type
     [Test]
     procedure TestAddAlreadySubscribedToTwo;
 
+    /// Test suit for cancelling the subscription
+    /// Partition the input as follows:
+    /// 1. is subscribed: true, false
+    /// 2. # of subscriptions: 0, 1, > 1
+
+    /// Cover:
+    /// 1. is subscribed: false
+    /// 2. # of subscriptions: 0
+    [Test]
+    procedure TestCancelNotSubscribedEmpty();
+
+    /// Cover:
+    /// 1. is subscribed: false
+    /// 2. # of subscriptions: 1
+    [Test]
+    procedure TestCancelNotSubscribedOne();
+
+    /// Cover:
+    /// 1. is subscribed: false
+    /// 2. # of subscriptions: > 1
+    [Test]
+    procedure TestCancelNotSubscribedThree();
+
+    /// Cover:
+    /// 1. is subscribed: true
+    /// 2. # of subscriptions: 1
+    [Test]
+    procedure TestCancelSubscribedOne();
+
+    /// Cover:
+    /// 1. is subscribed: true
+    /// 2. # of subscriptions: > 1
+    [Test]
+    procedure TestCancelSubscribedThree();
+
     /// Test suit for the number of subscriptions
     /// Partition the input as follows
     /// 1. # present subscriptions: 0, 1, > 1
@@ -218,6 +253,95 @@ begin
   model.AddSubscription('1.1.1.3', TSubscriptionData.Create('an url 3', 555, 'news-2/'));
   responce := model.AddSubscription('1.1.1.4', TSubscriptionData.Create('an url 4', 2345, 'news/'));
   Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestCancelNotSubscribedEmpty;
+var
+  Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+begin
+  Model := TActiveQueueModel.Create();
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('1.1.1.1');
+  Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestCancelNotSubscribedOne;
+var
+  Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 1);
+  IPs[0] := '1.1.1.1';
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('5.5.5.5');
+  Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestCancelNotSubscribedThree;
+var
+  Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 3);
+  IPs[0] := '1.1.1.13';
+  IPs[1] := '2.1.1.13';
+  IPs[2] := '3.1.1.13';
+
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.13', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription('2.1.1.13', TSubscriptionData.Create('an url 2', 8080, 'call-me/'));
+  model.AddSubscription('3.1.1.13', TSubscriptionData.Create('an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('no-associated-ip');
+  Assert.IsFalse(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestCancelSubscribedOne;
+var
+  Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 1);
+  IPs[0] := '100.100.001.1';
+  Model.SetIPs(IPs);
+  model.AddSubscription('100.100.001.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('100.100.001.1');
+  Assert.IsTrue(responce.status);
+end;
+
+procedure TActiveQueueModelTest.TestCancelSubscribedThree;
+var
+  Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+  IPs: TArray<String>;
+begin
+  Model := TActiveQueueModel.Create();
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 3);
+  IPs[0] := '1.1.1.13';
+  IPs[1] := '2.1.1.13';
+  IPs[2] := '3.1.1.13';
+
+  Model.SetIPs(IPs);
+  model.AddSubscription('1.1.1.13', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription('2.1.1.13', TSubscriptionData.Create('an url 2', 8080, 'call-me/'));
+  model.AddSubscription('3.1.1.13', TSubscriptionData.Create('an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('2.1.1.13');
+  Assert.IsTrue(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestFirstSubscriptionAllowed;
