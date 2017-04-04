@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -40,22 +40,33 @@ var
   Usage: TArray<TCliParam>;
   Config: TAQConfig;
 
-procedure RunServer(APort: Integer; const IPs: TArray<String>);
+procedure RunServer(const Config: TAQConfig);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   item: String;
+  WhiteList: TArray<String>;
+  APort: Integer;
 
 begin
   Writeln('** DMVCFramework Server **');
+  APort := Config.Port;
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
-  TController.SetIps(IPs);
-  Writeln('Whitelist of IPs:');
-  for Item in TController.GetIPs do
-    Writeln(Item);
+  TController.SetIps(Config.IPs);
+  WhiteList := TController.GetIPs;
+  if (Length(WhiteList) = 0) then
+  begin
+    Writeln('The IP whitelist is empty. No subscriptions will succeed.');
+  end
+  else
+  begin
+    Writeln('IP Whitelist:');
+    for Item in WhiteList do
+      Writeln(Item);
+  end;
 
   try
     LServer.DefaultPort := APort;
@@ -107,7 +118,7 @@ begin
       if WebRequestHandler <> nil then
         WebRequestHandler.WebModuleClass := WebModuleClass;
       WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(Config.Port, Config.IPS);
+      RunServer(Config);
     except
       on E: Exception do
         Writeln(E.ClassName, ': ', E.Message);
