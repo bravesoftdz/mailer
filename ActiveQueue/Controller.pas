@@ -14,7 +14,13 @@ type
     class var Model: TActiveQueueModel;
 
   public
+
     class procedure SetIPs(const IPs: TArray<String>);
+
+    /// <summary> Get the white list of ips: requests coming from only these ips
+    /// are to be taken in consideration </summary>
+    class function GetIPs(): TArray<String>;
+
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference
     /// corresponding to the model
@@ -55,6 +61,19 @@ implementation
 uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
   System.SysUtils, System.Generics.Collections;
+
+class function TController.GetIPs: TArray<String>;
+begin
+  if Assigned(Model) then
+  begin
+    Result := Model.GetIPs()
+  end
+  else
+  begin
+    Result := TArray<String>.Create();
+    SetLength(Result, 0);
+  end;
+end;
 
 procedure TController.GetItems(const Context: TWebContext);
 var
@@ -100,7 +119,9 @@ end;
 class procedure TController.SetIPs(const IPs: TArray<String>);
 begin
   if Assigned(Model) then
+  begin
     Model.SetIPs(IPs);
+  end
 end;
 
 class

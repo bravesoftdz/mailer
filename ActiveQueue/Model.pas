@@ -38,9 +38,9 @@ type
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <returns>True in case of success, False otherwise</returns>
     function addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
-    /// <summary>Get the IPs from which the subscriptions can be accepted.</summary>
+    /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
     function GetIPs: TArray<String>;
-    /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
+    /// <summary> Set the IPs from which the subscriptions can be accepted.</summary>
     procedure SetIPs(const IPs: TArray<String>);
 
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>

@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -21,7 +21,8 @@ uses
   System.IOUtils,
   System.JSON,
   System.Generics.Collections,
-  AQConfig in 'AQConfig.pas';
+  AQConfig in 'AQConfig.pas',
+  SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas';
 
 {$R *.res}
 
@@ -45,12 +46,17 @@ var
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
+  item: String;
 
 begin
   Writeln('** DMVCFramework Server **');
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   TController.SetIps(IPs);
+  Writeln('Whitelist of IPs:');
+  for Item in TController.GetIPs do
+    Writeln(Item);
+
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
