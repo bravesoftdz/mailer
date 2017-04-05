@@ -13,16 +13,18 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
   Model in 'Model.pas',
   System.IOUtils,
   System.JSON,
+  ObjectsMappers,
   System.Generics.Collections,
   AQConfig in 'AQConfig.pas',
-  SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas';
+  SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
+  ListenerInfo in 'ListenerInfo.pas';
 
 {$R *.res}
 
@@ -49,6 +51,7 @@ var
   item: String;
   WhiteList: TArray<String>;
   APort: Integer;
+  jo: TJsonObject;
 
 begin
   Writeln('** DMVCFramework Server **');
@@ -85,6 +88,9 @@ begin
         break;
     end;
   finally
+    jo := Mapper.ObjectToJSONObject(Config);
+    TFile.AppendAllText('saved_config.aq', jo.ToString);
+    // ('saved_config.aq').
     LServer.Free;
   end;
 end;
@@ -110,7 +116,7 @@ begin
   end;
   if Assigned(JsonConfig) then
   begin
-    Config := TAQConfig.LoadFromJson(JsonConfig);
+    Config := Mapper.JSONObjectToObject<TAQConfig>(JsonConfig);
   end;
   if Config.Port > 0 then
   begin

@@ -3,20 +3,25 @@ unit AQConfig;
 interface
 
 uses
-  System.JSON, System.Classes;
+  System.JSON, System.Classes, ListenerInfo, System.Generics.Collections, ObjectsMappers;
 
 type
+
   /// <sumary>
-  /// Immutable data type to store the active queue configuration.
+  /// Mutable data type to store the active queue configuration.
+  /// It is made mutable in order to be able to populate its fields from a json
+  /// using the DMVCFramework means.
   /// </summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TAQConfig = class
   const
     PORT_KEY_NAME = 'port';
     IPS_KEY_NAME = 'ips';
-
+    SUBSCRIPTIONS_KEY_NAME = 'subscriptions';
   strict private
     FPort: Integer;
     FIPs: TArray<String>;
+    FListeners: TObjectList<TListenerInfo>;
     function GetIps(): TArray<String>;
   public
     constructor Create(const Port: Integer; const IPs: TStringList);
@@ -27,11 +32,16 @@ type
     class function LoadFromJson(const jo: TJsonObject): TAQConfig;
 
     /// <summary> Port at which the program accepts the connections.</summary>
-    property Port: Integer read FPort;
+    [MapperJSONSer('port')]
+    property Port: Integer read FPort write FPort;
 
     /// <summary> white list of ips from which the subscriptions are allowed.
     /// Subscription request coming from any other ip is to be ignored.</summary>
-    property IPs: TArray<String> read GetIPs;
+    [MapperJSONSer('ips')]
+    property IPs: TArray<String> read GetIPs write FIPs;
+    /// <summary> list of subscribed listeners</summary>
+    [MapperJSONSer('listeners')]
+    property Listeners: TObjectList<TListenerInfo> read FListeners write FListeners;
 
   end;
 
@@ -48,6 +58,7 @@ var
 begin
   FPort := Port;
   FIPs := TArray<String>.Create();
+  FListeners := TObjectList<TListenerInfo>.Create();
   S := IPs.Count;
   Setlength(FIPs, S);
   for I := 0 to S - 1 do
@@ -56,7 +67,9 @@ end;
 
 destructor TAQConfig.Destroy;
 begin
+  FListeners.Clear;
   inherited;
+
 end;
 
 function TAQConfig.GetIps: TArray<String>;
@@ -75,11 +88,12 @@ end;
 
 class function TAQConfig.LoadFromJson(const jo: TJsonObject): TAQConfig;
 var
-  Port: Integer;
-  Item, PortJValue, IPsJValue: TJsonValue;
-
+  Port, ListenerNum: Integer;
+  Item, PortJValue, IPsJValue, ListenersJValue: TJsonValue;
   IPs: TStringList;
-  ipsJArr: TJsonArray;
+  Listeners: TArray<TListenerInfo>;
+  ipsJArr, ListenersJArr: TJsonArray;
+  I: Integer;
 begin
   PortJValue := jo.getValue(PORT_KEY_NAME);
   if PortJValue <> nil then
@@ -98,6 +112,16 @@ begin
     IPs := TStringList.Create;
     for Item in IPsJArr do
       IPs.Add(item.Value);
+  end;
+  ListenersJValue := jo.GetValue(SUBSCRIPTIONS_KEY_NAME);
+  if (ListenersJValue <> nil) AND (ListenersJValue is TJsonArray) then
+  begin
+    ListenersJArr := ListenersJValue as TJsonArray;
+    ListenerNum := ListenersJArr.Count;
+    Listeners := TArray<TListenerInfo>.Create();
+    SetLength(Listeners, ListenerNum);
+    // for I := 0 to ListenerNum - 1 do
+    // Listeners[I] := ListenersJArr.Items[I];
   end;
   Result := TAQConfig.Create(Port, IPs);
 end;
