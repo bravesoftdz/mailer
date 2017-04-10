@@ -19,7 +19,8 @@ uses
   TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
   TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas',
   TestActiveQueueResponceToJson in 'TestActiveQueueResponceToJson.pas',
-  TestBackEndResponceFromJson in 'TestBackEndResponceFromJson.pas';
+  TestBackEndResponceFromJson in 'TestBackEndResponceFromJson.pas',
+  SubscriptionOutcomeDataTest in 'SubscriptionOutcomeDataTest.pas';
 
 var
   runner: ITestRunner;

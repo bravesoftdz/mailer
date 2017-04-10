@@ -7,15 +7,16 @@ program ActiveQueueTests;
 
 uses
   System.SysUtils,
-{$IFDEF TESTINSIGHT}
+  {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-{$ENDIF }
+  {$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  SubscriptionDataTest in 'SubscriptionDataTest.pas',
   ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
-  ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas';
+  ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
+  SubscriptionDataTest in 'SubscriptionDataTest.pas',
+  AQConfigTest in 'AQConfigTest.pas';
 
 var
   runner: ITestRunner;

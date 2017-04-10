@@ -35,7 +35,10 @@ implementation
 
 constructor TListenerInfo.Create;
 begin
-
+  FToken := '';
+  FIP := '';
+  FPort := 0;
+  FPath := '';
 end;
 
 end.

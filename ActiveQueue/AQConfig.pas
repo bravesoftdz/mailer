@@ -24,7 +24,8 @@ type
     FListeners: TObjectList<TListenerInfo>;
     function GetIps(): TArray<String>;
   public
-    constructor Create(const Port: Integer; const IPs: TStringList);
+    constructor Create(const Port: Integer; const IPs: TStringList); overload;
+    constructor Create(); overload;
     destructor Destroy; override;
     /// <summary>Creates a new instance with values taken from given json object.</summary>
     /// <param name="jo">values of this object are to be used to initialize properties
@@ -41,6 +42,7 @@ type
     property IPs: TArray<String> read GetIPs write FIPs;
     /// <summary> list of subscribed listeners</summary>
     [MapperJSONSer('listeners')]
+    [MapperListOf(TListenerInfo)]
     property Listeners: TObjectList<TListenerInfo> read FListeners write FListeners;
 
   end;
@@ -65,11 +67,17 @@ begin
     FIPs[I] := IPs[I];
 end;
 
+constructor TAQConfig.Create;
+begin
+  FListeners := TObjectList<TListenerInfo>.Create();
+  FIPs := TArray<String>.Create();
+  Setlength(FIPs, 0);
+end;
+
 destructor TAQConfig.Destroy;
 begin
   FListeners.Clear;
   inherited;
-
 end;
 
 function TAQConfig.GetIps: TArray<String>;
