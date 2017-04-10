@@ -17,18 +17,21 @@ type
     FSubscriptionLock: TObject;
     /// a dumb lock object for managing the access to the queue items
     FQueueLock: TObject;
+    /// <summary>A dictionary for subscriptions: the keys are unique ids assigned
+    /// to the subscriptions, the values are objects containing subscription information</summary>
     FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
     /// items of the queue
     FQueue: TQueue<TReceptionRequest>;
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FIPs: TArray<String>;
     function GetNumOfSubscriptions: Integer;
+    /// <summary>Return true if given subscription data is already present in the register.</summary>
+    function IsSubscribed(const Data: TSubscriptionData): Boolean;
 
   public
     /// <summary>Create a subscription </summary>
-    /// <param name="Ip">ip of the computer from which the subscription request comes from</param>
     /// <param name="Data">subscription infomation (port, path etc)</param>
-    function AddSubscription(const Ip: String; const Data: TSubscriptionData): TActiveQueueResponce;
+    function AddSubscription(const Data: TSubscriptionData): TActiveQueueResponce;
     /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     function CancelSubscription(const Ip: String): TActiveQueueResponce;
@@ -80,24 +83,32 @@ begin
   end;
 end;
 
-function TActiveQueueModel.AddSubscription(const Ip: String;
-  const data: TSubscriptionData): TActiveQueueResponce;
+function TActiveQueueModel.AddSubscription(const data: TSubscriptionData): TActiveQueueResponce;
+var
+  Id: String;
+  Ip: String;
+  Guid: TGUID;
 begin
   TMonitor.Enter(FSubscriptionLock);
+  Ip := data.Ip;
   try
     if Not(IsSubscribable(Ip)) then
-      Result := TActiveQueueResponce.Create(False, 'not authorized')
+      Result := TActiveQueueResponce.Create(False, 'not authorized', '')
     else
     begin
-      if FSubscriptionRegister.ContainsKey(Ip) then
+      if IsSubscribed(data) then
       begin
-        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port));
+        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port), '');
       end
       else
       begin
+        Repeat
+          CreateGUID(Guid);
+          id := Guid.ToString;
+        until Not(FSubscriptionRegister.ContainsKey(id));
         // create a copy of the object
-        FSubscriptionRegister.Add(Ip, TSubscriptionData.Create(data.Url, data.Port, data.Path));
-        Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port));
+        FSubscriptionRegister.Add(id, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
+        Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port), id);
       end;
     end;
   finally
@@ -115,11 +126,11 @@ begin
     begin
       FSubscriptionRegister[Ip].DisposeOf;
       FSubscriptionRegister.Remove(Ip);
-      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.');
+      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.', 'to update');
     end
     else
     begin
-      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.');
+      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.', '---');
     end;
   finally
     TMonitor.Exit(FSubscriptionLock);
@@ -230,6 +241,11 @@ begin
     end;
   end;
   TMonitor.Exit(FSubscriptionLock);
+end;
+
+function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
+begin
+  Result := FSubscriptionRegister.ContainsValue(Data);
 end;
 
 procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);

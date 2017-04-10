@@ -11,9 +11,10 @@ type
   /// back end server corresponding to previously made requests.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TActiveQueueResponce = class
-  private
+  strict private
     FStatus: Boolean;
     FMessage: String;
+    FToken: String;
   public
     /// <param name="status">A status of the previously made request.</param>
     [MapperJSONSer('status')]
@@ -22,7 +23,7 @@ type
     /// previously made request</param>
     [MapperJSONSer('msgstat')]
     property Msg: String read FMessage write FMessage;
-    constructor Create(const Status: Boolean; const Msg: String); overload;
+    constructor Create(const Status: Boolean; const Msg: String; const Token: String); overload;
     constructor Create(); overload;
 
   end;
@@ -35,12 +36,14 @@ constructor TActiveQueueResponce.Create;
 begin
   FStatus := False;
   FMessage := '';
+  FToken := '';
 end;
 
-constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg: String);
+constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg: String; const Token: String);
 begin
   FStatus := Status;
   FMessage := Msg;
+  FToken := Token;
 end;
 
 end.

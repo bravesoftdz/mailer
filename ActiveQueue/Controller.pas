@@ -31,6 +31,10 @@ type
     class procedure Teardown();
 
     /// request a subscription to the ActiveQueue events
+    /// The body of the request must contain a TSubscriptionData instance.
+    /// As a reponce, a TActiveQueueResponce instance is returned.
+    /// In case of success, the reponce contains a unique token that will
+    /// be assigned to this subscription
     [MVCPath('/subscribe')]
     [MVCHTTPMethod([httpPUT])]
     procedure Subscribe(const Context: TWebContext);
@@ -143,12 +147,13 @@ begin
   begin
     try
       SubscriptionData := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+      SubscriptionData.Ip := Ip;
     except
       on e: Exception do
         SubscriptionData := nil;
     end;
   end;
-  responce := Model.AddSubscription(ip, SubscriptionData);
+  responce := Model.AddSubscription(SubscriptionData);
   Render(responce);
 end;
 

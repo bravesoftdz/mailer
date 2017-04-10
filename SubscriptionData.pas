@@ -12,16 +12,19 @@ type
   TSubscriptionData = class
   strict private
     FUrl: String;
+    FIP: String;
     FPort: Integer;
     FPath: String;
   public
     [MapperJSONSer('url')]
     property Url: String read FUrl write FUrl;
+    [MapperJSONSer('ip')]
+    property Ip: String read FIp write FIp;
     [MapperJSONSer('port')]
     property Port: Integer read FPort write FPort;
     [MapperJSONSer('path')]
     property Path: String read FPath write FPath;
-    constructor Create(const Url: String; const Port: Integer; const Path: String); overload;
+    constructor Create(const Ip, Url: String; const Port: Integer; const Path: String); overload;
     constructor Create(); overload;
   end;
 
@@ -29,9 +32,10 @@ implementation
 
 { TSubscriptionData }
 
-constructor TSubscriptionData.Create(const Url: String; const Port: Integer;
+constructor TSubscriptionData.Create(const Ip, Url: String; const Port: Integer;
   const Path: String);
 begin
+  FIP := Ip;
   FUrl := Url;
   FPort := Port;
   FPath := Path;
