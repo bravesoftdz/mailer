@@ -114,12 +114,14 @@ const
   Url = 'http://www.google.com';
   Port = 2346;
   Path = 'abc/efg';
+  Ip = '123.32.11.55';
 var
   jo: TJsonObject;
   obj: TSubscriptionData;
 begin
-  obj := TSubscriptionData.Create(Url, Port, Path);
+  obj := TSubscriptionData.Create(Ip, Url, Port, Path);
   jo := Mapper.ObjectToJSONObject(obj);
+  Assert.AreEqual(Ip, jo.GetValue('ip').value);
   Assert.AreEqual(url, jo.GetValue('url').value);
   Assert.AreEqual(port, strtoint(jo.GetValue('port').value));
   Assert.AreEqual(path, jo.GetValue('path').value);
@@ -141,7 +143,7 @@ var
   jo: TJsonObject;
   obj: TSubscriptionData;
 begin
-  obj := TSubscriptionData.Create('', 0, 'news/');
+  obj := TSubscriptionData.Create('111', '', 0, ' news / ');
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.IsNotNull(jo);
   Assert.AreEqual('news/', jo.GetValue('path').value, 'Path must be equal to "news/"');

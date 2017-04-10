@@ -126,11 +126,11 @@ begin
     begin
       FSubscriptionRegister[Ip].DisposeOf;
       FSubscriptionRegister.Remove(Ip);
-      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.', 'to update');
+      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.', '');
     end
     else
     begin
-      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.', '---');
+      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.', '');
     end;
   finally
     TMonitor.Exit(FSubscriptionLock);

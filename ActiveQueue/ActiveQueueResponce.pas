@@ -23,7 +23,7 @@ type
     /// previously made request</param>
     [MapperJSONSer('msgstat')]
     property Msg: String read FMessage write FMessage;
-    constructor Create(const Status: Boolean; const Msg: String; const Token: String); overload;
+    constructor Create(const Status: Boolean; const Msg, Token: String); overload;
     constructor Create(); overload;
 
   end;
@@ -39,7 +39,7 @@ begin
   FToken := '';
 end;
 
-constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg: String; const Token: String);
+constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg, Token: String);
 begin
   FStatus := Status;
   FMessage := Msg;

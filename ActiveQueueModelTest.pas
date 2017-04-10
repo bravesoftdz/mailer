@@ -208,10 +208,10 @@ begin
   IPs[2] := '1.1.1.3';
   IPs[3] := '1.1.1.4';
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
-  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
-  model.AddSubscription('1.1.1.3', TSubscriptionData.Create('an url 3', 555, 'news-2/'));
-  responce := model.AddSubscription('1.1.1.4', TSubscriptionData.Create('an url 4', 2345, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.4', 'an url 4', 2345, 'news/'));
   Assert.IsTrue(responce.status);
 end;
 
@@ -228,9 +228,9 @@ begin
   IPs[0] := '1.1.1.1';
   IPs[1] := '1.1.1.2';
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
-  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
-  responce := model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url', 2345, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url', 2345, 'news/'));
   Assert.IsFalse(responce.status);
 end;
 
@@ -248,10 +248,10 @@ begin
   IPs[1] := '1.1.1.2';
   IPs[2] := '1.1.1.3';
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
-  model.AddSubscription('1.1.1.2', TSubscriptionData.Create('an url 2', 1000, 'news/'));
-  model.AddSubscription('1.1.1.3', TSubscriptionData.Create('an url 3', 555, 'news-2/'));
-  responce := model.AddSubscription('1.1.1.4', TSubscriptionData.Create('an url 4', 2345, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.4', 'an url 4', 2345, 'news/'));
   Assert.IsFalse(responce.status);
 end;
 
@@ -277,7 +277,7 @@ begin
   SetLength(IPs, 1);
   IPs[0] := '1.1.1.1';
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce := model.CancelSubscription('5.5.5.5');
   Assert.IsFalse(responce.status);
@@ -297,9 +297,9 @@ begin
   IPs[2] := '3.1.1.13';
 
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.13', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
-  model.AddSubscription('2.1.1.13', TSubscriptionData.Create('an url 2', 8080, 'call-me/'));
-  model.AddSubscription('3.1.1.13', TSubscriptionData.Create('an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
   responce := model.CancelSubscription('no-associated-ip');
   Assert.IsFalse(responce.status);
@@ -316,7 +316,7 @@ begin
   SetLength(IPs, 1);
   IPs[0] := '100.100.001.1';
   Model.SetIPs(IPs);
-  model.AddSubscription('100.100.001.1', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce := model.CancelSubscription('100.100.001.1');
   Assert.IsTrue(responce.status);
@@ -336,9 +336,9 @@ begin
   IPs[2] := '3.1.1.13';
 
   Model.SetIPs(IPs);
-  model.AddSubscription('1.1.1.13', TSubscriptionData.Create('an url 1', 8080, 'call-me/'));
-  model.AddSubscription('2.1.1.13', TSubscriptionData.Create('an url 2', 8080, 'call-me/'));
-  model.AddSubscription('3.1.1.13', TSubscriptionData.Create('an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
   responce := model.CancelSubscription('2.1.1.13');
   Assert.IsTrue(responce.status);
@@ -356,8 +356,8 @@ begin
   SetLength(IPs, 1);
   IPs[0] := '5.5.5.5';
   Model.SetIPs(IPs);
-  data := TSubscriptionData.Create('an url', 2345, 'news/');
-  responce := model.AddSubscription('5.5.5.5', data);
+  data := TSubscriptionData.Create('5.5.5.5', 'an url', 2345, 'news/');
+  responce := model.AddSubscription(data);
   Assert.IsTrue(responce.status);
 end;
 
@@ -369,8 +369,8 @@ var
 begin
   Model := TActiveQueueModel.Create();
   Model.SetIPs(TArray<String>.Create());
-  data := TSubscriptionData.Create('an url', 2345, 'news/');
-  responce := model.AddSubscription('no such ip', data);
+  data := TSubscriptionData.Create('no such ip', 'an url', 2345, 'news/');
+  responce := model.AddSubscription(data);
   Assert.IsFalse(responce.status);
 end;
 
@@ -476,9 +476,9 @@ begin
   IPs[1] := 'ip 2';
   Model.SetIPs(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
-  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
   Assert.AreEqual(2, Model.numOfSubscriptions);
 end;
 
@@ -497,11 +497,11 @@ begin
   Model.SetIPs(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
 
-  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
-  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
-  Model.AddSubscription('ip 3', TSubscriptionData.Create('url 3', 2023, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 3', 'url 3', 2023, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
-  Model.AddSubscription('ip 4', TSubscriptionData.Create('url 4', 2024, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 4', 'url 4', 2024, 'path3'));
   Assert.AreEqual(4, Model.numOfSubscriptions);
 end;
 
@@ -516,7 +516,7 @@ begin
   IPs[0] := 'ip 1';
   Model.SetIPs(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
@@ -532,9 +532,9 @@ begin
   IPs[1] := 'ip 2';
   Model.SetIPs(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 1, 'a path 1'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 1, 'a path 1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
-  Model.AddSubscription('non-allowed-ip', TSubscriptionData.Create('url 2', 2, 'a path 2'));
+  Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 2', 2, 'a path 2'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
@@ -553,11 +553,11 @@ begin
   Model.SetIPs(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
 
-  Model.AddSubscription('ip 1', TSubscriptionData.Create('url 1', 2021, 'path1'));
-  Model.AddSubscription('ip 2', TSubscriptionData.Create('url 2', 2022, 'path2'));
-  Model.AddSubscription('ip 3', TSubscriptionData.Create('url 3', 2023, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create('ip 3', 'url 3', 2023, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
-  Model.AddSubscription('non-allowed-ip', TSubscriptionData.Create('url 4', 2024, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 4', 2024, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
 end;
 
@@ -569,7 +569,7 @@ begin
   Model := TActiveQueueModel.Create;
   Model.SetIPs(TArray<String>.Create());
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription('some non allowed ip', TSubscriptionData.Create('url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create('some non allowed ip', 'url 1', 2021, 'path1'));
   Assert.AreEqual(0, Model.numOfSubscriptions);
 end;
 
