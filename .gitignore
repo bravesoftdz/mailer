@@ -5,9 +5,12 @@ Data/
 LibrarySupport/
 ModelSupport_Source
 out/
+logs/
 *.tvsconfig
 __recovery/
 *.local
 *.identcache
 *.stat
 Delphi-Code-Coverage-Debug.log
+ActiveQueue.conf
+ActiveQueue*.conf
