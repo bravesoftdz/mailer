@@ -20,11 +20,12 @@ type
     SUBSCRIPTIONS_KEY_NAME = 'subscriptions';
   strict private
     FPort: Integer;
-    FIPs: TArray<String>;
+    FIPs: String;
+    FIPList: TArray<String>;
     FListeners: TObjectList<TListenerInfo>;
-    function GetIps(): TArray<String>;
+
   public
-    constructor Create(const Port: Integer; const IPs: TStringList); overload;
+    constructor Create(const Port: Integer; const IPs: String); overload;
     constructor Create(); overload;
     destructor Destroy; override;
     /// <summary>Creates a new instance with values taken from given json object.</summary>
@@ -32,14 +33,21 @@ type
     /// of returned instance.</name>
     class function LoadFromJson(const jo: TJsonObject): TAQConfig;
 
+    /// <summary>Return a list of ips from which the seubscriptions are allowed</summary>
+    function GetIps(): TArray<String>;
+    /// <summary>Set ip from which the subscription requests are allowed.</summary>
+    /// <param name="IPs">Comma-separated list of ips. Trailing white spaces
+    /// are to be trimmed</param>
+    procedure SetIPs(const IPs: String);
+
     /// <summary> Port at which the program accepts the connections.</summary>
     [MapperJSONSer('port')]
     property Port: Integer read FPort write FPort;
 
-    /// <summary> white list of ips from which the subscriptions are allowed.
-    /// Subscription request coming from any other ip is to be ignored.</summary>
+    /// <summary> comma-separated list of ips from which the subscriptions are allowed.
+    /// Any subscription request originating from any other ip is to be ignored.</summary>
     [MapperJSONSer('ips')]
-    property IPs: TArray<String> read GetIPs write FIPs;
+    property IPs: String read FIPs write setIPs;
     /// <summary> list of subscribed listeners</summary>
     [MapperJSONSer('listeners')]
     [MapperListOf(TListenerInfo)]
@@ -50,33 +58,35 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils, System.Types, System.StrUtils;
 
 { TAQConfig }
 
-constructor TAQConfig.Create(const Port: Integer; const IPs: TStringList);
+constructor TAQConfig.Create(const Port: Integer; const IPs: String);
 var
   I, S: Integer;
+  IPsArr: TArray<String>;
+  items: TStringDynArray;
 begin
   FPort := Port;
-  FIPs := TArray<String>.Create();
+  FIPs := IPs;
+  FIPList := TArray<String>.Create();
   FListeners := TObjectList<TListenerInfo>.Create();
-  S := IPs.Count;
-  Setlength(FIPs, S);
-  for I := 0 to S - 1 do
-    FIPs[I] := IPs[I];
+  SetIPs(IPs);
 end;
 
 constructor TAQConfig.Create;
 begin
   FListeners := TObjectList<TListenerInfo>.Create();
-  FIPs := TArray<String>.Create();
-  Setlength(FIPs, 0);
+  FIPs := '';
+  FIPList := TArray<String>.Create();
+  Setlength(FIPList, 0);
 end;
 
 destructor TAQConfig.Destroy;
 begin
   FListeners.Clear;
+  SetLength(FIPList, 0);
   inherited;
 end;
 
@@ -84,21 +94,21 @@ function TAQConfig.GetIps: TArray<String>;
 var
   I, S: Integer;
 begin
-  If Assigned(FIPs) then
-    S := Length(FIPs)
+  If Assigned(FIPList) then
+    S := Length(FIPList)
   else
     S := 0;
   Result := TArray<String>.Create();
   SetLength(Result, S);
   for I := 0 to S - 1 do
-    Result[I] := FIPs[I];
+    Result[I] := FIPList[I];
 end;
 
 class function TAQConfig.LoadFromJson(const jo: TJsonObject): TAQConfig;
 var
   Port, ListenerNum: Integer;
   Item, PortJValue, IPsJValue, ListenersJValue: TJsonValue;
-  IPs: TStringList;
+  IPs: String;
   Listeners: TArray<TListenerInfo>;
   ipsJArr, ListenersJArr: TJsonArray;
   I: Integer;
@@ -114,12 +124,9 @@ begin
       end;
     end;
   IPsJValue := jo.GetValue(IPS_KEY_NAME);
-  if (IPsJValue <> nil) AND (IPsJValue is TJsonArray) then
+  if (IPsJValue <> nil) then
   begin
-    ipsJArr := IPsJValue as TJsonArray;
-    IPs := TStringList.Create;
-    for Item in IPsJArr do
-      IPs.Add(item.Value);
+    IPs := IPsJValue.Value;
   end;
   ListenersJValue := jo.GetValue(SUBSCRIPTIONS_KEY_NAME);
   if (ListenersJValue <> nil) AND (ListenersJValue is TJsonArray) then
@@ -132,6 +139,21 @@ begin
     // Listeners[I] := ListenersJArr.Items[I];
   end;
   Result := TAQConfig.Create(Port, IPs);
+end;
+
+procedure TAQConfig.SetIPs(const IPs: String);
+var
+  items: TStringDynArray;
+  S, I: Integer;
+begin
+  /// clean the previously set values
+  SetLength(FIPList, 0);
+  FIPs := IPs;
+  Items := SplitString(IPs, ',');
+  S := Length(items);
+  SetLength(FIPList, S);
+  for I := 0 to S - 1 do
+    FIPList[I] := Items[I].Trim;
 end;
 
 end.
