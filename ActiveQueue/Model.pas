@@ -34,7 +34,8 @@ type
     function AddSubscription(const Data: TSubscriptionData): TActiveQueueResponce;
     /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
-    function CancelSubscription(const Ip: String): TActiveQueueResponce;
+    /// <param name="Token">token associated with the subscription</param>
+    function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
     /// get not more that N items from the queue.
     function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
     /// <summary>Add many items to the pull</summary>
@@ -117,22 +118,27 @@ begin
 
 end;
 
-function TActiveQueueModel.CancelSubscription(
-  const
-  Ip:
-  String): TActiveQueueResponce;
+function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
+var
+  subscription: TSubscriptionData;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
-    if (FSubscriptionRegister.ContainsKey(Ip)) then
+    if (FSubscriptionRegister.ContainsKey(Token)) then
     begin
-      FSubscriptionRegister[Ip].DisposeOf;
-      FSubscriptionRegister.Remove(Ip);
-      Result := TActiveQueueResponce.Create(True, 'request to cancel your subscription (' + Ip + ') is executed.', '');
+      subscription := FSubscriptionRegister[Token];
+      if (subscription.Ip = Ip) then
+      begin
+        subscription.DisposeOf;
+        FSubscriptionRegister.Remove(Token);
+        Result := TActiveQueueResponce.Create(True, 'unsubscribed', '');
+      end
+      else
+        Result := TActiveQueueResponce.Create(False, 'wrong ip or token', '');
     end
     else
     begin
-      Result := TActiveQueueResponce.Create(False, 'no subscription for ip ' + Ip + ' is found.', '');
+      Result := TActiveQueueResponce.Create(False, 'not subscribed', '');
     end;
   finally
     TMonitor.Exit(FSubscriptionLock);
@@ -254,17 +260,17 @@ var
   value: TSubscriptionData;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
-//  for key in FSubscriptionRegister.Keys do
-//  begin
-//    Value := FSubscriptionRegister[key];
-//    if Data.Equals(Value) then
-//    begin
-//      Result := True;
-//      Exit;
-//    end;
-//  end;
-//
-//  Result := False;
+  // for key in FSubscriptionRegister.Keys do
+  // begin
+  // Value := FSubscriptionRegister[key];
+  // if Data.Equals(Value) then
+  // begin
+  // Result := True;
+  // Exit;
+  // end;
+  // end;
+  //
+  // Result := False;
 end;
 
 procedure TActiveQueueModel.SetIPs(

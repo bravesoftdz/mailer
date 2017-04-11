@@ -23,6 +23,8 @@ type
     /// previously made request</param>
     [MapperJSONSer('msgstat')]
     property Msg: String read FMessage write FMessage;
+    [MapperJSONSer('token')]
+    property Token: String read FToken write FToken;
     constructor Create(const Status: Boolean; const Msg, Token: String); overload;
     constructor Create(); overload;
 
