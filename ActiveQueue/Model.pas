@@ -98,7 +98,7 @@ begin
     begin
       if IsSubscribed(data) then
       begin
-        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed, port ' + inttostr(FSubscriptionRegister[Ip].Port), '');
+        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed', '');
       end
       else
       begin
@@ -118,7 +118,9 @@ begin
 end;
 
 function TActiveQueueModel.CancelSubscription(
-  const Ip: String): TActiveQueueResponce;
+  const
+  Ip:
+  String): TActiveQueueResponce;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
@@ -170,7 +172,10 @@ begin
 
 end;
 
-function TActiveQueueModel.getData(const Ip: String;
+function TActiveQueueModel.getData(
+  const
+  Ip:
+  String;
   const
   N:
   Integer): TObjectList<TReceptionRequest>;
@@ -244,11 +249,28 @@ begin
 end;
 
 function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
+var
+  key: String;
+  value: TSubscriptionData;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
+//  for key in FSubscriptionRegister.Keys do
+//  begin
+//    Value := FSubscriptionRegister[key];
+//    if Data.Equals(Value) then
+//    begin
+//      Result := True;
+//      Exit;
+//    end;
+//  end;
+//
+//  Result := False;
 end;
 
-procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
+procedure TActiveQueueModel.SetIPs(
+  const
+  IPs:
+  TArray<String>);
 var
   I, S: Integer;
 begin

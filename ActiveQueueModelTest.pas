@@ -18,8 +18,8 @@ type
     /// Test suit for adding a subscription
     /// Partition the input as follows:
     /// 1. already subscribed: true, false
-    /// 2. ip is allowed: true, false
-    /// 3. # already present subscriptions: 0,  > 0
+    /// 2. # present subscriptions: 0, 1, > 2
+    /// 3. request is from allowed ip: true, false
 
     /// Cover
     /// 1. already subscribed: false
@@ -230,7 +230,7 @@ begin
   Model.SetIPs(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
-  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url', 2345, 'news/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
   Assert.IsFalse(responce.status);
 end;
 
