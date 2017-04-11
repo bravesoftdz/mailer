@@ -40,7 +40,7 @@ type
     procedure Subscribe(const Context: TWebContext);
 
     /// request a cancellation of the subscription to the ActiveQueue events
-    [MVCPath('/unsubscribe')]
+    [MVCPath('/unsubscribe/($token)')]
     [MVCHTTPMethod([httpPUT])]
     procedure unsubscribe(const Context: TWebContext);
 
@@ -166,10 +166,11 @@ end;
 procedure TController.unsubscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
-  Ip: String;
+  Ip, Token: String;
 begin
-  ip := Context.Request.ClientIP;
-  responce := Model.CancelSubscription(ip);
+  Token := Context.Request.Params['token'];
+  Ip := Context.Request.ClientIP;
+  responce := Model.CancelSubscription(ip, token);
   Render(responce);
 end;
 
