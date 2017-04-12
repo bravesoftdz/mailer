@@ -78,7 +78,7 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils, MVCFramework.RESTAdapter;
 { TActiveQueueModel }
 
 function TActiveQueueModel.addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
@@ -107,6 +107,7 @@ var
   Id: String;
   Ip: String;
   Guid: TGUID;
+  Adapter: TRestAdapter<IListenerProxy>;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
@@ -133,6 +134,8 @@ begin
           until Not(FSubscriptionRegister.ContainsKey(id));
           // create a copy of the object
           FSubscriptionRegister.Add(id, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
+          Adapter := TRestAdapter<IListenerProxy>.Create();
+          FProxyRegister.Add(id, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
           Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), id);
         end;
       end;
@@ -156,6 +159,7 @@ begin
       begin
         subscription.DisposeOf;
         FSubscriptionRegister.Remove(Token);
+        FProxyRegister.Remove(Token);
         Result := TActiveQueueResponce.Create(True, 'unsubscribed', '');
       end
       else
@@ -189,7 +193,8 @@ begin
         if Not(FSubscriptionRegister.ContainsKey(Token)) then
         begin
           IsOk := False;
-          Break;
+          // Break;
+          raise Exception.Create('Inconsistent rep of TActiveQueueModel ' + Token);
         end;
     end;
     if Not(IsOk) then
@@ -209,6 +214,7 @@ begin
   FQueue := TQueue<TReceptionRequest>.Create;
   FIPs := TArray<String>.Create();
   SetLength(FIPs, 0);
+  CheckRep();
 end;
 
 destructor TActiveQueueModel.Destroy;
@@ -236,13 +242,7 @@ begin
 
 end;
 
-function TActiveQueueModel.getData(
-  const
-  Ip:
-  String;
-  const
-  N:
-  Integer): TObjectList<TReceptionRequest>;
+function TActiveQueueModel.getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
   IsSubScribed: Boolean;
@@ -316,10 +316,7 @@ begin
 
 end;
 
-function TActiveQueueModel.IsSubscribable(
-  const
-  IP:
-  String): Boolean;
+function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
 var
   I, S: Integer;
 begin
@@ -345,10 +342,7 @@ begin
   Result := FSubscriptionRegister.ContainsValue(Data);
 end;
 
-procedure TActiveQueueModel.SetIPs(
-  const
-  IPs:
-  TArray<String>);
+procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
 var
   I, S: Integer;
 begin
@@ -357,6 +351,7 @@ begin
   SetLength(FIPs, S);
   for I := 0 to S - 1 do
     FIPs[I] := IPs[I];
+  CheckRep();
 end;
 
 procedure TActiveQueueModel.SetListeners(
@@ -371,6 +366,7 @@ begin
     begin
       FSubscriptionRegister.Add(Listener.token, TSubscriptionData.Create(Listener.IP, '', Listener.Port, Listener.Path));
     end;
+    CheckRep();
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
