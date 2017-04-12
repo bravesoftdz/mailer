@@ -36,6 +36,8 @@ type
     function Equals(Obj: TObject): Boolean; override;
     /// <summary>Since the  method Equals() is overriden, hash code must be overriden as well. </summary>
     function GetHashCode(): Integer; override;
+    /// <summary>Returns a copy of the object</summary>
+    function Copy(): TSubscriptionData;
   end;
 
 implementation
@@ -49,6 +51,11 @@ begin
   FUrl := Url;
   FPort := Port;
   FPath := Path;
+end;
+
+function TSubscriptionData.Copy: TSubscriptionData;
+begin
+  Result := TSubscriptionData.Create(FIp, FUrl, FPort, FPath);
 end;
 
 constructor TSubscriptionData.Create;
@@ -73,7 +80,7 @@ end;
 
 function TSubscriptionData.GetHashCode: Integer;
 const
-  Seed = 17;  // some mutually prime numbers
+  Seed = 17; // some mutually prime numbers
   Base = 31;
 begin
   Result := Seed;

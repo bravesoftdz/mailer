@@ -25,8 +25,16 @@ type
     FListeners: TObjectList<TListenerInfo>;
 
   public
+    constructor Create(const Port: Integer; const IPs: String; const Listeners: TObjectList<TListenerInfo>); overload;
     constructor Create(const Port: Integer; const IPs: String); overload;
     constructor Create(); overload;
+
+    /// <summary>Set the listeners. Performs a defencive copying.</summary>
+    procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
+
+    /// <summary>Get the listeners. Performs a defencive copying.</summary>
+    function GetListeners(): TObjectList<TListenerInfo>;
+
     destructor Destroy; override;
     /// <summary>Creates a new instance with values taken from given json object.</summary>
     /// <param name="jo">values of this object are to be used to initialize properties
@@ -63,24 +71,27 @@ uses
 { TAQConfig }
 
 constructor TAQConfig.Create(const Port: Integer; const IPs: String);
-var
-  I, S: Integer;
-  IPsArr: TArray<String>;
-  items: TStringDynArray;
 begin
-  FPort := Port;
-  FIPs := IPs;
-  FIPList := TArray<String>.Create();
-  FListeners := TObjectList<TListenerInfo>.Create();
-  SetIPs(IPs);
+  Create(Port, IPs, TObjectList<TListenerInfo>.Create());
 end;
 
 constructor TAQConfig.Create;
 begin
-  FListeners := TObjectList<TListenerInfo>.Create();
-  FIPs := '';
+  Create(0, '', TObjectList<TListenerInfo>.Create());
+end;
+
+constructor TAQConfig.Create(const Port: Integer; const IPs: String;
+  const Listeners: TObjectList<TListenerInfo>);
+var
+  I, S: Integer;
+  IPsArr: TArray<String>;
+begin
+  FPort := Port;
+  FIPs := IPs;
   FIPList := TArray<String>.Create();
-  Setlength(FIPList, 0);
+  SetIPs(IPs);
+  FListeners := TObjectList<TListenerInfo>.Create();
+  SetListeners(Listeners);
 end;
 
 destructor TAQConfig.Destroy;
@@ -102,6 +113,23 @@ begin
   SetLength(Result, S);
   for I := 0 to S - 1 do
     Result[I] := FIPList[I];
+end;
+
+function TAQConfig.GetListeners: TObjectList<TListenerInfo>;
+var
+  listener: TListenerInfo;
+begin
+  Result := TObjectList<TListenerInfo>.Create();
+  if Assigned(FListeners) then
+  begin
+    for listener in FListeners do
+      Result.Add(TListenerInfoBuilder.Create()
+        .SetToken(Listener.token)
+        .SetIP(Listener.IP)
+        .SetPort(Listener.Port)
+        .SetPath(Listener.Path).Build);
+  end;
+
 end;
 
 class function TAQConfig.LoadFromJson(const jo: TJsonObject): TAQConfig;
@@ -154,6 +182,27 @@ begin
   SetLength(FIPList, S);
   for I := 0 to S - 1 do
     FIPList[I] := Items[I].Trim;
+end;
+
+procedure TAQConfig.SetListeners(const Listeners: TObjectList<TListenerInfo>);
+var
+  Listener: TListenerInfo;
+begin
+  if Assigned(FListeners) then
+  begin
+    FListeners.Clear;
+    FListeners.DisposeOf;
+  end;
+  FListeners := TObjectList<TListenerInfo>.Create();
+  for Listener in Listeners do
+  begin
+    FListeners.Add(TListenerInfoBuilder.Create()
+      .SetToken(Listener.token)
+      .SetIP(Listener.IP)
+      .SetPort(Listener.Port)
+      .SetPath(Listener.Path).Build);
+  end;
+
 end;
 
 end.

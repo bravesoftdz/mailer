@@ -3,7 +3,8 @@ unit Controller;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers;
+  MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers,
+  System.Generics.Collections, ListenerInfo;
 
 type
 
@@ -16,6 +17,8 @@ type
   public
 
     class procedure SetIPs(const IPs: TArray<String>);
+
+    class function GetListeners(): TObjectList<TListenerInfo>;
 
     /// <summary> Get the white list of ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
@@ -64,7 +67,7 @@ implementation
 
 uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
-  System.SysUtils, System.Generics.Collections;
+  System.SysUtils;
 
 class function TController.GetIPs: TArray<String>;
 begin
@@ -89,6 +92,15 @@ begin
   ip := Context.Request.ClientIP;
   Items := Model.getData(Ip, N);
   Render<TReceptionRequest>(Items);
+end;
+
+class function TController.GetListeners: TObjectList<TListenerInfo>;
+begin
+  if Assigned(Model) then
+    Result := Model.GetListeners()
+  else
+    Result := TObjectList<TListenerInfo>.Create();
+
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);

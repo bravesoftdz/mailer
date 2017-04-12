@@ -82,6 +82,7 @@ var
   APort: Integer;
   jo: TJsonObject;
   OutFile: String;
+  ConfigUpdated: TAQConfig;
 
 begin
   Writeln('** DMVCFramework Server **');
@@ -118,7 +119,8 @@ begin
         break;
     end;
   finally
-    jo := Mapper.ObjectToJSONObject(Config);
+    ConfigUpdated := TAQConfig.Create(Config.Port, Config.IPs, TController.GetListeners());
+    jo := Mapper.ObjectToJSONObject(ConfigUpdated);
     OutFile := GetAvailablePath(ConfigFileName, '-YYYY-mm-dd_hh_nn_ss');
     SaveConfigToFile(OutFile, jo.ToString);
     LServer.Free;

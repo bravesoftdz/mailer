@@ -4,7 +4,7 @@ interface
 
 uses
   ActiveQueueResponce, SubscriptionData, System.Generics.Collections, ReceptionRequest,
-  System.Classes;
+  System.Classes, ListenerInfo;
 
 type
   /// <summary>
@@ -32,6 +32,9 @@ type
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
     function AddSubscription(const Data: TSubscriptionData): TActiveQueueResponce;
+
+    /// <summary>Get all subscribed listeners</summary>
+    function GetListeners(): TObjectList<TListenerInfo>;
     /// <summary> Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     /// <param name="Token">token associated with the subscription</param>
@@ -91,25 +94,32 @@ var
   Guid: TGUID;
 begin
   TMonitor.Enter(FSubscriptionLock);
-  Ip := data.Ip;
   try
-    if Not(IsSubscribable(Ip)) then
-      Result := TActiveQueueResponce.Create(False, 'not authorized', '')
+    if Data = nil then
+    begin
+      Result := TActiveQueueResponce.Create(False, 'incorrect data received', '');
+    end
     else
     begin
-      if IsSubscribed(data) then
-      begin
-        Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed', '');
-      end
+      Ip := data.Ip;
+      if Not(IsSubscribable(Ip)) then
+        Result := TActiveQueueResponce.Create(False, 'not authorized', '')
       else
       begin
-        Repeat
-          CreateGUID(Guid);
-          id := Guid.ToString;
-        until Not(FSubscriptionRegister.ContainsKey(id));
-        // create a copy of the object
-        FSubscriptionRegister.Add(id, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
-        Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port), id);
+        if IsSubscribed(data) then
+        begin
+          Result := TActiveQueueResponce.Create(False, 'your ip ' + Ip + ' is already subscribed', '');
+        end
+        else
+        begin
+          Repeat
+            CreateGUID(Guid);
+            id := Guid.ToString;
+          until Not(FSubscriptionRegister.ContainsKey(id));
+          // create a copy of the object
+          FSubscriptionRegister.Add(id, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
+          Result := TActiveQueueResponce.Create(True, 'your ip is ' + Ip + ', your port is ' + inttostr(data.Port), id);
+        end;
       end;
     end;
   finally
@@ -233,6 +243,31 @@ begin
   TMonitor.Exit(FSubscriptionLock);
 end;
 
+function TActiveQueueModel.GetListeners: TObjectList<TListenerInfo>;
+var
+  Subscription: TSubscriptionData;
+  Token: String;
+begin
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    Result := TObjectList<TListenerInfo>.Create();
+    for Token in FSubscriptionRegister.Keys do
+    begin
+      Subscription := FSubscriptionRegister[Token];
+      Result.Add(TListenerInfoBuilder.Create()
+        .SetToken(Token)
+        .SetIp(Subscription.Ip)
+        .SetPort(Subscription.Port)
+        .SetPath(Subscription.Path)
+        .Build()
+        );
+    end;
+  finally
+    TMonitor.Exit(FSubscriptionLock);
+  end;
+
+end;
+
 function TActiveQueueModel.IsSubscribable(
   const
   IP:
@@ -260,17 +295,6 @@ var
   value: TSubscriptionData;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
-  // for key in FSubscriptionRegister.Keys do
-  // begin
-  // Value := FSubscriptionRegister[key];
-  // if Data.Equals(Value) then
-  // begin
-  // Result := True;
-  // Exit;
-  // end;
-  // end;
-  //
-  // Result := False;
 end;
 
 procedure TActiveQueueModel.SetIPs(
