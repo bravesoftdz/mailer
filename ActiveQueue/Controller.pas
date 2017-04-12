@@ -20,6 +20,8 @@ type
 
     class function GetListeners(): TObjectList<TListenerInfo>;
 
+    class procedure SetSubscriptions(const Listeners: TObjectList<TListenerInfo>);
+
     /// <summary> Get the white list of ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
     class function GetIPs(): TArray<String>;
@@ -138,6 +140,13 @@ begin
   begin
     Model.SetIPs(IPs);
   end
+end;
+
+class procedure TController.SetSubscriptions(
+  const Listeners: TObjectList<TListenerInfo>);
+begin
+  if Assigned(Model) then
+    Model.SetListeners(Listeners);
 end;
 
 class

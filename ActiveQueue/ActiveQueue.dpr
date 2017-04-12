@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -24,7 +24,8 @@ uses
   System.Generics.Collections,
   AQConfig in 'AQConfig.pas',
   SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
-  ListenerInfo in 'ListenerInfo.pas';
+  ListenerInfo in 'ListenerInfo.pas',
+  ListenerProxyInterface in 'ListenerProxyInterface.pas';
 
 {$R *.res}
 
@@ -83,6 +84,7 @@ var
   jo: TJsonObject;
   OutFile: String;
   ConfigUpdated: TAQConfig;
+  numberOfListeners: Integer;
 
 begin
   Writeln('** DMVCFramework Server **');
@@ -90,6 +92,7 @@ begin
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   TController.SetIps(Config.getIPs());
+  TController.SetSubscriptions(Config.Listeners);
   WhiteList := TController.GetIPs;
   if (Length(WhiteList) = 0) then
   begin
@@ -101,6 +104,11 @@ begin
     for Item in WhiteList do
       Writeln(Item);
   end;
+  numberOfListeners := Config.Listeners.Count;
+  if numberOfListeners = 0 then
+    Writeln('No subscriptions found in the config file.')
+  else
+    Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');
 
   try
     LServer.DefaultPort := APort;
