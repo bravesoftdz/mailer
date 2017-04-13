@@ -73,6 +73,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <Debugger_RunParams>-c ActiveQueue.conf</Debugger_RunParams>
         <Debugger_CWD>C:\Dev\Mailer</Debugger_CWD>
         <DCC_UnitSearchPath>C:\Dev\Mailer;C:\Dev\Mailer\ActiveQueue;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>

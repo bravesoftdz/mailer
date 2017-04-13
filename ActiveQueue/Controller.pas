@@ -126,8 +126,13 @@ var
 begin
   if Context.Request.ThereIsRequestBody then
   begin
-    items := Context.Request.BodyAsListOf<TReceptionRequest>;
-    Outcome := Model.addAll(Items);
+    try
+      items := Context.Request.BodyAsListOf<TReceptionRequest>;
+      Outcome := Model.addAll(Items);
+    except
+      on E: Exception do
+        Outcome := False;
+    end;
   end
   else
     Outcome := False;

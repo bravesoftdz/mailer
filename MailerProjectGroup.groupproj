@@ -18,6 +18,9 @@
         <Projects Include="ActiveQueueTests.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="ConsumerMock\ConsumerMock.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -71,14 +74,23 @@
     <Target Name="ActiveQueueTests:Make">
         <MSBuild Projects="ActiveQueueTests.dproj" Targets="Make"/>
     </Target>
+    <Target Name="ConsumerMock">
+        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj"/>
+    </Target>
+    <Target Name="ConsumerMock:Clean">
+        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ConsumerMock:Make">
+        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue;ActiveQueueTests"/>
+        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue;ActiveQueueTests;ConsumerMock"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean;ActiveQueueTests:Clean"/>
+        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean;ActiveQueueTests:Clean;ConsumerMock:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make;ActiveQueueTests:Make"/>
+        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make;ActiveQueueTests:Make;ConsumerMock:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

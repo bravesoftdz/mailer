@@ -3,7 +3,7 @@ unit ActiveQueueAPI;
 interface
 
 uses SubscriptionData, ActiveQueueResponce, ReceptionRequest,
-  System.Generics.Collections;
+  System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons;
 
 type
   IActiveQueueAPI = interface(IInvokable)
