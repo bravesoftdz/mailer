@@ -111,7 +111,6 @@ var
   Token: String;
   Ip: String;
   Guid: TGUID;
-  Adapter: TRestAdapter<IListenerProxy>;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
@@ -138,7 +137,6 @@ begin
           until Not(FSubscriptionRegister.ContainsKey(Token));
           // create a copy of the object
           FSubscriptionRegister.Add(Token, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
-          Adapter := TRestAdapter<IListenerProxy>.Create();
           FProxyRegister.Add(Token, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
           Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
         end;
@@ -379,9 +377,11 @@ begin
   TMonitor.Enter(FSubscriptionLock);
   try
     FSubscriptionRegister.Clear;
+    FProxyRegister.Clear;
     for Listener in Listeners do
     begin
       FSubscriptionRegister.Add(Listener.token, TSubscriptionData.Create(Listener.IP, '', Listener.Port, Listener.Path));
+      FProxyRegister.Add(Listener.token, TRestAdapter<IListenerProxy>.Create().Build(Listener.IP, Listener.Port));
     end;
     CheckRep();
   finally

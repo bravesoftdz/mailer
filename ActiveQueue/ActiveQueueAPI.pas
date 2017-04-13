@@ -2,11 +2,7 @@ unit ActiveQueueAPI;
 
 interface
 
-uses SubscriptionData, ActiveQueueResponce, ReceptionRequest;
-
-implementation
-
-uses
+uses SubscriptionData, ActiveQueueResponce, ReceptionRequest,
   System.Generics.Collections;
 
 type
@@ -17,7 +13,7 @@ type
     function Subscribe([Body] Data: TSubscriptionData): TActiveQueueResponce;
 
     [RESTResource(TMVCHTTPMethodType.httpPUT, '/unsubscribe/{token}')]
-    function unsubscribe([Param('token')] Token: String): TActiveQueueResponce;
+    function Unsubscribe([Param('token')] Token: String): TActiveQueueResponce;
 
     [RESTResource(TMVCHTTPMethodType.httpGET, '/items/get/{quantity}')]
     function GetItems([Param('quantity')] N: Integer): TObjectList<TReceptionRequest>;
@@ -26,5 +22,7 @@ type
     function PutItems([Body] Items: TObjectList<TReceptionRequest>): Boolean;
 
   end;
+
+implementation
 
 end.
