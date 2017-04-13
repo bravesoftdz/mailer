@@ -38,6 +38,8 @@ type
 
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
+    /// <summary>Notify all subscribed listeners that the queue state has changed</summary>
+    procedure NotifyListeners();
 
   public
     /// <summary>Create a subscription </summary>
@@ -100,11 +102,13 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
+  NotifyListeners();
+
 end;
 
 function TActiveQueueModel.AddSubscription(const data: TSubscriptionData): TActiveQueueResponce;
 var
-  Id: String;
+  Token: String;
   Ip: String;
   Guid: TGUID;
   Adapter: TRestAdapter<IListenerProxy>;
@@ -130,13 +134,13 @@ begin
         begin
           Repeat
             CreateGUID(Guid);
-            id := Guid.ToString;
-          until Not(FSubscriptionRegister.ContainsKey(id));
+            Token := Guid.ToString;
+          until Not(FSubscriptionRegister.ContainsKey(Token));
           // create a copy of the object
-          FSubscriptionRegister.Add(id, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
+          FSubscriptionRegister.Add(Token, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
           Adapter := TRestAdapter<IListenerProxy>.Create();
-          FProxyRegister.Add(id, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
-          Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), id);
+          FProxyRegister.Add(Token, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
+          Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
         end;
       end;
     end;
@@ -177,7 +181,7 @@ end;
 procedure TActiveQueueModel.checkRep;
 var
   IsOk: Boolean;
-  Token: String;
+  Token: String; { TODO -oAndrew : skip it in the production }
 begin
   TMonitor.Enter(FQueueLock);
   try
@@ -192,12 +196,10 @@ begin
       for Token in FProxyRegister.Keys do
         if Not(FSubscriptionRegister.ContainsKey(Token)) then
         begin
-          IsOk := False;
-          // Break;
-          raise Exception.Create('Inconsistent rep of TActiveQueueModel ' + Token);
+          raise Exception.Create('Inconsistent rep of TActiveQueueModel: token mismatch');
         end;
-    end;
-    if Not(IsOk) then
+    end
+    else
       raise Exception.Create('Inconsistent rep of TActiveQueueModel');
   finally
     TMonitor.Exit(FQueueLock);
@@ -340,6 +342,19 @@ var
   value: TSubscriptionData;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
+end;
+
+procedure TActiveQueueModel.NotifyListeners;
+var
+  Token: String;
+begin
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    for Token in FProxyRegister.Keys do
+      FProxyRegister[Token].Notify();
+  finally
+    TMonitor.Exit(FSubscriptionLock);
+  end;
 end;
 
 procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
