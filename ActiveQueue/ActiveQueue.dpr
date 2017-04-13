@@ -25,7 +25,8 @@ uses
   AQConfig in 'AQConfig.pas',
   SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
   ListenerInfo in 'ListenerInfo.pas',
-  ListenerProxyInterface in 'ListenerProxyInterface.pas';
+  ListenerProxyInterface in 'ListenerProxyInterface.pas',
+  ActiveQueueAPI in 'ActiveQueueAPI.pas';
 
 {$R *.res}
 

@@ -8,15 +8,20 @@ uses
 type
 
   [MVCPath('/')]
-  TController = class(TMVCController) 
+  TController = class(TMVCController)
   public
-    [MVCPath('/')]
-    [MVCHTTPMethod([httpGET])]
-    procedure Index;
+    [MVCPath('/notify')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure Notify(const Ctx: TWebContext);
 
-    [MVCPath('/hellos/($FirstName)')]
-    [MVCHTTPMethod([httpGET])]
-    procedure GetSpecializedHello(const FirstName: String);
+    [MVCPath('/subscribe')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure Subscribe(const Ctx: TWebContext);
+
+    [MVCPath('/unsubscribe')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure Unsubscribe(const Ctx: TWebContext);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -27,18 +32,12 @@ implementation
 uses
   MVCFramework.Logger;
 
-procedure TController.Index;
+procedure TController.Notify(const Ctx: TWebContext);
 begin
-  //use Context property to access to the HTTP request and response 
-  Render('Hello World');
+  Render('notified');
 end;
 
-procedure TController.GetSpecializedHello(const FirstName: String);
-begin
-  Render('Hello ' + FirstName);
-end;
-
-procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string); 
+procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
@@ -52,5 +51,14 @@ begin
   inherited;
 end;
 
+procedure TController.Subscribe(const Ctx: TWebContext);
+begin
+
+end;
+
+procedure TController.Unsubscribe(const Ctx: TWebContext);
+begin
+
+end;
 
 end.

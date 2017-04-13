@@ -12,7 +12,8 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule};
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
+  ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas';
 
 {$R *.res}
 

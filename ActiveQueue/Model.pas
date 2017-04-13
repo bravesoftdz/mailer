@@ -144,6 +144,7 @@ begin
         end;
       end;
     end;
+    CheckRep();
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
@@ -163,6 +164,7 @@ begin
       begin
         subscription.DisposeOf;
         FSubscriptionRegister.Remove(Token);
+        FProxyRegister[Token] := nil;
         FProxyRegister.Remove(Token);
         Result := TActiveQueueResponce.Create(True, 'unsubscribed', '');
       end
@@ -173,6 +175,7 @@ begin
     begin
       Result := TActiveQueueResponce.Create(False, 'not subscribed', '');
     end;
+    CheckRep();
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
