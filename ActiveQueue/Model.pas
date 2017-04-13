@@ -13,7 +13,7 @@ type
     /// All conditions must hold:
     /// 1. lock objects are non null: FSubscriptionLock, FQueueLock
     /// 2. FSubscriptionRegister and  FProxyRegister must have the same set of keys
-    /// 3. FIPs is non null
+    /// 3. FIPs length is defined and is not less than zero
   strict private
   var
     /// a dumb lock object for managing the access to the  subscription register
@@ -181,11 +181,11 @@ var
 begin
   TMonitor.Enter(FQueueLock);
   try
-    IsOk := (FSubscriptionLock = nil)
-      OR (FIPs = nil)
-      OR (FSubscriptionRegister = nil)
-      OR (FProxyRegister = nil)
-      OR (FProxyRegister.Count <> FSubscriptionRegister.Count);
+    IsOk := (FSubscriptionLock <> nil)
+      AND (Length(FIPs) >= 0)
+      AND (FSubscriptionRegister <> nil)
+      AND (FProxyRegister <> nil)
+      AND (FProxyRegister.Count = FSubscriptionRegister.Count);
 
     if IsOk then
     begin
@@ -212,7 +212,6 @@ begin
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
   FQueue := TQueue<TReceptionRequest>.Create;
-  FIPs := TArray<String>.Create();
   SetLength(FIPs, 0);
   CheckRep();
 end;
@@ -239,6 +238,7 @@ begin
     FQueue.Dequeue.Disposeof;
   FQueue.Clear;
   FQueue.DisposeOf;
+  SetLength(FIPs, 0);
 
 end;
 
@@ -346,7 +346,6 @@ procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
 var
   I, S: Integer;
 begin
-  FIPs := TArray<String>.Create();
   S := Length(IPs);
   SetLength(FIPs, S);
   for I := 0 to S - 1 do
