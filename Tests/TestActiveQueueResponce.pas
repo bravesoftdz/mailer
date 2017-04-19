@@ -1,46 +1,90 @@
-unit TestBackEndResponceFromJson;
+unit TestActiveQueueResponce;
 
 interface
 
 uses
-  DUnitX.TestFramework, System.JSON, ActiveQueueResponce;
+  DUnitX.TestFramework, ActiveQueueResponce;
 
 type
 
   [TestFixture]
-  TTestBackEndResponceFromJson = class(TObject)
+  TTestActiveQueueResponce = class(TObject)
   public
+    // Test suit for the serialization
+    // Partition the input as follows
+    // 1. status: true, false
+    // 2. message length: 0, > 0
+    // 3. token length: 0, > 0
+    [Test]
+    // Cover
+    // 1. status: true
+    // 2. message length: > 0
+    // 3. token length: > 0
+    [TestCase('Serialize with True and non-empty msg and token', 'True,a message,token')]
+    // Cover
+    // 1. status: false
+    // 2. message length: > 0
+    // 3. token length: > 0
+    [TestCase('Serialize with False and non-empty msg and token', 'False, some message, a token')]
+    // Cover
+    // 1. status: true
+    // 2. message length: 0
+    // 3. token length:  0
+    [TestCase('Serialize with True and empty msg and token', 'True,,')]
+    // Cover
+    // 1. status: false
+    // 2. message length:  0
+    // 3. token length:  0
+    [TestCase('Serialize with False and empty msg and token', 'False,,')]
+    // Cover
+    // 1. status: true
+    // 2. message length: > 0
+    // 3. token length:  0
+    [TestCase('Serialize with True and non-empty msg and empty token', 'True,some message,')]
+    // Cover
+    // 1. status: false
+    // 2. message length:  0
+    // 3. token length:  > 0
+    [TestCase('Serialize with False and empty msg and non-empty token', 'False,,some token')]
+    procedure SerializeNonEmptyMsg(const status: Boolean; const msg: String; const token: String);
+
     /// Test suit for constructring the instance from a json
     /// Partition the input as follows:
     /// 1. key status: absent, true, false
     /// 2. key msgstat: absent, '' (empty string), 'some string'
+    /// 3. key token: absent, '' (empty string), 'a token' (non empty string)
 
     /// Cover
     /// 1. key status: absent
     /// 2. key msgstat: absent
+    /// 3. key token: absent
     [Test]
-    procedure createFromNoStatusNoMsgstat();
+    procedure createFromNoStatusNoMsgstatNoToken();
     /// Cover
     /// 1. key status: absent
     /// 2. key msgstat: ''
+    /// 3. key token: ''
     [Test]
-    procedure createFromNoStatusEmptyMsgstat();
+    procedure createFromNoStatusEmptyMsgstatEmptyToken();
     /// Cover
     /// 1. key status: absent
     /// 2. key msgstat: 'some string'
+    /// 3. key token: absent
     [Test]
-    procedure createFromNoStatusMsgstat();
+    procedure createFromNoStatusMsgstatNoToken();
 
     [Test]
     /// Cover
     /// 1. key status: true
-    /// 2. key msgstat: absent
+    /// 2. key msgstat: ''
+    /// 3. key token: ''
     [TestCase('Create with empty msgstat, status true', 'True')]
     /// Cover
     /// 1. key status: false
-    /// 2. key msgstat: absent
+    /// 2. key msgstat: ''
+    /// 3. key token: ''
     [TestCase('Create with empty msgstat, status false', 'False')]
-    procedure createEmptyMsgstat(const status: Boolean);
+    procedure createEmptyMsgstatEmptyToken(const status: Boolean);
 
     [Test]
     /// Cover
@@ -63,15 +107,37 @@ type
     /// 2. key msgstat: absent
     [TestCase('Create with absent msgstat, status=false', 'False')]
     procedure createAbsentMsgstat(const status: Boolean);
-
   end;
 
 implementation
 
 uses
-  ObjectsMappers, System.SysUtils;
+  ObjectsMappers, System.JSON, System.SysUtils;
 
-procedure TTestBackEndResponceFromJson.createAbsentMsgstat(
+procedure TTestActiveQueueResponce.SerializeNonEmptyMsg(
+  const status: Boolean; const msg: String; const Token: String);
+var
+  obj: TActiveQueueResponce;
+  jo: TJsonObject;
+  val1, val2: TJsonValue;
+begin
+  obj := TActiveQueueResponce.Create(Status, msg, Token);
+  jo := Mapper.ObjectToJSONObject(obj);
+  Assert.AreEqual((jo.GetValue('status') as TJsonBool).asBoolean, Status);
+  val1 := jo.GetValue('msgstat');
+  val2 := jo.GetValue('token');
+  if msg = '' then
+    Assert.IsTrue((val1 = nil) OR (val1.Value = ''))
+  else
+    Assert.AreEqual(val1.value, msg);
+
+  if Token = '' then
+    Assert.IsTrue((val2 = nil) OR (val2.Value = ''))
+  else
+    Assert.AreEqual(val2.value, Token);
+end;
+
+procedure TTestActiveQueueResponce.createAbsentMsgstat(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -85,7 +151,7 @@ begin
   Assert.IsEmpty(obj.Msg);
 end;
 
-procedure TTestBackEndResponceFromJson.createEmptyMsgstat(
+procedure TTestActiveQueueResponce.createEmptyMsgstatEmptyToken(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -93,27 +159,29 @@ var
   jo: TJsonObject;
 
 begin
-  input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":""}';
+  input := '{"status": ' + BoolToStr(status, True).ToLower + ', "msgstat":"", "token":""}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.AreEqual(status, obj.status);
   Assert.IsEmpty(obj.Msg);
+  Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestBackEndResponceFromJson.createFromNoStatusEmptyMsgstat;
+procedure TTestActiveQueueResponce.createFromNoStatusEmptyMsgstatEmptyToken;
 var
   input: String;
   obj: TActiveQueueResponce;
   jo: TJsonObject;
 begin
-  input := '{"msgstat":""}';
+  input := '{"msgstat":"", "token":""}';
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TActiveQueueResponce>(jo);
   Assert.IsFalse(obj.status);
   Assert.IsEmpty(obj.Msg);
+  Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestBackEndResponceFromJson.createFromNoStatusMsgstat;
+procedure TTestActiveQueueResponce.createFromNoStatusMsgstatNoToken;
 var
   obj: TActiveQueueResponce;
   input: String;
@@ -126,7 +194,7 @@ begin
   Assert.AreEqual('some string', obj.Msg);
 end;
 
-procedure TTestBackEndResponceFromJson.createFromNoStatusNoMsgstat;
+procedure TTestActiveQueueResponce.createFromNoStatusNoMsgstatNoToken;
 var
   obj: TActiveQueueResponce;
   input: String;
@@ -138,9 +206,10 @@ begin
   Assert.IsNotNull(obj);
   Assert.IsFalse(obj.status);
   Assert.IsEmpty(obj.Msg);
+  Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestBackEndResponceFromJson.createNonEmptyMsgstat(
+procedure TTestActiveQueueResponce.createNonEmptyMsgstat(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -156,6 +225,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestBackEndResponceFromJson);
+TDUnitX.RegisterTestFixture(TTestActiveQueueResponce);
 
 end.
