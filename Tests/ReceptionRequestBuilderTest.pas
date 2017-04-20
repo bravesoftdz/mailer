@@ -1,4 +1,4 @@
-unit TestReceptionRequestBuilder;
+unit ReceptionRequestBuilderTest;
 
 interface
 

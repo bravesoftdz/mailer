@@ -12,15 +12,18 @@ uses
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
-  TestActionDispatcher in 'TestActionDispatcher.pas',
-  Action in '..\Actions\Action.pas',
-  TestReceptionRequestBuilder in 'TestReceptionRequestBuilder.pas',
-  TestReceptionRequest in 'TestReceptionRequest.pas',
-  TestFrontEndRequestFromJson in 'TestFrontEndRequestFromJson.pas',
-  TestFrontEndDataFromJson in 'TestFrontEndDataFromJson.pas',
-  TestActiveQueueResponceToJson in 'TestActiveQueueResponceToJson.pas',
-  TestBackEndResponceFromJson in 'TestBackEndResponceFromJson.pas',
-  SubscriptionOutcomeDataTest in 'SubscriptionOutcomeDataTest.pas';
+  ActionDispatcherTest in 'ActionDispatcherTest.pas',
+//  Action in '..\Actions\Action.pas',
+  ReceptionRequestBuilderTest in 'ReceptionRequestBuilderTest.pas',
+  ReceptionRequestTest in 'ReceptionRequestTest.pas',
+  FrontEndRequestFromJsonTest in 'FrontEndRequestFromJsonTest.pas',
+  FrontEndDataFromJsonTest in 'FrontEndDataFromJsonTest.pas',
+  ActiveQueueResponceTest in 'ActiveQueueResponceTest.pas',
+  SubscriptionOutcomeDataTest in 'SubscriptionOutcomeDataTest.pas',
+  AQConfigTest in 'AQConfigTest.pas',
+  ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
+  ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
+  SubscriptionDataTest in 'SubscriptionDataTest.pas';
 
 var
   runner: ITestRunner;

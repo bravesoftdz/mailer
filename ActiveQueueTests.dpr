@@ -12,11 +12,7 @@ uses
   {$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
-  DUnitX.TestFramework,
-  ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
-  ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
-  SubscriptionDataTest in 'SubscriptionDataTest.pas',
-  AQConfigTest in 'AQConfigTest.pas';
+  DUnitX.TestFramework;
 
 var
   runner: ITestRunner;

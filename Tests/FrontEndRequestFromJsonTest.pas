@@ -1,4 +1,4 @@
-unit TestFrontEndRequestFromJson;
+unit FrontEndRequestFromJsonTest;
 
 interface
 

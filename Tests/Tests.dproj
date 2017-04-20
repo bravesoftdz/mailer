@@ -115,7 +115,7 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>C:\Dev\Mailer;C:\Dev\Mailer\Data;C:\Dev\Mailer\Providers;C:\Dev\Mailer\ActiveQueue;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>C:\Dev\Mailer;C:\Dev\Mailer\Data;C:\Dev\Mailer\Providers;C:\Dev\Mailer\ActiveQueue;C:\Dev\Mailer\Actions;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -128,15 +128,17 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="TestActionDispatcher.pas"/>
-        <DCCReference Include="..\Actions\Action.pas"/>
-        <DCCReference Include="TestReceptionRequestBuilder.pas"/>
-        <DCCReference Include="TestReceptionRequest.pas"/>
-        <DCCReference Include="TestFrontEndRequestFromJson.pas"/>
-        <DCCReference Include="TestFrontEndDataFromJson.pas"/>
-        <DCCReference Include="TestActiveQueueResponceToJson.pas"/>
-        <DCCReference Include="TestBackEndResponceFromJson.pas"/>
+        <DCCReference Include="ActionDispatcherTest.pas"/>
+        <DCCReference Include="ReceptionRequestBuilderTest.pas"/>
+        <DCCReference Include="ReceptionRequestTest.pas"/>
+        <DCCReference Include="FrontEndRequestFromJsonTest.pas"/>
+        <DCCReference Include="FrontEndDataFromJsonTest.pas"/>
+        <DCCReference Include="ActiveQueueResponceTest.pas"/>
         <DCCReference Include="SubscriptionOutcomeDataTest.pas"/>
+        <DCCReference Include="AQConfigTest.pas"/>
+        <DCCReference Include="ActiveQueueModelTest.pas"/>
+        <DCCReference Include="ActiveQueueControllerTest.pas"/>
+        <DCCReference Include="SubscriptionDataTest.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

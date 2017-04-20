@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -122,10 +122,13 @@ begin
     while True do
     begin
       Win32Check(ReadConsoleInput(LHandle, LInputRecord, 1, LEvent));
-      if (LInputRecord.EventType = KEY_EVENT) and
-        LInputRecord.Event.KeyEvent.bKeyDown and
-        (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
-        break;
+      // if (LInputRecord.EventType = KEY_EVENT) and
+      // LInputRecord.Event.KeyEvent.bKeyDown and
+      // (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
+      // break;
+      if (LInputRecord.EventType = KEY_EVENT) then
+        Writeln(LInputRecord.Event.KeyEvent.wVirtualKeyCode);
+
     end;
   finally
     ConfigUpdated := TAQConfig.Create(Config.Port, Config.IPs, TController.GetListeners());
