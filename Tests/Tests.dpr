@@ -13,7 +13,6 @@ uses
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
   ActionDispatcherTest in 'ActionDispatcherTest.pas',
-//  Action in '..\Actions\Action.pas',
   ReceptionRequestBuilderTest in 'ReceptionRequestBuilderTest.pas',
   ReceptionRequestTest in 'ReceptionRequestTest.pas',
   FrontEndRequestFromJsonTest in 'FrontEndRequestFromJsonTest.pas',

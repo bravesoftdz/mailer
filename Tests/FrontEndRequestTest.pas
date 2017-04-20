@@ -1,4 +1,4 @@
-unit FrontEndRequestFromJsonTest;
+unit FrontEndRequestTest;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
 
   [TestFixture]
-  TTestFrontEndRequestFromJson = class(TObject)
+  TFrontEndRequestTest = class(TObject)
   private
     Root, DataNode: TJsonObject;
     pairHtml, pairText, pairAttachs: TJsonPair;
@@ -56,7 +56,7 @@ implementation
 uses
   Attachment, ObjectsMappers;
 
-procedure TTestFrontEndRequestFromJson.Setup;
+procedure TFrontEndRequestTest.Setup;
 begin
   Root := TJsonObject.Create;
   DataNode := TJsonObject.Create;
@@ -65,14 +65,14 @@ begin
   pairText := TJsonPair.Create('text', 'a text content');
 end;
 
-procedure TTestFrontEndRequestFromJson.TearDown;
+procedure TFrontEndRequestTest.TearDown;
 begin
   pairHtml := nil;
   pairText := nil;
   Root := nil;
 end;
 
-procedure TTestFrontEndRequestFromJson.createFromEmpty;
+procedure TFrontEndRequestTest.createFromEmpty;
 var
   request: TFrontEndRequest;
 begin
@@ -81,7 +81,7 @@ begin
    Assert.AreEqual(request.Data.Text, '');
 end;
 
-procedure TTestFrontEndRequestFromJson.createFromHtmlAndText;
+procedure TFrontEndRequestTest.createFromHtmlAndText;
 var
   request: TFrontEndRequest;
 begin
@@ -92,7 +92,7 @@ begin
   Assert.AreEqual(request.Data.Text, 'a text content');
 end;
 
-procedure TTestFrontEndRequestFromJson.createOnlyFromHtml;
+procedure TFrontEndRequestTest.createOnlyFromHtml;
 var
   request: TFrontEndRequest;
 begin
@@ -102,7 +102,7 @@ begin
    Assert.AreEqual(request.Data.Text, '');
 end;
 
-procedure TTestFrontEndRequestFromJson.createOnlyFromText;
+procedure TFrontEndRequestTest.createOnlyFromText;
 var
   request: TFrontEndRequest;
 begin
@@ -114,7 +114,7 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestFrontEndRequestFromJson);
+TDUnitX.RegisterTestFixture(TFrontEndRequestTest);
 
 end.
 

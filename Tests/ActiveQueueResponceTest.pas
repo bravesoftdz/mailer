@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TTestActiveQueueResponce = class(TObject)
+  TActiveQueueResponceTest = class(TObject)
   public
     // Test suit for the serialization
     // Partition the input as follows
@@ -114,7 +114,7 @@ implementation
 uses
   ObjectsMappers, System.JSON, System.SysUtils;
 
-procedure TTestActiveQueueResponce.SerializeNonEmptyMsg(
+procedure TActiveQueueResponceTest.SerializeNonEmptyMsg(
   const status: Boolean; const msg: String; const Token: String);
 var
   obj: TActiveQueueResponce;
@@ -137,7 +137,7 @@ begin
     Assert.AreEqual(val2.value, Token);
 end;
 
-procedure TTestActiveQueueResponce.createAbsentMsgstat(
+procedure TActiveQueueResponceTest.createAbsentMsgstat(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -151,7 +151,7 @@ begin
   Assert.IsEmpty(obj.Msg);
 end;
 
-procedure TTestActiveQueueResponce.createEmptyMsgstatEmptyToken(
+procedure TActiveQueueResponceTest.createEmptyMsgstatEmptyToken(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -167,7 +167,7 @@ begin
   Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestActiveQueueResponce.createFromNoStatusEmptyMsgstatEmptyToken;
+procedure TActiveQueueResponceTest.createFromNoStatusEmptyMsgstatEmptyToken;
 var
   input: String;
   obj: TActiveQueueResponce;
@@ -181,7 +181,7 @@ begin
   Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestActiveQueueResponce.createFromNoStatusMsgstatNoToken;
+procedure TActiveQueueResponceTest.createFromNoStatusMsgstatNoToken;
 var
   obj: TActiveQueueResponce;
   input: String;
@@ -194,7 +194,7 @@ begin
   Assert.AreEqual('some string', obj.Msg);
 end;
 
-procedure TTestActiveQueueResponce.createFromNoStatusNoMsgstatNoToken;
+procedure TActiveQueueResponceTest.createFromNoStatusNoMsgstatNoToken;
 var
   obj: TActiveQueueResponce;
   input: String;
@@ -209,7 +209,7 @@ begin
   Assert.IsEmpty(obj.Token);
 end;
 
-procedure TTestActiveQueueResponce.createNonEmptyMsgstat(
+procedure TActiveQueueResponceTest.createNonEmptyMsgstat(
   const status: Boolean);
 var
   obj: TActiveQueueResponce;
@@ -225,6 +225,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestActiveQueueResponce);
+TDUnitX.RegisterTestFixture(TActiveQueueResponceTest);
 
 end.

@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TTestActionDispatcher = class(TObject)
+  TActionDispatcherTest = class(TObject)
   private
     action1, action2, action3, action4, defaultAction: TAction;
     actions: TObjectList<TAction>;
@@ -69,12 +69,12 @@ type
 
 implementation
 
-procedure TTestActionDispatcher.FindActionFromOneNotPresent;
+procedure TActionDispatcherTest.FindActionFromOneNotPresent;
 begin
 
 end;
 
-procedure TTestActionDispatcher.FindActionFromOnePresent;
+procedure TActionDispatcherTest.FindActionFromOnePresent;
 var
   Providers: TObjectList<TProvider>;
 begin
@@ -84,35 +84,35 @@ begin
 //  Assert.isTrue(action2 = factory.FindByName('not exist'));
 end;
 
-procedure TTestActionDispatcher.FindActionFromThreeNotPresent;
+procedure TActionDispatcherTest.FindActionFromThreeNotPresent;
 begin
 //  actions.addRange([action1, action2, action3]);
 //  factory := TProviderFactory.Create(actions, defaultAction);
 //  Assert.AreEqual(defaultAction, factory.FindByName('not', 'exist'));
 end;
 
-procedure TTestActionDispatcher.FindActionFromThreePresentInMiddle;
+procedure TActionDispatcherTest.FindActionFromThreePresentInMiddle;
 begin
 //  actions.addRange([action1, action2, action3]);
 //  factory := TProviderFactory.Create(actions, defaultAction);
 //  Assert.AreEqual(action2, factory.FindByName('name2', 'action2'));
 end;
 
-procedure TTestActionDispatcher.FindActionFromTwoPresentAtBeginning;
+procedure TActionDispatcherTest.FindActionFromTwoPresentAtBeginning;
 begin
 //  actions.addRange([action1, action2, action3]);
 //  factory := TProviderFactory.Create(actions, defaultAction);
 //  Assert.AreEqual(action1, factory.FindByName('name1', 'action1'));
 end;
 
-procedure TTestActionDispatcher.FindActionFromTwoPresentAtEnd;
+procedure TActionDispatcherTest.FindActionFromTwoPresentAtEnd;
 begin
 //  actions.addRange([action1, action2]);
 //  factory := TProviderFactory.Create(actions, action3);
 //  Assert.AreEqual(action2, factory.FindByName('name2', 'action2'));
 end;
 
-procedure TTestActionDispatcher.Setup;
+procedure TActionDispatcherTest.Setup;
 begin
 //  action1 := TAction.Create('name1', 'action1');
 //  action2 := TAction.Create('name2', 'action2');
@@ -121,12 +121,12 @@ begin
 //  actions := TObjectList<TAction>.Create();
 end;
 
-procedure TTestActionDispatcher.TearDown;
+procedure TActionDispatcherTest.TearDown;
 begin
 
 end;
 
-procedure TTestActionDispatcher.FindActionFromEmpty;
+procedure TActionDispatcherTest.FindActionFromEmpty;
 begin
 //  factory := TProviderFactory.Create(actions, action3);
 //  Assert.AreEqual(action3, factory.FindByName('whatever name', 'whatever action'));
@@ -134,6 +134,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestActionDispatcher);
+TDUnitX.RegisterTestFixture(TActionDispatcherTest);
 
 end.

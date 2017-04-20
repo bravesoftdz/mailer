@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TTestReceptionRequest = class(TObject)
+  TReceptionRequestTest = class(TObject)
   private
     request: TReceptionRequest;
     json: TJsonObject;
@@ -63,22 +63,22 @@ implementation
 uses
   ObjectsMappers;
 
-procedure TTestReceptionRequest.ObjToJsonKeyHtmlIsPresent;
+procedure TReceptionRequestTest.ObjToJsonKeyHtmlIsPresent;
 begin
   Assert.AreEqual(json.GetValue('bodyhtml').Value, 'html content');
 end;
 
-procedure TTestReceptionRequest.ObjToJsonKeyTokenIsPresent;
+procedure TReceptionRequestTest.ObjToJsonKeyTokenIsPresent;
 begin
   Assert.IsNotNull(json.GetValue('token'));
 end;
 
-procedure TTestReceptionRequest.ObjToJsonKeyBodytextIsPresent;
+procedure TReceptionRequestTest.ObjToJsonKeyBodytextIsPresent;
 begin
   Assert.AreEqual(json.GetValue('bodytext').Value, 'text content');
 end;
 
-procedure TTestReceptionRequest.Setup;
+procedure TReceptionRequestTest.Setup;
 begin
   request := TReceptionRequestBuilder.Create()
     .SetFrom('admin@google.com')
@@ -89,11 +89,11 @@ begin
   json := Mapper.ObjectToJSonObject(request);
 end;
 
-procedure TTestReceptionRequest.TearDown;
+procedure TReceptionRequestTest.TearDown;
 begin
 end;
 
-procedure TTestReceptionRequest.JsonToObjEmpty;
+procedure TReceptionRequestTest.JsonToObjEmpty;
 var
   obj: TReceptionRequest;
 begin
@@ -101,7 +101,7 @@ begin
   Assert.IsNotNull(obj);
 end;
 
-procedure TTestReceptionRequest.JsonToObjPrimitiveNonEmpty;
+procedure TReceptionRequestTest.JsonToObjPrimitiveNonEmpty;
 var
   jo: TJsonObject;
   obj: TReceptionRequest;
@@ -142,18 +142,18 @@ begin
   Assert.AreEqual('a token', obj.token);
 end;
 
-procedure TTestReceptionRequest.ObjToJsonKeyAttachIsPresent;
+procedure TReceptionRequestTest.ObjToJsonKeyAttachIsPresent;
 begin
   Assert.IsNotNull(json.GetValue('attach'));
 end;
 
-procedure TTestReceptionRequest.ObjToJsonKeyFromIsPresent;
+procedure TReceptionRequestTest.ObjToJsonKeyFromIsPresent;
 begin
   Assert.AreEqual(json.GetValue('from').Value, 'admin@google.com');
 end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestReceptionRequest);
+TDUnitX.RegisterTestFixture(TReceptionRequestTest);
 
 end.

@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TTestReceptionRequestBuilder = class(TObject)
+  TReceptionRequestBuilderTest = class(TObject)
   public
     [Test]
     procedure SetHtml;
@@ -21,7 +21,7 @@ implementation
 uses
   ReceptionRequest, System.JSON, ObjectsMappers;
 
-procedure TTestReceptionRequestBuilder.SetText;
+procedure TReceptionRequestBuilderTest.SetText;
 var
   request: TReceptionRequest;
   builder: TReceptionRequestBuilder;
@@ -33,7 +33,7 @@ begin
 end;
 
 
-procedure TTestReceptionRequestBuilder.SetHtml;
+procedure TReceptionRequestBuilderTest.SetHtml;
 var
   request: TReceptionRequest;
   builder: TReceptionRequestBuilder;
@@ -47,6 +47,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TTestReceptionRequestBuilder);
+TDUnitX.RegisterTestFixture(TReceptionRequestBuilderTest);
 
 end.
