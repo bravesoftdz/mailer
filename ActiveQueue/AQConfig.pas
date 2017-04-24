@@ -31,6 +31,7 @@ type
     FListenersAllowedIPArray: TArray<String>;
     FProvidersAllowedIPArray: TArray<String>;
     FListeners: TObjectList<TListenerInfo>;
+    /// <summary>a anonimous function that trims a string</summary>
     TrimMapper: StringMapper;
 
     /// <summary>Create a copy of given array. Its purpose is for defencive copying.</summary>
@@ -97,46 +98,36 @@ begin
   Create(0, '', '', TObjectList<TListenerInfo>.Create());
 end;
 
-constructor TAQConfig.Create(const Port: Integer;
-
-  const
-  ListenersIPs, ProvidersIPs: String;
-
-  const
-  Listeners:
-  TObjectList<TListenerInfo>);
+constructor TAQConfig.Create(const Port: Integer; const ListenersIPs, ProvidersIPs: String; const Listeners: TObjectList<TListenerInfo>);
 var
   I, S: Integer;
   IPsArr: TArray<String>;
 begin
+  TrimMapper := Function(const From: String): String
+    begin
+      Result := From.Trim();
+    End;
+
   FPort := Port;
-  FListenersAllowedIPArray := TArray<String>.Create();
   SetListenersIPs(ListenersIPs);
   SetProvidersIPs(ProvidersIPs);
 
   FListeners := TObjectList<TListenerInfo>.Create();
   SetListeners(Listeners);
-  TrimMapper := Function(const From: String): String
-    begin
-      Result := From.Trim();
-    End;
 end;
 
 destructor TAQConfig.Destroy;
 begin
   FListeners.Clear;
   SetLength(FListenersAllowedIPArray, 0);
+  SetLength(FProvidersAllowedIPArray, 0);
+  TrimMapper := nil;
   inherited;
 end;
 
 function TAQConfig.GetListenersIps: TArray<String>;
 begin
-  Result := ApplyToEach(FListenersAllowedIPArray,
-    Function(const From: String): String
-    begin
-      Result := From;
-    End);
-
+  Result := ApplyToEach(FListenersAllowedIPArray, TrimMapper);
 end;
 
 function TAQConfig.ApplyToEach(const Original: TArray<String>; const Mapper: StringMapper): TArray<String>;

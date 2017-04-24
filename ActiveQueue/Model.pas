@@ -11,7 +11,7 @@ type
   TActiveQueueModel = class
     /// Representation invariant:
     /// All conditions must hold:
-    /// 1. lock objects are non null: FSubscriptionsLock, FProvidersLock, FQueueLock
+    /// 1. lock objects are non null: FSubscriptionsLock, FProvidersLock, FQueueLock, FProvidersLock
     /// 2. FSubscriptionRegister and  FProxyRegister must have the same set of keys
     /// 3. FIPs length is defined and is not less than zero
     ///
@@ -210,7 +210,7 @@ var
 begin
   TMonitor.Enter(FQueueLock);
   try
-    IsOk := (FSubscriptionsLock <> nil)
+    IsOk := (FSubscriptionsLock <> nil) AND (FProvidersLock <> nil)
       AND (Length(FListenersIPs) >= 0)
       AND (FSubscriptionRegister <> nil)
       AND (FProxyRegister <> nil)
@@ -236,10 +236,12 @@ constructor TActiveQueueModel.Create;
 begin
   FSubscriptionsLock := TObject.Create;
   FQueueLock := TObject.Create;
+  FProvidersLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
   FQueue := TQueue<TReceptionRequest>.Create;
   SetLength(FListenersIPs, 0);
+  SetLength(FProvidersIPs, 0);
   CheckRep();
 end;
 
@@ -250,6 +252,7 @@ var
 begin
   FSubscriptionsLock.DisposeOf;
   FQueueLock.DisposeOf;
+  FProvidersLock.DisposeOf;
   // remove objects from the register and clean the register afterwards
   for ItemKey in FSubscriptionRegister.Keys do
   begin

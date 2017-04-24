@@ -80,7 +80,7 @@ var
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   item: String;
-  WhiteList: TArray<String>;
+  ListenersWhiteList, ProvidersWhiteList: TArray<String>;
   APort: Integer;
   jo: TJsonObject;
   OutFile: String;
@@ -93,18 +93,32 @@ begin
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   TController.SetListenersIPs(Config.GetListenersIps());
+  TController.SetProvidersIPs(Config.GetProvidersIps());
   TController.SetSubscriptions(Config.Listeners);
-  WhiteList := TController.GetListenersIPs;
-  if (Length(WhiteList) = 0) then
+  ListenersWhiteList := TController.GetListenersIPs;
+  ProvidersWhiteList := TController.GetProvidersIPs;
+
+  if (Length(ListenersWhiteList) = 0) then
   begin
     Writeln('The listener IP whitelist is empty. No subscriptions will succeed.');
   end
   else
   begin
-    Writeln('IP Whitelist:');
-    for Item in WhiteList do
+    Writeln('Allowed IPs for listeners:');
+    for Item in ListenersWhiteList do
       Writeln(Item);
   end;
+  if (Length(ProvidersWhiteList) = 0) then
+  begin
+    Writeln('The provider IP whitelist is empty. No one will succeed to enqueue the data.');
+  end
+  else
+  begin
+    Writeln('Allowed IPs for data providers:');
+    for Item in ProvidersWhiteList do
+      Writeln(Item);
+  end;
+
   numberOfListeners := Config.Listeners.Count;
   if numberOfListeners = 0 then
     Writeln('No subscriptions found in the config file.')
@@ -122,14 +136,14 @@ begin
     while True do
     begin
       Win32Check(ReadConsoleInput(LHandle, LInputRecord, 1, LEvent));
-       if (LInputRecord.EventType = KEY_EVENT) and
-       LInputRecord.Event.KeyEvent.bKeyDown and
-       (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
-       break;
+      if (LInputRecord.EventType = KEY_EVENT) and
+        LInputRecord.Event.KeyEvent.bKeyDown and
+        (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
+        break;
 
     end;
   finally
-    ConfigUpdated := TAQConfig.Create(Config.Port, Config.ListenersIPs, TController.GetListeners());
+    ConfigUpdated := TAQConfig.Create(Config.Port, Config.ListenersIPs, Config.ProvidersIPs, TController.GetListeners());
     jo := Mapper.ObjectToJSONObject(ConfigUpdated);
     OutFile := GetAvailablePath(ConfigFileName, '-YYYY-mm-dd_hh_nn_ss');
     SaveConfigToFile(OutFile, jo.ToString);
