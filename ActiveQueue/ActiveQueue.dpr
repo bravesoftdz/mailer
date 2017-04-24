@@ -63,7 +63,7 @@ begin
   TryName := path;
   while TFile.Exists(TryName) do
   begin
-    Sleep(1000); // make it sleep for a second since the name suffix is up to seconds
+    Sleep(1000); // make it sleep for one sec since the output file name suffix is up to seconds
     Folder := ExtractFilePath(TryName);
     Ext := ExtractFileExt(TryName);
     NameExt := ExtractFileName(TryName);

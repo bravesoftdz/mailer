@@ -3,7 +3,11 @@ unit AQConfig;
 interface
 
 uses
-  System.JSON, System.Classes, ListenerInfo, System.Generics.Collections, ObjectsMappers;
+  System.JSON, System.Classes, ListenerInfo, System.Generics.Collections, ObjectsMappers,
+  System.SysUtils;
+
+type
+  StringMapper = reference to function(const From: String): String;
 
 type
 
@@ -19,16 +23,21 @@ type
     IPS_KEY_NAME_LISTENERS = 'ip-listeners';
     IPS_KEY_NAME_PROVIDERS = 'ip-providers';
     SUBSCRIPTIONS_KEY_NAME = 'subscriptions';
+
   strict private
     FPort: Integer;
-    ///
-    FListenersIPs: String;
-    FIPList: TArray<String>;
+    FListenersAllowedIPs: String;
+    FProvidersAllowedIPs: String;
+    FListenersAllowedIPArray: TArray<String>;
+    FProvidersAllowedIPArray: TArray<String>;
     FListeners: TObjectList<TListenerInfo>;
+    TrimMapper: StringMapper;
+
+    /// <summary>Create a copy of given array. Its purpose is for defencive copying.</summary>
+    function ApplyToEach(const Original: TArray<String>; const mapper: StringMapper): TArray<String>;
 
   public
-    constructor Create(const Port: Integer; const IPs: String; const Listeners: TObjectList<TListenerInfo>); overload;
-    constructor Create(const Port: Integer; const IPs: String); overload;
+    constructor Create(const Port: Integer; const ListenersIPs, ProvidersIPs: String; const Listeners: TObjectList<TListenerInfo>); overload;
     constructor Create(); overload;
 
     /// <summary>Set the listeners. Performs a defencive copying.</summary>
@@ -47,19 +56,27 @@ type
     /// are to be trimmed</param>
     procedure SetListenersIPs(const IPs: String);
 
+    /// <summary>Return a list of ips from which the data can be accepted</summary>
+    function GetProvidersIps(): TArray<String>;
+
+    /// <summary>Set ip from which the data can be accepted.</summary>
+    /// <param name="IPs">Comma-separated list of ips. Trailing white spaces
+    /// are to be trimmed</param>
+    procedure SetProvidersIPs(const IPs: String);
+
     /// <summary> Port at which the program accepts the connections.</summary>
     [MapperJSONSer('port')]
     property Port: Integer read FPort write FPort;
 
     /// <summary> comma-separated list of ips from which the subscriptions are allowed.
     /// A subscription request originating from an ip not present in this string is to be ignored.</summary>
-    [MapperJSONSer('ips')]
-    property ListenersIPs: String read FListenersIPs write SetListenersIPs;
+    [MapperJSONSer('listeners-allowed-ips')]
+    property ListenersIPs: String read FListenersAllowedIPs write SetListenersIPs;
 
     /// <summary> comma-separated list of ips of providers that are allowed to enqueue the items.
     /// Any request to put a request into the queue originating from an ip not present in this string is to be ignored.</summary>
-    [MapperJSONSer('providers-ips')]
-    property ProvidersIPs: String read FListenersIPs write SetListenersIPs;
+    [MapperJSONSer('providers-allowed-ips')]
+    property ProvidersIPs: String read FProvidersAllowedIPs write SetProvidersIPs;
 
     /// <summary> list of subscribed listeners</summary>
     [MapperJSONSer('listeners')]
@@ -71,53 +88,74 @@ type
 implementation
 
 uses
-  System.SysUtils, System.Types, System.StrUtils;
+  System.Types, System.StrUtils;
 
 { TAQConfig }
 
-constructor TAQConfig.Create(const Port: Integer; const IPs: String);
-begin
-  Create(Port, IPs, TObjectList<TListenerInfo>.Create());
-end;
-
 constructor TAQConfig.Create;
 begin
-  Create(0, '', TObjectList<TListenerInfo>.Create());
+  Create(0, '', '', TObjectList<TListenerInfo>.Create());
 end;
 
-constructor TAQConfig.Create(const Port: Integer; const IPs: String;
-  const Listeners: TObjectList<TListenerInfo>);
+constructor TAQConfig.Create(const Port: Integer;
+
+  const
+  ListenersIPs, ProvidersIPs: String;
+
+  const
+  Listeners:
+  TObjectList<TListenerInfo>);
 var
   I, S: Integer;
   IPsArr: TArray<String>;
 begin
   FPort := Port;
-  FListenersIPs := IPs;
-  FIPList := TArray<String>.Create();
-  SetListenersIPs(IPs);
+  FListenersAllowedIPArray := TArray<String>.Create();
+  SetListenersIPs(ListenersIPs);
+  SetProvidersIPs(ProvidersIPs);
+
   FListeners := TObjectList<TListenerInfo>.Create();
   SetListeners(Listeners);
+  TrimMapper := Function(const From: String): String
+    begin
+      Result := From.Trim();
+    End;
 end;
 
 destructor TAQConfig.Destroy;
 begin
   FListeners.Clear;
-  SetLength(FIPList, 0);
+  SetLength(FListenersAllowedIPArray, 0);
   inherited;
 end;
 
 function TAQConfig.GetListenersIps: TArray<String>;
+begin
+  Result := ApplyToEach(FListenersAllowedIPArray,
+    Function(const From: String): String
+    begin
+      Result := From;
+    End);
+
+end;
+
+function TAQConfig.ApplyToEach(const Original: TArray<String>; const Mapper: StringMapper): TArray<String>;
 var
   I, S: Integer;
 begin
-  If Assigned(FIPList) then
-    S := Length(FIPList)
+  If Assigned(Original) then
+    S := Length(Original)
   else
     S := 0;
   Result := TArray<String>.Create();
   SetLength(Result, S);
   for I := 0 to S - 1 do
-    Result[I] := FIPList[I];
+    Result[I] := Mapper(Original[I]);
+end;
+
+function TAQConfig.GetProvidersIps: TArray<String>;
+begin
+  Result := ApplyToEach(FProvidersAllowedIPArray, TrimMapper);
 end;
 
 function TAQConfig.GetListeners: TObjectList<TListenerInfo>;
@@ -137,22 +175,37 @@ begin
 
 end;
 
-procedure TAQConfig.SetListenersIPs(const IPs: String);
+procedure TAQConfig.SetListenersIPs(
+
+  const
+  IPs:
+  String);
 var
-  items: TStringDynArray;
-  S, I: Integer;
+  Items: TArray<String>;
 begin
   /// clean the previously set values
-  SetLength(FIPList, 0);
-  FListenersIPs := IPs;
-  Items := SplitString(IPs, ',');
-  S := Length(items);
-  SetLength(FIPList, S);
-  for I := 0 to S - 1 do
-    FIPList[I] := Items[I].Trim;
+  SetLength(FListenersAllowedIPArray, 0);
+  FListenersAllowedIPs := IPs;
+  Items := TArray<String>(SplitString(IPs, ','));
+  FListenersAllowedIPArray := ApplyToEach(Items, TrimMapper);
+end;
+
+procedure TAQConfig.SetProvidersIPs(
+
+  const
+  IPs: String);
+var
+  items: TArray<String>;
+begin
+  /// clean the previously set values
+  SetLength(FProvidersAllowedIPs, 0);
+  FProvidersAllowedIPs := IPs;
+  Items := TArray<String>(SplitString(IPs, ','));
+  FProvidersAllowedIPArray := ApplyToEach(Items, TrimMapper);
 end;
 
 procedure TAQConfig.SetListeners(const Listeners: TObjectList<TListenerInfo>);
+
 var
   Listener: TListenerInfo;
 begin
