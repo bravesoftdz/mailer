@@ -16,15 +16,25 @@ type
 
   public
 
-    class procedure SetIPs(const IPs: TArray<String>);
-
     class function GetListeners(): TObjectList<TListenerInfo>;
 
     class procedure SetSubscriptions(const Listeners: TObjectList<TListenerInfo>);
 
-    /// <summary> Get the white list of ips: requests coming from only these ips
+    /// <summary> Get the white list of listeners' ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
-    class function GetIPs(): TArray<String>;
+    class function GetListenersIPs(): TArray<String>;
+
+    /// <summary> Set the white list of listeners' ips: requests coming from only these ips
+    /// are to be taken in consideration </summary>
+    class procedure SetListenersIPs(const IPs: TArray<String>);
+
+    /// <summary> Get the white list of providers' ips: requests to enqueue the data coming from only these ips
+    /// are to be taken in consideration </summary>
+    class function GetProvidersIPs(): TArray<String>;
+
+    /// <summary> Set the white list of providers' ips: requests to enqueue the data coming from only these ips
+    /// are to be taken in consideration </summary>
+    class procedure SetProvidersIPs(const IPs: TArray<String>);
 
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference
@@ -71,11 +81,24 @@ uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
   System.SysUtils;
 
-class function TController.GetIPs: TArray<String>;
+class function TController.GetListenersIPs: TArray<String>;
 begin
   if Assigned(Model) then
   begin
-    Result := Model.GetIPs()
+    Result := Model.GetListenersIPs()
+  end
+  else
+  begin
+    Result := TArray<String>.Create();
+    SetLength(Result, 0);
+  end;
+end;
+
+class function TController.GetProvidersIPs: TArray<String>;
+begin
+  if Assigned(Model) then
+  begin
+    Result := Model.GetProvidersIPs()
   end
   else
   begin
@@ -139,11 +162,19 @@ begin
   Render(Outcome.ToString(False));
 end;
 
-class procedure TController.SetIPs(const IPs: TArray<String>);
+class procedure TController.SetListenersIPs(const IPs: TArray<String>);
 begin
   if Assigned(Model) then
   begin
-    Model.SetIPs(IPs);
+    Model.SetListenersIPs(IPs);
+  end
+end;
+
+class procedure TController.SetProvidersIPs(const IPs: TArray<String>);
+begin
+  if Assigned(Model) then
+  begin
+    Model.SetProvidersIPs(IPs);
   end
 end;
 

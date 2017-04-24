@@ -92,12 +92,12 @@ begin
   APort := Config.Port;
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
-  TController.SetIps(Config.getIPs());
+  TController.SetListenersIPs(Config.GetListenersIps());
   TController.SetSubscriptions(Config.Listeners);
-  WhiteList := TController.GetIPs;
+  WhiteList := TController.GetListenersIPs;
   if (Length(WhiteList) = 0) then
   begin
-    Writeln('The IP whitelist is empty. No subscriptions will succeed.');
+    Writeln('The listener IP whitelist is empty. No subscriptions will succeed.');
   end
   else
   begin
@@ -122,16 +122,14 @@ begin
     while True do
     begin
       Win32Check(ReadConsoleInput(LHandle, LInputRecord, 1, LEvent));
-      // if (LInputRecord.EventType = KEY_EVENT) and
-      // LInputRecord.Event.KeyEvent.bKeyDown and
-      // (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
-      // break;
-      if (LInputRecord.EventType = KEY_EVENT) then
-        Writeln(LInputRecord.Event.KeyEvent.wVirtualKeyCode);
+       if (LInputRecord.EventType = KEY_EVENT) and
+       LInputRecord.Event.KeyEvent.bKeyDown and
+       (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
+       break;
 
     end;
   finally
-    ConfigUpdated := TAQConfig.Create(Config.Port, Config.IPs, TController.GetListeners());
+    ConfigUpdated := TAQConfig.Create(Config.Port, Config.ListenersIPs, TController.GetListeners());
     jo := Mapper.ObjectToJSONObject(ConfigUpdated);
     OutFile := GetAvailablePath(ConfigFileName, '-YYYY-mm-dd_hh_nn_ss');
     SaveConfigToFile(OutFile, jo.ToString);

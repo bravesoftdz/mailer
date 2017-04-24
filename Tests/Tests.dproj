@@ -131,8 +131,8 @@
         <DCCReference Include="ActionDispatcherTest.pas"/>
         <DCCReference Include="ReceptionRequestBuilderTest.pas"/>
         <DCCReference Include="ReceptionRequestTest.pas"/>
-        <DCCReference Include="FrontEndRequestFromJsonTest.pas"/>
-        <DCCReference Include="FrontEndDataFromJsonTest.pas"/>
+        <DCCReference Include="FrontEndRequestTest.pas"/>
+        <DCCReference Include="FrontEndDataTest.pas"/>
         <DCCReference Include="ActiveQueueResponceTest.pas"/>
         <DCCReference Include="SubscriptionOutcomeDataTest.pas"/>
         <DCCReference Include="AQConfigTest.pas"/>

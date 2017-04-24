@@ -47,9 +47,9 @@ begin
   jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
   obj := Mapper.JSONObjectToObject<TAQConfig>(jo);
   Assert.AreEqual(4321, obj.port);
-  Assert.AreEqual(2, Length(obj.GetIps));
-  Assert.AreEqual('192.111.12.1', obj.GetIps[0]);
-  Assert.AreEqual('92.22.14.55', obj.GetIPs[1]);
+  Assert.AreEqual(2, Length(obj.GetListenersIps));
+  Assert.AreEqual('192.111.12.1', obj.GetListenersIps[0]);
+  Assert.AreEqual('92.22.14.55', obj.GetListenersIps[1]);
   Assert.AreEqual(2, obj.Listeners.Count);
   Assert.AreEqual('abc', obj.Listeners[0].token);
   Assert.AreEqual('xxx/yyy', obj.Listeners[0].path);

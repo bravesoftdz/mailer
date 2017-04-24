@@ -16,11 +16,13 @@ type
   TAQConfig = class
   const
     PORT_KEY_NAME = 'port';
-    IPS_KEY_NAME = 'ips';
+    IPS_KEY_NAME_LISTENERS = 'ip-listeners';
+    IPS_KEY_NAME_PROVIDERS = 'ip-providers';
     SUBSCRIPTIONS_KEY_NAME = 'subscriptions';
   strict private
     FPort: Integer;
-    FIPs: String;
+    ///
+    FListenersIPs: String;
     FIPList: TArray<String>;
     FListeners: TObjectList<TListenerInfo>;
 
@@ -36,26 +38,29 @@ type
     function GetListeners(): TObjectList<TListenerInfo>;
 
     destructor Destroy; override;
-    /// <summary>Creates a new instance with values taken from given json object.</summary>
-    /// <param name="jo">values of this object are to be used to initialize properties
-    /// of returned instance.</name>
-    class function LoadFromJson(const jo: TJsonObject): TAQConfig;
 
-    /// <summary>Return a list of ips from which the seubscriptions are allowed</summary>
-    function GetIps(): TArray<String>;
+    /// <summary>Return a list of ips from which the subscriptions are allowed</summary>
+    function GetListenersIps(): TArray<String>;
+
     /// <summary>Set ip from which the subscription requests are allowed.</summary>
     /// <param name="IPs">Comma-separated list of ips. Trailing white spaces
     /// are to be trimmed</param>
-    procedure SetIPs(const IPs: String);
+    procedure SetListenersIPs(const IPs: String);
 
     /// <summary> Port at which the program accepts the connections.</summary>
     [MapperJSONSer('port')]
     property Port: Integer read FPort write FPort;
 
     /// <summary> comma-separated list of ips from which the subscriptions are allowed.
-    /// Any subscription request originating from any other ip is to be ignored.</summary>
+    /// A subscription request originating from an ip not present in this string is to be ignored.</summary>
     [MapperJSONSer('ips')]
-    property IPs: String read FIPs write setIPs;
+    property ListenersIPs: String read FListenersIPs write SetListenersIPs;
+
+    /// <summary> comma-separated list of ips of providers that are allowed to enqueue the items.
+    /// Any request to put a request into the queue originating from an ip not present in this string is to be ignored.</summary>
+    [MapperJSONSer('providers-ips')]
+    property ProvidersIPs: String read FListenersIPs write SetListenersIPs;
+
     /// <summary> list of subscribed listeners</summary>
     [MapperJSONSer('listeners')]
     [MapperListOf(TListenerInfo)]
@@ -87,9 +92,9 @@ var
   IPsArr: TArray<String>;
 begin
   FPort := Port;
-  FIPs := IPs;
+  FListenersIPs := IPs;
   FIPList := TArray<String>.Create();
-  SetIPs(IPs);
+  SetListenersIPs(IPs);
   FListeners := TObjectList<TListenerInfo>.Create();
   SetListeners(Listeners);
 end;
@@ -101,7 +106,7 @@ begin
   inherited;
 end;
 
-function TAQConfig.GetIps: TArray<String>;
+function TAQConfig.GetListenersIps: TArray<String>;
 var
   I, S: Integer;
 begin
@@ -132,51 +137,14 @@ begin
 
 end;
 
-class function TAQConfig.LoadFromJson(const jo: TJsonObject): TAQConfig;
-var
-  Port, ListenerNum: Integer;
-  Item, PortJValue, IPsJValue, ListenersJValue: TJsonValue;
-  IPs: String;
-  Listeners: TArray<TListenerInfo>;
-  ipsJArr, ListenersJArr: TJsonArray;
-  I: Integer;
-begin
-  PortJValue := jo.getValue(PORT_KEY_NAME);
-  if PortJValue <> nil then
-    try
-      Port := PortJValue.Value.ToInteger;
-    except
-      on E: Exception do
-      begin
-        Port := 0;
-      end;
-    end;
-  IPsJValue := jo.GetValue(IPS_KEY_NAME);
-  if (IPsJValue <> nil) then
-  begin
-    IPs := IPsJValue.Value;
-  end;
-  ListenersJValue := jo.GetValue(SUBSCRIPTIONS_KEY_NAME);
-  if (ListenersJValue <> nil) AND (ListenersJValue is TJsonArray) then
-  begin
-    ListenersJArr := ListenersJValue as TJsonArray;
-    ListenerNum := ListenersJArr.Count;
-    Listeners := TArray<TListenerInfo>.Create();
-    SetLength(Listeners, ListenerNum);
-    // for I := 0 to ListenerNum - 1 do
-    // Listeners[I] := ListenersJArr.Items[I];
-  end;
-  Result := TAQConfig.Create(Port, IPs);
-end;
-
-procedure TAQConfig.SetIPs(const IPs: String);
+procedure TAQConfig.SetListenersIPs(const IPs: String);
 var
   items: TStringDynArray;
   S, I: Integer;
 begin
   /// clean the previously set values
   SetLength(FIPList, 0);
-  FIPs := IPs;
+  FListenersIPs := IPs;
   Items := SplitString(IPs, ',');
   S := Length(items);
   SetLength(FIPList, S);

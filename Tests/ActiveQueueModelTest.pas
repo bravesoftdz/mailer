@@ -297,7 +297,7 @@ begin
   IPs[1] := '1.1.1.2';
   IPs[2] := '1.1.1.3';
   IPs[3] := '1.1.1.4';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
@@ -317,7 +317,7 @@ begin
   SetLength(IPs, 2);
   IPs[0] := '1.1.1.1';
   IPs[1] := '1.1.1.2';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
   responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
@@ -337,7 +337,7 @@ begin
   IPs[0] := '1.1.1.1';
   IPs[1] := '1.1.1.2';
   IPs[2] := '1.1.1.3';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
   model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
@@ -366,7 +366,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '1.1.1.1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce := model.CancelSubscription('5.5.5.5', 'token-not-exists');
@@ -385,7 +385,7 @@ begin
   IPs[0] := '1.1.1.13';
   IPs[1] := '2.1.1.13';
   IPs[2] := '3.1.1.13';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
@@ -404,7 +404,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '100.100.001.1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('100.100.001.1', 'make it wrong ' + responce1.Token);
@@ -421,7 +421,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '100.100.001.1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('100.100.001.1', responce1.Token);
@@ -438,7 +438,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '100.100.001.1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('WRONG', responce1.Token);
@@ -455,7 +455,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '100.100.001.1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('wrong-ip', 'wrong' + responce1.Token);
@@ -475,7 +475,7 @@ begin
   IPs[1] := '2.1.1.13';
   IPs[2] := '3.1.1.13';
 
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
   responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
@@ -497,7 +497,7 @@ begin
   IPs[1] := '2.1.1.13';
   IPs[2] := '3.1.1.13';
 
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
   responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
@@ -519,7 +519,7 @@ begin
   IPs[1] := '2.1.1.13';
   IPs[2] := '3.1.1.13';
 
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
   responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
@@ -539,7 +539,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := '5.5.5.5';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   data := TSubscriptionData.Create('5.5.5.5', 'an url', 2345, 'news/');
   responce := model.AddSubscription(data);
   Assert.IsTrue(responce.status);
@@ -552,7 +552,7 @@ var
   Model: TActiveQueueModel;
 begin
   Model := TActiveQueueModel.Create();
-  Model.SetIPs(TArray<String>.Create());
+  Model.SetListenersIps(TArray<String>.Create());
   data := TSubscriptionData.Create('no such ip', 'an url', 2345, 'news/');
   responce := model.AddSubscription(data);
   Assert.IsFalse(responce.status);
@@ -574,7 +574,7 @@ begin
   SetLength(ips, N);
   for I := 0 to N - 1 do
     IPs[I] := inttostr(I);
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   for I := 0 to N - 1 do
   begin
     Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url', I, 'news/' + inttostr(I)));
@@ -602,7 +602,7 @@ begin
   SetLength(ips, N);
   for I := 0 to N - 1 do
     IPs[I] := inttostr(I);
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   for I := 0 to N - 1 do
   begin
     Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), I, 'news/' + inttostr(I)));
@@ -629,7 +629,7 @@ begin
   SetLength(ips, N);
   for I := 0 to N - 1 do
     IPs[I] := inttostr(I);
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   for I := 0 to N - 1 do
   begin
     Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), 3333, 'news/' + inttostr(I)));
@@ -653,7 +653,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(ips, 1);
   IPs[0] := '1.1.1.1';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an-url', 88, '/'));
   Assert.IsTrue(Responce.status);
   for I := 0 to N - 2 do
@@ -673,7 +673,7 @@ begin
   SetLength(ips, 2);
   ips[0] := '127.0.0.7';
   ips[1] := '175.112.32.211';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
@@ -688,7 +688,7 @@ begin
   ips[0] := '175.112.32.211';
   ips[1] := '216.87.22.99';
   ips[2] := '175.112.32.222';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Assert.IsTrue(Model.IsSubscribable('175.112.32.222'));
 end;
 
@@ -703,7 +703,7 @@ begin
   ips[0] := '175.112.32.211';
   ips[1] := '216.87.22.99';
   ips[2] := '175.112.32.222';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Assert.IsTrue(Model.IsSubscribable('216.87.22.99'));
 end;
 
@@ -719,7 +719,7 @@ begin
   ips[1] := '216.87.22.99';
   ips[2] := '175.112.32.222';
   ips[3] := '15.12.32.20';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Assert.IsFalse(Model.IsSubscribable('16.7.2.9'));
 end;
 
@@ -728,7 +728,7 @@ var
   model: TActiveQueueModel;
 begin
   model := TActiveQueueModel.Create;
-  model.SetIPs(TArray<String>.Create());
+  model.SetListenersIps(TArray<String>.Create());
   Assert.IsFalse(Model.IsSubscribable('112.112.252.441'));
 end;
 
@@ -749,7 +749,7 @@ begin
   ips := TArray<String>.Create();
   SetLength(ips, 1);
   ips[0] := '127.0.0.7';
-  model.SetIPs(ips);
+  model.SetListenersIps(ips);
   Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
@@ -763,7 +763,7 @@ begin
   SetLength(IPs, 2);
   IPs[0] := 'ip 1';
   IPs[1] := 'ip 2';
-  Model.SetIPs(Ips);
+  Model.SetListenersIps(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
@@ -783,7 +783,7 @@ begin
   IPs[1] := 'ip 2';
   IPs[2] := 'ip 3';
   IPs[3] := 'ip 4';
-  Model.SetIPs(Ips);
+  Model.SetListenersIps(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
 
   Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
@@ -803,7 +803,7 @@ begin
   IPs := TArray<String>.Create();
   SetLength(IPs, 1);
   IPs[0] := 'ip 1';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
@@ -819,7 +819,7 @@ begin
   SetLength(IPs, 2);
   IPs[0] := 'ip 1';
   IPs[1] := 'ip 2';
-  Model.SetIPs(IPs);
+  Model.SetListenersIps(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 1, 'a path 1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
@@ -839,7 +839,7 @@ begin
   IPs[1] := 'ip 2';
   IPs[2] := 'ip 3';
 
-  Model.SetIPs(Ips);
+  Model.SetListenersIps(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
 
   Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
@@ -856,7 +856,7 @@ var
   IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
-  Model.SetIPs(TArray<String>.Create());
+  Model.SetListenersIps(TArray<String>.Create());
   Assert.AreEqual(0, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('some non allowed ip', 'url 1', 2021, 'path1'));
   Assert.AreEqual(0, Model.numOfSubscriptions);

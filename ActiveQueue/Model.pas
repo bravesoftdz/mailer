@@ -11,15 +11,21 @@ type
   TActiveQueueModel = class
     /// Representation invariant:
     /// All conditions must hold:
-    /// 1. lock objects are non null: FSubscriptionLock, FQueueLock
+    /// 1. lock objects are non null: FSubscriptionsLock, FProvidersLock, FQueueLock
     /// 2. FSubscriptionRegister and  FProxyRegister must have the same set of keys
     /// 3. FIPs length is defined and is not less than zero
+    ///
   strict private
   var
     /// a dumb lock object for managing the access to the  subscription register
-    FSubscriptionLock: TObject;
+    FSubscriptionsLock: TObject;
+
+    /// a dumb lock object for managing the access to the  providers' ips
+    FProvidersLock: TObject;
+
     /// a dumb lock object for managing the access to the queue items
     FQueueLock: TObject;
+
     /// <summary>A dictionary for subscriptions: the keys are unique ids assigned
     /// to the subscriptions, the values are objects containing subscription information</summary>
     FSubscriptionRegister: TDictionary<String, TSubscriptionData>;
@@ -28,16 +34,24 @@ type
     /// Each pair is composed of a key that is a token issued during the subscription
     /// and a value that is a proxy server of the listener associated with the token.</summary>
     FProxyRegister: TDictionary<String, IListenerProxy>;
+
     /// items of the queue
     FQueue: TQueue<TReceptionRequest>;
+
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
-    FIPs: TArray<String>;
+    FListenersIPs: TArray<String>;
+
+    /// <summary>Set the IPs from which the data to enqueue can be accepted.</summary>
+    FProvidersIPs: TArray<String>;
+
     function GetNumOfSubscriptions: Integer;
+
     /// <summary>Return true if given subscription data is already present in the register.</summary>
     function IsSubscribed(const Data: TSubscriptionData): Boolean;
 
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
+
     /// <summary>Notify all subscribed listeners that the queue state has changed</summary>
     procedure NotifyListeners();
 
@@ -52,20 +66,30 @@ type
     /// <summary>Set the listeners</summary>
     procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
 
-    /// <summary> Cancel the subscription corresponding to given ip</summary>
+    /// <summary>Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     /// <param name="Token">token associated with the subscription</param>
     function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
+
     /// get not more that N items from the queue.
     function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+
     /// <summary>Add many items to the pull</summary>
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <returns>True in case of success, False otherwise</returns>
     function addAll(const Items: TObjectList<TReceptionRequest>): Boolean;
+
     /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
-    function GetIPs: TArray<String>;
+    function GetListenersIPs: TArray<String>;
+
     /// <summary> Set the IPs from which the subscriptions can be accepted.</summary>
-    procedure SetIPs(const IPs: TArray<String>);
+    procedure SetListenersIPs(const IPs: TArray<String>);
+
+    /// <summary> Get the IPs from which the requests to enqueue the data can be accepted.</summary>
+    function GetProvidersIPs: TArray<String>;
+
+    /// <summary> Set the IPs from which the requests to enqueue the data can be accepted.</summary>
+    procedure SetProvidersIPs(const IPs: TArray<String>);
 
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
     function IsSubscribable(const IP: String): Boolean;
@@ -112,7 +136,7 @@ var
   Ip: String;
   Guid: TGUID;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     if Data = nil then
     begin
@@ -144,7 +168,7 @@ begin
     end;
     CheckRep();
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 
 end;
@@ -153,7 +177,7 @@ function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQ
 var
   subscription: TSubscriptionData;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     if (FSubscriptionRegister.ContainsKey(Token)) then
     begin
@@ -175,7 +199,7 @@ begin
     end;
     CheckRep();
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 end;
 
@@ -186,8 +210,8 @@ var
 begin
   TMonitor.Enter(FQueueLock);
   try
-    IsOk := (FSubscriptionLock <> nil)
-      AND (Length(FIPs) >= 0)
+    IsOk := (FSubscriptionsLock <> nil)
+      AND (Length(FListenersIPs) >= 0)
       AND (FSubscriptionRegister <> nil)
       AND (FProxyRegister <> nil)
       AND (FProxyRegister.Count = FSubscriptionRegister.Count);
@@ -210,12 +234,12 @@ end;
 
 constructor TActiveQueueModel.Create;
 begin
-  FSubscriptionLock := TObject.Create;
+  FSubscriptionsLock := TObject.Create;
   FQueueLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
   FQueue := TQueue<TReceptionRequest>.Create;
-  SetLength(FIPs, 0);
+  SetLength(FListenersIPs, 0);
   CheckRep();
 end;
 
@@ -224,7 +248,7 @@ var
   ItemKey: String;
   I, S: Integer;
 begin
-  FSubscriptionLock.DisposeOf;
+  FSubscriptionsLock.DisposeOf;
   FQueueLock.DisposeOf;
   // remove objects from the register and clean the register afterwards
   for ItemKey in FSubscriptionRegister.Keys do
@@ -241,7 +265,7 @@ begin
     FQueue.Dequeue.Disposeof;
   FQueue.Clear;
   FQueue.DisposeOf;
-  SetLength(FIPs, 0);
+  SetLength(FListenersIPs, 0);
 
 end;
 
@@ -251,7 +275,7 @@ var
   IsSubScribed: Boolean;
 begin
   Result := TObjectList<TReceptionRequest>.Create(True);
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
     begin
@@ -268,30 +292,54 @@ begin
       TMonitor.Exit(FQueueLock);
     end;
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 
 end;
 
-function TActiveQueueModel.GetIPs: TArray<String>;
+function TActiveQueueModel.GetListenersIPs: TArray<String>;
 var
   I, S: Integer;
 begin
-  If Assigned(FIPs) then
-    S := Length(FIPs)
-  else
-    S := 0;
-  Result := TArray<String>.Create();
-  SetLength(Result, S);
-  for I := 0 to S - 1 do
-    Result[I] := FIPs[I];
+  TMonitor.Enter(FSubscriptionsLock);
+  try
+    If Assigned(FListenersIPs) then
+      S := Length(FListenersIPs)
+    else
+      S := 0;
+    Result := TArray<String>.Create();
+    SetLength(Result, S);
+    for I := 0 to S - 1 do
+      Result[I] := FListenersIPs[I];
+  finally
+    TMonitor.Exit(FSubscriptionsLock);
+  end;
 end;
 
 function TActiveQueueModel.GetNumOfSubscriptions: Integer;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   Result := FSubscriptionRegister.Count;
-  TMonitor.Exit(FSubscriptionLock);
+  TMonitor.Exit(FSubscriptionsLock);
+end;
+
+function TActiveQueueModel.GetProvidersIPs: TArray<String>;
+var
+  I, S: Integer;
+begin
+  TMonitor.Enter(FProvidersLock);
+  try
+    If Assigned(FProvidersIPs) then
+      S := Length(FProvidersIPs)
+    else
+      S := 0;
+    Result := TArray<String>.Create();
+    SetLength(Result, S);
+    for I := 0 to S - 1 do
+      Result[I] := FProvidersIPs[I];
+  finally
+    TMonitor.Exit(FProvidersLock);
+  end;
 end;
 
 function TActiveQueueModel.GetListeners: TObjectList<TListenerInfo>;
@@ -299,7 +347,7 @@ var
   Subscription: TSubscriptionData;
   Token: String;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     Result := TObjectList<TListenerInfo>.Create();
     for Token in FSubscriptionRegister.Keys do
@@ -314,7 +362,7 @@ begin
         );
     end;
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 
 end;
@@ -323,18 +371,18 @@ function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
 var
   I, S: Integer;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   Result := False;
-  S := Length(FIPs);
+  S := Length(FListenersIPs);
   for I := 0 to S - 1 do
   begin
-    if (FIPs[I].Equals(IP)) then
+    if (FListenersIPs[I].Equals(IP)) then
     begin
       Result := True;
       break;
     end;
   end;
-  TMonitor.Exit(FSubscriptionLock);
+  TMonitor.Exit(FSubscriptionsLock);
 end;
 
 function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
@@ -349,32 +397,55 @@ procedure TActiveQueueModel.NotifyListeners;
 var
   Token: String;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     for Token in FProxyRegister.Keys do
       FProxyRegister[Token].Notify();
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 end;
 
-procedure TActiveQueueModel.SetIPs(const IPs: TArray<String>);
+procedure TActiveQueueModel.SetListenersIPs(const IPs: TArray<String>);
 var
   I, S: Integer;
 begin
-  S := Length(IPs);
-  SetLength(FIPs, S);
-  for I := 0 to S - 1 do
-    FIPs[I] := IPs[I];
-  CheckRep();
+  TMonitor.Enter(FSubscriptionsLock);
+  try
+    S := Length(IPs);
+    SetLength(FListenersIPs, S);
+    for I := 0 to S - 1 do
+      FListenersIPs[I] := IPs[I];
+    CheckRep();
+  finally
+    TMonitor.Exit(FSubscriptionsLock);
+  end;
+end;
+
+procedure TActiveQueueModel.SetProvidersIPs(const IPs: TArray<String>);
+var
+  I, S: Integer;
+begin
+  TMonitor.Enter(FProvidersLock);
+  try
+    S := Length(IPs);
+    SetLength(FProvidersIPs, S);
+    for I := 0 to S - 1 do
+      FProvidersIPs[I] := IPs[I];
+    CheckRep();
+  finally
+    TMonitor.Exit(FProvidersLock);
+  end;
 end;
 
 procedure TActiveQueueModel.SetListeners(
-  const Listeners: TObjectList<TListenerInfo>);
+  const
+  Listeners:
+  TObjectList<TListenerInfo>);
 var
   Listener: TListenerInfo;
 begin
-  TMonitor.Enter(FSubscriptionLock);
+  TMonitor.Enter(FSubscriptionsLock);
   try
     FSubscriptionRegister.Clear;
     FProxyRegister.Clear;
@@ -385,7 +456,7 @@ begin
     end;
     CheckRep();
   finally
-    TMonitor.Exit(FSubscriptionLock);
+    TMonitor.Exit(FSubscriptionsLock);
   end;
 end;
 

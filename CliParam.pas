@@ -3,6 +3,9 @@ unit CliParam;
 interface
 
 type
+  /// <summary>Immutable ADT that represents a command line argument.</summary>
+  ///  Immutablity is achieved by the fact that all properties are of primitive
+  ///  types (string and boolean) and are read-only.
   TCliParam = class
   strict private
     FSwitchString: String;
