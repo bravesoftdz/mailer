@@ -4,7 +4,8 @@ interface
 
 uses
   ActiveQueueResponce, SubscriptionData, ReceptionRequest,
-  System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface;
+  System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
+  ConditionInterface;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -94,6 +95,9 @@ type
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
     function IsSubscribable(const IP: String): Boolean;
 
+    /// <summary>Cancel the items of the queue for which the condition is true.</summary>
+    function CancelBy(const Condition: ICondition): Integer;
+
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
 
@@ -171,6 +175,11 @@ begin
     TMonitor.Exit(FSubscriptionsLock);
   end;
 
+end;
+
+function TActiveQueueModel.CancelBy(const Condition: ICondition): Integer;
+begin
+raise Exception.Create('Not implemented yet');
 end;
 
 function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQueueResponce;

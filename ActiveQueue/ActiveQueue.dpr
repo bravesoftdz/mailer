@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -26,7 +26,9 @@ uses
   SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
   ListenerInfo in 'ListenerInfo.pas',
   ListenerProxyInterface in 'ListenerProxyInterface.pas',
-  ActiveQueueAPI in 'ActiveQueueAPI.pas';
+  ActiveQueueAPI in 'ActiveQueueAPI.pas',
+  ConditionInterface in 'ConditionInterface.pas',
+  TokenBasedCondition in 'TokenBasedCondition.pas';
 
 {$R *.res}
 

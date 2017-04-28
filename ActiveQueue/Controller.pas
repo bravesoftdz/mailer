@@ -70,6 +70,11 @@ type
     [MVCHTTPMethod([httpPOST])]
     procedure PutItems(const Context: TWebContext);
 
+    /// cancel items from the ActiveQueue.
+    [MVCPath('/cancel/post')]
+    [MVCHTTPMethod([httpPUT])]
+    procedure CancelItems(const Context: TWebContext);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -79,7 +84,7 @@ implementation
 
 uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
-  System.SysUtils;
+  System.SysUtils, ConditionInterface, TokenBasedCondition;
 
 class function TController.GetListenersIPs: TArray<String>;
 begin
@@ -105,6 +110,27 @@ begin
     Result := TArray<String>.Create();
     SetLength(Result, 0);
   end;
+end;
+
+procedure TController.CancelItems(const Context: TWebContext);
+var
+  Ip: String;
+  jo: TJsonObject;
+  Condition: ICondition;
+begin
+  Ip := Context.Request.ClientIP;
+  jo := Context.Request.BodyAsJSONObject;
+  if (Assigned(jo)) then
+  begin
+    try
+      Condition := Mapper.JSONObjectToObject<TTokenBasedCondition>(jo);
+      Model.CancelBy(Condition);
+    except
+      on e: Exception do
+        Condition := nil;
+    end;
+  end;
+
 end;
 
 procedure TController.GetItems(const Context: TWebContext);
