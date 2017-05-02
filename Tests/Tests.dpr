@@ -22,7 +22,8 @@ uses
   AQConfigTest in 'AQConfigTest.pas',
   ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
   ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
-  SubscriptionDataTest in 'SubscriptionDataTest.pas';
+  SubscriptionDataTest in 'SubscriptionDataTest.pas',
+  TokenBasedConditionTest in 'TokenBasedConditionTest.pas';
 
 var
   runner: ITestRunner;

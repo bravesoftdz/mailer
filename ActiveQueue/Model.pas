@@ -37,7 +37,7 @@ type
     FProxyRegister: TDictionary<String, IListenerProxy>;
 
     /// items of the queue
-    FQueue: TObjectList<TReceptionRequest>;
+    FItems: TObjectList<TReceptionRequest>;
 
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FListenersIPs: TArray<String>;
@@ -45,6 +45,7 @@ type
     /// <summary>Set the IPs from which the data to enqueue can be accepted.</summary>
     FProvidersIPs: TArray<String>;
 
+    /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
 
     /// <summary>Return true if given subscription data is already present in the register.</summary>
@@ -79,7 +80,7 @@ type
     function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
 
     /// get not more that N items from the queue.
-    function getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+    function GetItems(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
 
     /// <summary>Add many items to the pull</summary>
     /// <param name="Items">list of elements to be added to the queue</param>
@@ -128,7 +129,7 @@ begin
     try
       for item in Items do
       begin
-        FQueue.Add(item);
+        FItems.Add(item);
       end;
       Result := True;
     except
@@ -187,14 +188,14 @@ end;
 
 procedure TActiveQueueModel.BroadcastCancel(const Condition: ICondition);
 var
-  Listener: IListenerProxy;
+  Listener: TPair<String, IListenerProxy>;
 begin
   TMonitor.Enter(FSubscriptionsLock);
   try
     for Listener in FProxyRegister do
     begin
       try
-        Listener.Cancel(Condition);
+        Listener.Value.Cancel(Condition);
       except
         on E: Exception do
           Writeln(E.Message);
@@ -218,11 +219,11 @@ begin
   TMonitor.Enter(FQueueLock);
   Result := 0;
   try
-    for Item in FQueue do
+    for Item in FItems do
     begin
       if Condition.Satisfy(Item) then
       begin
-        FQueue.Remove(Item);
+        FItems.Remove(Item);
         Result := Result + 1;
       end;
     end;
@@ -297,7 +298,7 @@ begin
   FProvidersLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
-  FQueue := TQueue<TReceptionRequest>.Create;
+  FItems := TObjectList<TReceptionRequest>.Create;
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
   CheckRep();
@@ -321,16 +322,16 @@ begin
   FProxyRegister.Clear;
   FProxyRegister.DisposeOf;
   // remove objects from the queue and clean the queue afterwards
-  S := FQueue.Count;
+  S := FItems.Count;
   for I := 0 to S - 1 do
-    FQueue.Dequeue.Disposeof;
-  FQueue.Clear;
-  FQueue.DisposeOf;
+    FItems[I] := nil;
+  FItems.Clear;
+  FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
 
 end;
 
-function TActiveQueueModel.getData(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+function TActiveQueueModel.GetItems(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
   IsSubScribed: Boolean;
@@ -341,14 +342,18 @@ begin
     if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
     begin
       TMonitor.Enter(FQueueLock);
-      Size := FQueue.Count;
+      Size := FItems.Count;
       if Size < N then
         ReturnSize := Size
       else
         ReturnSize := N;
       for I := 0 to ReturnSize - 1 do
       begin
-        Result.Add(FQueue.Dequeue);
+        Result.Add(FItems[I]);
+      end;
+      for I := 0 to ReturnSize - 1 do
+      begin
+        FItems[I] := nil;
       end;
       TMonitor.Exit(FQueueLock);
     end;

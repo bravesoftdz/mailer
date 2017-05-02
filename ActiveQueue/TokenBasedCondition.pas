@@ -33,8 +33,7 @@ uses
 
 procedure TTokenBasedCondition.CheckRep;
 begin
-  raise Exception.Create('Not implemented');
-
+  if (FValue = nil) then raise Exception.Create('Can not compare to nil');
 end;
 
 constructor TTokenBasedCondition.Create(const Value: String);

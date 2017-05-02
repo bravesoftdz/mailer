@@ -1,4 +1,4 @@
-﻿unit Controller;
+unit Controller;
 
 interface
 
@@ -124,7 +124,7 @@ begin
   begin
     try
       Condition := Mapper.JSONObjectToObject<TTokenBasedCondition>(jo);
-      Model.CancelLocalAndRemote(Condition);
+      Model.Cancel(Condition);
     except
       on e: Exception do
         Condition := nil;
@@ -141,7 +141,7 @@ var
 begin
   N := Context.Request.Params['n'].ToInteger;
   ip := Context.Request.ClientIP;
-  Items := Model.getData(Ip, N);
+  Items := Model.GetItems(Ip, N);
   Render<TReceptionRequest>(Items);
 end;
 
