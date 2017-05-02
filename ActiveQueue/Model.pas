@@ -37,7 +37,7 @@ type
     FProxyRegister: TDictionary<String, IListenerProxy>;
 
     /// items of the queue
-    FQueue: TQueue<TReceptionRequest>;
+    FQueue: TObjectList<TReceptionRequest>;
 
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FListenersIPs: TArray<String>;
@@ -55,6 +55,12 @@ type
 
     /// <summary>Notify all subscribed listeners that the queue state has changed</summary>
     procedure NotifyListeners();
+
+    /// <sumary>Inform the listeners that they should cancel items satisfying the condition</summary>
+    procedure BroadcastCancel(const Condition: ICondition);
+
+    /// <sumary>Cancel local items of the queue for which the condition is true.</summary>
+    function CancelLocal(const Condition: ICondition): Integer;
 
   public
     /// <summary>Create a subscription </summary>
@@ -95,8 +101,10 @@ type
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
     function IsSubscribable(const IP: String): Boolean;
 
-    /// <summary>Cancel the items of the queue for which the condition is true.</summary>
-    function CancelBy(const Condition: ICondition): Integer;
+    /// <summary>Cancel local items of the queue for which the condition is true. Then informs the
+    /// listeners to cancel the items that satisfy the condition.
+    /// Returns the number of items cancelled from the local storage.</summary>
+    function Cancel(const Condition: ICondition): Integer;
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -120,7 +128,7 @@ begin
     try
       for item in Items do
       begin
-        FQueue.Enqueue(item);
+        FQueue.Add(item);
       end;
       Result := True;
     except
@@ -177,9 +185,50 @@ begin
 
 end;
 
-function TActiveQueueModel.CancelBy(const Condition: ICondition): Integer;
+procedure TActiveQueueModel.BroadcastCancel(const Condition: ICondition);
+var
+  Listener: IListenerProxy;
 begin
-raise Exception.Create('Not implemented yet');
+  TMonitor.Enter(FSubscriptionsLock);
+  try
+    for Listener in FProxyRegister do
+    begin
+      try
+        Listener.Cancel(Condition);
+      except
+        on E: Exception do
+          Writeln(E.Message);
+      end;
+    end;
+  finally
+    TMonitor.Exit(FSubscriptionsLock);
+  end;
+end;
+
+function TActiveQueueModel.Cancel(const Condition: ICondition): Integer;
+begin
+  Result := CancelLocal(Condition);
+  BroadcastCancel(Condition);
+end;
+
+function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
+var
+  item: TReceptionRequest;
+begin
+  TMonitor.Enter(FQueueLock);
+  Result := 0;
+  try
+    for Item in FQueue do
+    begin
+      if Condition.Satisfy(Item) then
+      begin
+        FQueue.Remove(Item);
+        Result := Result + 1;
+      end;
+    end;
+  finally
+    TMonitor.Exit(FQueueLock);
+  end;
 end;
 
 function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQueueResponce;

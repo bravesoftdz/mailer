@@ -1,4 +1,4 @@
-unit Controller;
+﻿unit Controller;
 
 interface
 
@@ -71,7 +71,7 @@ type
     procedure PutItems(const Context: TWebContext);
 
     /// cancel items from the ActiveQueue.
-    [MVCPath('/cancel/post')]
+    [MVCPath('/items/cancel')]
     [MVCHTTPMethod([httpPUT])]
     procedure CancelItems(const Context: TWebContext);
 
@@ -124,7 +124,7 @@ begin
   begin
     try
       Condition := Mapper.JSONObjectToObject<TTokenBasedCondition>(jo);
-      Model.CancelBy(Condition);
+      Model.CancelLocalAndRemote(Condition);
     except
       on e: Exception do
         Condition := nil;
