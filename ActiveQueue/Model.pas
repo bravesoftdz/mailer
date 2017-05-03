@@ -113,8 +113,9 @@ type
 
     /// <summary>Cancel local items of the queue for which the condition is true. Then informs the
     /// listeners to cancel the items that satisfy the condition.
-    /// Returns the number of items cancelled from the local storage.</summary>
-    function Cancel(const Condition: ICondition): Integer;
+    /// Returns the number of items cancelled from the local storage, or -1 of the request comes from a
+    /// computer with non-allowed IP.</summary>
+    function Cancel(const IP: string; const Condition: ICondition): Integer;
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -216,10 +217,15 @@ begin
   end;
 end;
 
-function TActiveQueueModel.Cancel(const Condition: ICondition): Integer;
+function TActiveQueueModel.Cancel(const IP: string; const Condition: ICondition): Integer;
 begin
-  Result := CancelLocal(Condition);
-  BroadcastCancel(Condition);
+  if (IsAllowedProvider(IP)) then
+  begin
+    Result := CancelLocal(Condition);
+    BroadcastCancel(Condition);
+  end
+  else
+    Result := -1;
 end;
 
 function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;

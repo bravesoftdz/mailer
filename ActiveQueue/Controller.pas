@@ -118,13 +118,13 @@ var
   jo: TJsonObject;
   Condition: ICondition;
 begin
-  Ip := Context.Request.ClientIP;
+  IP := Context.Request.ClientIP;
   jo := Context.Request.BodyAsJSONObject;
   if (Assigned(jo)) then
   begin
     try
       Condition := Mapper.JSONObjectToObject<TTokenBasedCondition>(jo);
-      Model.Cancel(Condition);
+      Model.Cancel(IP, Condition);
     except
       on e: Exception do
         Condition := nil;

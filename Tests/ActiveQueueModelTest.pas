@@ -268,12 +268,115 @@ type
     [Test]
     procedure TestIsSubs3ElemEnd();
 
+    /// Test suit for the cancelling the data from the queue
+    /// Partition the input as follows:
+    /// 1. ip is among allowed ones: true, false
+    /// 2. # of items in the queue: 0, 1, 2, > 2
+    /// 3. # of items with sought token: 0, 1, > 1
+
+    /// Cover:
+    /// 1. ip is among allowed ones: false
+    /// 2. # of items in the queue: > 2
+    /// 3. # of items with sought token: 1
+    [Test]
+    procedure LeaveUnchangedIfIpIsNotAmongAllowedButTokenMatch();
+
+    /// Cover:
+    /// 1. ip is among allowed ones: false
+    /// 2. # of items in the queue: > 2
+    /// 3. # of items with sought token: 0
+    [Test]
+    procedure LeaveThreeItemQueueUnchangedIfIpIsNotAmongAllowedAndTokenDoesNotMatch();
+
+    /// Cover:
+    /// 1. ip is among allowed ones: true
+    /// 2. # of items in the queue: 0
+    /// 3. # of items with sought token: 0
+    [Test]
+    procedure LeaveUnchangedIfIpIsAllowedButQueueEmptyTokenDoesNotMatch();
+
+    /// Cover:
+    /// 1. ip is among allowed ones: true
+    /// 2. # of items in the queue: 1
+    /// 3. # of items with sought token: 0
+    [Test]
+    procedure LeaveUnchangedIfIpIsAllowedButQueueHasOneItemTokenDoesNotMatch();
+
+    /// Cover:
+    /// 1. ip is among allowed ones: true
+    /// 2. # of items in the queue: 1
+    /// 3. # of items with sought token: 1
+    [Test]
+    procedure EmptyQueueIfIpIsAllowedQueueHasOneItemTokenMatches();
+
+    /// Cover:
+    /// 1. ip is among allowed ones: true
+    /// 2. # of items in the queue: > 1
+    /// 3. # of items with sought token: > 1
+    [Test]
+    procedure Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems();
+
   end;
 
 implementation
 
 uses Model, SubscriptionData, ActiveQueueResponce, System.SysUtils,
-  System.Generics.Collections;
+  System.Generics.Collections, ReceptionRequest, TokenBasedCondition;
+
+procedure TActiveQueueModelTest.EmptyQueueIfIpIsAllowedQueueHasOneItemTokenMatches;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueEmptyTokenDoesNotMatch;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueHasOneItemTokenDoesNotMatch;
+begin
+
+end;
+
+procedure TActiveQueueModelTest.LeaveThreeItemQueueUnchangedIfIpIsNotAmongAllowedAndTokenDoesNotMatch;
+var
+  Model: TActiveQueueModel;
+  IPs: TArray<String>;
+  Request1, Request2, Request3: TReceptionRequest;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+begin
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(IPs, 1);
+  IPs[0] := '1.1.1.1';
+  Model.SetProvidersIPs(IPs);
+  Request1 := TReceptionRequestBuilder.Create().setToken('token1').Build;
+  Request2 := TReceptionRequestBuilder.Create().setToken('token2').Build;
+  Request3 := TReceptionRequestBuilder.Create().setToken('token3').Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request1);
+  Requests.Add(Request2);
+  Requests.Add(Request3);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('some string');
+  Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
+
+end;
+
+procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsNotAmongAllowedButTokenMatch;
+var
+  Model: TActiveQueueModel;
+begin
+  Model := TActiveQueueModel.Create;
+  Model.SetProvidersIPs(TArray<String>.Create());
+
+end;
 
 procedure TActiveQueueModelTest.Setup;
 begin
