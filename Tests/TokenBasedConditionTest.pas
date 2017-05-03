@@ -113,7 +113,7 @@ var
 begin
   Condition := TTokenBasedCondition.Create(Sought);
   Request := TReceptionRequestBuilder.Create.SetFrom('from').setToken(Token).Build;
-  Assert.AreEqual(Condition.Satisfy(request), Outcome);
+  Assert.AreEqual(Outcome, Condition.Satisfy(request));
 end;
 
 

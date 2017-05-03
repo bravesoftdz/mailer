@@ -68,7 +68,7 @@ type
     /// add items to the ActiveQueue.
     [MVCPath('/items/post')]
     [MVCHTTPMethod([httpPOST])]
-    procedure PutItems(const Context: TWebContext);
+    procedure PostItems(const Context: TWebContext);
 
     /// cancel items from the ActiveQueue.
     [MVCPath('/items/cancel')]
@@ -168,16 +168,18 @@ begin
   inherited;
 end;
 
-procedure TController.PutItems(const Context: TWebContext);
+procedure TController.PostItems(const Context: TWebContext);
 var
   items: TObjectList<TReceptionRequest>;
   Outcome: Boolean;
+  IP: String;
 begin
   if Context.Request.ThereIsRequestBody then
   begin
     try
       items := Context.Request.BodyAsListOf<TReceptionRequest>;
-      Outcome := Model.addAll(Items);
+      IP := Context.Request.ClientIP;
+      Outcome := Model.Enqueue(IP, Items);
     except
       on E: Exception do
         Outcome := False;
