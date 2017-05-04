@@ -43,7 +43,6 @@ type
     [Test]
     procedure createFromHtmlAndText;
 
-
     /// cover:
     /// 1. key "html" is present: false
     /// 2. key "text" is present: true
@@ -76,9 +75,9 @@ procedure TFrontEndRequestTest.createFromEmpty;
 var
   request: TFrontEndRequest;
 begin
-   request := Mapper.JSONObjectToObject<TFrontEndRequest>(root);
-   Assert.AreEqual(request.Data.Html, '');
-   Assert.AreEqual(request.Data.Text, '');
+  request := Mapper.JSONObjectToObject<TFrontEndRequest>(root);
+  Assert.AreEqual(request.Data.Html, '');
+  Assert.AreEqual(request.Data.Text, '');
 end;
 
 procedure TFrontEndRequestTest.createFromHtmlAndText;
@@ -96,20 +95,20 @@ procedure TFrontEndRequestTest.createOnlyFromHtml;
 var
   request: TFrontEndRequest;
 begin
-   DataNode.AddPair(pairHtml);
-   request := Mapper.JSONObjectToObject<TFrontEndRequest>(Root);
-   Assert.AreEqual(request.Data.Html, 'an html content');
-   Assert.AreEqual(request.Data.Text, '');
+  DataNode.AddPair(pairHtml);
+  request := Mapper.JSONObjectToObject<TFrontEndRequest>(Root);
+  Assert.AreEqual(request.Data.Html, 'an html content');
+  Assert.AreEqual(request.Data.Text, '');
 end;
 
 procedure TFrontEndRequestTest.createOnlyFromText;
 var
   request: TFrontEndRequest;
 begin
-   DataNode.AddPair(pairText);
-   request := Mapper.JSONObjectToObject<TFrontEndRequest>(Root);
-   Assert.AreEqual(request.Data.Html, '');
-   Assert.AreEqual(request.Data.Text, 'a text content');
+  DataNode.AddPair(pairText);
+  request := Mapper.JSONObjectToObject<TFrontEndRequest>(Root);
+  Assert.AreEqual(request.Data.Html, '');
+  Assert.AreEqual(request.Data.Text, 'a text content');
 end;
 
 initialization
@@ -117,4 +116,3 @@ initialization
 TDUnitX.RegisterTestFixture(TFrontEndRequestTest);
 
 end.
-

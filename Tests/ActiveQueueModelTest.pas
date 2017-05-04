@@ -543,152 +543,127 @@ begin
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectIpWrongToken;
+const
+  IPs: TArray<String> = ['100.100.001.1'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '100.100.001.1';
   Model.SetListenersIps(IPs);
-  responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
-  responce2 := model.CancelSubscription('100.100.001.1', 'make it wrong ' + responce1.Token);
+  responce2 := model.CancelSubscription(IPs[0], 'make it wrong ' + responce1.Token);
   Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectTokenIp;
+const
+  IPs: TArray<String> = ['100.100.001.1'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '100.100.001.1';
   Model.SetListenersIps(IPs);
-  responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
-  responce2 := model.CancelSubscription('100.100.001.1', responce1.Token);
+  responce2 := model.CancelSubscription(IPs[0], responce1.Token);
   Assert.IsTrue(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectTokenWrongIp;
+const
+  IPs: TArray<String> = ['100.100.001.1'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '100.100.001.1';
   Model.SetListenersIps(IPs);
-  responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('WRONG', responce1.Token);
   Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneWrongIpToken;
+const
+  IPs: TArray<String> = ['100.100.001.1'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '100.100.001.1';
   Model.SetListenersIps(IPs);
-  responce1 := model.AddSubscription(TSubscriptionData.Create('100.100.001.1', 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('wrong-ip', 'wrong' + responce1.Token);
   Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectIpToken;
+const
+  IPs: TArray<String> = ['1.1.1.13', '2.1.1.13', '3.1.1.13'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := '1.1.1.13';
-  IPs[1] := '2.1.1.13';
-  IPs[2] := '3.1.1.13';
-
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
-  responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
   responce2 := model.CancelSubscription('2.1.1.13', responce1.Token);
   Assert.IsTrue(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectIpWrongToken;
+const
+  IPs: TArray<String> = ['1.1.1.13', '2.1.1.13', '3.1.1.13'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := '1.1.1.13';
-  IPs[1] := '2.1.1.13';
-  IPs[2] := '3.1.1.13';
-
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
-  responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
-  responce2 := model.CancelSubscription('2.1.1.13', 'append-to-make-it-wrong-' + responce1.Token);
+  responce2 := model.CancelSubscription(IPs[1], 'append-to-make-it-wrong-' + responce1.Token);
   Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectTokenWrongIp;
+const
+  IPs: TArray<String> = ['1.1.1.13', '2.1.1.13', '3.1.1.13'];
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := '1.1.1.13';
-  IPs[1] := '2.1.1.13';
-  IPs[2] := '3.1.1.13';
-
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
-  responce1 := model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
-  responce2 := model.CancelSubscription('3.1.1.13', responce1.Token);
+  responce2 := model.CancelSubscription(IPs[2], responce1.Token);
   Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestFirstSubscriptionAllowed;
+const
+  IPs: TArray<String> = ['5.5.5.5'];
 var
   data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '5.5.5.5';
   Model.SetListenersIps(IPs);
-  data := TSubscriptionData.Create('5.5.5.5', 'an url', 2345, 'news/');
+  data := TSubscriptionData.Create(IPs[0], 'an url', 2345, 'news/');
   responce := model.AddSubscription(data);
   Assert.IsTrue(responce.status);
 end;
@@ -920,79 +895,63 @@ begin
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToThree;
+const
+  IPs: TArray<String> = ['ip 1', 'ip 2', 'ip 3', 'ip 4'];
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 4);
-  IPs[0] := 'ip 1';
-  IPs[1] := 'ip 2';
-  IPs[2] := 'ip 3';
-  IPs[3] := 'ip 4';
   Model.SetListenersIps(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-
-  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
-  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
-  Model.AddSubscription(TSubscriptionData.Create('ip 3', 'url 3', 2023, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
-  Model.AddSubscription(TSubscriptionData.Create('ip 4', 'url 4', 2024, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[3], 'url 4', 2024, 'path3'));
   Assert.AreEqual(4, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToZero;
+const
+  IPs: TArray<String> = ['ip 1'];
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := 'ip 1';
   Model.SetListenersIps(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToOne;
+const
+  IPs: TArray<String> = ['ip 1', 'ip 2'];
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 2);
-  IPs[0] := 'ip 1';
-  IPs[1] := 'ip 2';
   Model.SetListenersIps(IPs);
   Assert.AreEqual(0, Model.numOfSubscriptions);
-  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 1, 'a path 1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 1, 'a path 1'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 2', 2, 'a path 2'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToThree;
+const
+  IPs: TArray<String> = ['ip 1', 'ip 2', 'ip 3'];
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := 'ip 1';
-  IPs[1] := 'ip 2';
-  IPs[2] := 'ip 3';
-
   Model.SetListenersIps(Ips);
   Assert.AreEqual(0, Model.numOfSubscriptions);
 
-  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
-  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
-  Model.AddSubscription(TSubscriptionData.Create('ip 3', 'url 3', 2023, 'path3'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
   Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 4', 2024, 'path3'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
