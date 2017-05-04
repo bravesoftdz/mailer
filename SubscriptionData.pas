@@ -92,10 +92,10 @@ end;
 
 function TSubscriptionData.StringHash(const Text: String; const Base: Integer): Integer;
 var
-  c: Char;
   S, I: Integer;
 begin
   Result := 0;
+  S := Length(Text);
   for I := 1 to S do
     Result := Base * Result + Ord(Text[I]);
 end;

@@ -99,9 +99,6 @@ begin
 end;
 
 constructor TAQConfig.Create(const Port: Integer; const ListenersIPs, ProvidersIPs: String; const Listeners: TObjectList<TListenerInfo>);
-var
-  I, S: Integer;
-  IPsArr: TArray<String>;
 begin
   TrimMapper := Function(const From: String): String
     begin

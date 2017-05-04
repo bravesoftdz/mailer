@@ -12,7 +12,7 @@ type
   TFrontEndRequestTest = class(TObject)
   private
     Root, DataNode: TJsonObject;
-    pairHtml, pairText, pairAttachs: TJsonPair;
+    pairHtml, pairText: TJsonPair;
 
   public
     [Setup]

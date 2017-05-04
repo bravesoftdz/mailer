@@ -329,15 +329,13 @@ const
   TOKEN = 'common token';
 var
   Model: TActiveQueueModel;
-  Request1, Request2, Request3: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
 begin
   Model := TActiveQueueModel.Create;
   Model.SetProvidersIPs(IPs);
-  Request1 := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
   Requests := TObjectList<TReceptionRequest>.Create;
-  Requests.Add(Request1);
+  Requests.Add(TReceptionRequestBuilder.Create().setToken(TOKEN).Build);
   Model.Enqueue(IPs[0], Requests);
   Condition := TTokenBasedCondition.Create(TOKEN);
   Assert.AreEqual(1, Model.Cancel(IPs[0], Condition));
@@ -349,13 +347,11 @@ const
   TOKEN = 'common token';
 var
   Model: TActiveQueueModel;
-  Request1, Request2, Request3: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
 begin
   Model := TActiveQueueModel.Create;
   Model.SetProvidersIPs(IPs);
-  Request1 := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
   Requests := TObjectList<TReceptionRequest>.Create();
   Requests.AddRange([TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
     TReceptionRequestBuilder.Create().setToken('another token').Build,
@@ -412,19 +408,15 @@ const
   IPs: TArray<String> = ['2.3.4.5'];
 var
   Model: TActiveQueueModel;
-  Request1, Request2, Request3: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
 begin
   Model := TActiveQueueModel.Create;
   Model.SetProvidersIPs(IPs);
-  Request1 := TReceptionRequestBuilder.Create().setToken('token1').Build;
-  Request2 := TReceptionRequestBuilder.Create().setToken('token2').Build;
-  Request3 := TReceptionRequestBuilder.Create().setToken('token3').Build;
-  Requests := TObjectList<TReceptionRequest>.Create;
-  Requests.Add(Request1);
-  Requests.Add(Request2);
-  Requests.Add(Request3);
+  Requests := TObjectList<TReceptionRequest>.Create();
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken('token1').Build,
+    TReceptionRequestBuilder.Create().setToken('token2').Build,
+    TReceptionRequestBuilder.Create().setToken('token3').Build]);
   Model.Enqueue(IPs[0], Requests);
   Condition := TTokenBasedCondition.Create('some string');
   Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
@@ -434,27 +426,22 @@ end;
 procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsNotAmongAllowedButTokenMatch;
 const
   IPs: TArray<String> = ['52.63.74.85'];
+  Token = 'token that matches';
 var
   Model: TActiveQueueModel;
-  Request1, Request2, Request3: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
-  Token: String;
 begin
   Model := TActiveQueueModel.Create;
   Model.SetProvidersIPs(IPs);
-  Token := 'token that matches';
-  Request1 := TReceptionRequestBuilder.Create().setToken(Token).Build;
-  Request2 := TReceptionRequestBuilder.Create().setToken('token2').Build;
-  Request3 := TReceptionRequestBuilder.Create().setToken('token3').Build;
+
   Requests := TObjectList<TReceptionRequest>.Create;
-  Requests.Add(Request1);
-  Requests.Add(Request2);
-  Requests.Add(Request3);
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken(Token).Build,
+    TReceptionRequestBuilder.Create().setToken(Token).Build,
+    TReceptionRequestBuilder.Create().setToken(Token).Build]);
   Model.Enqueue(IPs[0], Requests);
   Condition := TTokenBasedCondition.Create(Token);
   Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
-
 end;
 
 procedure TActiveQueueModelTest.Setup;
@@ -466,64 +453,49 @@ begin
 end;
 
 procedure TActiveQueueModelTest.TestAddAllowedSubscriptionToThree;
+const
+  IPs: TArray<String> = ['1.1.1.1', '1.1.1.2', '1.1.1.3', '1.1.1.4'];
 var
-  data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 4);
-  IPs[0] := '1.1.1.1';
-  IPs[1] := '1.1.1.2';
-  IPs[2] := '1.1.1.3';
-  IPs[3] := '1.1.1.4';
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
-  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.4', 'an url 4', 2345, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create(IPs[3], 'an url 4', 2345, 'news/'));
   Assert.IsTrue(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestAddAlreadySubscribedToTwo;
+const
+  IPs: TArray<String> = ['1.1.1.1', '1.1.1.2'];
 var
-  data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 2);
-  IPs[0] := '1.1.1.1';
-  IPs[1] := '1.1.1.2';
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
-  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  responce := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
   Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestAddNonAllowedSubscriptionToThree;
+const
+  IPs: TArray<String> = ['1.1.1.1', '1.1.1.2', '1.1.1.3'];
 var
-  data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := '1.1.1.1';
-  IPs[1] := '1.1.1.2';
-  IPs[2] := '1.1.1.3';
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.2', 'an url 2', 1000, 'news/'));
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.3', 'an url 3', 555, 'news-2/'));
-  responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.4', 'an url 4', 2345, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('Not-Allowed', 'an url 4', 2345, 'news/'));
   Assert.IsFalse(responce.status);
 end;
 
@@ -539,38 +511,32 @@ begin
 end;
 
 procedure TActiveQueueModelTest.TestCancelNotSubscribedOne;
+const
+  IPs: TArray<String> = ['1.1.1.1'];
 var
   Model: TActiveQueueModel;
   responce: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '1.1.1.1';
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   Assert.AreEqual(1, Model.numOfSubscriptions);
   responce := model.CancelSubscription('5.5.5.5', 'token-not-exists');
   Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelNotSubscribedThree;
+const
+  IPs: TArray<String> = ['22.33.44.55', '122.133.144.155', '222.233.244.255'];
 var
   Model: TActiveQueueModel;
   responce: TActiveQueueResponce;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create();
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 3);
-  IPs[0] := '1.1.1.13';
-  IPs[1] := '2.1.1.13';
-  IPs[2] := '3.1.1.13';
   Model.SetListenersIps(IPs);
-  model.AddSubscription(TSubscriptionData.Create('1.1.1.13', 'an url 1', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('2.1.1.13', 'an url 2', 8080, 'call-me/'));
-  model.AddSubscription(TSubscriptionData.Create('3.1.1.13', 'an url 3', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
   Assert.AreEqual(3, Model.numOfSubscriptions);
   responce := model.CancelSubscription('no-associated-ip', 'no-token');
   Assert.IsFalse(responce.status);
@@ -1035,7 +1001,6 @@ end;
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToZero;
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
 begin
   Model := TActiveQueueModel.Create;
   Model.SetListenersIps(TArray<String>.Create());

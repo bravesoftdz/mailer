@@ -80,24 +80,28 @@ end;
 function TListenerInfoBuilder.SetIP(const AnIP: String): TListenerInfoBuilder;
 begin
   FIP := AnIP;
+  Result := Self;
 end;
 
 function TListenerInfoBuilder.SetPath(
   const APath: String): TListenerInfoBuilder;
 begin
   FPath := APath;
+  Result := Self;
 end;
 
 function TListenerInfoBuilder.SetPort(
   const APort: Integer): TListenerInfoBuilder;
 begin
   FPort := APort;
+  Result := Self;
 end;
 
 function TListenerInfoBuilder.SetToken(
   const AToken: String): TListenerInfoBuilder;
 begin
   FToken := AToken;
+  Result := Self;
 end;
 
 end.

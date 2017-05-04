@@ -131,6 +131,7 @@ function TReceptionRequestBuilder.addAttachments(
   const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
 begin
   FAttach.AddRange(Items);
+  Result := Self;
 end;
 
 function TReceptionRequestBuilder.Build: TReceptionRequest;

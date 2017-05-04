@@ -466,8 +466,6 @@ begin
 end;
 
 function TActiveQueueModel.IsAllowedProvider(const IP: String): Boolean;
-var
-  I, S: Integer;
 begin
   TMonitor.Enter(FProvidersLock);
   try
@@ -478,8 +476,6 @@ begin
 end;
 
 function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
-var
-  I, S: Integer;
 begin
   TMonitor.Enter(FListenersLock);
   try
@@ -490,9 +486,6 @@ begin
 end;
 
 function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
-var
-  key: String;
-  value: TSubscriptionData;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
 end;

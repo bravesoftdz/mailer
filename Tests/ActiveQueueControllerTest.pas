@@ -50,10 +50,7 @@ var
   JArray: TJSONArray;
   list: TObjectList<TReceptionRequest>;
   request: TReceptionRequest;
-  str: String;
-  arr: TJsonArray;
   obj: TJsonObject;
-
 begin
   request := TReceptionRequestBuilder.Create()
     .SetFrom('info@mail.com')
