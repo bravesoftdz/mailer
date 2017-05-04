@@ -324,37 +324,99 @@ uses Model, SubscriptionData, ActiveQueueResponce, System.SysUtils,
   System.Generics.Collections, ReceptionRequest, TokenBasedCondition;
 
 procedure TActiveQueueModelTest.EmptyQueueIfIpIsAllowedQueueHasOneItemTokenMatches;
-begin
-
-end;
-
-procedure TActiveQueueModelTest.Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems;
-begin
-
-end;
-
-procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueEmptyTokenDoesNotMatch;
-begin
-
-end;
-
-procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueHasOneItemTokenDoesNotMatch;
-begin
-
-end;
-
-procedure TActiveQueueModelTest.LeaveThreeItemQueueUnchangedIfIpIsNotAmongAllowedAndTokenDoesNotMatch;
+const
+  IPs: TArray<String> = ['2.3.4.5'];
+  TOKEN = 'common token';
 var
   Model: TActiveQueueModel;
-  IPs: TArray<String>;
   Request1, Request2, Request3: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
 begin
   Model := TActiveQueueModel.Create;
-  IPs := TArray<String>.Create();
-  SetLength(IPs, 1);
-  IPs[0] := '1.1.1.1';
+  Model.SetProvidersIPs(IPs);
+  Request1 := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request1);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create(TOKEN);
+  Assert.AreEqual(1, Model.Cancel(IPs[0], Condition));
+end;
+
+procedure TActiveQueueModelTest.Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems;
+const
+  IPs: TArray<String> = ['2.3.4.5', '7.8.9.10'];
+  TOKEN = 'common token';
+var
+  Model: TActiveQueueModel;
+  Request1, Request2, Request3: TReceptionRequest;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+begin
+  Model := TActiveQueueModel.Create;
+  Model.SetProvidersIPs(IPs);
+  Request1 := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
+  Requests := TObjectList<TReceptionRequest>.Create();
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
+    TReceptionRequestBuilder.Create().setToken('another token').Build,
+    TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
+    TReceptionRequestBuilder.Create().setToken('token 2').Build,
+    TReceptionRequestBuilder.Create().setToken(TOKEN).Build]);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create(TOKEN);
+  Assert.AreEqual(3, Model.Cancel(IPs[1], Condition));
+end;
+
+procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueEmptyTokenDoesNotMatch;
+const
+  IPs: TArray<String> = ['2.3.4.5'];
+var
+  Model: TActiveQueueModel;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+begin
+  Model := TActiveQueueModel.Create;
+  Model.SetProvidersIPs(IPs);
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken('a token').Build,
+    TReceptionRequestBuilder.Create().setToken('another token').Build,
+    TReceptionRequestBuilder.Create().setToken('another agian').Build]);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('no such token');
+  Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
+
+end;
+
+procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsAllowedButQueueHasOneItemTokenDoesNotMatch;
+const
+  IPs: TArray<String> = ['231.11.34.99'];
+var
+  Model: TActiveQueueModel;
+  Request: TReceptionRequest;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+begin
+  Model := TActiveQueueModel.Create;
+  Model.SetProvidersIPs(IPs);
+  Request := TReceptionRequestBuilder.Create().setToken('a token').Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('no such token');
+  Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
+
+end;
+
+procedure TActiveQueueModelTest.LeaveThreeItemQueueUnchangedIfIpIsNotAmongAllowedAndTokenDoesNotMatch;
+const
+  IPs: TArray<String> = ['2.3.4.5'];
+var
+  Model: TActiveQueueModel;
+  Request1, Request2, Request3: TReceptionRequest;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+begin
+  Model := TActiveQueueModel.Create;
   Model.SetProvidersIPs(IPs);
   Request1 := TReceptionRequestBuilder.Create().setToken('token1').Build;
   Request2 := TReceptionRequestBuilder.Create().setToken('token2').Build;
@@ -370,11 +432,28 @@ begin
 end;
 
 procedure TActiveQueueModelTest.LeaveUnchangedIfIpIsNotAmongAllowedButTokenMatch;
+const
+  IPs: TArray<String> = ['52.63.74.85'];
 var
   Model: TActiveQueueModel;
+  Request1, Request2, Request3: TReceptionRequest;
+  Requests: TObjectList<TReceptionRequest>;
+  Condition: TTokenBasedCondition;
+  Token: String;
 begin
   Model := TActiveQueueModel.Create;
-  Model.SetProvidersIPs(TArray<String>.Create());
+  Model.SetProvidersIPs(IPs);
+  Token := 'token that matches';
+  Request1 := TReceptionRequestBuilder.Create().setToken(Token).Build;
+  Request2 := TReceptionRequestBuilder.Create().setToken('token2').Build;
+  Request3 := TReceptionRequestBuilder.Create().setToken('token3').Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request1);
+  Requests.Add(Request2);
+  Requests.Add(Request3);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create(Token);
+  Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
 
 end;
 
