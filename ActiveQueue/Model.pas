@@ -366,7 +366,6 @@ end;
 function TActiveQueueModel.GetItems(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
-  IsSubScribed: Boolean;
 begin
   Result := TObjectList<TReceptionRequest>.Create(True);
   TMonitor.Enter(FListenersLock);
