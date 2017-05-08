@@ -24,7 +24,7 @@ uses
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
   Controller in 'Controller.pas',
-  ReceptionDispatcher in 'ReceptionDispatcher.pas' {ReceptionWebModule: TWebModule},
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionWebModule: TWebModule},
   ReceptionModel in 'ReceptionModel.pas',
   ReceptionRequest in 'ReceptionRequest.pas',
   ReceptionResponce in 'ReceptionResponce.pas',

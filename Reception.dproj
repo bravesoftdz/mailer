@@ -109,7 +109,7 @@
         <DCCReference Include="Provider.pas"/>
         <DCCReference Include="ProviderFactory.pas"/>
         <DCCReference Include="Controller.pas"/>
-        <DCCReference Include="ReceptionDispatcher.pas">
+        <DCCReference Include="ReceptionModule.pas">
             <Form>ReceptionWebModule</Form>
             <FormType>dfm</FormType>
             <DesignClass>TWebModule</DesignClass>

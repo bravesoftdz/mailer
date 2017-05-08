@@ -1,4 +1,4 @@
-unit ReceptionDispatcher;
+unit ReceptionModule;
 
 interface
 
@@ -8,7 +8,7 @@ uses System.SysUtils,
      MVCFramework;
 
 type
-  TReceptionWebModule = class(TWebModule)
+  TReceptionModule = class(TWebModule)
     procedure WebModuleCreate(Sender: TObject);
     procedure WebModuleDestroy(Sender: TObject);
   private
@@ -18,7 +18,7 @@ type
   end;
 
 var
-  WebModuleClass: TComponentClass = TReceptionWebModule;
+  WebModuleClass: TComponentClass = TReceptionModule;
 
 implementation
 
@@ -26,7 +26,7 @@ implementation
 
 uses Controller, MVCFramework.Commons;
 
-procedure TReceptionWebModule.WebModuleCreate(Sender: TObject);
+procedure TReceptionModule.WebModuleCreate(Sender: TObject);
 begin
   FMVC := TMVCEngine.Create(Self,
     procedure(Config: TMVCConfig)
@@ -55,7 +55,7 @@ begin
   FMVC.AddController(TController);
 end;
 
-procedure TReceptionWebModule.WebModuleDestroy(Sender: TObject);
+procedure TReceptionModule.WebModuleDestroy(Sender: TObject);
 begin
   FMVC.Free;
 end;
