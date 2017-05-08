@@ -14,7 +14,7 @@ uses
   IdHTTPWebBrokerBridge,
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
   Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-    {$R *.res},
+    {$R *.res} ,
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   Attachment in 'Attachment.pas',
@@ -24,7 +24,7 @@ uses
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
   Controller in 'Controller.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionWebModule: TWebModule},
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionWebModule: TWebModule} ,
   ReceptionModel in 'ReceptionModel.pas',
   ReceptionRequest in 'ReceptionRequest.pas',
   ReceptionResponce in 'ReceptionResponce.pas',
@@ -34,6 +34,7 @@ uses
   SubscriptionData in 'SubscriptionData.pas',
   CliParam in 'CliParam.pas',
   System.JSON,
+  ObjectsMappers,
   System.IOUtils,
   ReceptionConfig in 'ReceptionConfig.pas',
   Client in 'Client.pas';

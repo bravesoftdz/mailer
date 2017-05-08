@@ -20,7 +20,7 @@ type
 
     /// <summary> Url of the backend service accepts the connections.</summary>
     [MapperJSONSer('backend-url')]
-    property BackEndUrl: Integer read FBackEndUrl write FBackEndUrl;
+    property BackEndUrl: String read FBackEndUrl write FBackEndUrl;
 
     /// <summary> Port at which the backend service accepts the connections.</summary>
     [MapperJSONSer('backend-port')]
