@@ -24,7 +24,7 @@ implementation
 
 {$R *.dfm}
 
-uses ReceptionController, MVCFramework.Commons;
+uses Controller, MVCFramework.Commons;
 
 procedure TReceptionWebModule.WebModuleCreate(Sender: TObject);
 begin
@@ -52,7 +52,7 @@ begin
       // Define a default URL for requests that don't map to a route or a file (useful for client side web app)
       Config[TMVCConfigKey.FallbackResource] := 'index.html';
     end);
-  FMVC.AddController(TReceptionController);
+  FMVC.AddController(TController);
 end;
 
 procedure TReceptionWebModule.WebModuleDestroy(Sender: TObject);

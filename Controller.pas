@@ -1,4 +1,4 @@
-﻿unit ReceptionController;
+﻿unit Controller;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
 
   [MVCPath('/')]
-  TReceptionController = class(TMVCController)
+  TController = class(TMVCController)
   private
     class var Model: TReceptionModel;
   strict private
@@ -50,7 +50,7 @@ uses
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
   System.Classes, Attachment, Web.HTTPApp;
 
-procedure TReceptionController.Elaborate(Ctx: TWebContext);
+procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce: TReceptionResponce;
   RequestorName, ActionName, Data: String;
@@ -63,13 +63,13 @@ begin
   Render(Responce);
 end;
 
-procedure TReceptionController.OnAfterAction(Context: TWebContext; const AActionName: string);
+procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
 end;
 
-procedure TReceptionController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
+procedure TController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
 begin
   { Executed before each action
     if handled is true (or an exception is raised) the actual
@@ -77,17 +77,17 @@ begin
   inherited;
 end;
 
-class procedure TReceptionController.SetBackEnd(const aSettings: TActiveQueueSettings);
+class procedure TController.SetBackEnd(const aSettings: TActiveQueueSettings);
 begin
   FSettings := aSettings;
 end;
 
 initialization
 
-TReceptionController.Model := TReceptionModel.Create();
+TController.Model := TReceptionModel.Create();
 
 finalization
 
-TReceptionController.Model.DisposeOf;
+TController.Model.DisposeOf;
 
 end.

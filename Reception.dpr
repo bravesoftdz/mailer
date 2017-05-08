@@ -23,7 +23,7 @@ uses
   FrontEndRequest in 'FrontEndRequest.pas',
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
-  ReceptionController in 'ReceptionController.pas',
+  Controller in 'Controller.pas',
   ReceptionDispatcher in 'ReceptionDispatcher.pas' {ReceptionWebModule: TWebModule},
   ReceptionModel in 'ReceptionModel.pas',
   ReceptionRequest in 'ReceptionRequest.pas',
@@ -69,21 +69,15 @@ begin
   BackEndServer.setSettings(Settings);
   Writeln('Back end server url: ' + Settings.Summary);
 
-  TReceptionController.SetBackEnd(Settings);
+  TController.SetBackEnd(Settings);
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
     LogI(Format('Server started on port %d', [APort]));
-    { more info about MaxConnections
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html }
     LServer.MaxConnections := 0;
-    { more info about ListenQueue
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html }
     LServer.ListenQueue := 200;
-    { Comment the next line to avoid the default browser startup }
-    // ShellExecute(0, 'open', PChar('http://localhost:' + inttostr(APort)), nil, nil, SW_SHOWMAXIMIZED);
     Writeln('Press ESC to stop the server');
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
@@ -100,8 +94,6 @@ begin
 end;
 
 { TCliParam }
-
-
 
 begin
   ReportMemoryLeaksOnShutdown := True;
