@@ -32,15 +32,28 @@ uses
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   ActiveQueueSettings,
   SubscriptionData in 'SubscriptionData.pas',
-  CliParam in 'CliParam.pas';
+  CliParam in 'CliParam.pas',
+  System.JSON,
+  System.IOUtils,
+  ReceptionConfig in 'ReceptionConfig.pas',
+  Client in 'Client.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
   BACKEND_PORT_SWITCH = 'p';
   SWITCH_CHAR = '-';
+  SWITCH_CONFIG = 'c';
 
-procedure RunServer(APort: Integer);
 var
+  ConfigFileName: String;
+  JsonConfig: TJsonObject;
+  FileContent: String;
+  Usage: TArray<TCliParam>;
+  Config: TReceptionConfig;
+
+procedure RunServer(const OutputConfigName: String; const Config: TReceptionConfig);
+var
+  Port: Integer;
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
@@ -50,8 +63,9 @@ var
   Settings: TActiveQueueSettings;
   BackEndServer: TBackEndProxy;
 begin
+  Port := Config.Port;
   Writeln('** DMVCFramework Server **');
-  Writeln(Format('Starting HTTP Server on port %d', [APort]));
+  Writeln(Format('Starting HTTP Server on port %d', [Port]));
 
   FindCmdLineSwitch(BACKEND_URL_SWITCH, BackEndUrl, False);
   FindCmdLineSwitch(BACKEND_PORT_SWITCH, BackEndPortStr, False);
@@ -73,9 +87,9 @@ begin
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
-    LServer.DefaultPort := APort;
+    LServer.DefaultPort := Port;
     LServer.Active := True;
-    LogI(Format('Server started on port %d', [APort]));
+    LogI(Format('Server started on port %d', [Port]));
     LServer.MaxConnections := 0;
     LServer.ListenQueue := 200;
     Writeln('Press ESC to stop the server');
@@ -97,14 +111,41 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+  Usage := [TCliParam.Create('c', 'path', 'path to the config file', True)];
+  FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
+
+  if Not(TFile.Exists(ConfigFileName)) then
+  begin
+    Writeln('Error: config file ' + ConfigFileName + 'not found.');
+    Exit();
+  end;
   try
-    if WebRequestHandler <> nil then
-      WebRequestHandler.WebModuleClass := WebModuleClass;
-    WebRequestHandlerProc.MaxConnections := 1024;
-    RunServer(80);
+    FileContent := TFile.ReadAllText(ConfigFileName);
+    JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
   except
     on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+    begin
+      Writeln(E.Message);
+      Exit();
+    end;
+  end;
+  if Assigned(JsonConfig) then
+  begin
+    Config := Mapper.JSONObjectToObject<TReceptionConfig>(JsonConfig);
+  end;
+
+  if Assigned(Config) then
+  begin
+
+    try
+      if WebRequestHandler <> nil then
+        WebRequestHandler.WebModuleClass := WebModuleClass;
+      WebRequestHandlerProc.MaxConnections := 1024;
+      RunServer(ConfigFileName, Config);
+    except
+      on E: Exception do
+        Writeln(E.ClassName, ': ', E.Message);
+    end;
   end;
 
 end.

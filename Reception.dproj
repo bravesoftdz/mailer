@@ -121,6 +121,8 @@
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
         <DCCReference Include="SubscriptionData.pas"/>
         <DCCReference Include="CliParam.pas"/>
+        <DCCReference Include="ReceptionConfig.pas"/>
+        <DCCReference Include="Client.pas"/>
         <None Include="ModelSupport_Source\default.txvpck"/>
         <None Include="ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="ModelSupport_Source\Source\default.txvpck"/>
