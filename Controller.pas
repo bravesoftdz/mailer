@@ -3,8 +3,8 @@
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, System.Generics.Collections, Action,
-  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel;
+  MVCFramework, MVCFramework.Commons, Action,
+  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel, Client;
 
 type
 
@@ -18,6 +18,7 @@ type
     REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
     class var FSettings: TActiveQueueSettings;
+    class var FClients: TArray<TClient>;
 
   public
     [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
@@ -38,6 +39,9 @@ type
     /// <summary>Set up a global (i.e., static) object for the back end settings</summary>
     class procedure SetBackEnd(const aSettings: TActiveQueueSettings);
 
+    /// <summary>Set a list of clients. A request is taken into consideration iff it comes from one of the clients.</summary>
+    class procedure SetClients(const Clients: TObjectList<TClient>);
+
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -48,7 +52,7 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
-  System.Classes, Attachment, Web.HTTPApp;
+  System.Classes, Attachment, Web.HTTPApp, System.Generics.Collections;
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
@@ -80,6 +84,11 @@ end;
 class procedure TController.SetBackEnd(const aSettings: TActiveQueueSettings);
 begin
   FSettings := aSettings;
+end;
+
+class procedure TController.SetClients(const Clients: TObjectList<TClient>);
+begin
+  raise Exception.Create('Not implemented yet');
 end;
 
 initialization

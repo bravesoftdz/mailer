@@ -73,13 +73,14 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Debugger_CWD>C:\Dev\Mailer</Debugger_CWD>
         <VerInfo_Build>1</VerInfo_Build>
         <VerInfo_Keys>CompanyName=Ritoll;FileDescription=;FileVersion=0.0.0.1;InternalName=Reception;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=0.0.0.1;Comments=This is a very first version of the reception microservice.</VerInfo_Keys>
         <Icon_MainIcon>Reception_Icon.ico</Icon_MainIcon>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_UnitSearchPath>C:\Dev\Mailer\ActiveQueue;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <Debugger_RunParams>-u localhost -p 8080</Debugger_RunParams>
+        <Debugger_RunParams>-c Reception.conf</Debugger_RunParams>
         <DCC_MapFile>3</DCC_MapFile>
         <Manifest_File>(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -111,7 +112,6 @@
         <DCCReference Include="Controller.pas"/>
         <DCCReference Include="ReceptionModule.pas">
             <Form>ReceptionWebModule</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="ReceptionModel.pas"/>

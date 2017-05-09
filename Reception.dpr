@@ -51,8 +51,9 @@ var
   FileContent: String;
   Usage: TArray<TCliParam>;
   Config: TReceptionConfig;
+  ProgramName: String;
 
-procedure RunServer(const OutputConfigName: String; const Config: TReceptionConfig);
+procedure RunServer(const Config: TReceptionConfig);
 var
   Port: Integer;
   LInputRecord: TInputRecord;
@@ -61,30 +62,23 @@ var
   LServer: TIdHTTPWebBrokerBridge;
   BackEndUrl, BackEndPortStr: String;
   BackEndPort: Integer;
-  Settings: TActiveQueueSettings;
+  BackEndSettings: TActiveQueueSettings;
   BackEndServer: TBackEndProxy;
 begin
   Port := Config.Port;
   Writeln('** DMVCFramework Server **');
   Writeln(Format('Starting HTTP Server on port %d', [Port]));
 
-  FindCmdLineSwitch(BACKEND_URL_SWITCH, BackEndUrl, False);
-  FindCmdLineSwitch(BACKEND_PORT_SWITCH, BackEndPortStr, False);
-  try
-    BackEndPort := StrToInt(BackEndPortStr);
-  except
-    on E: Exception do
-    begin
-      Writeln('Error: ' + E.Message);
-      Exit();
-    end
-  end;
-  Settings := TActiveQueueSettings.Create(BackEndUrl, BackEndPort);
-  BackEndServer := TBackEndProxy.getInstance();
-  BackEndServer.setSettings(Settings);
-  Writeln('Back end server url: ' + Settings.Summary);
+  BackEndPort := Config.BackEndPort;
+  BackEndUrl := Config.BackEndUrl;
 
-  TController.SetBackEnd(Settings);
+  BackEndSettings := TActiveQueueSettings.Create(BackEndUrl, BackEndPort);
+  BackEndServer := TBackEndProxy.getInstance();
+  BackEndServer.setSettings(BackEndSettings);
+  Writeln('Back end server url: ' + BackEndSettings.Summary);
+
+  TController.SetBackEnd(BackEndSettings);
+  TController.SetClients(Config.Clients);
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
@@ -104,20 +98,40 @@ begin
         break;
     end;
   finally
+
     LServer.Free;
   end;
+end;
+
+/// <summary>Create a text describing how to use the program comand line arguments.</summary>
+function CreateUsageText(const FileName: String; const CliParams: TArray<TCliParam>): String;
+var
+  L, I: Integer;
+  Short, Long: String;
+begin
+  L := Length(CliParams);
+  Short := '';
+  Long := '';
+  for I := 0 to L - 1 do
+  begin
+    Short := Short + CliParams[I].CliUsage + sLineBreak;
+    Long := Long + CliParams[I].Explanation + sLineBreak;
+  end;
+  Result := 'Usage:' + sLineBreak + FileName + ' ' + Short + 'where' + sLineBreak + Long;
+
 end;
 
 { TCliParam }
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+  ProgramName := ExtractFileName(paramstr(0));
   Usage := [TCliParam.Create('c', 'path', 'path to the config file', True)];
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
-
   if Not(TFile.Exists(ConfigFileName)) then
   begin
     Writeln('Error: config file ' + ConfigFileName + 'not found.');
+    Writeln(CreateUsageText(ProgramName, Usage));
     Exit();
   end;
   try
@@ -137,12 +151,11 @@ begin
 
   if Assigned(Config) then
   begin
-
     try
       if WebRequestHandler <> nil then
         WebRequestHandler.WebModuleClass := WebModuleClass;
       WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(ConfigFileName, Config);
+      RunServer(Config);
     except
       on E: Exception do
         Writeln(E.ClassName, ': ', E.Message);
