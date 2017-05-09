@@ -61,8 +61,6 @@ var
   input: String;
   jo: TJsonObject;
   obj: TReceptionConfig;
-  arr1, arr2: TArray<String>;
-
 begin
   input := '{"port": 4321, "backend-port":21, "backend-url":"www.back.end.url", "clients": [' +
     '{"token":"abc", "ip":"192.11.12.21"},{"ip":"1.2.3.4", "token":"qazwsx"}]}';
@@ -79,13 +77,33 @@ begin
 end;
 
 procedure TReceptionConfigTest.ConstructFromAllKeysArePresentZeroClients;
+var
+  input: String;
+  jo: TJsonObject;
+  obj: TReceptionConfig;
 begin
-
+  input := '{"port": 9, "backend-port": 85, "backend-url": "some-url", "clients": []}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TReceptionConfig>(jo);
+  Assert.AreEqual(9, obj.port);
+  Assert.AreEqual(85, obj.BackEndPort);
+  Assert.AreEqual('some-url', obj.BackEndUrl);
+  Assert.AreEqual(0, obj.clients.count);
 end;
 
 procedure TReceptionConfigTest.ConstructFromEmpty;
+var
+  input: String;
+  jo: TJsonObject;
+  obj: TReceptionConfig;
 begin
-
+  input := '{}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TReceptionConfig>(jo);
+  Assert.AreEqual(0, obj.port);
+  Assert.AreEqual(0, obj.BackEndPort);
+  Assert.AreEqual('', obj.BackEndUrl);
+  Assert.AreEqual(0, obj.clients.count);
 end;
 
 procedure TReceptionConfigTest.Setup;

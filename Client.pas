@@ -2,17 +2,24 @@ unit Client;
 
 interface
 
+uses ObjectsMappers;
+
 type
+
   /// <summary>An ADT for representing a client.
   /// A client is defined by its ip address and a token.</summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TClient = class
   strict private
     FToken: String;
     FIP: String;
   public
-    property IP: String read FIP;
-    property Token: String read FToken;
-    constructor Create(const IP: String; const Token: String);
+    [MapperJSONSer('ip')]
+    property IP: String read FIP write FIP;
+    [MapperJSONSer('token')]
+    property Token: String read FToken write FToken;
+    constructor Create(const IP: String; const Token: String); overload;
+    constructor Create(); overload;
   end;
 
 implementation
@@ -23,6 +30,11 @@ constructor TClient.Create(const IP, Token: String);
 begin
   FIP := IP;
   FToken := Token;
+end;
+
+constructor TClient.Create;
+begin
+  Create('', '');
 end;
 
 end.

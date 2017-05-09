@@ -3,9 +3,11 @@ unit ReceptionConfig;
 interface
 
 uses
-  System.Generics.Collections, Client;
+  System.Generics.Collections, Client, ObjectsMappers;
 
 type
+
+  [MapperJSONNaming(JSONNameLowerCase)]
   TReceptionConfig = class
   strict private
     FPort: Integer;
@@ -30,8 +32,17 @@ type
     [MapperJSONSer('clients')]
     [MapperListOf(TClient)]
     property Clients: TObjectList<TClient> read FClients write FClients;
+
+    constructor Create(); overload;
   end;
 
 implementation
+
+{ TReceptionConfig }
+
+constructor TReceptionConfig.Create;
+begin
+  FClients := TObjectList<TClient>.Create();
+end;
 
 end.

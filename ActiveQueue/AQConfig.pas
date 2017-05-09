@@ -11,7 +11,7 @@ type
 
 type
 
-  /// <sumary>
+  /// <summary>
   /// Mutable data type to store the active queue configuration.
   /// It is made mutable in order to be able to populate its fields from a json
   /// using the DMVCFramework means.
