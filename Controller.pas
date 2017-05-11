@@ -18,8 +18,7 @@ type
     ACTION_TOKEN = 'action';
     REQUESTOR_TOKEN = 'destination';
     DATA_TOKEN = 'data';
-    class var FSettings: TActiveQueueSettings;
-    class var FClients: TArray<TClient>;
+    // class var FSettings: TActiveQueueSettings;
 
   public
     [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
@@ -37,11 +36,15 @@ type
     /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
 
-    /// <summary>Set up a global (i.e., static) object for the back end settings</summary>
-    class procedure SetBackEnd(const aSettings: TActiveQueueSettings);
+    /// <summary>Set the back end settings (delegate it to the model)</summary>
+    class procedure SetBackEndSettings(const aSettings: TActiveQueueSettings);
+
+    /// <summary>Get the back end settings (delegate it to the model)</summary>
+    class function GetBackEndSettings(): TActiveQueueSettings;
 
     /// <summary>Set a list of clients. A request is taken into consideration iff it comes from one of the clients.</summary>
     class procedure SetClients(const Clients: TObjectList<TClient>);
+
     /// <summary>Get a copy of clients.</summary>
     class function GetClients(): TObjectList<TClient>;
 
@@ -66,13 +69,18 @@ begin
   RequestorName := Ctx.request.params[REQUESTOR_TOKEN];
   ActionName := Ctx.request.params[ACTION_TOKEN];
   Data := Ctx.Request.ContentParam(DATA_TOKEN);
-  Responce := Model.Elaborate(RequestorName, ActionName, Data, Ctx.Request.Files, FSettings);
+  Responce := Model.Elaborate(RequestorName, ActionName, Data, Ctx.Request.Files);
   Render(Responce);
+end;
+
+class function TController.GetBackEndSettings: TActiveQueueSettings;
+begin
+  Result := Model.BackEndSettings;
 end;
 
 class function TController.GetClients: TObjectList<TClient>;
 begin
-  /// thre is no need in performing defencieve copying since the controller does not store this info
+  /// there is no need in performing defencieve copying since the controller does not store this info
   Result := Model.Clients
 end;
 
@@ -90,14 +98,14 @@ begin
   inherited;
 end;
 
-class procedure TController.SetBackEnd(const aSettings: TActiveQueueSettings);
+class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
 begin
-  FSettings := aSettings;
+  Model.BackEndSettings := aSettings;
 end;
 
 class procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
-  /// thre is no need in performing defencieve copying since the controller does not store this info
+  /// there is no need in performing defencieve copying since the controller does not store this info
   Model.clients := Clients;
 end;
 

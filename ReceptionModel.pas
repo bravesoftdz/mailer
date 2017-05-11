@@ -11,11 +11,15 @@ type
   strict private
     FFactory: TProviderFactory;
     FClients: TArray<TClient>;
+    FSettings: TActiveQueueSettings;
 
     /// <summary>client setter. Perform the defencieve copying.</summary>
     procedure SetClients(const clients: TObjectList<TClient>);
     /// <summary>return a copy of clients.</summary>
     function GetClients(): TObjectList<TClient>;
+
+    function GetSettings: TActiveQueueSettings;
+    procedure SetSettings(const Value: TActiveQueueSettings);
 
   public
     /// <summary>
@@ -25,12 +29,12 @@ type
     /// <param name="anAction">what action should be performed</param>
     /// <param name="aData">a string version of a json to be passed to the action executor</param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
-    /// <param name="ASettings">Settings for the back end server</param>
     function Elaborate(const Requestor: string; const anAction: string;
-      const aData: String; const AttachedFiles: TAbstractWebRequestFiles;
-      const ASettings: TActiveQueueSettings): TReceptionResponce;
+      const aData: String; const AttachedFiles: TAbstractWebRequestFiles): TReceptionResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
+
+    property BackEndSettings: TActiveQueueSettings read GetSettings write SetSettings;
     constructor Create();
     destructor Destroy();
   end;
@@ -61,8 +65,7 @@ begin
 end;
 
 function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
-  const AttachedFiles: TAbstractWebRequestFiles;
-  const ASettings: TActiveQueueSettings): TReceptionResponce;
+  const AttachedFiles: TAbstractWebRequestFiles): TReceptionResponce;
 var
   AJson: TJsonObject;
   Request: TFrontEndRequest;
@@ -92,7 +95,7 @@ begin
   end;
   if (Action <> nil) then
   begin
-    Responce := Action.Elaborate(Request, ASettings);
+    Responce := Action.Elaborate(Request, FSettings);
   end
   else
   begin
@@ -115,6 +118,11 @@ begin
 
 end;
 
+function TReceptionModel.GetSettings: TActiveQueueSettings;
+begin
+  Result := TActiveQueueSettings.Create(FSettings.Url, FSettings.Port);
+end;
+
 procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
 var
   L, I: Integer;
@@ -126,6 +134,11 @@ begin
     FClients[I] := TClient.Create(Clients[I].IP, Clients[I].Token);
   end;
 
+end;
+
+procedure TReceptionModel.SetSettings(const Value: TActiveQueueSettings);
+begin
+  FSettings := TActiveQueueSettings.Create(Value.Url, Value.Port);
 end;
 
 end.
