@@ -23,7 +23,8 @@ uses
   ActiveQueueModelTest in 'ActiveQueueModelTest.pas',
   ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
   SubscriptionDataTest in 'SubscriptionDataTest.pas',
-  TokenBasedConditionTest in 'TokenBasedConditionTest.pas';
+  TokenBasedConditionTest in 'TokenBasedConditionTest.pas',
+  ReceptionConfigTest in 'ReceptionConfigTest.pas';
 
 var
   runner: ITestRunner;

@@ -37,7 +37,7 @@ uses
   ObjectsMappers,
   System.IOUtils,
   ReceptionConfig in 'ReceptionConfig.pas',
-  Client in 'Client.pas';
+  Client in 'Client.pas', System.Generics.Collections;
 
 const
   BACKEND_URL_SWITCH = 'u';
@@ -62,8 +62,10 @@ var
   LServer: TIdHTTPWebBrokerBridge;
   BackEndUrl, BackEndPortStr: String;
   BackEndPort: Integer;
-  BackEndSettings: TActiveQueueSettings;
+  BackEndSettings, BackEndSettingsCopy: TActiveQueueSettings;
   BackEndServer: TBackEndProxy;
+  Clients: TObjectList<TClient>;
+  Client: TClient;
 begin
   Port := Config.Port;
   Writeln('** DMVCFramework Server **');
@@ -75,10 +77,28 @@ begin
   BackEndSettings := TActiveQueueSettings.Create(BackEndUrl, BackEndPort);
   BackEndServer := TBackEndProxy.getInstance();
   BackEndServer.setSettings(BackEndSettings);
-  Writeln('Back end server url: ' + BackEndSettings.Summary);
 
   TController.SetBackEnd(BackEndSettings);
+
+  BackEndSettingsCopy := BackEndServer.GetSettings;
+  Writeln('Back end server:');
+  Writeln('url: ' + BackEndSettingsCopy.URL + ', port: ' + IntToStr(BackEndSettingsCopy.Port));
+
   TController.SetClients(Config.Clients);
+  Clients := TController.GetClients;
+  if (Clients.Count > 0) then
+  begin
+    Writeln('Clients:');
+    for Client in Clients do
+    begin
+      Writeln('ip: ' + Client.IP);
+    end;
+  end
+  else
+  begin
+    Writeln('No clients are provided. Every request is to be ignored.');
+  end;
+  Clients.Clear;
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try

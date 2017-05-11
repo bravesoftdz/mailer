@@ -15,7 +15,7 @@ type
   public
     property Url: String read FUrl;
     property Port: Integer read FPort;
-    property Summary: String read FSummary;
+
     constructor Create(const Url: String; const Port: Integer);
 
   end;

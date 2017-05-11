@@ -4,7 +4,8 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, Action,
-  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel, Client;
+  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel, Client,
+  System.Generics.Collections;
 
 type
 
@@ -41,6 +42,8 @@ type
 
     /// <summary>Set a list of clients. A request is taken into consideration iff it comes from one of the clients.</summary>
     class procedure SetClients(const Clients: TObjectList<TClient>);
+    /// <summary>Get a copy of clients.</summary>
+    class function GetClients(): TObjectList<TClient>;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -52,7 +55,7 @@ implementation
 uses
   MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
-  System.Classes, Attachment, Web.HTTPApp, System.Generics.Collections;
+  System.Classes, Attachment, Web.HTTPApp;
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
@@ -65,6 +68,12 @@ begin
   Data := Ctx.Request.ContentParam(DATA_TOKEN);
   Responce := Model.Elaborate(RequestorName, ActionName, Data, Ctx.Request.Files, FSettings);
   Render(Responce);
+end;
+
+class function TController.GetClients: TObjectList<TClient>;
+begin
+  /// thre is no need in performing defencieve copying since the controller does not store this info
+  Result := Model.Clients
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -88,7 +97,8 @@ end;
 
 class procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
-  raise Exception.Create('Not implemented yet');
+  /// thre is no need in performing defencieve copying since the controller does not store this info
+  Model.clients := Clients;
 end;
 
 initialization

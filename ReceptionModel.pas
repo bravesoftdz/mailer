@@ -4,12 +4,19 @@ interface
 
 uses
   ReceptionResponce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp;
+  Web.HTTPApp, System.Generics.Collections, Client;
 
 type
   TReceptionModel = class
   strict private
-    class var FFactory: TProviderFactory;
+    /// <summary>client setter. Perform the defencieve copying.</summary>
+    procedure SetClients(const clients: TObjectList<TClient>);
+    /// <summary>return a copy of clients.</summary>
+    function GetClients(): TObjectList<TClient>;
+
+  class var
+    FFactory: TProviderFactory;
+    FClients: TArray<TClient>;
   public
     /// <summary>
     /// Elaborate an action from a requestor. The request might contain a plain
@@ -22,13 +29,16 @@ type
     class function Elaborate(const Requestor: string; const anAction: string;
       const aData: String; const AttachedFiles: TAbstractWebRequestFiles;
       const ASettings: TActiveQueueSettings): TReceptionResponce;
+
+    property clients: TObjectList<TClient> read GetClients write SetClients;
     constructor Create();
+    destructor Destroy();
   end;
 
 implementation
 
 uses
-  Provider, Action, System.Contnrs, System.Generics.Collections,
+  Provider, Action, System.Contnrs,
   VenditoriSimple, SoluzioneAgenti, System.JSON, System.SysUtils,
   ObjectsMappers, FrontEndData;
 
@@ -41,6 +51,13 @@ begin
   Providers := TObjectList<TProvider>.Create;
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
   FFactory := TProviderFactory.Create(Providers);
+  FClients := TArray<TClient>.Create();
+end;
+
+destructor TReceptionModel.Destroy;
+begin
+  SetLength(FClients, 0);
+  FFactory.DisposeOf;
 end;
 
 class function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
@@ -83,6 +100,31 @@ begin
     Responce.msg := 'authorization missing...';
   end;
   Result := Responce;
+
+end;
+
+function TReceptionModel.GetClients: TObjectList<TClient>;
+var
+  item: TClient;
+begin
+  Result := TObjectList<TClient>.Create;
+  for Item in FClients do
+  begin
+    Result.Add(TClient.Create(Item.IP, Item.Token));
+  end;
+
+end;
+
+procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
+var
+  L, I: Integer;
+begin
+  L := Clients.Count;
+  SetLength(FClients, L);
+  for I := 0 to L - 1 do
+  begin
+    FClients[I] := TClient.Create(Clients[I].IP, Clients[I].Token);
+  end;
 
 end;
 
