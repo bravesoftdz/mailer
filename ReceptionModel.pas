@@ -9,14 +9,14 @@ uses
 type
   TReceptionModel = class
   strict private
+    FFactory: TProviderFactory;
+    FClients: TArray<TClient>;
+
     /// <summary>client setter. Perform the defencieve copying.</summary>
     procedure SetClients(const clients: TObjectList<TClient>);
     /// <summary>return a copy of clients.</summary>
     function GetClients(): TObjectList<TClient>;
 
-  class var
-    FFactory: TProviderFactory;
-    FClients: TArray<TClient>;
   public
     /// <summary>
     /// Elaborate an action from a requestor. The request might contain a plain
@@ -26,7 +26,7 @@ type
     /// <param name="aData">a string version of a json to be passed to the action executor</param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
     /// <param name="ASettings">Settings for the back end server</param>
-    class function Elaborate(const Requestor: string; const anAction: string;
+    function Elaborate(const Requestor: string; const anAction: string;
       const aData: String; const AttachedFiles: TAbstractWebRequestFiles;
       const ASettings: TActiveQueueSettings): TReceptionResponce;
 
@@ -60,7 +60,7 @@ begin
   FFactory.DisposeOf;
 end;
 
-class function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
+function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
   const AttachedFiles: TAbstractWebRequestFiles;
   const ASettings: TActiveQueueSettings): TReceptionResponce;
 var
