@@ -13,8 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
-  Action in 'Actions\Action.pas' {ActionSend in 'ActionSend.pas';
-    {$R *.res} ,
+  Action in 'Actions\Action.pas',
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   Attachment in 'Attachment.pas',
@@ -24,7 +23,7 @@ uses
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
   Controller in 'Controller.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionWebModule: TWebModule} ,
+  ReceptionModule in 'ReceptionModule.pas',
   ReceptionModel in 'ReceptionModel.pas',
   ReceptionRequest in 'ReceptionRequest.pas',
   ReceptionResponce in 'ReceptionResponce.pas',

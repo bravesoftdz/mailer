@@ -98,16 +98,23 @@ begin
   Request := builder.build;
   adapter := TRestAdapter<ISendServerProxy>.Create();
   server := adapter.Build(Settings.Url, Settings.Port);
-  try
-    Responce := server.send(Request);
-    if Responce.status then
-      Result.msg := 'OK'
-    else
-      Result.msg := Responce.Msg;
-  except
-    on E: Exception do
-    begin
-      Result.msg := E.Message;
+  if (Server = nil) then
+  begin
+    Result.msg := 'Backend server is not running';
+  end
+  else
+  begin
+    try
+      Responce := server.send(Request);
+      if Responce.status then
+        Result.msg := 'OK'
+      else
+        Result.msg := Responce.Msg;
+    except
+      on E: Exception do
+      begin
+        Result.msg := E.Message;
+      end;
     end;
   end;
 

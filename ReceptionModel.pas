@@ -29,8 +29,8 @@ type
     /// <param name="anAction">what action should be performed</param>
     /// <param name="aData">a string version of a json to be passed to the action executor</param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
-    function Elaborate(const Requestor: string; const anAction: string;
-      const aData: String; const AttachedFiles: TAbstractWebRequestFiles): TReceptionResponce;
+    function Elaborate(const Requestor: string; const anAction: string; const aData: string; const Token: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
+      : TReceptionResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -64,8 +64,9 @@ begin
   FFactory.DisposeOf;
 end;
 
-function TReceptionModel.Elaborate(const Requestor, anAction, aData: String;
-  const AttachedFiles: TAbstractWebRequestFiles): TReceptionResponce;
+function TReceptionModel.Elaborate(const Requestor: string; const anAction: string;
+  const aData: string; const Token: string; const IP: string; const AttachedFiles: TAbstractWebRequestFiles)
+  : TReceptionResponce;
 var
   AJson: TJsonObject;
   Request: TFrontEndRequest;

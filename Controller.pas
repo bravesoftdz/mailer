@@ -15,23 +15,37 @@ type
     class var Model: TReceptionModel;
   strict private
   const
-    ACTION_TOKEN = 'action';
-    REQUESTOR_TOKEN = 'destination';
-    DATA_TOKEN = 'data';
-    // class var FSettings: TActiveQueueSettings;
+
+    /// named part of the url that stores the value of the requested action
+    ACTION_KEY = 'action';
+
+    /// named part of the url that stores the value of the requested action requestor
+    REQUESTOR_KEY = 'destination';
+
+    /// name of the key in the request that by means of which the requestor-specific token is passed
+    TOKEN_KEY = 'token';
+
+    /// name of the key in the request that by means of which the requestor passes the data
+    DATA_KEY = 'data';
 
   public
-    [MVCPath('/($' + REQUESTOR_TOKEN + ')/($' + ACTION_TOKEN + ')')]
+    // [MVCPath('/($' + REQUESTOR + ')/($' + ACTION + ')')]
+    [MVCPath('/($' + REQUESTOR_KEY + ')/($' + ACTION_KEY + ')')]
     [MVCHTTPMethod([httpPOST])]
     // [MVCProduces('application/json')]
     // [MVCConsumes('application/json')]
     [MVCDoc('Elaborate the request. The action that should be performed is to be decided based on provided destination and action token.')]
     /// <summary>  An entry point to the server.
-    /// This method handles requests of the form  "/provider/action", i.e.
+    /// This method handles requests of the form  "/requestor/action", i.e.
     /// "/venditori/send", "/soluzioniagenti/contact".
-    /// The requests must be done by means of a POST method.
-    /// It accepts a json object with the following structure:
-    /// {'msg': 'some string'}
+    /// The method handles the requests that being expressend in terms of CURL have the following
+    /// form (split on multiple line for clarity)
+    ///
+    /// curl -X POST -H "Content-Type: application/json"
+    /// -d token="abcdefgh"
+    /// -d data="{\"html\":\"html version of the mail\", \"text\":\"text version of the mail\"}"
+    /// http://localhost/venditori/send
+    ///
     /// </summary>
     /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
@@ -63,13 +77,16 @@ uses
 procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce: TReceptionResponce;
-  RequestorName, ActionName, Data: String;
+  RequestorName, ActionName, Data, IP, Token: String;
   Request: TFrontEndRequest;
+  AJson: TJsonObject;
 begin
-  RequestorName := Ctx.request.params[REQUESTOR_TOKEN];
-  ActionName := Ctx.request.params[ACTION_TOKEN];
-  Data := Ctx.Request.ContentParam(DATA_TOKEN);
-  Responce := Model.Elaborate(RequestorName, ActionName, Data, Ctx.Request.Files);
+  RequestorName := Ctx.request.params[REQUESTOR_KEY];
+  IP := Context.Request.ClientIP;
+  ActionName := Ctx.request.params[ACTION_KEY];
+  Token := Ctx.request.params[TOKEN_KEY];
+  Data := Ctx.request.params[DATA_KEY];
+  Responce := Model.Elaborate(RequestorName, ActionName, Data, Token, IP, Ctx.Request.Files);
   Render(Responce);
 end;
 

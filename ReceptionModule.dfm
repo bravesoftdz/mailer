@@ -1,8 +1,8 @@
-object ReceptionWebModule: TReceptionWebModule
+object ReceptionModule: TReceptionModule
   OldCreateOrder = False
   OnCreate = WebModuleCreate
   OnDestroy = WebModuleDestroy
   Actions = <>
-  Height = 230
-  Width = 415
+  Height = 39
+  Width = 136
 end
