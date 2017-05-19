@@ -42,8 +42,7 @@ type
     /// form (split on multiple line for clarity)
     ///
     /// curl -X POST -H "Content-Type: application/json"
-    /// -d token="abcdefgh"
-    /// -d data="{\"html\":\"html version of the mail\", \"text\":\"text version of the mail\"}"
+    /// -d "{\"token\":\"abcdefgh\", \"html\":\"html version of the mail\", \"text\":\"text version of the mail\"}"
     /// http://localhost/venditori/send
     ///
     /// </summary>
@@ -77,16 +76,15 @@ uses
 procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce: TReceptionResponce;
-  RequestorName, ActionName, Data, IP, Token: String;
+  RequestorName, ActionName, Body, IP, Token: String;
   Request: TFrontEndRequest;
   AJson: TJsonObject;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   IP := Context.Request.ClientIP;
   ActionName := Ctx.request.params[ACTION_KEY];
-  Token := Ctx.request.params[TOKEN_KEY];
-  Data := Ctx.request.params[DATA_KEY];
-  Responce := Model.Elaborate(RequestorName, ActionName, Data, Token, IP, Ctx.Request.Files);
+  Body := Ctx.Request.Body;
+  Responce := Model.Elaborate(RequestorName, ActionName, Body, IP, Ctx.Request.Files);
   Render(Responce);
 end;
 

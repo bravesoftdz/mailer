@@ -8,6 +8,10 @@ uses
 
 type
   TReceptionModel = class
+
+  const
+    /// name of the key that contains a token in a json
+    TOKEN_KEY = 'token';
   strict private
     FFactory: TProviderFactory;
     FClients: TArray<TClient>;
@@ -27,9 +31,11 @@ type
     /// text data and attachments.</summary>
     /// <param name="Requestor">who requests the action</param>
     /// <param name="anAction">what action should be performed</param>
-    /// <param name="aData">a string version of a json to be passed to the action executor</param>
+    /// <param name="aData">a json in a string form (i.e., "{'key': value, ...}")
+    /// It should contain a key "token" with a valid value in order to be taken into considration.
+    /// </param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
-    function Elaborate(const Requestor: string; const anAction: string; const aData: string; const Token: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
+    function Elaborate(const Requestor: string; const anAction: string; const aData: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
       : TReceptionResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
@@ -65,7 +71,7 @@ begin
 end;
 
 function TReceptionModel.Elaborate(const Requestor: string; const anAction: string;
-  const aData: string; const Token: string; const IP: string; const AttachedFiles: TAbstractWebRequestFiles)
+  const aData: string; const IP: string; const AttachedFiles: TAbstractWebRequestFiles)
   : TReceptionResponce;
 var
   AJson: TJsonObject;
@@ -74,10 +80,11 @@ var
   Action: TAction;
   Responce: TReceptionResponce;
   Input: TFrontEndData;
-
+  Token: String;
 begin
   try
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(aData), 0) as TJSONObject;
+    Token := AJSon.GetValue(TOKEN_KEY).Value;
     if (AJson <> nil) then
     begin
       Input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
@@ -88,6 +95,11 @@ begin
       AJSon := nil;
     end;
   end;
+
+//  ----- add authorisaztion control here -----
+
+
+
   Request := TFrontEndRequest.Create(Input, AttachedFiles);
   Provider := FFactory.FindByName(Requestor);
   if (Provider <> nil) then
