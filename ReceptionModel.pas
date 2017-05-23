@@ -96,7 +96,7 @@ begin
     end;
   end;
 
-  // ----- add authorisaztion control here -----
+  // ----- add authorisation control here -----
 
   Request := TFrontEndRequest.Create(Input, AttachedFiles);
   Provider := FFactory.FindByName(Requestor);

@@ -77,14 +77,18 @@ procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce: TResponce;
   RequestorName, ActionName, Body, IP, Token: String;
-  AJson: TJsonObject;
+  Body2: TClientRequest;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
-  IP := Context.Request.ClientIP;
   ActionName := Ctx.request.params[ACTION_KEY];
+  IP := Context.Request.ClientIP;
+
   Body := Ctx.Request.Body;
   Responce := Model.Elaborate(RequestorName, ActionName, Body, IP, Ctx.Request.Files);
-  Render(Responce);
+
+  Body2 := Ctx.Request.BodyAs<TClientRequest>();
+
+  // Render(Responce);
 end;
 
 class function TController.GetBackEndSettings: TActiveQueueSettings;
