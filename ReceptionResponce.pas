@@ -5,7 +5,7 @@ interface
 type
 
   /// <summary>
-  ///  A front-end responce.
+  ///  A responce that a Reception instance provides to a client.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TReceptionResponce = class

@@ -77,7 +77,6 @@ procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce: TReceptionResponce;
   RequestorName, ActionName, Body, IP, Token: String;
-  Request: TFrontEndRequest;
   AJson: TJsonObject;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];

@@ -15,15 +15,15 @@ type
   [MapperJSONNaming(JSONNameLowerCase)]
   TFrontEndRequest = class
   private
-    FData: TFrontEndData;
+    FData: TClientRequest;
     FAttachments: TObjectList<TAttachment>;
     procedure SetAttachments(const Value: TObjectList<TAttachment>);
   public
     /// <summary> Constructor</summary>
-    constructor Create(const aData: TFrontEndData; const AttachedFiles: TAbstractWebRequestFiles); overload;
+    constructor Create(const aData: TClientRequest; const AttachedFiles: TAbstractWebRequestFiles); overload;
     constructor Create(); overload;
     [MapperJSONSer('data')]
-    property Data: TFrontEndData read FData;
+    property Data: TClientRequest read FData;
     property Attachments: TObjectList<TAttachment> read FAttachments;
     function ToString(): String;
   end;
@@ -35,7 +35,7 @@ uses
 
 { TSimpleInputData }
 
-constructor TFrontEndRequest.Create(const aData: TFrontEndData; const AttachedFiles: TAbstractWebRequestFiles);
+constructor TFrontEndRequest.Create(const aData: TClientRequest; const AttachedFiles: TAbstractWebRequestFiles);
 var
   anAttachment: TAttachment;
   Len, I: Integer;
@@ -43,7 +43,7 @@ var
   MemStream: TMemoryStream;
 begin
   /// defensive copying
-  FData := TFrontEndData.Create(aData.Text, aData.Html);
+  FData := TClientRequest.Create(aData.Text, aData.Html);
   FAttachments := TObjectList<TAttachment>.Create;
   Len := AttachedFiles.Count;
   for I := 0 to Len - 1 do
@@ -56,7 +56,7 @@ end;
 
 constructor TFrontEndRequest.Create;
 begin
-  FData := TFrontEndData.Create();
+  FData := TClientRequest.Create();
   FAttachments := TObjectList<TAttachment>.Create;
 end;
 

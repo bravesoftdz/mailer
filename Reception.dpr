@@ -13,12 +13,12 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   VenditoriSimple in 'Providers\VenditoriSimple.pas',
-  Action in 'Actions\Action.pas',
+  Action in 'Actions\Action.pas' {$R *.res},
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   Attachment in 'Attachment.pas',
   ActiveQueueProxy in 'ActiveQueueProxy.pas',
-  FrontEndData in 'FrontEndData.pas',
+  ClientRequest in 'ClientRequest.pas',
   FrontEndRequest in 'FrontEndRequest.pas',
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
@@ -36,7 +36,8 @@ uses
   ObjectsMappers,
   System.IOUtils,
   ReceptionConfig in 'ReceptionConfig.pas',
-  Client in 'Client.pas', System.Generics.Collections;
+  Client in 'Client.pas',
+  System.Generics.Collections;
 
 const
   BACKEND_URL_SWITCH = 'u';

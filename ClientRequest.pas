@@ -1,4 +1,4 @@
-unit FrontEndData;
+unit ClientRequest;
 
 interface
 
@@ -7,11 +7,10 @@ uses
 
 type
 
-  /// <summary>Represents a textual request that arrives from the front end.
-  /// This request does not include any attachments. The attachments are
-  /// supposed to be elaborated somewhere else. </summary>
+  /// <summary>Represents a textual request that arrives from the client.
+  /// This request does not include any attachments. </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TFrontEndData = class
+  TClientRequest = class
   private
     FHtml: String;
     FText: String;
@@ -29,13 +28,13 @@ implementation
 
 { TFrontEndData }
 
-constructor TFrontEndData.Create(const aText, anHtml: String);
+constructor TClientRequest.Create(const aText, anHtml: String);
 begin
   FHtml := aText;
   FText := anHtml;
 end;
 
-constructor TFrontEndData.Create;
+constructor TClientRequest.Create;
 begin
   FHtml := '';
   FText := '';

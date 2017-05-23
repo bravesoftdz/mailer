@@ -9,7 +9,7 @@ uses
 type
 
   /// <summary>
-  /// Object containing data to be sent to the back-end.
+  /// A request that a Reception instance performs to a back-end server.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TReceptionRequest = class

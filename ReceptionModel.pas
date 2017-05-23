@@ -79,7 +79,7 @@ var
   Provider: TProvider;
   Action: TAction;
   Responce: TReceptionResponce;
-  Input: TFrontEndData;
+  Input: TClientRequest;
   Token: String;
 begin
   try
@@ -87,7 +87,7 @@ begin
     Token := AJSon.GetValue(TOKEN_KEY).Value;
     if (AJson <> nil) then
     begin
-      Input := Mapper.JSONObjectToObject<TFrontEndData>(AJSon);
+      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
     end;
   except
     on E: Exception do
