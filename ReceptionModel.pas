@@ -50,7 +50,7 @@ implementation
 uses
   Provider, Action, System.Contnrs,
   VenditoriSimple, SoluzioneAgenti, System.JSON, System.SysUtils,
-  ObjectsMappers, FrontEndData;
+  ObjectsMappers, ClientRequest;
 
 { TMailerModel }
 

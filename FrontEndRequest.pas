@@ -3,7 +3,7 @@ unit FrontEndRequest;
 interface
 
 uses
-  System.JSON, System.Generics.Collections, Attachment, FrontEndData,
+  System.JSON, System.Generics.Collections, Attachment, ClientRequest,
   Web.HTTPApp, ObjectsMappers;
 
 type
