@@ -1,14 +1,14 @@
-unit FrontEndDataTest;
+unit ClientRequestTest;
 
 interface
 
 uses
-  DUnitX.TestFramework, System.JSON, FrontEndData;
+  DUnitX.TestFramework, System.JSON, ClientRequest;
 
 type
 
   [TestFixture]
-  TFrontEndDataTest = class(TObject)
+  TClientRequestTest = class(TObject)
   private
     json: TJsonObject;
     pairHtml, pairText: TJsonPair;
@@ -54,54 +54,54 @@ implementation
 uses
   ObjectsMappers;
 
-procedure TFrontEndDataTest.createFromEmpty;
+procedure TClientRequestTest.createFromEmpty;
 var
-  request: TFrontEndData;
+  request: TClientRequest;
 begin
-  request := Mapper.JSONObjectToObject<TFrontEndData>(json);
+  request := Mapper.JSONObjectToObject<TClientRequest>(json);
   Assert.AreEqual(request.Html, '');
   Assert.AreEqual(request.Text, '');
 end;
 
-procedure TFrontEndDataTest.createFromHtmlAndText;
+procedure TClientRequestTest.createFromHtmlAndText;
 var
-  request: TFrontEndData;
+  request: TClientRequest;
 begin
   json.AddPair(pairHtml);
   json.AddPair(pairText);
-  request := Mapper.JSONObjectToObject<TFrontEndData>(json);
+  request := Mapper.JSONObjectToObject<TClientRequest>(json);
   Assert.AreEqual(request.Html, 'an html content');
   Assert.AreEqual(request.text, 'a text content');
 end;
 
-procedure TFrontEndDataTest.createOnlyFromHtml;
+procedure TClientRequestTest.createOnlyFromHtml;
 var
-  request: TFrontEndData;
+  request: TClientRequest;
 begin
   json.AddPair(pairHtml);
-  request := Mapper.JSONObjectToObject<TFrontEndData>(json);
+  request := Mapper.JSONObjectToObject<TClientRequest>(json);
   Assert.AreEqual(request.Html, 'an html content');
   Assert.AreEqual(request.Text, '');
 end;
 
-procedure TFrontEndDataTest.createOnlyFromText;
+procedure TClientRequestTest.createOnlyFromText;
 var
-  request: TFrontEndData;
+  request: TClientRequest;
 begin
   json.AddPair(pairText);
-  request := Mapper.JSONObjectToObject<TFrontEndData>(json);
+  request := Mapper.JSONObjectToObject<TClientRequest>(json);
   Assert.AreEqual(request.Html, '');
   Assert.AreEqual(request.Text, 'a text content');
 end;
 
-procedure TFrontEndDataTest.Setup;
+procedure TClientRequestTest.Setup;
 begin
   json := TJsonObject.Create;
   pairHtml := TJsonPair.Create('html', 'an html content');
   pairText := TJsonPair.Create('text', 'a text content');
 end;
 
-procedure TFrontEndDataTest.TearDown;
+procedure TClientRequestTest.TearDown;
 begin
   pairHtml := nil;
   pairText := nil;
@@ -110,6 +110,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TFrontEndDataTest);
+TDUnitX.RegisterTestFixture(TClientRequestTest);
 
 end.

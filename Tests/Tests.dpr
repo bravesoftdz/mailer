@@ -16,7 +16,7 @@ uses
   ReceptionRequestBuilderTest in 'ReceptionRequestBuilderTest.pas',
   ReceptionRequestTest in 'ReceptionRequestTest.pas',
   FrontEndRequestTest in 'FrontEndRequestTest.pas',
-  FrontEndDataTest in 'FrontEndDataTest.pas',
+  ClientRequestTest in 'ClientRequestTest.pas',
   ActiveQueueResponceTest in 'ActiveQueueResponceTest.pas',
   SubscriptionOutcomeDataTest in 'SubscriptionOutcomeDataTest.pas',
   AQConfigTest in 'AQConfigTest.pas',

@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, Action,
-  ProviderFactory, ReceptionResponce, ActiveQueueSettings, ReceptionModel, Client,
+  ProviderFactory, Responce, ActiveQueueSettings, ReceptionModel, Client,
   System.Generics.Collections;
 
 type
@@ -69,13 +69,13 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
+  MVCFramework.Logger, System.JSON, System.SysUtils,
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
   System.Classes, Attachment, Web.HTTPApp;
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
-  Responce: TReceptionResponce;
+  Responce: TResponce;
   RequestorName, ActionName, Body, IP, Token: String;
   AJson: TJsonObject;
 begin

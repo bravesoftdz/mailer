@@ -3,7 +3,7 @@ unit Action;
 interface
 
 uses
-  ReceptionResponce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings;
+  Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings;
 
 type
   TAction = class
@@ -15,7 +15,7 @@ type
     /// <summary>A virtual method that i ssupposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce; virtual; abstract;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -29,21 +29,21 @@ type
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce; override;
+    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
@@ -71,7 +71,7 @@ begin
 end;
 
 function TActionSend.Elaborate(
-  const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce;
+  const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
 var
   builder: TReceptionRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -79,7 +79,7 @@ var
   Responce: TActiveQueueResponce;
   Request: TReceptionRequest;
 begin
-  Result := TReceptionResponce.Create;
+  Result := TResponce.Create;
   builder := TReceptionRequestBuilder.Create();
   builder.SetFrom(TVenditoriCredentials.From())
     .SetSender(TVenditoriCredentials.Name())
@@ -127,10 +127,10 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce;
+function TActionContact.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
-  Result := TReceptionResponce.Create;
+  Result := TResponce.Create;
   Result.msg := 'contact action: not implemented yet';
 
 end;
@@ -142,10 +142,10 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TReceptionResponce;
+function TActionOrder.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
-  Result := TReceptionResponce.Create;
+  Result := TResponce.Create;
   Result.msg := 'contact action: not implemented yet';
 end;
 

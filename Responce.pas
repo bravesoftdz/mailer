@@ -1,14 +1,14 @@
-unit ReceptionResponce;
+unit Responce;
 
 interface
 
 type
 
   /// <summary>
-  ///  A responce that a Reception instance provides to a client.
+  /// A responce that a Reception instance provides to a client.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TReceptionResponce = class
+  TResponce = class
   private
     FMessage: String;
     FToken: String;
@@ -16,6 +16,8 @@ type
     procedure SetToken(const Value: String);
   public
     property msg: String read FMessage write SetMessage;
+
+    { TODO : Does the client really need the token in the responce? }
     property token: String read FToken write SetToken;
   end;
 
@@ -23,12 +25,12 @@ implementation
 
 { TSimpleMailerResponce }
 
-procedure TReceptionResponce.setMessage(const Value: String);
+procedure TResponce.setMessage(const Value: String);
 begin
   FMessage := Value;
 end;
 
-procedure TReceptionResponce.SetToken(const Value: String);
+procedure TResponce.SetToken(const Value: String);
 begin
   FToken := Value;
 end;

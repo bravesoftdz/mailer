@@ -112,8 +112,7 @@
         <DCCReference Include="ReceptionModule.pas"/>
         <DCCReference Include="ReceptionModel.pas"/>
         <DCCReference Include="ReceptionRequest.pas"/>
-        <DCCReference Include="ReceptionResponce.pas"/>
-        <DCCReference Include="RegistrationResponce.pas"/>
+        <DCCReference Include="Responce.pas"/>
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
         <DCCReference Include="SubscriptionData.pas"/>
         <DCCReference Include="CliParam.pas"/>

@@ -3,7 +3,7 @@ unit ReceptionModel;
 interface
 
 uses
-  ReceptionResponce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
+  Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
   Web.HTTPApp, System.Generics.Collections, Client;
 
 type
@@ -36,7 +36,7 @@ type
     /// </param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
     function Elaborate(const Requestor: string; const anAction: string; const aData: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
-      : TReceptionResponce;
+      : TResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -72,13 +72,13 @@ end;
 
 function TReceptionModel.Elaborate(const Requestor: string; const anAction: string;
   const aData: string; const IP: string; const AttachedFiles: TAbstractWebRequestFiles)
-  : TReceptionResponce;
+  : TResponce;
 var
   AJson: TJsonObject;
   Request: TFrontEndRequest;
   Provider: TProvider;
   Action: TAction;
-  Responce: TReceptionResponce;
+  Responce: TResponce;
   Input: TClientRequest;
   Token: String;
 begin
@@ -96,9 +96,7 @@ begin
     end;
   end;
 
-//  ----- add authorisaztion control here -----
-
-
+  // ----- add authorisaztion control here -----
 
   Request := TFrontEndRequest.Create(Input, AttachedFiles);
   Provider := FFactory.FindByName(Requestor);
@@ -112,7 +110,7 @@ begin
   end
   else
   begin
-    Responce := TReceptionResponce.Create;
+    Responce := TResponce.Create;
     Responce.msg := 'authorization missing...';
   end;
   Result := Responce;
