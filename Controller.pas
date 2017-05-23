@@ -70,7 +70,7 @@ implementation
 
 uses
   MVCFramework.Logger, RegistrationResponce, System.JSON, System.SysUtils,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, FrontEndData,
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
   System.Classes, Attachment, Web.HTTPApp;
 
 procedure TController.Elaborate(Ctx: TWebContext);
