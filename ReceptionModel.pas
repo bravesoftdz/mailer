@@ -23,6 +23,11 @@ type
     function GetClients(): TObjectList<TClient>;
 
     function GetSettings: TActiveQueueSettings;
+
+    /// <summary> Return true if the list of clients contains a one with given IP and token.
+    /// Otherwise, return false.
+    /// </summary>
+    function isAuthenticated(const IP, Token: String): Boolean;
     procedure SetSettings(const Value: TActiveQueueSettings);
 
   public
@@ -159,6 +164,20 @@ end;
 function TReceptionModel.GetSettings: TActiveQueueSettings;
 begin
   Result := TActiveQueueSettings.Create(FSettings.Url, FSettings.Port);
+end;
+
+function TReceptionModel.isAuthenticated(const IP, Token: String): Boolean;
+var
+  Client: TClient;
+begin
+  /// this one is not effective implementation.
+  /// 1. create a separate class for authentications
+  /// 2. index on the tokens (since they should be unique)
+  for client in FClients do
+    if (Client.IP = IP) AND (Client.Token = Token) then
+      Result := True;
+  Result := False;
+
 end;
 
 procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
