@@ -71,22 +71,47 @@ implementation
 uses
   MVCFramework.Logger, System.JSON, System.SysUtils,
   FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
-  System.Classes, Attachment, Web.HTTPApp;
+  System.Classes, Attachment, Web.HTTPApp, ClientFullRequest;
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
-  Responce: TResponce;
+  Responce, Responce2: TResponce;
   RequestorName, ActionName, Body, IP, Token: String;
   Body2: TClientRequest;
+  Request: TClientFullRequest;
+  Attachments: TObjectList<TAttachment>;
+  Len, I: Integer;
+  AttachedFiles: TAbstractWebRequestFiles;
+  MemStream: TMemoryStream;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   ActionName := Ctx.request.params[ACTION_KEY];
-  IP := Context.Request.ClientIP;
+  IP := Ctx.Request.ClientIP;
+  try
+    Body := Ctx.Request.Body;
+    Writeln(Body);
+  except
+    on e: Exception do
+      Writeln(e.Message);
 
-  Body := Ctx.Request.Body;
-  Responce := Model.Elaborate(RequestorName, ActionName, Body, IP, Ctx.Request.Files);
+  end;
+  //
+  // Responce := Model.Elaborate(RequestorName, ActionName, Body, IP, Ctx.Request.Files);
 
-  Body2 := Ctx.Request.BodyAs<TClientRequest>();
+  // Writeln(Ctx.Request.Body);
+
+  Attachments := TObjectList<TAttachment>.Create;
+  AttachedFiles := Ctx.Request.Files;
+  Len := AttachedFiles.Count;
+  for I := 0 to Len - 1 do
+  begin
+    MemStream := TMemoryStream.Create();
+    MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
+    Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
+  end;
+
+  Request := TClientFullRequest.Create(Body2, Attachments);
+  Responce2 := Model.Elaborate2(RequestorName, ActionName, IP, Request);
 
   // Render(Responce);
 end;

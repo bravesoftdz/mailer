@@ -36,7 +36,8 @@ uses
   System.IOUtils,
   ReceptionConfig in 'ReceptionConfig.pas',
   Client in 'Client.pas',
-  System.Generics.Collections;
+  System.Generics.Collections,
+  ClientFullRequest in 'ClientFullRequest.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';

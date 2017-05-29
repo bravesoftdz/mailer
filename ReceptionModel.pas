@@ -4,7 +4,7 @@ interface
 
 uses
   Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp, System.Generics.Collections, Client;
+  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest;
 
 type
   TReceptionModel = class
@@ -36,7 +36,15 @@ type
     /// </param>
     /// <param name="AttachedFiles">provided files to be passed to the executor</param>
     function Elaborate(const Requestor: string; const anAction: string; const aData: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
-      : TResponce;
+      : TResponce; deprecated 'Use SomeOtherProp instead';
+
+    /// <summary>
+    /// Elaborate an action from a client.</summary>
+    /// <param name="Requestor">client name</param>
+    /// <param name="anAction">an action name that the client requests to perform</param>
+    /// <param name="IP">client IP</param>
+    /// <param name="Request">request obtained from the client</param>
+    function Elaborate2(const Requestor: string; const anAction: string; const IP: String; const Request: TClientFullRequest): TResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -114,6 +122,25 @@ begin
     Responce.msg := 'authorization missing...';
   end;
   Result := Responce;
+
+end;
+
+function TReceptionModel.Elaborate2(const Requestor, anAction, IP: String;
+  const Request: TClientFullRequest): TResponce;
+const
+  FMT = '%-10s:';
+var
+  L, I: Integer;
+begin
+  Writeln(Format(FMT, ['Requestor']) + Requestor);
+  Writeln(Format(FMT, ['Action']) + anAction);
+  Writeln(Format(FMT, ['ip']) + IP);
+  L := Request.FAttachments.Count;
+  Writeln(Format(FMT, ['# attchm']) + inttostr(L));
+  for I := 0 to L - 1 do
+  begin
+    Writeln(Format('%5s %d: %d', ['attch', I, Request.FAttachments[I].Content.Size]));
+  end;
 
 end;
 
