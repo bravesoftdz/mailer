@@ -4,7 +4,7 @@ interface
 
 uses
   Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest;
+  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication;
 
 type
   TReceptionModel = class
@@ -16,6 +16,7 @@ type
     FFactory: TProviderFactory;
     FClients: TArray<TClient>;
     FSettings: TActiveQueueSettings;
+    FAuthentication: TAuthentication;
 
     /// <summary>client setter. Perform the defencieve copying.</summary>
     procedure SetClients(const clients: TObjectList<TClient>);
@@ -184,13 +185,9 @@ procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
 var
   L, I: Integer;
 begin
-  L := Clients.Count;
-  SetLength(FClients, L);
-  for I := 0 to L - 1 do
-  begin
-    FClients[I] := TClient.Create(Clients[I].IP, Clients[I].Token);
-  end;
-
+  if FAuthentication <> nil then
+    raise Exception.Create('Reception model can instantiate authentication class only once!');
+  FAuthentication := TAuthentication.Create(clients);
 end;
 
 procedure TReceptionModel.SetSettings(const Value: TActiveQueueSettings);

@@ -37,7 +37,8 @@ uses
   ReceptionConfig in 'ReceptionConfig.pas',
   Client in 'Client.pas',
   System.Generics.Collections,
-  ClientFullRequest in 'ClientFullRequest.pas';
+  ClientFullRequest in 'ClientFullRequest.pas',
+  Authentication in 'Authentication.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
