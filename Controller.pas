@@ -180,12 +180,6 @@ begin
   Result := Model.BackEndSettings;
 end;
 
-class function TController.GetClients: TObjectList<TClient>;
-begin
-  /// there is no need in performing defencieve copying since the controller does not store this info
-  Result := Model.Clients
-end;
-
 function TController.GetParamValue(const Query, Param: String): String;
 var
   items, keyvalue: TArray<string>;
@@ -255,18 +249,18 @@ begin
 
 end;
 
-class
-  procedure TController.SetBackEndSettings(
-  const
-  aSettings:
-  TActiveQueueSettings);
+class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
 begin
   Model.BackEndSettings := aSettings;
 end;
 
+class function TController.GetClients: TObjectList<TClient>;
+begin
+  Result := Model.Clients
+end;
+
 class procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
-  /// there is no need in performing defencieve copying since the controller does not store this info
   Model.clients := Clients;
 end;
 

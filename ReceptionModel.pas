@@ -168,12 +168,20 @@ function TReceptionModel.GetClients: TObjectList<TClient>;
 var
   item: TClient;
 begin
-  Result := TObjectList<TClient>.Create;
-  for Item in FClients do
-  begin
-    Result.Add(TClient.Create(Item.IP, Item.Token));
-  end;
+  if FAuthentication = nil then
+    Result := TObjectList<TClient>.Create
+  else
+    Result := FAuthentication.GetClients;
 
+end;
+
+procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
+var
+  L, I: Integer;
+begin
+  if FAuthentication <> nil then
+    raise Exception.Create('Reception model can instantiate authentication class only once!');
+  FAuthentication := TAuthentication.Create(clients);
 end;
 
 function TReceptionModel.GetSettings: TActiveQueueSettings;
@@ -193,15 +201,6 @@ begin
   begin
     Result := FAuthentication.isAuthenticated(TClient.Create(IP, Token));
   end;
-end;
-
-procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
-var
-  L, I: Integer;
-begin
-  if FAuthentication <> nil then
-    raise Exception.Create('Reception model can instantiate authentication class only once!');
-  FAuthentication := TAuthentication.Create(clients);
 end;
 
 procedure TReceptionModel.SetSettings(const Value: TActiveQueueSettings);

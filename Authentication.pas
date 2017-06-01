@@ -17,6 +17,9 @@ type
     /// </summary>
     function isAuthenticated(item: TClient): Boolean;
 
+    /// <summary> return a list of clients</summary>
+    function GetClients(): TObjectList<TClient>;
+
   end;
 
 implementation
@@ -46,6 +49,18 @@ destructor TAuthentication.Destroy;
 begin
   FItems.Clear;
   FItems.DisposeOf;
+
+end;
+
+function TAuthentication.GetClients: TObjectList<TClient>;
+var
+  Client: TClient;
+begin
+  Result := TObjectList<TClient>.Create;
+  for Client in FItems.Values do
+  begin
+    Result.Add(TClient.Create(Client.IP, Client.Token));
+  end;
 
 end;
 
