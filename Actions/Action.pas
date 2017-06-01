@@ -52,7 +52,8 @@ implementation
 
 uses
   Credentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce,
-  SendServerProxy.interfaces, System.SysUtils, Attachment;
+  SendServerProxy.interfaces, System.SysUtils, Attachment,
+  System.Generics.Collections;
 
 { TMailerAction }
 
@@ -79,6 +80,7 @@ var
   server: ISendServerProxy;
   Responce: TActiveQueueResponce;
   Request: TReceptionRequest;
+  Items: TObjectList<TReceptionRequest>;
 begin
   Result := TResponce.Create;
   builder := TReceptionRequestBuilder.Create();
@@ -106,7 +108,9 @@ begin
   else
   begin
     try
-      Responce := server.send(Request);
+      Items := TObjectList<TReceptionRequest>.Create();
+      Items.add(Request);
+      Responce := server.PostItems(Items);
       if Responce.status then
         Result.msg := 'OK'
       else
