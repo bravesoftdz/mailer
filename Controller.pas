@@ -5,7 +5,7 @@ interface
 uses
   MVCFramework, MVCFramework.Commons, Action,
   ProviderFactory, Responce, ActiveQueueSettings, ReceptionModel, Client,
-  System.Generics.Collections;
+  System.Generics.Collections, System.Classes;
 
 type
 
@@ -44,6 +44,8 @@ type
     /// { "html":"html version of the mail", "text":"text version of the mail", "token":"abcdef" }
     /// </summary>
     function PickMultipartItem(const Items: TArray<String>; const ContentType: String; const KeyName: String): String;
+    /// <summary> Returns a copy of original list in which the elements at specified postions are skipped</summary>
+    function SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
   public
     // [MVCPath('/($' + REQUESTOR + ')/($' + ACTION + ')')]
     [MVCPath('/($' + REQUESTOR_KEY + ')/($' + ACTION_KEY + ')')]
@@ -86,8 +88,7 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.SysUtils,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
-  System.Classes, Attachment, Web.HTTPApp, ClientFullRequest;
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest, Attachment, Web.HTTPApp, ClientFullRequest;
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
@@ -137,7 +138,7 @@ end;
 function TController.ExtractBody(const ContentType, RawBody: String): String;
 var
   items, BodyParts: TArray<string>;
-  boundary, data: String;
+  boundary, separator, data: String;
 
 begin
   if not ContentType.IsEmpty then
@@ -147,12 +148,19 @@ begin
     Writeln(boundary);
     if not boundary.IsEmpty then
     begin
-      BodyParts := RawBody.Split([boundary]);
+      /// See section 5.1.1 "Common Syntax" (http://www.ietf.org/rfc/rfc2046.txt):
+      /// The Content-Type field for multipart entities requires one parameter,
+      // "boundary". The boundary delimiter line is then defined as a line
+      // consisting entirely of two hyphen characters ("-", decimal value 45)
+      // followed by the boundary parameter value from the Content-Type header
+      // field, optional linear whitespace, and a terminating CRLF.
+      Separator := '--' + boundary;
+      BodyParts := RawBody.Split([Separator]);
       data := PickMultipartItem(BodyParts, 'application/json', 'data');
-      Writeln(inttostr(Length(BodyParts)));
+      Writeln(data);
     end;
 
-    Writeln(RawBody);
+    // Writeln(RawBody);
 
     // ContentType := Trim(items[0]);
     // if Length(items) > 1 then
@@ -218,24 +226,67 @@ end;
 function TController.PickMultipartItem(const Items: TArray<String>; const ContentType,
   KeyName: String): String;
 var
-  Elem: String;
+  Elem, Part, Needle1, Needle2: String;
+  Parts: TStringList;
+  Output: String;
+  positions: TList<Integer>;
+
 begin
+  Needle1 := 'Content-Disposition: form-data; name="' + KeyName + '"';
+  Needle2 := 'Content-Type: ' + ContentType;
+  Parts := TStringList.Create;
   for Elem in Items do
   begin
+    Parts.Text := Elem.Trim();
+    if Parts.Count > 2 then
+    begin
+      if (Parts[0] = Needle1) AND (Parts[1] = Needle2) then
+      begin
+        Positions := TList<Integer>.Create;
+        Positions.Add(0);
+        Positions.Add(1);
+        Result := SkipElements(Parts, Positions).Text.trim();
+        Exit();
+      end;
+
+    end;
+    // if (Contains(Parts, ['Content-Disposition: ' + ContentType, 'Content-Type: ' + ContentType])) then
 
   end;
 
 end;
 
-class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
+class
+  procedure TController.SetBackEndSettings(
+  const
+  aSettings:
+  TActiveQueueSettings);
 begin
   Model.BackEndSettings := aSettings;
 end;
 
-class procedure TController.SetClients(const Clients: TObjectList<TClient>);
+class
+  procedure TController.SetClients(
+  const
+  Clients:
+  TObjectList<TClient>);
 begin
   /// there is no need in performing defencieve copying since the controller does not store this info
   Model.clients := Clients;
+end;
+
+function TController.SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
+var
+  I, L: Integer;
+begin
+  Result := TStringList.Create;
+  L := Items.Count;
+  for I := 0 to L - 1 do
+    if not(Positions.Contains(I)) then
+    begin
+      Result.Add(Items[I]);
+    end;
+
 end;
 
 initialization
