@@ -92,16 +92,13 @@ uses
 
 procedure TController.Elaborate(Ctx: TWebContext);
 var
-  Responce, Responce2: TResponce;
-  RequestorName, ActionName, Body, IP, Token, Boundary: String;
-  Body2: TClientRequest;
+  Responce: TResponce;
+  RequestorName, ActionName, Body, IP, Boundary: String;
   Request: TClientFullRequest;
   Attachments: TObjectList<TAttachment>;
   Len, I: Integer;
   AttachedFiles: TAbstractWebRequestFiles;
   MemStream: TMemoryStream;
-  ContentType: String;
-  CT: TArray<string>;
   AJSon: TJSONObject;
   Input: TClientRequest;
 begin
@@ -118,14 +115,22 @@ begin
 
   try
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Body), 0) as TJSONObject;
-    if (AJson <> nil) then
-    begin
-      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
-    end;
   except
     on E: Exception do
     begin
       AJSon := nil;
+    end;
+  end;
+
+  if (AJson <> nil) then
+  begin
+    try
+      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
+    except
+      on E: Exception do
+      begin
+        Input := nil;
+      end;
     end;
   end;
 
@@ -140,15 +145,15 @@ begin
   end;
 
   Request := TClientFullRequest.Create(Input, Attachments);
-  Responce2 := Model.Elaborate2(RequestorName, ActionName, IP, Request);
+  Responce := Model.Elaborate2(RequestorName, ActionName, IP, Request);
 
-  // Render(Responce);
+  Render(Responce);
 end;
 
 function TController.ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 var
   items, BodyParts: TArray<string>;
-  separator, data: String;
+  separator: String;
 begin
   if not ContentType.IsEmpty then
   begin
@@ -223,9 +228,8 @@ end;
 function TController.PickMultipartItem(const Items: TArray<String>; const ContentType,
   KeyName: String): String;
 var
-  Elem, Part, Needle1, Needle2: String;
+  Elem, Needle1, Needle2: String;
   Parts: TStringList;
-  Output: String;
   positions: TList<Integer>;
 
 begin
@@ -245,9 +249,7 @@ begin
         Result := SkipElements(Parts, Positions).Text.trim();
         Exit();
       end;
-
     end;
-    // if (Contains(Parts, ['Content-Disposition: ' + ContentType, 'Content-Type: ' + ContentType])) then
 
   end;
 
