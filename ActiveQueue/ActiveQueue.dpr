@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -36,6 +36,7 @@ uses
 const
   SWITCH_CONFIG = 'c';
   SWITCH_CHAR = '-';
+  PROGRAM_NAME = 'Active Queue Server';
 
 var
   configFileName: String;
@@ -88,9 +89,15 @@ var
   OutFile: String;
   ConfigUpdated: TAQConfig;
   numberOfListeners: Integer;
+  I: Integer;
 
 begin
-  Writeln('** DMVCFramework Server **');
+  SetConsoleTitle(PROGRAM_NAME);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+  Writeln('');
+  Writeln('  ' + PROGRAM_NAME);
+  Writeln('');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
   APort := Config.Port;
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
@@ -117,6 +124,7 @@ begin
   else
   begin
     Writeln('Allowed IPs for data providers:');
+
     for Item in ProvidersWhiteList do
       Writeln(Item);
   end;

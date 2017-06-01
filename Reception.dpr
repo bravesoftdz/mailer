@@ -45,6 +45,7 @@ const
   BACKEND_PORT_SWITCH = 'p';
   SWITCH_CHAR = '-';
   SWITCH_CONFIG = 'c';
+  PROGRAM_NAME = 'Reception Server';
 
 var
   ConfigFileName: String;
@@ -66,7 +67,12 @@ var
   Client: TClient;
 begin
   Port := Config.Port;
-  Writeln('** DMVCFramework Server **');
+  SetConsoleTitle(PROGRAM_NAME);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+  Writeln('');
+  Writeln('  ' + PROGRAM_NAME);
+  Writeln('');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
   Writeln(Format('Starting HTTP Server on port %d', [Port]));
 
   BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
