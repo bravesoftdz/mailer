@@ -133,20 +133,34 @@ end;
 
 function TReceptionModel.Elaborate2(const Requestor, anAction, IP: String;
   const Request: TClientFullRequest): TResponce;
-const
-  FMT = '%-10s:';
 var
-  L, I: Integer;
+  Provider: TProvider;
+  Action: TAction;
+  Responce: TResponce;
 begin
-  Writeln(Format(FMT, ['Requestor']) + Requestor);
-  Writeln(Format(FMT, ['Action']) + anAction);
-  Writeln(Format(FMT, ['ip']) + IP);
-  L := Request.FAttachments.Count;
-  Writeln(Format(FMT, ['# attchm']) + inttostr(L));
-  for I := 0 to L - 1 do
+  if isAuthenticated(IP, Request.FRequest.Token) then
   begin
-    Writeln(Format('%5s %d: %d', ['attch', I, Request.FAttachments[I].Content.Size]));
+    Provider := FFactory.FindByName(Requestor);
+    if (Provider <> nil) then
+    begin
+      Action := Provider.FindByName(anAction);
+    end;
+    if (Action <> nil) then
+    begin
+      Responce := Action.Elaborate2(Request, FSettings);
+    end
+    else
+    begin
+      Responce := TResponce.Create;
+      Responce.msg := 'Action not allowed.';
+    end;
+  end
+  else
+  begin
+    Responce := TResponce.Create;
+    Responce.msg := 'Access denied';
   end;
+  Result := Responce;
 
 end;
 
@@ -171,14 +185,14 @@ function TReceptionModel.isAuthenticated(const IP, Token: String): Boolean;
 var
   Client: TClient;
 begin
-  /// this one is not effective implementation.
-  /// 1. create a separate class for authentications
-  /// 2. index on the tokens (since they should be unique)
-  for client in FClients do
-    if (Client.IP = IP) AND (Client.Token = Token) then
-      Result := True;
-  Result := False;
-
+  if (FAuthentication = nil) then
+  begin
+    Result := False;
+  end
+  else
+  begin
+    Result := FAuthentication.isAuthenticated(TClient.Create(IP, Token));
+  end;
 end;
 
 procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);

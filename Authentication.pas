@@ -37,7 +37,7 @@ begin
     Token := Item.Token;
     if FItems.ContainsKey(Token) then
       raise Exception.Create('Dublicate token: every token must be registered not more than once.');
-//    FItems.add(Token, TClient.Create(IP, Token));
+    FItems.add(Token, TClient.Create(Item.IP, Token));
   end;
 
 end;
@@ -50,18 +50,8 @@ begin
 end;
 
 function TAuthentication.isAuthenticated(item: TClient): Boolean;
-var
-  Client: TClient;
 begin
-  /// this one is not effective implementation.
-  /// 1. create a separate class for authentications
-  /// 2. index on the tokens (since they should be unique)
-//  for client in FClients do
-//    if (Client.IP = IP) AND (Client.Token = Token) then
-//      Result := True;
-  Result := False;
-
-
+  Result := FItems.ContainsKey(item.Token) AND (FItems[Item.Token].IP = Item.IP);
 end;
 
 end.

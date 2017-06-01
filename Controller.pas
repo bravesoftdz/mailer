@@ -264,11 +264,7 @@ begin
   Model.BackEndSettings := aSettings;
 end;
 
-class
-  procedure TController.SetClients(
-  const
-  Clients:
-  TObjectList<TClient>);
+class procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
   /// there is no need in performing defencieve copying since the controller does not store this info
   Model.clients := Clients;

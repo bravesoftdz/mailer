@@ -3,7 +3,8 @@ unit Action;
 interface
 
 uses
-  Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings;
+  Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings,
+  ClientFullRequest;
 
 type
   TAction = class
@@ -12,10 +13,13 @@ type
   protected
     FName: String;
   public
-    /// <summary>A virtual method that i ssupposed to be overwritten in classes
+    /// <summary>A virtual method that is supposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
     function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
+    /// this method is supposed to substitute the above one called "Elaborate" (due to possible merge
+    /// of classes TFrontEndRequest and TClientFullRequest. For the moment, it is not implemented.
+    function Elaborate2(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -30,6 +34,8 @@ type
   TActionSend = class(TAction)
   public
     function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
+
+    function Elaborate2(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
@@ -118,6 +124,12 @@ begin
     end;
   end;
 
+end;
+
+function TActionSend.Elaborate2(const Data: TClientFullRequest;
+  const Settings: TActiveQueueSettings): TResponce;
+begin
+      raise Exception.Create('Not implemented yet... See TActionSend.Elaborate().');
 end;
 
 { TActionContact }
