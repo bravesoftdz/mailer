@@ -37,9 +37,7 @@ uses
 
 constructor TFrontEndRequest.Create(const aData: TClientRequest; const AttachedFiles: TAbstractWebRequestFiles);
 var
-  anAttachment: TAttachment;
   Len, I: Integer;
-  Stream: TStream;
   MemStream: TMemoryStream;
 begin
   /// defensive copying

@@ -129,10 +129,13 @@ begin
     except
       on E: Exception do
       begin
-        ClientRequest := nil;
+        Writeln('Failed to convert json into an object');
       end;
     end;
   end;
+
+  if ClientRequest = nil then
+    ClientRequest := TClientRequest.Create();
 
   Attachments := TObjectList<TAttachment>.Create;
   AttachedFiles := Ctx.Request.Files;
@@ -144,8 +147,8 @@ begin
     Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
   end;
 
-  Request := TClientFullRequest.Create(ClientRequest, IP, Attachments);
-  Responce := Model.Elaborate2(RequestorName, ActionName, IP, Request);
+  Request := TClientFullRequest.Create(ClientRequest.Text, ClientRequest.Html, Attachments);
+  Responce := Model.Elaborate(RequestorName, ActionName, IP, ClientRequest.Token, Request);
 
   Render(Responce);
 end;
@@ -175,7 +178,8 @@ begin
 
 end;
 
-class function TController.GetBackEndSettings: TActiveQueueSettings;
+class
+  function TController.GetBackEndSettings: TActiveQueueSettings;
 begin
   Result := Model.BackEndSettings;
 end;
@@ -249,17 +253,20 @@ begin
 
 end;
 
-class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
+class
+  procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
 begin
   Model.BackEndSettings := aSettings;
 end;
 
-class function TController.GetClients: TObjectList<TClient>;
+class
+  function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
 end;
 
-class procedure TController.SetClients(const Clients: TObjectList<TClient>);
+class
+  procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
   Model.clients := Clients;
 end;

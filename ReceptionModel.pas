@@ -32,17 +32,6 @@ type
     procedure SetSettings(const Value: TActiveQueueSettings);
 
   public
-    /// <summary>
-    /// Elaborate an action from a requestor. The request might contain a plain
-    /// text data and attachments.</summary>
-    /// <param name="Requestor">who requests the action</param>
-    /// <param name="anAction">what action should be performed</param>
-    /// <param name="aData">a json in a string form (i.e., "{'key': value, ...}")
-    /// It should contain a key "token" with a valid value in order to be taken into considration.
-    /// </param>
-    /// <param name="AttachedFiles">provided files to be passed to the executor</param>
-    function Elaborate(const Requestor: string; const anAction: string; const aData: string; const IP: String; const AttachedFiles: TAbstractWebRequestFiles)
-      : TResponce; deprecated 'Use SomeOtherProp instead';
 
     /// <summary>
     /// Elaborate an action from a client.</summary>
@@ -50,7 +39,7 @@ type
     /// <param name="anAction">an action name that the client requests to perform</param>
     /// <param name="IP">client IP</param>
     /// <param name="Request">request obtained from the client</param>
-    function Elaborate2(const Requestor: string; const anAction: string; const IP: String; const Request: TClientFullRequest): TResponce;
+    function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -84,61 +73,14 @@ begin
   FFactory.DisposeOf;
 end;
 
-function TReceptionModel.Elaborate(const Requestor: string; const anAction: string;
-  const aData: string; const IP: string; const AttachedFiles: TAbstractWebRequestFiles)
-  : TResponce;
-var
-  AJson: TJsonObject;
-  Request: TFrontEndRequest;
-  Provider: TProvider;
-  Action: TAction;
-  Responce: TResponce;
-  Input: TClientRequest;
-  Token: String;
-begin
-  try
-    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(aData), 0) as TJSONObject;
-    Token := AJSon.GetValue(TOKEN_KEY).Value;
-    if (AJson <> nil) then
-    begin
-      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
-    end;
-  except
-    on E: Exception do
-    begin
-      AJSon := nil;
-    end;
-  end;
-
-  // ----- add authorisation control here -----
-
-  Request := TFrontEndRequest.Create(Input, AttachedFiles);
-  Provider := FFactory.FindByName(Requestor);
-  if (Provider <> nil) then
-  begin
-    Action := Provider.FindByName(anAction);
-  end;
-  if (Action <> nil) then
-  begin
-    Responce := Action.Elaborate(Request, FSettings);
-  end
-  else
-  begin
-    Responce := TResponce.Create;
-    Responce.msg := 'authorization missing...';
-  end;
-  Result := Responce;
-
-end;
-
-function TReceptionModel.Elaborate2(const Requestor, anAction, IP: String;
+function TReceptionModel.Elaborate(const Requestor, anAction, IP, Token: String;
   const Request: TClientFullRequest): TResponce;
 var
   Provider: TProvider;
   Action: TAction;
   Responce: TResponce;
 begin
-  if isAuthenticated(IP, Request.Request.Token) then
+  if isAuthenticated(IP, Token) then
   begin
     Provider := FFactory.FindByName(Requestor);
     if (Provider <> nil) then
@@ -147,7 +89,7 @@ begin
     end;
     if (Action <> nil) then
     begin
-      Responce := Action.Elaborate2(Request, FSettings);
+      Responce := Action.Elaborate(Request, FSettings);
     end
     else
     begin
@@ -165,19 +107,14 @@ begin
 end;
 
 function TReceptionModel.GetClients: TObjectList<TClient>;
-var
-  item: TClient;
 begin
   if FAuthentication = nil then
     Result := TObjectList<TClient>.Create
   else
     Result := FAuthentication.GetClients;
-
 end;
 
 procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
-var
-  L, I: Integer;
 begin
   if FAuthentication <> nil then
     raise Exception.Create('Reception model can instantiate authentication class only once!');
@@ -190,8 +127,6 @@ begin
 end;
 
 function TReceptionModel.isAuthenticated(const IP, Token: String): Boolean;
-var
-  Client: TClient;
 begin
   if (FAuthentication = nil) then
   begin

@@ -88,7 +88,7 @@ begin
     Writeln('Clients:');
     for Client in Clients do
     begin
-      Writeln('ip: ' + Format('%15s', [Client.IP]) + ', token: *****');
+      Writeln('ip: ' + Format('%15s', [Client.IP]) + ', token: (not shown)');
     end;
   end
   else

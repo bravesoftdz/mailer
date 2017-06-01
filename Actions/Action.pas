@@ -16,10 +16,7 @@ type
     /// <summary>A virtual method that is supposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
-    /// this method is supposed to substitute the above one called "Elaborate" (due to possible merge
-    /// of classes TFrontEndRequest and TClientFullRequest. For the moment, it is not implemented.
-    function Elaborate2(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
+    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
     /// <summary>A name of the operation that this action performs.
     /// The operation name is used in order to find an action that is able
     /// to do a requested operation.
@@ -33,23 +30,21 @@ type
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
-
-    function Elaborate2(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
     constructor Create();
   end;
 
@@ -76,8 +71,8 @@ begin
   inherited Create('send')
 end;
 
-function TActionSend.Elaborate(
-  const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
+function TActionSend.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
+
 var
   builder: TReceptionRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -97,8 +92,8 @@ begin
 
   if (Data <> nil) then
   begin
-    builder.SetText(Data.Data.Text);
-    builder.SetHtml(Data.Data.Html);
+    builder.SetText(Data.Text);
+    builder.SetHtml(Data.Html);
   end;
 
   Request := builder.build;
@@ -126,12 +121,6 @@ begin
 
 end;
 
-function TActionSend.Elaborate2(const Data: TClientFullRequest;
-  const Settings: TActiveQueueSettings): TResponce;
-begin
-      raise Exception.Create('Not implemented yet... See TActionSend.Elaborate().');
-end;
-
 { TActionContact }
 
 constructor TActionContact.Create;
@@ -139,7 +128,7 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
+function TActionContact.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
   Result := TResponce.Create;
@@ -154,7 +143,7 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.Elaborate(const Data: TFrontEndRequest; const Settings: TActiveQueueSettings): TResponce;
+function TActionOrder.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
   Result := TResponce.Create;
