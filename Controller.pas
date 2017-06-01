@@ -217,8 +217,14 @@ end;
 
 function TController.PickMultipartItem(const Items: TArray<String>; const ContentType,
   KeyName: String): String;
+var
+  Elem: String;
 begin
-{ TODO 2 : To implement }
+  for Elem in Items do
+  begin
+
+  end;
+
 end;
 
 class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
