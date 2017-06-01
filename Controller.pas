@@ -29,7 +29,7 @@ type
     DATA_KEY = 'data';
 
     /// <summary>Extract body from a multipart request body</summary
-    function ExtractBody(const ContentType, RawBody: String): String;
+    function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
     /// <summary>Extract a value corresponding to a key in a set of key-value pairs. The pairs
     /// are separated by semicolon, while the key and value are separated by equality sign. A key is
     /// optional in the key-value pairs. Example:
@@ -93,7 +93,7 @@ uses
 procedure TController.Elaborate(Ctx: TWebContext);
 var
   Responce, Responce2: TResponce;
-  RequestorName, ActionName, Body, IP, Token: String;
+  RequestorName, ActionName, Body, IP, Token, Boundary: String;
   Body2: TClientRequest;
   Request: TClientFullRequest;
   Attachments: TObjectList<TAttachment>;
@@ -102,22 +102,32 @@ var
   MemStream: TMemoryStream;
   ContentType: String;
   CT: TArray<string>;
+  AJSon: TJSONObject;
+  Input: TClientRequest;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   ActionName := Ctx.request.params[ACTION_KEY];
   IP := Ctx.Request.ClientIP;
   try
-    Body := ExtractBody(Ctx.Request.Headers['Content-Type'], Ctx.Request.Body);
-    Writeln(ContentType);
+    boundary := GetParamValue(Ctx.Request.Headers['Content-Type'], 'boundary');
+    Body := ExtractBody(boundary, Ctx.Request.Body, 'application/json', 'data');
   except
     on e: Exception do
       Writeln(e.Message);
-
   end;
-  //
-  // Responce := Model.Elaborate(RequestorName, ActionName, Body, IP, Ctx.Request.Files);
 
-  // Writeln(Ctx.Request.Body);
+  try
+    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Body), 0) as TJSONObject;
+    if (AJson <> nil) then
+    begin
+      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
+    end;
+  except
+    on E: Exception do
+    begin
+      AJSon := nil;
+    end;
+  end;
 
   Attachments := TObjectList<TAttachment>.Create;
   AttachedFiles := Ctx.Request.Files;
@@ -129,24 +139,21 @@ begin
     Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
   end;
 
-  Request := TClientFullRequest.Create(Body2, Attachments);
+  Request := TClientFullRequest.Create(Input, Attachments);
   Responce2 := Model.Elaborate2(RequestorName, ActionName, IP, Request);
 
   // Render(Responce);
 end;
 
-function TController.ExtractBody(const ContentType, RawBody: String): String;
+function TController.ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 var
   items, BodyParts: TArray<string>;
-  boundary, separator, data: String;
-
+  separator, data: String;
 begin
   if not ContentType.IsEmpty then
   begin
     items := ContentType.Split([';']);
-    boundary := GetParamValue(ContentType, 'boundary');
-    Writeln(boundary);
-    if not boundary.IsEmpty then
+    if not Boundary.IsEmpty then
     begin
       /// See section 5.1.1 "Common Syntax" (http://www.ietf.org/rfc/rfc2046.txt):
       /// The Content-Type field for multipart entities requires one parameter,
@@ -156,19 +163,9 @@ begin
       // field, optional linear whitespace, and a terminating CRLF.
       Separator := '--' + boundary;
       BodyParts := RawBody.Split([Separator]);
-      data := PickMultipartItem(BodyParts, 'application/json', 'data');
-      Writeln(data);
+      Result := PickMultipartItem(BodyParts, ContentType, KeyName);
     end;
 
-    // Writeln(RawBody);
-
-    // ContentType := Trim(items[0]);
-    // if Length(items) > 1 then
-    // begin
-    // if CT[1].Trim.StartsWith('charset', true) then
-    // begin
-    // FCharset := CT[1].Trim.Split(['='])[1].Trim;
-    // end;
   end;
 
 end;

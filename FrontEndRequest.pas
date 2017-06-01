@@ -43,7 +43,7 @@ var
   MemStream: TMemoryStream;
 begin
   /// defensive copying
-  FData := TClientRequest.Create(aData.Text, aData.Html);
+  FData := TClientRequest.Create(aData.Text, aData.Html, aData.Token);
   FAttachments := TObjectList<TAttachment>.Create;
   Len := AttachedFiles.Count;
   for I := 0 to Len - 1 do
