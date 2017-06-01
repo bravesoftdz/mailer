@@ -138,7 +138,7 @@ var
   Action: TAction;
   Responce: TResponce;
 begin
-  if isAuthenticated(IP, Request.FRequest.Token) then
+  if isAuthenticated(IP, Request.Request.Token) then
   begin
     Provider := FFactory.FindByName(Requestor);
     if (Provider <> nil) then

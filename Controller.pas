@@ -100,7 +100,7 @@ var
   AttachedFiles: TAbstractWebRequestFiles;
   MemStream: TMemoryStream;
   AJSon: TJSONObject;
-  Input: TClientRequest;
+  ClientRequest: TClientRequest;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   ActionName := Ctx.request.params[ACTION_KEY];
@@ -125,11 +125,11 @@ begin
   if (AJson <> nil) then
   begin
     try
-      Input := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
+      ClientRequest := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
     except
       on E: Exception do
       begin
-        Input := nil;
+        ClientRequest := nil;
       end;
     end;
   end;
@@ -144,7 +144,7 @@ begin
     Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
   end;
 
-  Request := TClientFullRequest.Create(Input, Attachments);
+  Request := TClientFullRequest.Create(ClientRequest, IP, Attachments);
   Responce := Model.Elaborate2(RequestorName, ActionName, IP, Request);
 
   Render(Responce);
