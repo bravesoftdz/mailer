@@ -35,6 +35,15 @@ type
     /// optional in the key-value pairs. Example:
     /// 'multipart/form-data;charset=UTF-8;boundary=--dsds'
     function GetParamValue(const Query: String; const Param: String): String;
+
+    /// <summary>Return a first element from the array that has given content type and key name.
+    /// If nothing is found, an empty string is returned.
+    /// Example of the array elements (this is just a one element, it spans many lines):
+    /// Content-Disposition: form-data; name="data"
+    /// Content-Type: application/json
+    /// { "html":"html version of the mail", "text":"text version of the mail", "token":"abcdef" }
+    /// </summary>
+    function PickMultipartItem(const Items: TArray<String>; const ContentType: String; const KeyName: String): String;
   public
     // [MVCPath('/($' + REQUESTOR + ')/($' + ACTION + ')')]
     [MVCPath('/($' + REQUESTOR_KEY + ')/($' + ACTION_KEY + ')')]
@@ -127,13 +136,24 @@ end;
 
 function TController.ExtractBody(const ContentType, RawBody: String): String;
 var
-  items: TArray<string>;
-  boundary: String;
+  items, BodyParts: TArray<string>;
+  boundary, data: String;
+
 begin
   if not ContentType.IsEmpty then
   begin
     items := ContentType.Split([';']);
     boundary := GetParamValue(ContentType, 'boundary');
+    Writeln(boundary);
+    if not boundary.IsEmpty then
+    begin
+      BodyParts := RawBody.Split([boundary]);
+      data := PickMultipartItem(BodyParts, 'application/json', 'data');
+      Writeln(inttostr(Length(BodyParts)));
+    end;
+
+    Writeln(RawBody);
+
     // ContentType := Trim(items[0]);
     // if Length(items) > 1 then
     // begin
@@ -179,14 +199,6 @@ begin
     end
 
   end;
-
-  // ContentType := Trim(items[0]);
-  // if Length(items) > 1 then
-  // begin
-  // if CT[1].Trim.StartsWith('charset', true) then
-  // begin
-  // FCharset := CT[1].Trim.Split(['='])[1].Trim;
-  // end;
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -201,6 +213,12 @@ begin
     if handled is true (or an exception is raised) the actual
     action will not be called }
   inherited;
+end;
+
+function TController.PickMultipartItem(const Items: TArray<String>; const ContentType,
+  KeyName: String): String;
+begin
+{ TODO 2 : To implement }
 end;
 
 class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
