@@ -54,7 +54,9 @@ type
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
 
-    /// <summary>Notify all subscribed listeners that the queue state has changed</summary>
+    /// <summary>Notify all subscribed listeners that the queue state has changed.
+    /// NB: each listeners is notified in a separate thread. It might be a problem if the
+    /// number of listeners is high.</summary>
     procedure NotifyListeners();
 
     /// <sumary>Inform the listeners that they should cancel items satisfying the condition</summary>
@@ -67,6 +69,8 @@ type
     /// <param name="Haystack">an array of string to search in. Assume that the haystack remains unchanged during the method's execution.</param>
     /// <param name="Needle">a string to find</param>
     function Contains(const Haystack: TArray<String>; const Needle: String): Boolean;
+
+    procedure NotifySingleListener(const Listener: IListenerProxy);
 
   public
     /// <summary>Create a subscription </summary>
@@ -496,16 +500,34 @@ begin
   TMonitor.Enter(FListenersLock);
   try
     for Token in FProxyRegister.Keys do
-      try
-        FProxyRegister[Token].Notify();
-      except
-        on E: Exception do
-          Writeln(E.Message);
-      end;
-
+      TThread.CreateAnonymousThread(
+        procedure
+        var
+          Listener: IListenerProxy;
+        begin
+          Listener := FProxyRegister[Token];
+          if Listener <> nil then
+            try
+              Listener.Notify();
+            except
+              on E: Exception do
+                Writeln(E.Message);
+            end;
+        end).Start;
   finally
     TMonitor.Exit(FListenersLock);
   end;
+end;
+
+procedure TActiveQueueModel.NotifySingleListener(const Listener: IListenerProxy);
+begin
+  if Listener <> nil then
+    try
+      Listener.Notify();
+    except
+      on E: Exception do
+        Writeln(E.Message);
+    end;
 end;
 
 procedure TActiveQueueModel.SetListenersIPs(const IPs: TArray<String>);
