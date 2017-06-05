@@ -98,12 +98,13 @@ begin
   Writeln('  ' + PROGRAM_NAME);
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+  TController.SetState(ConfigFile, Config);
+
   APort := Config.Port;
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
-  TController.SetListenersIPs(Config.GetListenersIps());
-  TController.SetProvidersIPs(Config.GetProvidersIps());
-  TController.SetSubscriptions(Config.Listeners);
+
   ListenersWhiteList := TController.GetListenersIPs;
   ProvidersWhiteList := TController.GetProvidersIPs;
 
@@ -153,12 +154,12 @@ begin
 
     end;
   finally
-    ConfigUpdated := TAQConfig.Create(Config.Port, Config.ListenersIPs, Config.ProvidersIPs, TController.GetListeners());
-    jo := Mapper.ObjectToJSONObject(ConfigUpdated);
-    OutFile := GetAvailablePath(ConfigFileName, '-YYYY-mm-dd_hh_nn_ss');
-    SaveConfigToFile(OutFile, jo.ToString);
+    // ConfigUpdated := TAQConfig.Create(Config.Port, Config.ListenersIPs, Config.ProvidersIPs, TController.GetListeners());
+    // jo := Mapper.ObjectToJSONObject(ConfigUpdated);
+    // OutFile := GetAvailablePath(ConfigFileName, '-YYYY-mm-dd_hh_nn_ss');
+    // SaveConfigToFile(OutFile, jo.ToString);
     LServer.Free;
-    jo.DisposeOf;
+    // jo.DisposeOf;
   end;
 end;
 

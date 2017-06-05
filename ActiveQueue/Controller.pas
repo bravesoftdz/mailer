@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers,
-  System.Generics.Collections, ListenerInfo;
+  System.Generics.Collections, ListenerInfo, AQConfig;
 
 type
 
@@ -15,32 +15,24 @@ type
     class var Model: TActiveQueueModel;
 
   public
-
     class function GetListeners(): TObjectList<TListenerInfo>;
 
-    class procedure SetSubscriptions(const Listeners: TObjectList<TListenerInfo>);
+    /// Set the state of the Active Queue server.
+    class procedure SetState(const FilePath: String; const Config: TAQConfig);
 
     /// <summary> Get the white list of listeners' ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
     class function GetListenersIPs(): TArray<String>;
 
-    /// <summary> Set the white list of listeners' ips: requests coming from only these ips
-    /// are to be taken in consideration </summary>
-    class procedure SetListenersIPs(const IPs: TArray<String>);
-
     /// <summary> Get the white list of providers' ips: requests to enqueue the data coming from only these ips
     /// are to be taken in consideration </summary>
     class function GetProvidersIPs(): TArray<String>;
 
-    /// <summary> Set the white list of providers' ips: requests to enqueue the data coming from only these ips
-    /// are to be taken in consideration </summary>
-    class procedure SetProvidersIPs(const IPs: TArray<String>);
-
     /// <summary> Initialize the model. Since this controller is added in a static manner,
-    /// I have to create a static method that instantiate a static reference
-    /// corresponding to the model
+    /// I have to create a static method that instantiate a static reference  corresponding to the model
     /// </summary>
     class procedure Setup();
+
     /// <summary> Release the reference to the model instantiated during the initialization
     /// </summary>
     class procedure Teardown();
@@ -220,33 +212,15 @@ begin
   Render(Outcome.ToString(False));
 end;
 
-class procedure TController.SetListenersIPs(const IPs: TArray<String>);
+class procedure TController.SetState(const FilePath: String; const Config: TAQConfig);
 begin
-  if Assigned(Model) then
-  begin
-    Model.SetListenersIPs(IPs);
-  end
+  if Model <> nil then
+    Model.SetState(FilePath, Config);
 end;
 
-class procedure TController.SetProvidersIPs(const IPs: TArray<String>);
+class procedure TController.Setup;
 begin
-  if Assigned(Model) then
-  begin
-    Model.SetProvidersIPs(IPs);
-  end
-end;
-
-class procedure TController.SetSubscriptions(
-  const Listeners: TObjectList<TListenerInfo>);
-begin
-  if Assigned(Model) then
-    Model.SetListeners(Listeners);
-end;
-
-class
-  procedure TController.Setup;
-begin
-  Model := TActiveQueueModel.Create;
+  Model := TActiveQueueModel.Create();
 end;
 
 procedure TController.Subscribe(const Context: TWebContext);
@@ -268,12 +242,11 @@ begin
         SubscriptionData := nil;
     end;
   end;
-  responce := Model.AddSubscription(SubscriptionData);
+  Responce := Model.AddSubscription(SubscriptionData);
   Render(responce);
 end;
 
-class
-  procedure TController.Teardown;
+class procedure TController.Teardown;
 begin
   Model.DisposeOf;
 end;

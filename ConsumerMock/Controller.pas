@@ -18,7 +18,7 @@ type
     [MVCHTTPMethod([httpPOST])]
     procedure Subscribe(const Ctx: TWebContext);
 
-    [MVCPath('/unsubscribe')]
+    [MVCPath('/unsubscribe/($token)')]
     [MVCHTTPMethod([httpPOST])]
     procedure Unsubscribe(const Ctx: TWebContext);
 
@@ -60,7 +60,7 @@ var
 begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
   Server := Adapter.Build('192.168.5.95', 8070);
-  Responce := Server.Subscribe(TSubscriptionData.Create('1.1.1.1', '', 9000, ''));
+  Responce := Server.Subscribe(TSubscriptionData.Create('1.1.1.1', '', 9001, ''));
   if Responce.Status then
     Writeln('subscription token: ' + Responce.Token)
   else
@@ -68,8 +68,20 @@ begin
 end;
 
 procedure TController.Unsubscribe(const Ctx: TWebContext);
+var
+  Adapter: TRestAdapter<IActiveQueueAPI>;
+  Server: IActiveQueueAPI;
+  Responce: TActiveQueueResponce;
+  Token: String;
 begin
-
+  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
+  Server := Adapter.Build('192.168.5.95', 8070);
+  Token := Context.Request.Params['token'];
+  Responce := Server.UnSubscribe(Token);
+  if (Responce.status) then
+    Writeln('unsubscription success.')
+  else
+    Writeln('unsubscription failure')
 end;
 
 end.
