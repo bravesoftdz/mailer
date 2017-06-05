@@ -28,7 +28,8 @@ uses
   ListenerProxyInterface in 'ListenerProxyInterface.pas',
   ActiveQueueAPI in 'ActiveQueueAPI.pas',
   ConditionInterface in 'ConditionInterface.pas',
-  TokenBasedCondition in 'TokenBasedCondition.pas';
+  TokenBasedCondition in 'TokenBasedCondition.pas',
+  StateSaver in 'StateSaver.pas';
 
 {$R *.res}
 
@@ -85,9 +86,6 @@ var
   item: String;
   ListenersWhiteList, ProvidersWhiteList: TArray<String>;
   APort: Integer;
-  jo: TJsonObject;
-  OutFile: String;
-  ConfigUpdated: TAQConfig;
   numberOfListeners: Integer;
   I: Integer;
 

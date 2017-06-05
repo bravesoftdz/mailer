@@ -57,6 +57,8 @@ type
     /// are to be trimmed</param>
     procedure SetListenersIPs(const IPs: String);
 
+    function ToString(): String; overload;
+
     /// <summary>Return a list of ips from which the data can be accepted</summary>
     function GetProvidersIps(): TArray<String>;
 
@@ -163,11 +165,7 @@ begin
 
 end;
 
-procedure TAQConfig.SetListenersIPs(
-
-  const
-  IPs:
-  String);
+procedure TAQConfig.SetListenersIPs(const IPs: String);
 var
   Items: TArray<String>;
 begin
@@ -178,10 +176,7 @@ begin
   FListenersAllowedIPArray := ApplyToEach(Items, TrimMapper);
 end;
 
-procedure TAQConfig.SetProvidersIPs(
-
-  const
-  IPs: String);
+procedure TAQConfig.SetProvidersIPs(const IPs: String);
 var
   items: TArray<String>;
 begin
@@ -190,6 +185,11 @@ begin
   FProvidersAllowedIPs := IPs;
   Items := TArray<String>(SplitString(IPs, ','));
   FProvidersAllowedIPArray := ApplyToEach(Items, TrimMapper);
+end;
+
+function TAQConfig.ToString: String;
+begin
+  Result := 'to implement';
 end;
 
 procedure TAQConfig.SetListeners(const Listeners: TObjectList<TListenerInfo>);
