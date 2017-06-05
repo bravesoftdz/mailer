@@ -70,8 +70,6 @@ type
     /// <param name="Needle">a string to find</param>
     function Contains(const Haystack: TArray<String>; const Needle: String): Boolean;
 
-    procedure NotifySingleListener(const Listener: IListenerProxy);
-
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
@@ -517,17 +515,6 @@ begin
   finally
     TMonitor.Exit(FListenersLock);
   end;
-end;
-
-procedure TActiveQueueModel.NotifySingleListener(const Listener: IListenerProxy);
-begin
-  if Listener <> nil then
-    try
-      Listener.Notify();
-    except
-      on E: Exception do
-        Writeln(E.Message);
-    end;
 end;
 
 procedure TActiveQueueModel.SetListenersIPs(const IPs: TArray<String>);
