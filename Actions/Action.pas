@@ -108,9 +108,7 @@ begin
   else
   begin
     try
-      Items := TObjectList<TReceptionRequest>.Create();
-      Items.add(Request);
-      Responce := server.PostItems(Items);
+      Responce := server.PostItem(Request);
       if Responce.status then
         Result.msg := 'OK'
       else

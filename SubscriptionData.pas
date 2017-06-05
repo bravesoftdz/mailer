@@ -4,7 +4,7 @@ interface
 
 uses ObjectsMappers;
 
-// <summary>Data class that contains information necessary for
+// <summary>Data class that contains information necessary to
 // perform the subscription.</summary>
 type
 

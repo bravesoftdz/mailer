@@ -17,6 +17,10 @@ type
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
     function PostItems([Body] input: TObjectList<TReceptionRequest>): TActiveQueueResponce;
+
+    [RESTResource(TMVCHTTPMethodType.httpPOST, '/item/post')]
+    function PostItem([Body] input: TReceptionRequest): TActiveQueueResponce;
+
   end;
 
 implementation

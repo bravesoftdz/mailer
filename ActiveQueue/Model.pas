@@ -496,7 +496,13 @@ begin
   TMonitor.Enter(FListenersLock);
   try
     for Token in FProxyRegister.Keys do
-      FProxyRegister[Token].Notify();
+      try
+        FProxyRegister[Token].Notify();
+      except
+        on E: Exception do
+          Writeln(E.Message);
+      end;
+
   finally
     TMonitor.Exit(FListenersLock);
   end;
@@ -534,10 +540,7 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetListeners(
-  const
-  Listeners:
-  TObjectList<TListenerInfo>);
+procedure TActiveQueueModel.SetListeners(const Listeners: TObjectList<TListenerInfo>);
 var
   Listener: TListenerInfo;
 begin

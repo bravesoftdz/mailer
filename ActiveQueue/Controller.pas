@@ -70,6 +70,11 @@ type
     [MVCHTTPMethod([httpPOST])]
     procedure PostItems(const Context: TWebContext);
 
+    /// add items to the ActiveQueue.
+    [MVCPath('/item/post')]
+    [MVCHTTPMethod([httpPOST])]
+    procedure PostItem(const Context: TWebContext);
+
     /// cancel items from the ActiveQueue.
     [MVCPath('/items/cancel')]
     [MVCHTTPMethod([httpPUT])]
@@ -166,6 +171,31 @@ begin
     if handled is true (or an exception is raised) the actual
     action will not be called }
   inherited;
+end;
+
+procedure TController.PostItem(const Context: TWebContext);
+var
+  item: TReceptionRequest;
+  Outcome: Boolean;
+  Wrapper: TObjectList<TReceptionRequest>;
+  IP: String;
+begin
+  if Context.Request.ThereIsRequestBody then
+  begin
+    try
+      item := Context.Request.BodyAs<TReceptionRequest>;
+      IP := Context.Request.ClientIP;
+      wrapper := TObjectList<TReceptionRequest>.Create();
+      wrapper.add(item);
+      Outcome := Model.Enqueue(IP, wrapper);
+    except
+      on E: Exception do
+        Outcome := False;
+    end;
+  end
+  else
+    Outcome := False;
+  Render(Outcome.ToString(False));
 end;
 
 procedure TController.PostItems(const Context: TWebContext);

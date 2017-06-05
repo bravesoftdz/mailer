@@ -183,6 +183,11 @@ begin
       on E: Exception do
         Writeln(E.ClassName, ': ', E.Message);
     end;
+
   end;
+  Usage[0].DisposeOf;
+  SetLength(Usage, 0);
+  if Config <> nil then
+    Config.DisposeOf;
 
 end.
