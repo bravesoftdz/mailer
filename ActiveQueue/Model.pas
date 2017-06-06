@@ -387,6 +387,7 @@ begin
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
+  FSaver.DisposeOf;
 
 end;
 
@@ -522,7 +523,7 @@ var
 begin
   Result := '';
   L := Length(Items);
-  for I := Low(Items) to High(Items) - 2 do
+  for I := 0 to L - 2 do
     Result := Result + Items[I] + delimiter;
   if L > 0 then
     Result := Result + Items[L - 1];

@@ -68,7 +68,7 @@ type
     procedure SetProvidersIPs(const IPs: String);
 
     /// <summary> Port at which the program accepts the connections.</summary>
-    [MapperJSONSer('port')]
+    [MapperJSONSer(PORT_KEY_NAME)]
     property Port: Integer read FPort write FPort;
 
     /// <summary> comma-separated list of ips from which the subscriptions are allowed.
@@ -85,6 +85,25 @@ type
     [MapperJSONSer('listeners')]
     [MapperListOf(TListenerInfo)]
     property Listeners: TObjectList<TListenerInfo> read FListeners write FListeners;
+
+  end;
+
+type
+  TAQConfigBuilder = class
+  strict private
+    FPort: Integer;
+    FListenerIPs: String;
+    FProviderIPs: String;
+    FListeners: TObjectList<TListenerInfo>;
+    function Join(const Items: TArray<String>; const Separator: String): String;
+  public
+    function SetPort(const Port: Integer): TAQConfigBuilder;
+    function SetListenerIPs(const IPs: String): TAQConfigBuilder;
+    function SetProviderIPs(const IPs: String): TAQConfigBuilder; overload;
+    function SetProviderIPs(const IPs: TArray<String>): TAQConfigBuilder; overload;
+    function SetListeners(const Listeners: TObjectList<TListenerInfo>): TAQConfigBuilder;
+    function Build(): TAQConfig;
+    constructor Create();
 
   end;
 
@@ -203,15 +222,84 @@ begin
     FListeners.DisposeOf;
   end;
   FListeners := TObjectList<TListenerInfo>.Create();
-  for Listener in Listeners do
+  if Listeners <> nil then
   begin
-    FListeners.Add(TListenerInfoBuilder.Create()
-      .SetToken(Listener.token)
-      .SetIP(Listener.IP)
-      .SetPort(Listener.Port)
-      .SetPath(Listener.Path).Build);
+    for Listener in Listeners do
+    begin
+      FListeners.Add(TListenerInfoBuilder.Create()
+        .SetToken(Listener.token)
+        .SetIP(Listener.IP)
+        .SetPort(Listener.Port)
+        .SetPath(Listener.Path).Build);
+    end;
   end;
 
+end;
+
+{ TAQConfigBuilder }
+
+function TAQConfigBuilder.Build: TAQConfig;
+begin
+  Result := TAQConfig.Create(FPort, FListenerIPs, FProviderIPs, FListeners);
+end;
+
+constructor TAQConfigBuilder.Create;
+begin
+  FPort := 0;
+  FListenerIPs := '';
+  FProviderIPs := '';
+  FListeners := TObjectList<TListenerInfo>.Create();
+end;
+
+function TAQConfigBuilder.Join(const Items: TArray<String>; const Separator: String): String;
+var
+  I, L: Integer;
+begin
+  Result := '';
+  L := Length(Items);
+  for I := 0 to L - 2 do
+    Result := Result + Items[I] + Separator;
+  if L > 0 then
+    Result := Result + Items[L - 1];
+
+end;
+
+function TAQConfigBuilder.SetListenerIPs(const IPs: String): TAQConfigBuilder;
+begin
+  FListenerIPs := IPs;
+  Result := Self;
+end;
+
+function TAQConfigBuilder.SetListeners(
+  const Listeners: TObjectList<TListenerInfo>): TAQConfigBuilder;
+var
+  ListenerInfo: TListenerInfo;
+begin
+  FListeners.Clear;
+  for ListenerInfo in Listeners do
+  begin
+    FListeners.Add(ListenerInfo);
+  end;
+  Result := Self;
+
+end;
+
+function TAQConfigBuilder.SetPort(const Port: Integer): TAQConfigBuilder;
+begin
+  FPort := Port;
+  Result := Self;
+end;
+
+function TAQConfigBuilder.SetProviderIPs(const IPs: TArray<String>): TAQConfigBuilder;
+begin
+  FProviderIPs := Join(IPs, ',');
+  Result := Self;
+end;
+
+function TAQConfigBuilder.SetProviderIPs(const IPs: String): TAQConfigBuilder;
+begin
+  FProviderIPs := IPs;
+  Result := Self;
 end;
 
 end.
