@@ -11,17 +11,24 @@ type
   [MapperJSONNaming(JSONNameLowerCase)]
   TListenerInfo = class(TInterfacedObject, JSonable)
   strict private
+  const
+    /// names of the keys in order to transform the instance into a json or construct it from a json.
+    TOKEN_KEY_NAME = 'token';
+    IP_KEY_NAME = 'ip';
+    PORT_KEY_NAME = 'port';
+
+  var
     FToken: String;
     FIP: String;
     FPort: Integer;
     FPath: String;
   public
     constructor Create();
-    [MapperJSONSer('token')]
+    [MapperJSONSer(TOKEN_KEY_NAME)]
     property token: String read FToken write FToken;
-    [MapperJSONSer('ip')]
+    [MapperJSONSer(IP_KEY_NAME)]
     property IP: String read FIP write FIP;
-    [MapperJSONSer('port')]
+    [MapperJSONSer(PORT_KEY_NAME)]
     property Port: Integer read FPort write FPort;
     [MapperJSONSer('path')]
     property Path: String read FPath write FPath;
@@ -61,9 +68,9 @@ end;
 function TListenerInfo.ToJson: TJsonObject;
 begin
   Result := TJsonObject.Create();
-  Result.AddPair('token', FToken);
-  Result.AddPair('ip', FIp);
-  Result.AddPair(TJsonPair.Create('port', TJsonNumber.Create(FPort)));
+  Result.AddPair(TOKEN_KEY_NAME, FToken);
+  Result.AddPair(IP_KEY_NAME, FIp);
+  Result.AddPair(TJsonPair.Create(PORT_KEY_NAME, TJsonNumber.Create(FPort)));
 end;
 
 { TListenerInfoBuilder }

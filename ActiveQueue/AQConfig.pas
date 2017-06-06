@@ -73,16 +73,16 @@ type
 
     /// <summary> comma-separated list of ips from which the subscriptions are allowed.
     /// A subscription request originating from an ip not present in this string is to be ignored.</summary>
-    [MapperJSONSer('listeners-allowed-ips')]
+    [MapperJSONSer(IPS_KEY_NAME_LISTENERS)]
     property ListenersIPs: String read FListenersAllowedIPs write SetListenersIPs;
 
     /// <summary> comma-separated list of ips of providers that are allowed to enqueue the items.
     /// Any request to put a request into the queue originating from an ip not present in this string is to be ignored.</summary>
-    [MapperJSONSer('providers-allowed-ips')]
+    [MapperJSONSer(IPS_KEY_NAME_PROVIDERS)]
     property ProvidersIPs: String read FProvidersAllowedIPs write SetProvidersIPs;
 
     /// <summary> list of subscribed listeners</summary>
-    [MapperJSONSer('listeners')]
+    [MapperJSONSer(SUBSCRIPTIONS_KEY_NAME)]
     [MapperListOf(TListenerInfo)]
     property Listeners: TObjectList<TListenerInfo> read FListeners write FListeners;
 
