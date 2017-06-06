@@ -2,14 +2,14 @@ unit ListenerInfo;
 
 interface
 
-uses ObjectsMappers;
+uses ObjectsMappers, JsonableInterface, System.JSON;
 
 type
 
   /// <summary> An ADT that contains complete information about
   /// a listener (i.e. a subscriptor)</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TListenerInfo = class
+  TListenerInfo = class(TInterfacedObject, JSonable)
   strict private
     FToken: String;
     FIP: String;
@@ -25,6 +25,8 @@ type
     property Port: Integer read FPort write FPort;
     [MapperJSONSer('path')]
     property Path: String read FPath write FPath;
+
+    function ToJson(): TJsonObject;
   end;
 
 type
@@ -54,6 +56,14 @@ begin
   FIP := '';
   FPort := 0;
   FPath := '';
+end;
+
+function TListenerInfo.ToJson: TJsonObject;
+begin
+  Result := TJsonObject.Create();
+  Result.AddPair('token', FToken);
+  Result.AddPair('ip', FIp);
+  Result.AddPair(TJsonPair.Create('port', TJsonNumber.Create(FPort)));
 end;
 
 { TListenerInfoBuilder }

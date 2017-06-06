@@ -4,7 +4,7 @@ interface
 
 uses
   System.JSON, System.Classes, ListenerInfo, System.Generics.Collections, ObjectsMappers,
-  System.SysUtils;
+  System.SysUtils, JsonableInterface;
 
 type
   StringMapper = reference to function(const From: String): String;
@@ -17,12 +17,12 @@ type
   /// using the DMVCFramework means.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TAQConfig = class
+  TAQConfig = class(TInterfacedObject, JSonable)
   const
     PORT_KEY_NAME = 'port';
-    IPS_KEY_NAME_LISTENERS = 'ip-listeners';
-    IPS_KEY_NAME_PROVIDERS = 'ip-providers';
-    SUBSCRIPTIONS_KEY_NAME = 'subscriptions';
+    IPS_KEY_NAME_LISTENERS = 'listeners-allowed-ips';
+    IPS_KEY_NAME_PROVIDERS = 'providers-allowed-ips';
+    SUBSCRIPTIONS_KEY_NAME = 'listeners';
 
   strict private
     FPort: Integer;
@@ -57,7 +57,7 @@ type
     /// are to be trimmed</param>
     procedure SetListenersIPs(const IPs: String);
 
-    function ToString(): String; overload;
+    function ToJson(): TJsonObject;
 
     /// <summary>Return a list of ips from which the data can be accepted</summary>
     function GetProvidersIps(): TArray<String>;
@@ -207,9 +207,20 @@ begin
   FProvidersAllowedIPArray := ApplyToEach(Items, TrimMapper);
 end;
 
-function TAQConfig.ToString: String;
+function TAQConfig.ToJson: TJsonObject;
+var
+  arr: TJsonArray;
+  Listener: TListenerInfo;
 begin
-  Result := 'to implement';
+  Result := TJsonObject.Create();
+  Result.AddPair(TJsonPair.Create(PORT_KEY_NAME, TJsonNumber.Create(FPort)));
+  Result.AddPair(TJsonPair.Create(IPS_KEY_NAME_LISTENERS, ListenersIPs));
+  Result.AddPair(TJsonPair.Create(IPS_KEY_NAME_PROVIDERS, ProvidersIPs));
+  arr := TJSonArray.Create();
+  for Listener in FListeners do
+    arr.AddElement(Listener.toJson());
+  Result.AddPair(TJsonPair.Create(SUBSCRIPTIONS_KEY_NAME, arr));
+
 end;
 
 procedure TAQConfig.SetListeners(const Listeners: TObjectList<TListenerInfo>);

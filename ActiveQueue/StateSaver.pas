@@ -3,7 +3,7 @@ unit StateSaver;
 interface
 
 uses
-  AQConfig;
+  JsonableInterface;
 
 type
   /// A class that saves given state in a file.
@@ -24,7 +24,7 @@ type
 
   public
 
-    procedure Save(const FilePath: String; const Obj: TAQConfig);
+    procedure Save(const FilePath: String; const Obj: Jsonable);
 
   end;
 
@@ -52,12 +52,12 @@ begin
   Result := TryName;
 end;
 
-procedure TStateSaver.Save(const FilePath: String; const Obj: TAQConfig);
+procedure TStateSaver.Save(const FilePath: String; const Obj: Jsonable);
 var
   OutFileName: String;
 begin
   OutFileName := GetAvailablePath(FFilePath, Format);
-  TFile.AppendAllText(OutFileName, Obj.ToString);
+  TFile.AppendAllText(OutFileName, Obj.ToJson().ToString());
 end;
 
 end.
