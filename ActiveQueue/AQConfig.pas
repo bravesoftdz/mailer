@@ -98,7 +98,8 @@ type
     function Join(const Items: TArray<String>; const Separator: String): String;
   public
     function SetPort(const Port: Integer): TAQConfigBuilder;
-    function SetListenerIPs(const IPs: String): TAQConfigBuilder;
+    function SetListenerIPs(const IPs: String): TAQConfigBuilder; overload;
+    function SetListenerIPs(const IPs: TArray<String>): TAQConfigBuilder; overload;
     function SetProviderIPs(const IPs: String): TAQConfigBuilder; overload;
     function SetProviderIPs(const IPs: TArray<String>): TAQConfigBuilder; overload;
     function SetListeners(const Listeners: TObjectList<TListenerInfo>): TAQConfigBuilder;
@@ -267,6 +268,12 @@ end;
 function TAQConfigBuilder.SetListenerIPs(const IPs: String): TAQConfigBuilder;
 begin
   FListenerIPs := IPs;
+  Result := Self;
+end;
+
+function TAQConfigBuilder.SetListenerIPs(const IPs: TArray<String>): TAQConfigBuilder;
+begin
+  FListenerIPs := Join(IPs, ',');
   Result := Self;
 end;
 

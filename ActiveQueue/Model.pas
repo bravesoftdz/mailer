@@ -92,9 +92,6 @@ type
     /// <summary>Set the listeners</summary>
     procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
 
-    /// <summary>Save the state of the Active Queue server into a file</summary>
-    procedure UpdatePersistedState();
-
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
@@ -143,6 +140,9 @@ type
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
+
+    /// <summary>Save the state of the Active Queue server into a file</summary>
+    procedure UpdatePersistedState();
 
     constructor Create();
     destructor Destroy();
@@ -210,7 +210,6 @@ begin
           // create a copy of the object
           FSubscriptionRegister.Add(Token, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
           FProxyRegister.Add(Token, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
-          UpdatePersistedState();
           Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
         end;
       end;
@@ -288,7 +287,6 @@ begin
         FSubscriptionRegister.Remove(Token);
         FProxyRegister[Token] := nil;
         FProxyRegister.Remove(Token);
-        UpdatePersistedState();
         Result := TActiveQueueResponce.Create(True, 'unsubscribed', '');
       end
       else

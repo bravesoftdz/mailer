@@ -364,7 +364,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfig.Create(0, '', IPs[0], nil);
+  State := TAQConfigBuilder.Create().SetPort(11).SetProviderIPs(IPs).Build();
   Model.SetState('dumb', State);
   Requests := TObjectList<TReceptionRequest>.Create;
   Requests.Add(TReceptionRequestBuilder.Create().setToken(TOKEN).Build);
@@ -376,45 +376,47 @@ end;
 
 procedure TActiveQueueModelTest.Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems;
 const
-  IPs: TArray<String> = ['2.3.4.5', '7.8.9.10'];
   TOKEN = 'common token';
 var
   Model: TActiveQueueModel;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  // Requests := TObjectList<TReceptionRequest>.Create();
-  // Requests.AddRange([TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
-  // TReceptionRequestBuilder.Create().setToken('another token').Build,
-  // TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
-  // TReceptionRequestBuilder.Create().setToken('token 2').Build,
-  // TReceptionRequestBuilder.Create().setToken(TOKEN).Build]);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create(TOKEN);
-  // Assert.AreEqual(3, Model.Cancel(IPs[1], Condition));
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs('2.3.4.5, 7.8.9.10').Build();
+  Model.SetState('dumb', State);
+  Requests := TObjectList<TReceptionRequest>.Create();
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
+    TReceptionRequestBuilder.Create().setToken('another token').Build,
+    TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
+    TReceptionRequestBuilder.Create().setToken('token 2').Build,
+    TReceptionRequestBuilder.Create().setToken(TOKEN).Build]);
+  Model.Enqueue('2.3.4.5', Requests);
+  Condition := TTokenBasedCondition.Create(TOKEN);
+  Assert.AreEqual(3, Model.Cancel('7.8.9.10', Condition));
 end;
 
 procedure TActiveQueueModelTest.LeaveUnchangedAfterSecondCancellation;
 const
-  IPs: TArray<String> = ['231.11.34.99'];
   TOKEN = 'token';
 var
   Model: TActiveQueueModel;
   Request: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  // Request := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
-  // Requests := TObjectList<TReceptionRequest>.Create;
-  // Requests.Add(Request);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create(TOKEN);
-  // Assert.AreEqual(1, Model.Cancel(IPs[0], Condition));
-  // Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs('231.11.34.99').Build();
+  Model.SetState('dumb', State);
+  Request := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request);
+  Model.Enqueue('231.11.34.99', Requests);
+  Condition := TTokenBasedCondition.Create(TOKEN);
+  Assert.AreEqual(1, Model.Cancel('231.11.34.99', Condition));
+  Assert.AreEqual(0, Model.Cancel('231.11.34.99', Condition));
 
 end;
 
@@ -425,16 +427,18 @@ var
   Model: TActiveQueueModel;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  // Requests := TObjectList<TReceptionRequest>.Create;
-  // Requests.AddRange([TReceptionRequestBuilder.Create().setToken('a token').Build,
-  // TReceptionRequestBuilder.Create().setToken('another token').Build,
-  // TReceptionRequestBuilder.Create().setToken('another agian').Build]);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create('no such token');
-  // Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken('a token').Build,
+    TReceptionRequestBuilder.Create().setToken('another token').Build,
+    TReceptionRequestBuilder.Create().setToken('another agian').Build]);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('no such token');
+  Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
 
 end;
 
@@ -446,16 +450,17 @@ var
   Request: TReceptionRequest;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  // Request := TReceptionRequestBuilder.Create().setToken('a token').Build;
-  // Requests := TObjectList<TReceptionRequest>.Create;
-  // Requests.Add(Request);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create('no such token');
-  // Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
-
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  Request := TReceptionRequestBuilder.Create().setToken('a token').Build;
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.Add(Request);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('no such token');
+  Assert.AreEqual(0, Model.Cancel(IPs[0], Condition));
 end;
 
 procedure TActiveQueueModelTest.LeaveThreeItemQueueUnchangedIfIpIsNotAmongAllowedAndTokenDoesNotMatch;
@@ -465,16 +470,18 @@ var
   Model: TActiveQueueModel;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  // Requests := TObjectList<TReceptionRequest>.Create();
-  // Requests.AddRange([TReceptionRequestBuilder.Create().setToken('token1').Build,
-  // TReceptionRequestBuilder.Create().setToken('token2').Build,
-  // TReceptionRequestBuilder.Create().setToken('token3').Build]);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create('some string');
-  // Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  Requests := TObjectList<TReceptionRequest>.Create();
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken('token1').Build,
+    TReceptionRequestBuilder.Create().setToken('token2').Build,
+    TReceptionRequestBuilder.Create().setToken('token3').Build]);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create('some string');
+  Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
 
 end;
 
@@ -486,17 +493,18 @@ var
   Model: TActiveQueueModel;
   Requests: TObjectList<TReceptionRequest>;
   Condition: TTokenBasedCondition;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetProvidersIPs(IPs);
-  //
-  // Requests := TObjectList<TReceptionRequest>.Create;
-  // Requests.AddRange([TReceptionRequestBuilder.Create().setToken(Token).Build,
-  // TReceptionRequestBuilder.Create().setToken(Token).Build,
-  // TReceptionRequestBuilder.Create().setToken(Token).Build]);
-  // Model.Enqueue(IPs[0], Requests);
-  // Condition := TTokenBasedCondition.Create(Token);
-  // Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  Requests := TObjectList<TReceptionRequest>.Create;
+  Requests.AddRange([TReceptionRequestBuilder.Create().setToken(Token).Build,
+    TReceptionRequestBuilder.Create().setToken(Token).Build,
+    TReceptionRequestBuilder.Create().setToken(Token).Build]);
+  Model.Enqueue(IPs[0], Requests);
+  Condition := TTokenBasedCondition.Create(Token);
+  Assert.AreEqual(-1, Model.Cancel('non-allowed-ip', Condition));
 end;
 
 procedure TActiveQueueModelTest.Setup;
@@ -511,16 +519,18 @@ procedure TActiveQueueModelTest.TestAddAllowedSubscriptionToThree;
 const
   IPs: TArray<String> = ['1.1.1.1', '1.1.1.2', '1.1.1.3', '1.1.1.4'];
 var
-  responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
+  responce: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
-  // responce := model.AddSubscription(TSubscriptionData.Create(IPs[3], 'an url 4', 2345, 'news/'));
-  // Assert.IsTrue(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetPort(12345).SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create(IPs[3], 'an url 4', 2345, 'news/'));
+  Assert.IsTrue(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestAddAlreadySubscribedToTwo;

@@ -243,6 +243,9 @@ begin
     end;
   end;
   Responce := Model.AddSubscription(SubscriptionData);
+  if Responce.status then
+    Model.UpdatePersistedState();
+
   Render(responce);
 end;
 
@@ -259,6 +262,8 @@ begin
   Token := Context.Request.Params['token'];
   Ip := Context.Request.ClientIP;
   responce := Model.CancelSubscription(ip, token);
+  if Responce.status then
+    Model.UpdatePersistedState();
   Render(responce);
 end;
 
