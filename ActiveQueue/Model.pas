@@ -151,7 +151,7 @@ type
 implementation
 
 uses
-  System.SysUtils, MVCFramework.RESTAdapter, System.JSON, System.IOUtils, ObjectsMappers;
+  System.SysUtils, MVCFramework.RESTAdapter, System.JSON, System.IOUtils;
 { TActiveQueueModel }
 
 function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
