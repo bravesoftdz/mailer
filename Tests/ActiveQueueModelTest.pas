@@ -384,7 +384,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs('2.3.4.5, 7.8.9.10').Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs('2.3.4.5, 7.8.9.10').Build();
   Model.SetState('dumb', State);
   Requests := TObjectList<TReceptionRequest>.Create();
   Requests.AddRange([TReceptionRequestBuilder.Create().setToken(TOKEN).Build,
@@ -408,7 +408,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs('231.11.34.99').Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs('231.11.34.99').Build();
   Model.SetState('dumb', State);
   Request := TReceptionRequestBuilder.Create().setToken(TOKEN).Build;
   Requests := TObjectList<TReceptionRequest>.Create;
@@ -430,7 +430,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs(IPs).Build();
   Model.SetState('dumb', State);
   Requests := TObjectList<TReceptionRequest>.Create;
   Requests.AddRange([TReceptionRequestBuilder.Create().setToken('a token').Build,
@@ -453,7 +453,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs(IPs).Build();
   Model.SetState('dumb', State);
   Request := TReceptionRequestBuilder.Create().setToken('a token').Build;
   Requests := TObjectList<TReceptionRequest>.Create;
@@ -473,7 +473,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs(IPs).Build();
   Model.SetState('dumb', State);
   Requests := TObjectList<TReceptionRequest>.Create();
   Requests.AddRange([TReceptionRequestBuilder.Create().setToken('token1').Build,
@@ -496,7 +496,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetProviderIPs(IPs).Build();
+  State := TAQConfigBuilder.Create().SetProviderIPs(IPs).Build();
   Model.SetState('dumb', State);
   Requests := TObjectList<TReceptionRequest>.Create;
   Requests.AddRange([TReceptionRequestBuilder.Create().setToken(Token).Build,
@@ -524,7 +524,7 @@ var
   State: TAQConfig;
 begin
   Model := TActiveQueueModel.Create;
-  State := TAQConfigBuilder.Create().SetPort(12345).SetListenerIPs(IPs).Build();
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
   Model.SetState('dumb', State);
   model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
   model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
@@ -539,13 +539,15 @@ const
 var
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
-  // responce := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
-  // Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  responce := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestAddNonAllowedSubscriptionToThree;
@@ -554,14 +556,16 @@ const
 var
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
-  // responce := model.AddSubscription(TSubscriptionData.Create('Not-Allowed', 'an url 4', 2345, 'news/'));
-  // Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 1000, 'news/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 555, 'news-2/'));
+  responce := model.AddSubscription(TSubscriptionData.Create('Not-Allowed', 'an url 4', 2345, 'news/'));
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelNotSubscribedEmpty;
@@ -581,13 +585,15 @@ const
 var
   Model: TActiveQueueModel;
   responce: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // responce := model.CancelSubscription('5.5.5.5', 'token-not-exists');
-  // Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('5.5.5.5', 'token-not-exists');
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelNotSubscribedThree;
@@ -596,15 +602,17 @@ const
 var
   Model: TActiveQueueModel;
   responce: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // responce := model.CancelSubscription('no-associated-ip', 'no-token');
-  // Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce := model.CancelSubscription('no-associated-ip', 'no-token');
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectIpWrongToken;
@@ -613,13 +621,15 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription(IPs[0], 'make it wrong ' + responce1.Token);
-  // Assert.IsFalse(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription(IPs[0], 'make it wrong ' + responce1.Token);
+  Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectTokenIp;
@@ -628,13 +638,15 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription(IPs[0], responce1.Token);
-  // Assert.IsTrue(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription(IPs[0], responce1.Token);
+  Assert.IsTrue(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneCorrectTokenWrongIp;
@@ -643,13 +655,15 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription('WRONG', responce1.Token);
-  // Assert.IsFalse(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription('WRONG', responce1.Token);
+  Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedOneWrongIpToken;
@@ -658,13 +672,15 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription('wrong-ip', 'wrong' + responce1.Token);
-  // Assert.IsFalse(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription('wrong-ip', 'wrong' + responce1.Token);
+  Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectIpToken;
@@ -673,15 +689,17 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription('2.1.1.13', responce1.Token);
-  // Assert.IsTrue(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription('2.1.1.13', responce1.Token);
+  Assert.IsTrue(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectIpWrongToken;
@@ -690,15 +708,17 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription(IPs[1], 'append-to-make-it-wrong-' + responce1.Token);
-  // Assert.IsFalse(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription(IPs[1], 'append-to-make-it-wrong-' + responce1.Token);
+  Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestCancelSubscribedThreeCorrectTokenWrongIp;
@@ -707,15 +727,17 @@ const
 var
   Model: TActiveQueueModel;
   responce1, responce2: TActiveQueueResponce;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
-  // responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
-  // model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // responce2 := model.CancelSubscription(IPs[2], responce1.Token);
-  // Assert.IsFalse(responce2.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  model.AddSubscription(TSubscriptionData.Create(IPs[0], 'an url 1', 8080, 'call-me/'));
+  responce1 := model.AddSubscription(TSubscriptionData.Create(IPs[1], 'an url 2', 8080, 'call-me/'));
+  model.AddSubscription(TSubscriptionData.Create(IPs[2], 'an url 3', 8080, 'call-me/'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  responce2 := model.CancelSubscription(IPs[2], responce1.Token);
+  Assert.IsFalse(responce2.status);
 end;
 
 procedure TActiveQueueModelTest.TestFirstSubscriptionAllowed;
@@ -725,12 +747,14 @@ var
   data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(IPs);
-  // data := TSubscriptionData.Create(IPs[0], 'an url', 2345, 'news/');
-  // responce := model.AddSubscription(data);
-  // Assert.IsTrue(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  data := TSubscriptionData.Create(IPs[0], 'an url', 2345, 'news/');
+  responce := model.AddSubscription(data);
+  Assert.IsTrue(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestFirstSubscriptionNonAllowed;
@@ -738,12 +762,14 @@ var
   data: TSubscriptionData;
   responce: TActiveQueueResponce;
   Model: TActiveQueueModel;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create();
-  // Model.SetListenersIps(TArray<String>.Create());
-  // data := TSubscriptionData.Create('no such ip', 'an url', 2345, 'news/');
-  // responce := model.AddSubscription(data);
-  // Assert.IsFalse(responce.status);
+  Model := TActiveQueueModel.Create;
+  State := TAQConfigBuilder.Create().Build();
+  Model.SetState('dumb', State);
+  data := TSubscriptionData.Create('no such ip', 'an url', 2345, 'news/');
+  responce := model.AddSubscription(data);
+  Assert.IsFalse(responce.status);
 end;
 
 procedure TActiveQueueModelTest.TestIPsPortsAreUniqueUrlsAreEquals;
@@ -755,22 +781,25 @@ var
   I: Integer;
   responce: TActiveQueueResponce;
   Pool: TDictionary<String, Boolean>;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Pool := TDictionary<String, Boolean>.Create();
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, N);
-  // for I := 0 to N - 1 do
-  // IPs[I] := inttostr(I);
-  // model.SetListenersIps(ips);
-  // for I := 0 to N - 1 do
-  // begin
-  // Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url', I, 'news/' + inttostr(I)));
-  // Pool.Add(Responce.Token, True);
-  // end;
-  // Assert.AreEqual(N, Pool.Count);
-  // Pool.Clear;
-  // Pool.DisposeOf;
+  Model := TActiveQueueModel.Create;
+  Pool := TDictionary<String, Boolean>.Create();
+  IPs := TArray<String>.Create();
+  SetLength(ips, N);
+  for I := 0 to N - 1 do
+    IPs[I] := inttostr(I);
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+
+  for I := 0 to N - 1 do
+  begin
+    Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url', I, 'news/' + inttostr(I)));
+    Pool.Add(Responce.Token, True);
+  end;
+  Assert.AreEqual(N, Pool.Count);
+  Pool.Clear;
+  Pool.DisposeOf;
 
 end;
 
@@ -783,22 +812,24 @@ var
   I: Integer;
   responce: TActiveQueueResponce;
   Pool: TDictionary<String, Boolean>;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Pool := TDictionary<String, Boolean>.Create();
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, N);
-  // for I := 0 to N - 1 do
-  // IPs[I] := inttostr(I);
-  // model.SetListenersIps(ips);
-  // for I := 0 to N - 1 do
-  // begin
-  // Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), I, 'news/' + inttostr(I)));
-  // Pool.Add(Responce.Token, True);
-  // end;
-  // Assert.AreEqual(N, Pool.Count);
-  // Pool.Clear;
-  // Pool.DisposeOf;
+  Model := TActiveQueueModel.Create;
+  Pool := TDictionary<String, Boolean>.Create();
+  IPs := TArray<String>.Create();
+  SetLength(ips, N);
+  for I := 0 to N - 1 do
+    IPs[I] := inttostr(I);
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  for I := 0 to N - 1 do
+  begin
+    Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), I, 'news/' + inttostr(I)));
+    Pool.Add(Responce.Token, True);
+  end;
+  Assert.AreEqual(N, Pool.Count);
+  Pool.Clear;
+  Pool.DisposeOf;
 end;
 
 procedure TActiveQueueModelTest.TestIPsUrlsAreUniquePortsAreEquals;
@@ -810,22 +841,24 @@ var
   I: Integer;
   responce: TActiveQueueResponce;
   Pool: TDictionary<String, Boolean>;
+  State: TAQConfig;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Pool := TDictionary<String, Boolean>.Create();
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, N);
-  // for I := 0 to N - 1 do
-  // IPs[I] := inttostr(I);
-  // model.SetListenersIps(ips);
-  // for I := 0 to N - 1 do
-  // begin
-  // Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), 3333, 'news/' + inttostr(I)));
-  // Pool.Add(Responce.Token, True);
-  // end;
-  // Assert.AreEqual(N, Pool.Count);
-  // Pool.Clear;
-  // Pool.DisposeOf;
+  Model := TActiveQueueModel.Create;
+  Pool := TDictionary<String, Boolean>.Create();
+  IPs := TArray<String>.Create();
+  SetLength(ips, N);
+  for I := 0 to N - 1 do
+    IPs[I] := inttostr(I);
+  State := TAQConfigBuilder.Create().SetListenerIPs(IPs).Build();
+  Model.SetState('dumb', State);
+  for I := 0 to N - 1 do
+  begin
+    Responce := model.AddSubscription(TSubscriptionData.Create(IPs[I], 'an-url-' + inttostr(I), 3333, 'news/' + inttostr(I)));
+    Pool.Add(Responce.Token, True);
+  end;
+  Assert.AreEqual(N, Pool.Count);
+  Pool.Clear;
+  Pool.DisposeOf;
 end;
 
 procedure TActiveQueueModelTest.TestIPsUrlsPortsAreEquals;
@@ -836,19 +869,20 @@ var
   IPs: TArray<String>;
   I: Integer;
   Responce: TActiveQueueResponce;
+
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, 1);
-  // IPs[0] := '1.1.1.1';
-  // model.SetListenersIps(ips);
-  // Responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an-url', 88, '/'));
-  // Assert.IsTrue(Responce.status);
-  // for I := 0 to N - 2 do
-  // begin
-  // Responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an-url', 88, '/'));
-  // Assert.IsFalse(Responce.status);
-  // end;
+  Model := TActiveQueueModel.Create;
+  IPs := TArray<String>.Create();
+  SetLength(ips, 1);
+  IPs[0] := '1.1.1.1';
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an-url', 88, '/'));
+  Assert.IsTrue(Responce.status);
+  for I := 0 to N - 2 do
+  begin
+    Responce := model.AddSubscription(TSubscriptionData.Create('1.1.1.1', 'an-url', 88, '/'));
+    Assert.IsFalse(Responce.status);
+  end;
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs2ElemStart;
@@ -856,13 +890,10 @@ var
   Model: TActiveQueueModel;
   IPs: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, 2);
-  // ips[0] := '127.0.0.7';
-  // ips[1] := '175.112.32.211';
-  // model.SetListenersIps(ips);
-  // Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
+  Model := TActiveQueueModel.Create;
+  ips := ['127.0.0.7', '175.112.32.211'];
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs3ElemEnd;
@@ -870,14 +901,10 @@ var
   Model: TActiveQueueModel;
   IPs: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, 3);
-  // ips[0] := '175.112.32.211';
-  // ips[1] := '216.87.22.99';
-  // ips[2] := '175.112.32.222';
-  // model.SetListenersIps(ips);
-  // Assert.IsTrue(Model.IsSubscribable('175.112.32.222'));
+  Model := TActiveQueueModel.Create;
+  IPs := ['175.112.32.211', '216.87.22.99', '175.112.32.222'];
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.IsTrue(Model.IsSubscribable('175.112.32.222'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs3ElemMiddle;
@@ -885,14 +912,10 @@ var
   Model: TActiveQueueModel;
   IPs: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, 3);
-  // ips[0] := '175.112.32.211';
-  // ips[1] := '216.87.22.99';
-  // ips[2] := '175.112.32.222';
-  // model.SetListenersIps(ips);
-  // Assert.IsTrue(Model.IsSubscribable('216.87.22.99'));
+  Model := TActiveQueueModel.Create;
+  ips := ['175.112.32.211', '216.87.22.99', '175.112.32.222'];
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.IsTrue(Model.IsSubscribable('216.87.22.99'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubs4ElemNotPresent;
@@ -900,24 +923,18 @@ var
   Model: TActiveQueueModel;
   IPs: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(ips, 4);
-  // ips[0] := '175.112.32.211';
-  // ips[1] := '216.87.22.99';
-  // ips[2] := '175.112.32.222';
-  // ips[3] := '15.12.32.20';
-  // model.SetListenersIps(ips);
-  // Assert.IsFalse(Model.IsSubscribable('16.7.2.9'));
+  Model := TActiveQueueModel.Create;
+  IPs := ['175.112.32.211', '216.87.22.99', '175.112.32.222', '15.12.32.20'];
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.IsFalse(Model.IsSubscribable('16.7.2.9'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubsInit;
 var
   model: TActiveQueueModel;
 begin
-  // model := TActiveQueueModel.Create;
-  // model.SetListenersIps(TArray<String>.Create());
-  // Assert.IsFalse(Model.IsSubscribable('112.112.252.441'));
+  model := TActiveQueueModel.Create;
+  Assert.IsFalse(Model.IsSubscribable('112.112.252.441'));
 end;
 
 procedure TActiveQueueModelTest.TestIsSubsNotInit;
@@ -931,14 +948,10 @@ end;
 procedure TActiveQueueModelTest.TestIsSubsOneIpIsPresnt;
 var
   model: TActiveQueueModel;
-  ips: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // ips := TArray<String>.Create();
-  // SetLength(ips, 1);
-  // ips[0] := '127.0.0.7';
-  // model.SetListenersIps(ips);
-  // Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs('127.0.0.7').Build());
+  Assert.IsTrue(Model.IsSubscribable('127.0.0.7'));
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToOne;
@@ -946,17 +959,14 @@ var
   Model: TActiveQueueModel;
   IPs: TArray<String>;
 begin
-  // Model := TActiveQueueModel.Create;
-  // IPs := TArray<String>.Create();
-  // SetLength(IPs, 2);
-  // IPs[0] := 'ip 1';
-  // IPs[1] := 'ip 2';
-  // Model.SetListenersIps(Ips);
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
-  // Assert.AreEqual(2, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  IPs := ['ip 1', 'ip 2'];
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create('ip 1', 'url 1', 2021, 'path1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create('ip 2', 'url 2', 2022, 'path2'));
+  Assert.AreEqual(2, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToThree;
@@ -965,15 +975,15 @@ const
 var
   Model: TActiveQueueModel;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetListenersIps(Ips);
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[3], 'url 4', 2024, 'path3'));
-  // Assert.AreEqual(4, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create(IPs[3], 'url 4', 2024, 'path3'));
+  Assert.AreEqual(4, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddAllowedSubscriptionToZero;
@@ -982,11 +992,11 @@ const
 var
   Model: TActiveQueueModel;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetListenersIps(IPs);
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToOne;
@@ -995,13 +1005,13 @@ const
 var
   Model: TActiveQueueModel;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetListenersIps(IPs);
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 1, 'a path 1'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 2', 2, 'a path 2'));
-  // Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 1, 'a path 1'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 2', 2, 'a path 2'));
+  Assert.AreEqual(1, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToThree;
@@ -1010,27 +1020,27 @@ const
 var
   Model: TActiveQueueModel;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetListenersIps(Ips);
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  //
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
-  // Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 4', 2024, 'path3'));
-  // Assert.AreEqual(3, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().SetListenerIPs(IPs).Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+
+  Model.AddSubscription(TSubscriptionData.Create(IPs[0], 'url 1', 2021, 'path1'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[1], 'url 2', 2022, 'path2'));
+  Model.AddSubscription(TSubscriptionData.Create(IPs[2], 'url 3', 2023, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create('non-allowed-ip', 'url 4', 2024, 'path3'));
+  Assert.AreEqual(3, Model.numOfSubscriptions);
 end;
 
 procedure TActiveQueueModelTest.TestNumberAddNonAllowedSubscriptionToZero;
 var
   Model: TActiveQueueModel;
 begin
-  // Model := TActiveQueueModel.Create;
-  // Model.SetListenersIps(TArray<String>.Create());
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
-  // Model.AddSubscription(TSubscriptionData.Create('some non allowed ip', 'url 1', 2021, 'path1'));
-  // Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model := TActiveQueueModel.Create;
+  Model.SetState('dumb', TAQConfigBuilder.Create().Build());
+  Assert.AreEqual(0, Model.numOfSubscriptions);
+  Model.AddSubscription(TSubscriptionData.Create('some non allowed ip', 'url 1', 2021, 'path1'));
+  Assert.AreEqual(0, Model.numOfSubscriptions);
 end;
 
 initialization
