@@ -38,7 +38,8 @@ uses
   Client in 'Client.pas',
   System.Generics.Collections,
   ClientFullRequest in 'ClientFullRequest.pas',
-  Authentication in 'Authentication.pas';
+  Authentication in 'Authentication.pas',
+  CliUsage in 'ActiveQueue\CliUsage.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
@@ -51,7 +52,7 @@ var
   ConfigFileName: String;
   JsonConfig: TJsonObject;
   FileContent: String;
-  Usage: TArray<TCliParam>;
+  Usage: TCliUsage;
   Config: TReceptionConfig;
   ProgramName: String;
 
@@ -126,35 +127,16 @@ begin
   end;
 end;
 
-/// <summary>Create a text describing how to use the program comand line arguments.</summary>
-function CreateUsageText(const FileName: String; const CliParams: TArray<TCliParam>): String;
-var
-  L, I: Integer;
-  Short, Long: String;
-begin
-  L := Length(CliParams);
-  Short := '';
-  Long := '';
-  for I := 0 to L - 1 do
-  begin
-    Short := Short + CliParams[I].CliUsage + sLineBreak;
-    Long := Long + CliParams[I].Explanation + sLineBreak;
-  end;
-  Result := 'Usage:' + sLineBreak + FileName + ' ' + Short + 'where' + sLineBreak + Long;
-
-end;
-
-{ TCliParam }
-
 begin
   ReportMemoryLeaksOnShutdown := True;
   ProgramName := ExtractFileName(paramstr(0));
-  Usage := [TCliParam.Create('c', 'path', 'path to the config file', True)];
+  Usage := TCliUsage.Create(ProgramName, [TCliParam.Create('c', 'path', 'path to the config file', True)]);
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
   if Not(TFile.Exists(ConfigFileName)) then
   begin
     Writeln('Error: config file ' + ConfigFileName + 'not found.');
-    Writeln(CreateUsageText(ProgramName, Usage));
+    Writeln(Usage.Text);
+    Usage.DisposeOf;
     Exit();
   end;
   try
@@ -185,8 +167,6 @@ begin
     end;
 
   end;
-  Usage[0].DisposeOf;
-  SetLength(Usage, 0);
   if Config <> nil then
     Config.DisposeOf;
 
