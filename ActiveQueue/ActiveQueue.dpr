@@ -42,21 +42,19 @@ const
 
 var
   configFileName: String;
-  JsonConfig: TJsonObject;
-  FileContent: String;
   Usage: TArray<TCliParam>;
-  Config: TAQConfig;
 
-procedure RunServer(const ConfigFile: String; const Config: TAQConfig);
+procedure RunServer(const ConfigFile: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
-  item: String;
+  WhiteListitem: String;
   ListenersWhiteList, ProvidersWhiteList: TArray<String>;
   APort: Integer;
-  numberOfListeners: Integer;
+  numberOfListeners, Counter: Integer;
+  Listener: TListenerInfo;
 begin
   SetConsoleTitle(PROGRAM_NAME);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
@@ -65,9 +63,9 @@ begin
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
-  TController.SetState(ConfigFile, Config);
+  TController.LoadStateFromFile(ConfigFile);
 
-  APort := Config.Port;
+  APort := TController.GetPort();
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
 
@@ -81,8 +79,8 @@ begin
   else
   begin
     Writeln('Allowed IPs for listeners:');
-    for Item in ListenersWhiteList do
-      Writeln(Item);
+    for WhiteListitem in ListenersWhiteList do
+      Writeln(WhiteListitem);
   end;
   if (Length(ProvidersWhiteList) = 0) then
   begin
@@ -91,17 +89,23 @@ begin
   else
   begin
     Writeln('Allowed IPs for data providers:');
-
-    for Item in ProvidersWhiteList do
-      Writeln(Item);
+    for WhiteListitem in ProvidersWhiteList do
+      Writeln(WhiteListitem);
   end;
 
-  numberOfListeners := Config.Listeners.Count;
+  numberOfListeners := TController.GetListeners().Count;
+  Counter := 1;
   if numberOfListeners = 0 then
     Writeln('No subscriptions found in the config file.')
   else
+  begin
     Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');
-
+    for Listener in TController.GetListeners() do
+    begin
+      Writeln(Format('%d) ip: %s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
+      Counter := Counter + 1;
+    end;
+  end;
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
@@ -128,38 +132,14 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
   Usage := [TCliParam.Create('c', 'path', 'path to the config file', True)];
-  if Not(TFile.Exists(ConfigFileName)) then
-  begin
-    Writeln('Error: config file ' + ConfigFileName + 'not found.');
-    Exit();
-  end;
   try
-    FileContent := TFile.ReadAllText(ConfigFileName);
-    JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
+    if WebRequestHandler <> nil then
+      WebRequestHandler.WebModuleClass := WebModuleClass;
+    WebRequestHandlerProc.MaxConnections := 1024;
+    RunServer(ConfigFileName);
   except
     on E: Exception do
-    begin
-      Writeln(E.Message);
-      Exit();
-    end;
-  end;
-  if Assigned(JsonConfig) then
-  begin
-    Config := Mapper.JSONObjectToObject<TAQConfig>(JsonConfig);
-  end;
-
-  if Assigned(Config) then
-  begin
-    try
-      if WebRequestHandler <> nil then
-        WebRequestHandler.WebModuleClass := WebModuleClass;
-      WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(ConfigFileName, Config);
-    except
-      on E: Exception do
-        Writeln(E.ClassName, ': ', E.Message);
-    end;
-
+      Writeln(E.ClassName, ': ', E.Message);
   end;
 
 end.

@@ -141,6 +141,9 @@ type
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
 
+    /// <summary>the number of a port to which this service is bound</summary>
+    property Port: Integer read FPort;
+
     /// <summary>Save the state of the Active Queue server into a file</summary>
     procedure UpdatePersistedState();
 

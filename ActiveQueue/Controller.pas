@@ -20,6 +20,10 @@ type
     /// Set the state of the Active Queue server.
     class procedure SetState(const FilePath: String; const Config: TAQConfig);
 
+    /// Read the given file and try to construct a TAQConfig instance. Then, this insytance is
+    /// passed to the SetState method.
+    class procedure LoadStateFromFile(const FilePath: String);
+
     /// <summary> Get the white list of listeners' ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
     class function GetListenersIPs(): TArray<String>;
@@ -27,6 +31,9 @@ type
     /// <summary> Get the white list of providers' ips: requests to enqueue the data coming from only these ips
     /// are to be taken in consideration </summary>
     class function GetProvidersIPs(): TArray<String>;
+
+    /// <summary> Get port number to which this service is bound. It is defined in the configuration file. </summary>
+    class function GetPort(): Integer;
 
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference  corresponding to the model
@@ -81,7 +88,7 @@ implementation
 
 uses
   MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
-  System.SysUtils, ConditionInterface, TokenBasedCondition;
+  System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
 
 class function TController.GetListenersIPs: TArray<String>;
 begin
@@ -96,6 +103,14 @@ begin
   end;
 end;
 
+class function TController.GetPort: Integer;
+begin
+  if Model = nil then
+    raise Exception.Create('The model has not been initialized yet.');
+  Result := Model.Port;
+
+end;
+
 class function TController.GetProvidersIPs: TArray<String>;
 begin
   if Assigned(Model) then
@@ -107,6 +122,30 @@ begin
     Result := TArray<String>.Create();
     SetLength(Result, 0);
   end;
+end;
+
+class procedure TController.LoadStateFromFile(const FilePath: String);
+var
+  Content: String;
+  Json: TJsonObject;
+  Config: TAQConfig;
+begin
+  if Not(TFile.Exists(FilePath)) then
+    raise Exception.Create('Error: config file ' + FilePath + 'not found.');
+  try
+    Content := TFile.ReadAllText(FilePath);
+    Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
+  except
+    on E: Exception do
+    begin
+      raise Exception.Create('Error: failed to parse the content of file "' + FilePath + '" into a json:' + sLineBreak + E.Message);
+    end;
+  end;
+  if Assigned(Json) then
+  begin
+    Config := Mapper.JSONObjectToObject<TAQConfig>(Json);
+  end;
+  SetState(FilePath, Config);
 end;
 
 procedure TController.CancelItems(const Context: TWebContext);
