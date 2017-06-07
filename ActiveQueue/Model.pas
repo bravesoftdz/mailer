@@ -9,7 +9,7 @@ uses
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
-  TActiveQueueModel = class
+  TActiveQueueModel = class(TObject)
     /// Representation invariant:
     /// All conditions must hold:
     /// 1. lock objects are non null: FSubscriptionsLock, FProvidersLock, FQueueLock, FProvidersLock
@@ -148,7 +148,7 @@ type
     procedure UpdatePersistedState();
 
     constructor Create();
-    destructor Destroy();
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -352,6 +352,7 @@ end;
 
 constructor TActiveQueueModel.Create();
 begin
+  Writeln('Creating a model...');
   FListenersLock := TObject.Create;
   FQueueLock := TObject.Create;
   FProvidersLock := TObject.Create;
@@ -369,6 +370,7 @@ var
   ItemKey: String;
   I, S: Integer;
 begin
+  Writeln('Destroying the model...');
   FListenersLock.DisposeOf;
   FQueueLock.DisposeOf;
   FProvidersLock.DisposeOf;

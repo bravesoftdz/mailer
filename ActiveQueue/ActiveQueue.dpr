@@ -43,7 +43,8 @@ const
 
 var
   configFileName: String;
-  Usage: TCliUsage;
+  Usage: String;
+  CliParams: TArray<TCliParam>;
 
 procedure RunServer(const ConfigFile: String);
 var
@@ -63,7 +64,6 @@ begin
   Writeln('  ' + PROGRAM_NAME);
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
-   raise Exception.Create('Error Message');
 
   TController.LoadStateFromFile(ConfigFile);
 
@@ -143,11 +143,12 @@ begin
     on E: Exception do
     begin
       Writeln(E.ClassName, ': ', E.Message);
-      Usage := TCliUsage.Create(ExtractFileName(paramstr(0)), [TCliParam.Create('c', 'path', 'path to the config file', True)]);
-      Writeln(Usage.Text);
-      Usage.Disposeof;
+      CliParams := [TCliParam.Create('c', 'path', 'path to the config file', True)];
+      Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
+      Writeln(Usage);
+      CliParams[0].DisposeOf;
+      SetLength(CliParams, 0);
     end;
-
   end;
 
 end.
