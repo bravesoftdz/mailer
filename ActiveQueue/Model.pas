@@ -391,6 +391,7 @@ begin
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
   FSaver.DisposeOf;
+  inherited;
 
 end;
 
@@ -474,6 +475,7 @@ function TActiveQueueModel.GetListeners: TObjectList<TListenerInfo>;
 var
   Subscription: TSubscriptionData;
   Token: String;
+  builder: TListenerInfoBuilder;
 begin
   TMonitor.Enter(FListenersLock);
   try
@@ -481,13 +483,15 @@ begin
     for Token in FSubscriptionRegister.Keys do
     begin
       Subscription := FSubscriptionRegister[Token];
-      Result.Add(TListenerInfoBuilder.Create()
+      builder := TListenerInfoBuilder.Create();
+      Result.Add(builder
         .SetToken(Token)
         .SetIp(Subscription.Ip)
         .SetPort(Subscription.Port)
         .SetPath(Subscription.Path)
         .Build()
         );
+      builder.DisposeOf;
     end;
   finally
     TMonitor.Exit(FListenersLock);

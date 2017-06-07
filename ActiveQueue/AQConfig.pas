@@ -171,16 +171,21 @@ end;
 function TAQConfig.GetListeners: TObjectList<TListenerInfo>;
 var
   listener: TListenerInfo;
+  builder: TListenerInfoBuilder;
 begin
   Result := TObjectList<TListenerInfo>.Create();
   if Assigned(FListeners) then
   begin
     for listener in FListeners do
-      Result.Add(TListenerInfoBuilder.Create()
+    begin
+      builder := TListenerInfoBuilder.Create();
+      Result.Add(builder
         .SetToken(Listener.token)
         .SetIP(Listener.IP)
         .SetPort(Listener.Port)
         .SetPath(Listener.Path).Build);
+      builder.DisposeOf;
+    end;
   end;
 
 end;

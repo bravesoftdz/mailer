@@ -37,7 +37,7 @@ type
   end;
 
 type
-  TListenerInfoBuilder = class
+  TListenerInfoBuilder = class(TObject)
   strict private
     FToken: String;
     FIP: String;
@@ -50,7 +50,6 @@ type
     function SetPort(const APort: Integer): TListenerInfoBuilder;
     function SetPath(const APath: String): TListenerInfoBuilder;
     function Build(): TListenerInfo;
-
   end;
 
 implementation
