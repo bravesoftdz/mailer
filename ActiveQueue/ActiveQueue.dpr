@@ -30,7 +30,8 @@ uses
   ConditionInterface in 'ConditionInterface.pas',
   TokenBasedCondition in 'TokenBasedCondition.pas',
   StateSaver in 'StateSaver.pas',
-  JsonableInterface in 'JsonableInterface.pas';
+  JsonableInterface in 'JsonableInterface.pas',
+  CliUsage in 'CliUsage.pas';
 
 {$R *.res}
 
@@ -42,7 +43,7 @@ const
 
 var
   configFileName: String;
-  Usage: TArray<TCliParam>;
+  Usage: TCliUsage;
 
 procedure RunServer(const ConfigFile: String);
 var
@@ -62,6 +63,7 @@ begin
   Writeln('  ' + PROGRAM_NAME);
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+   raise Exception.Create('Error Message');
 
   TController.LoadStateFromFile(ConfigFile);
 
@@ -131,7 +133,7 @@ end;
 begin
   ReportMemoryLeaksOnShutdown := True;
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
-  Usage := [TCliParam.Create('c', 'path', 'path to the config file', True)];
+
   try
     if WebRequestHandler <> nil then
       WebRequestHandler.WebModuleClass := WebModuleClass;
@@ -139,7 +141,13 @@ begin
     RunServer(ConfigFileName);
   except
     on E: Exception do
+    begin
       Writeln(E.ClassName, ': ', E.Message);
+      Usage := TCliUsage.Create(ExtractFileName(paramstr(0)), [TCliParam.Create('c', 'path', 'path to the config file', True)]);
+      Writeln(Usage.Text);
+      Usage.Disposeof;
+    end;
+
   end;
 
 end.
