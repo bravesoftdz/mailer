@@ -4,7 +4,7 @@ interface
 
 uses
   System.JSON, System.Generics.Collections, Attachment, ObjectsMappers,
-  System.Classes;
+  System.Classes, JsonableInterface;
 
 type
 
@@ -12,8 +12,19 @@ type
   /// A request that a Reception instance performs to a back-end server.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TReceptionRequest = class
+  TReceptionRequest = class(TInterfacedObject, Jsonable)
   strict private
+  const
+    TOKEN_HTML = 'bodyhtml';
+    TOKEN_TEXT = 'bodytext';
+    TOKEN_ATTACH = 'attach';
+    TOKEN_TOKEN = 'token';
+    TOKEN_SUBJECT = 'subject';
+    TOKEN_RECIPTO = 'recipto';
+    TOKEN_RECIPBCC = 'recipbcc';
+    TOKEN_RECIPPCC = 'recippcc';
+
+  var
     FFRom: String;
     FSender: String;
     FServer: String;
@@ -48,23 +59,27 @@ type
     /// <summary> whether to use SSL </summary>
     property usessl: Boolean read FUseSSL write FUseSSL;
     /// <summary> html text version of the message to send </summary>
-    [MapperJSONSer('bodyhtml')]
+    [MapperJSONSer(TOKEN_HTML)]
     property html: String read FHtml write FHtml;
     /// <summary> plain text version of the message to send </summary>
-    [MapperJSONSer('bodytext')]
+    [MapperJSONSer(TOKEN_TEXT)]
     property text: String read FText write FText;
     /// <summary> email subject, i.e. "News for you" </summary>
+    [MapperJSONSer(TOKEN_SUBJECT)]
     property subject: String read FSubject write FSubject;
     /// <summary> list of email addresses of the recipients (to) </summary>
+    [MapperJSONSer(TOKEN_RECIPTO)]
     property recipto: String read FRecipTo write FRecipTo;
     /// <summary> list of email addresses of the recipients (cc) </summary>
+    [MapperJSONSer(TOKEN_RECIPPCC)]
     property recipcc: String read FRecipCc write FRecipCc;
     /// <summary> list of email addresses of the recipients (bcc) </summary>
+    [MapperJSONSer(TOKEN_RECIPBCC)]
     property recipbcc: String read FRecipBcc write FRecipBcc;
     /// <summary> list of attachment contents </summary>
-    [MapperJSONSer('attach')]
+    [MapperJSONSer(TOKEN_ATTACH)]
     property attachment: TObjectList<TAttachment> read FAttach write FAttach;
-    [MapperJSONSer('token')]
+    [MapperJSONSer(TOKEN_TOKEN)]
     property token: String read FToken write FToken;
 
     /// <summary> Multi argument constructor. It is recommended to use
@@ -74,6 +89,8 @@ type
       const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
+
+    function ToJson(): TJsonObject;
 
   end;
 
@@ -291,6 +308,16 @@ constructor TReceptionRequest.Create;
 begin
   FAttach := TObjectList<TAttachment>.Create;
   // FData := TMemoryStream.Create();
+end;
+
+function TReceptionRequest.ToJson: TJsonObject;
+var
+  arr: TJsonArray;
+begin
+  Result := TJsonObject.Create();
+  Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
+  Result.AddPair(TJsonPair.Create(TOKEN_TEXT, FText));
+  { TODO: to finish }
 end;
 
 end.

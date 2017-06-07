@@ -5,7 +5,7 @@ interface
 uses
   ActiveQueueResponce, SubscriptionData, ReceptionRequest,
   System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
-  ConditionInterface, AQConfig, StateSaver;
+  ConditionInterface, AQConfig, StateSaver, JsonSaver;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -21,7 +21,7 @@ type
     /// a dumb lock object for managing the access to the  subscription register
     FListenersLock: TObject;
 
-    /// a dumb lock object for managing the access to the  providers' ips
+    /// a dumb lock object for managing the access to the providers' ips
     FProvidersLock: TObject;
 
     /// a dumb lock object for managing the access to the queue items
@@ -46,14 +46,20 @@ type
     FProvidersIPs: TArray<String>;
 
     /// <summary>Suggestion for the file name under which the model state is to be saved</summary>
-    FFilePath: String;
+    FStateFilePath: String;
+
+    /// <summary>Suggestion for the file name under which the model state is to be saved</summary>
+    FQueueFilePath: String;
 
     /// <summary>Port associated with this service. This parameter is not a part of the model state,
     /// it is a part of the service configuration.</summary>
     FPort: Integer;
 
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
-    FSaver: TStateSaver;
+    FStateSaver: TJsonSaver;
+
+    /// <summary>a class instance by means of which the queue is persisted<summary>
+    FQueueSaver: TJsonSaver;
 
     /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
@@ -137,6 +143,8 @@ type
     /// (mostly due to the adding/cancelling the listeners) in real time mode: once a change occurs,
     /// the new state is saved.
     procedure SetState(const FilePath: String; const Config: TAQConfig);
+
+    procedure SetQueue(const FilePath: String; const Items: TObjectList<TReceptionRequest>);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -364,7 +372,8 @@ begin
   FItems := TObjectList<TReceptionRequest>.Create;
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
-  FSaver := TStateSaver.Create();
+  FStateSaver := TJsonSaver.Create();
+  FQueueSaver := TJsonSaver.Create();
   CheckRep();
 end;
 
@@ -393,7 +402,8 @@ begin
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
-  FSaver.DisposeOf;
+  FStateSaver.DisposeOf;
+  FQueueSaver.Disposeof;
   inherited;
 
 end;
@@ -603,14 +613,24 @@ begin
   SetListenersIPs(Config.GetListenersIps());
   SetProvidersIPs(Config.GetProvidersIps());
   SetListeners(Config.Listeners);
-  FFilePath := FilePath;
+  FStateFilePath := FilePath;
   FPort := Config.Port;
 end;
 
 procedure TActiveQueueModel.PersistQueue;
+var
+  arr: TJsonArray;
+  Request: TReceptionRequest;
 begin
   TMonitor.Enter(FQueueLock);
   try
+    arr := TJsonArray.Create();
+    for Request in FItems do
+    begin
+      arr.AddElement(Request.ToJson);
+    end;
+
+    /// FItems
 
   finally
     TMonitor.Exit(FQueueLock);
@@ -622,7 +642,7 @@ var
   State: TAQConfig;
 begin
   State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
-  FSaver.save(FFilePath, State);
+  FStateSaver.save(FStateFilePath);
   State.DisposeOf;
 end;
 

@@ -43,11 +43,11 @@ const
   PROGRAM_NAME = 'Active Queue Server';
 
 var
-  configFileName: String;
+  ConfigFileName, QueueFileName: String;
   Usage: String;
   CliParams: TArray<TCliParam>;
 
-procedure RunServer(const ConfigFile: String);
+procedure RunServer(const ConfigFileName, QueueFileName: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -67,7 +67,8 @@ begin
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
-  TController.LoadStateFromFile(ConfigFile);
+  TController.LoadStateFromFile(ConfigFileName);
+  TController.LoadQueuesFromFile(QueueFileName);
 
   APort := TController.GetPort();
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
@@ -136,19 +137,19 @@ end;
 begin
   ReportMemoryLeaksOnShutdown := True;
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
-  FindCmdLineSwitch(SWITCH_QUEUE, ConfigFileName, False);
+  FindCmdLineSwitch(SWITCH_QUEUE, QueueFileName, False);
 
   try
     if WebRequestHandler <> nil then
       WebRequestHandler.WebModuleClass := WebModuleClass;
     WebRequestHandlerProc.MaxConnections := 1024;
-    RunServer(ConfigFileName);
+    RunServer(ConfigFileName, QueueFileName);
   except
     on E: Exception do
     begin
       Writeln(E.ClassName, ': ', E.Message);
       CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True),
-        TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file with queues', False)];
+        TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file in which the queues received from the reception have been saved', True)];
       Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
       Writeln(Usage);
       CliParams[0].DisposeOf;

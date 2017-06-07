@@ -1,4 +1,4 @@
-unit StateSaver;
+unit JsonSaver;
 
 interface
 
@@ -7,7 +7,7 @@ uses
 
 type
   /// A class that saves given state in a file.
-  TStateSaver = class
+  TJsonSaver = class
   strict private
   const
     Format = '-YYYY-mm-dd_hh_nn_ss';
@@ -34,7 +34,7 @@ uses
 
 { TStateSaver }
 
-function TStateSaver.GetAvailablePath(const Path, Format: String): String;
+function TJsonSaver.GetAvailablePath(const Path, Format: String): String;
 var
   TryName: String;
   folder, nameExt, name, ext: String;
@@ -51,7 +51,7 @@ begin
   Result := TryName;
 end;
 
-procedure TStateSaver.Save(const FilePath: String; const Obj: Jsonable);
+procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
 var
   OutFileName: String;
 begin

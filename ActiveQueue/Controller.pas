@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers,
-  System.Generics.Collections, ListenerInfo, AQConfig;
+  System.Generics.Collections, ListenerInfo, AQConfig, System.JSON;
 
 type
 
@@ -16,15 +16,22 @@ type
 
     /// enqueue the requests and persist the queue in case of success
     class function EnqueueAndPersist(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
+
+    /// convert json array into a list
+    class function JSonArrayToObjectList(const items: TJsonArray): TObjectList<TReceptionRequest>;
   public
     class function GetListeners(): TObjectList<TListenerInfo>;
 
     /// Set the state of the Active Queue server.
     class procedure SetState(const FilePath: String; const Config: TAQConfig);
 
-    /// Read the given file and try to construct a TAQConfig instance. Then, this insytance is
+    /// Read the given file and try to construct a TAQConfig instance. Then, this instance is
     /// passed to the SetState method.
     class procedure LoadStateFromFile(const FilePath: String);
+
+    /// <summary>Load queues from given file. The file might not exist, the argument is used as a file name
+    /// to save the queues. The file content is supposed to be a json string of array of TReceptionRequest instances.</summary>
+    class procedure LoadQueuesFromFile(const FilePath: String);
 
     /// <summary> Get the white list of listeners' ips: requests coming from only these ips
     /// are to be taken in consideration </summary>
@@ -89,7 +96,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce, System.JSON, SubscriptionData,
+  MVCFramework.Logger, ActiveQueueResponce, SubscriptionData,
   System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
 
 class function TController.GetListenersIPs: TArray<String>;
@@ -124,6 +131,37 @@ begin
     Result := TArray<String>.Create();
     SetLength(Result, 0);
   end;
+end;
+
+class function TController.JSonArrayToObjectList(
+  const items: TJsonArray): TObjectList<TReceptionRequest>;
+begin
+
+end;
+
+class procedure TController.LoadQueuesFromFile(const FilePath: String);
+var
+  Content: String;
+  Json: TJsonArray;
+  Requests: TObjectList<TReceptionRequest>;
+begin
+  if TFile.Exists(FilePath) then
+  begin
+    Content := TFile.ReadAllText(FilePath);
+    try
+      Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONArray;
+      if Json <> nil then
+      begin
+        Requests := JSonArrayToObjectList(Json);
+        Model.SetQueue(FilePath, Requests);
+      end;
+
+    finally
+
+    end;
+
+  end;
+
 end;
 
 class procedure TController.LoadStateFromFile(const FilePath: String);
