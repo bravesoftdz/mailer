@@ -147,6 +147,9 @@ type
     /// <summary>Save the state of the Active Queue server into a file</summary>
     procedure UpdatePersistedState();
 
+    /// <summary>Persist the queue in its current state</summary>
+    procedure PersistQueue();
+
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -602,6 +605,16 @@ begin
   SetListeners(Config.Listeners);
   FFilePath := FilePath;
   FPort := Config.Port;
+end;
+
+procedure TActiveQueueModel.PersistQueue;
+begin
+  TMonitor.Enter(FQueueLock);
+  try
+
+  finally
+    TMonitor.Exit(FQueueLock);
+  end;
 end;
 
 procedure TActiveQueueModel.UpdatePersistedState;

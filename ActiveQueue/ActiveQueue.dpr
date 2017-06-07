@@ -57,6 +57,7 @@ var
   APort: Integer;
   numberOfListeners, Counter: Integer;
   Listener: TListenerInfo;
+  Listeners: TObjectList<TListenerInfo>;
 begin
   SetConsoleTitle(PROGRAM_NAME);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
@@ -94,19 +95,20 @@ begin
     for WhiteListitem in ProvidersWhiteList do
       Writeln(WhiteListitem);
   end;
-
-  numberOfListeners := TController.GetListeners().Count;
+  Listeners := TController.GetListeners();
+  numberOfListeners := Listeners.Count;
   Counter := 1;
   if numberOfListeners = 0 then
     Writeln('No subscriptions found in the config file.')
   else
   begin
     Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');
-    for Listener in TController.GetListeners() do
+    for Listener in Listeners do
     begin
       Writeln(Format('%d) ip: %s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
       Counter := Counter + 1;
     end;
+    Listeners.Clear;
   end;
   try
     LServer.DefaultPort := APort;

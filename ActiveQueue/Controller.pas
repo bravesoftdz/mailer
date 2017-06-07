@@ -14,6 +14,8 @@ type
   strict private
     class var Model: TActiveQueueModel;
 
+    /// enqueue the requests and persist the queue in case of success
+    class function EnqueueAndPersist(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
   public
     class function GetListeners(): TObjectList<TListenerInfo>;
 
@@ -169,6 +171,14 @@ begin
 
 end;
 
+class function TController.EnqueueAndPersist(const IP: String;
+  const Items: TObjectList<TReceptionRequest>): Boolean;
+begin
+  Result := Model.Enqueue(IP, Items);
+  if Result then
+    Model.PersistQueue();
+end;
+
 procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
@@ -218,7 +228,7 @@ begin
       IP := Context.Request.ClientIP;
       wrapper := TObjectList<TReceptionRequest>.Create();
       wrapper.add(item);
-      Outcome := Model.Enqueue(IP, wrapper);
+      Outcome := EnqueueAndPersist(IP, wrapper);
     except
       on E: Exception do
         Outcome := False;
@@ -240,7 +250,7 @@ begin
     try
       items := Context.Request.BodyAsListOf<TReceptionRequest>;
       IP := Context.Request.ClientIP;
-      Outcome := Model.Enqueue(IP, Items);
+      Outcome := EnqueueAndPersist(IP, Items);
     except
       on E: Exception do
         Outcome := False;
