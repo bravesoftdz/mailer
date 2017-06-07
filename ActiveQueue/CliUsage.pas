@@ -7,6 +7,10 @@ uses CliParam;
 type
   /// A class that generates a text describing how to use command line arguments.
   TCliUsage = class
+  strict private
+  const
+    HORIZONTAL_SPACE = ' ';
+    VERTICAL_SPACE = sLineBreak;
   public
     /// <summary>Create a text describing the usage of the command line arguments.</sumamry>
     /// <param name="FileName">the name of the program to which the command line arguments refer to</param>
@@ -33,10 +37,10 @@ begin
   Long := '';
   for I := 0 to L - 1 do
   begin
-    Short := Short + CliParams[I].CliUsage + sLineBreak;
-    Long := Long + CliParams[I].Explanation + sLineBreak;
+    Short := Short + CliParams[I].CliUsage + HORIZONTAL_SPACE;
+    Long := Long + CliParams[I].Explanation + VERTICAL_SPACE;
   end;
-  Result := 'Usage:' + sLineBreak + FileName + ' ' + Short + 'where' + sLineBreak + Long;
+  Result := 'Usage:' + VERTICAL_SPACE + FileName + HORIZONTAL_SPACE + Short + VERTICAL_SPACE + 'where' + VERTICAL_SPACE + Long;
 
 end;
 

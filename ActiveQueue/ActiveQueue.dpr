@@ -38,6 +38,7 @@ uses
 
 const
   SWITCH_CONFIG = 'c';
+  SWITCH_QUEUE = 'q';
   SWITCH_CHAR = '-';
   PROGRAM_NAME = 'Active Queue Server';
 
@@ -135,6 +136,7 @@ end;
 begin
   ReportMemoryLeaksOnShutdown := True;
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
+  FindCmdLineSwitch(SWITCH_QUEUE, ConfigFileName, False);
 
   try
     if WebRequestHandler <> nil then
@@ -145,10 +147,12 @@ begin
     on E: Exception do
     begin
       Writeln(E.ClassName, ': ', E.Message);
-      CliParams := [TCliParam.Create('c', 'path', 'path to the config file', True)];
+      CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True),
+        TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file with queues', False)];
       Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
       Writeln(Usage);
       CliParams[0].DisposeOf;
+      CliParams[1].DisposeOf;
       SetLength(CliParams, 0);
     end;
   end;
