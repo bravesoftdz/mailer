@@ -608,6 +608,13 @@ begin
   end;
 end;
 
+procedure TActiveQueueModel.SetQueue(const FilePath: String;
+const Items: TObjectList<TReceptionRequest>);
+begin
+  // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
+  Writeln('Here, the queue must be saved, but it is yet to be done');
+end;
+
 procedure TActiveQueueModel.SetState(const FilePath: String; const Config: TAQConfig);
 begin
   SetListenersIPs(Config.GetListenersIps());
@@ -642,7 +649,7 @@ var
   State: TAQConfig;
 begin
   State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
-  FStateSaver.save(FStateFilePath);
+  FStateSaver.save(FStateFilePath, State);
   State.DisposeOf;
 end;
 

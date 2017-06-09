@@ -13,7 +13,8 @@ uses
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
   ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
-  ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas';
+  ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
+  Config in 'Config.pas';
 
 {$R *.res}
 

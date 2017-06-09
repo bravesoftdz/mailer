@@ -52,9 +52,7 @@ var
   ConfigFileName: String;
   JsonConfig: TJsonObject;
   FileContent: String;
-  Usage: TCliUsage;
   Config: TReceptionConfig;
-  ProgramName: String;
 
 procedure RunServer(const Config: TReceptionConfig);
 var
@@ -129,14 +127,11 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
-  ProgramName := ExtractFileName(paramstr(0));
-  Usage := TCliUsage.Create(ProgramName, [TCliParam.Create('c', 'path', 'path to the config file', True)]);
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
   if Not(TFile.Exists(ConfigFileName)) then
   begin
     Writeln('Error: config file ' + ConfigFileName + 'not found.');
-    Writeln(Usage.Text);
-    Usage.DisposeOf;
+    Writeln(TCliUsage.CreateText(ExtractFileName(paramstr(0)), [TCliParam.Create('c', 'path', 'path to the config file', True)]));
     Exit();
   end;
   try

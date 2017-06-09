@@ -31,12 +31,42 @@ implementation
 
 uses
   MVCFramework.Logger, MVCFramework.RESTAdapter, ActiveQueueAPI,
-  SubscriptionData, ActiveQueueResponce;
+  SubscriptionData, ActiveQueueResponce, IdSMTP, IdMessage, Config;
 
 procedure TController.Notify(const Ctx: TWebContext);
-var SMTP : TIdSMTP;
+var
+  SMTP: TIdSMTP;
+  Msg: TIdMessage;
 begin
   Render('notified');
+  MSG := TIdMessage.Create(NIL);
+  TRY
+    WITH MSG.Recipients.Add DO
+    BEGIN
+      Name := 'Recep. name';
+      Address := Config.MAIL_TO;
+    END;
+    // MSG.BccList.Add.Address := '<Email address of Blind Copy recipient>';
+    MSG.From.Name := '<Name of sender>';
+    MSG.From.Address := TConfig.MAIL_FROM;
+    MSG.Body.Text := 'Ciao!';
+    MSG.Subject := 'test message';
+    SMTP := TIdSMTP.Create(NIL);
+    TRY
+      SMTP.Host := TConfig.HOST;
+      SMTP.Port := TConfig.PORT;
+      SMTP.Connect;
+      TRY
+        SMTP.Send(MSG)
+      FINALLY
+        SMTP.Disconnect
+      END
+    FINALLY
+      SMTP.Free
+    END
+  FINALLY
+    MSG.Free
+  END;
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
