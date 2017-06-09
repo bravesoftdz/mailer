@@ -34,6 +34,7 @@ uses
   SubscriptionData, ActiveQueueResponce;
 
 procedure TController.Notify(const Ctx: TWebContext);
+var SMTP : TIdSMTP;
 begin
   Render('notified');
 end;
