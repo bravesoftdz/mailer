@@ -145,6 +145,7 @@ var
   Json: TJsonArray;
   Requests: TObjectList<TReceptionRequest>;
 begin
+  Model.SetQueuePath(Filepath);
   if TFile.Exists(FilePath) then
   begin
     Content := TFile.ReadAllText(FilePath);
@@ -153,7 +154,7 @@ begin
       if Json <> nil then
       begin
         Requests := JSonArrayToObjectList(Json);
-        Model.SetQueue(FilePath, Requests);
+        // Model.SetQueue(FilePath, Requests);
       end;
 
     finally
@@ -213,8 +214,8 @@ class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TReceptionRequest>): Boolean;
 begin
   Result := Model.Enqueue(IP, Items);
-  if Result then
-    Model.PersistQueue();
+//  if Result then
+//    Model.PersistQueue();
 end;
 
 procedure TController.GetItems(const Context: TWebContext);

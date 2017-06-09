@@ -1,6 +1,7 @@
 program ConsumerMock;
 
- {$APPTYPE CONSOLE}
+{$APPTYPE CONSOLE}
+
 
 uses
   System.SysUtils,
@@ -12,33 +13,48 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
   ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
-  Config in 'Config.pas';
+  Config in 'Config.pas',
+  Model in 'Model.pas',
+  ConsumerConfig in 'ConsumerConfig.pas';
 
 {$R *.res}
 
-procedure RunServer(APort: Integer);
+
+const
+  SWITCH_CONFIG = 'c';
+  SWITCH_CHAR = '-';
+  PROGRAM_NAME = 'Consumer Server';
+
+var
+  ConfigFileName: String;
+
+procedure RunServer(const ConfigFileName: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
+  Port: Integer;
+
 begin
-  Writeln('** DMVCFramework Server: Consumer mock **');
-  Writeln(Format('Starting HTTP Server on port %d', [APort]));
+  SetConsoleTitle(PROGRAM_NAME);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 13);
+  Writeln('');
+  Writeln('  ' + PROGRAM_NAME);
+  Writeln('');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
-    LServer.DefaultPort := APort;
+    TController.LoadConfigFromFile(ConfigFileName);
+    Port := TController.GetPort();
+    LServer.DefaultPort := Port;
     LServer.Active := True;
-    LogI(Format('Server started on port %d', [APort]));
-    { more info about MaxConnections
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html}
+    Writeln(Format('Server started on port %d', [Port]));
     LServer.MaxConnections := 0;
-    { more info about ListenQueue
-      http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_ListenQueue.html}
     LServer.ListenQueue := 200;
-    { Comment the next line to avoid the default browser startup }
 
     Writeln('Press ESC to stop the server');
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
@@ -57,13 +73,16 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+  FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
+
   try
     if WebRequestHandler <> nil then
       WebRequestHandler.WebModuleClass := WebModuleClass;
     WebRequestHandlerProc.MaxConnections := 1024;
-    RunServer(9000);
+    RunServer(ConfigFileName);
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
   end;
+
 end.

@@ -158,6 +158,8 @@ type
     /// <summary>Persist the queue in its current state</summary>
     procedure PersistQueue();
 
+    procedure SetQueuePath(const path: String);
+
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -165,7 +167,8 @@ type
 implementation
 
 uses
-  System.SysUtils, MVCFramework.RESTAdapter, System.JSON, System.IOUtils;
+  System.SysUtils, MVCFramework.RESTAdapter, System.JSON, System.IOUtils,
+  JsonableInterface;
 { TActiveQueueModel }
 
 function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
@@ -615,6 +618,12 @@ begin
   Writeln('Here, the queue must be saved, but it is yet to be done');
 end;
 
+procedure TActiveQueueModel.SetQueuePath(const Path: String);
+begin
+  FQueueFilePath := Path;
+
+end;
+
 procedure TActiveQueueModel.SetState(const FilePath: String; const Config: TAQConfig);
 begin
   SetListenersIPs(Config.GetListenersIps());
@@ -628,10 +637,19 @@ procedure TActiveQueueModel.PersistQueue;
 var
   arr: TJsonArray;
   Request: TReceptionRequest;
+  items: TList<Jsonable>;
+
 begin
   TMonitor.Enter(FQueueLock);
   try
-    FQueueSaver.SaveMulti(FQueueFilePath, FItems);
+    Items := TList<Jsonable>.Create();
+    for Request in FItems do
+    begin
+      Items.Add(Request as Jsonable);
+    end;
+    FQueueSaver.SaveMulti(FQueueFilePath, Items);
+    Items.Clear;
+    Items.DisposeOf;
   finally
     TMonitor.Exit(FQueueLock);
   end;

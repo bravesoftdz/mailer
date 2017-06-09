@@ -22,7 +22,7 @@ type
     function GetAvailablePath(const Path: String; const Format: String): String;
   public
     procedure Save(const FilePath: String; const Obj: Jsonable);
-    procedure SaveMulti(const FilePath: String; const Items: TObjectList<Jsonable>);
+    procedure SaveMulti(const FilePath: String; const Items: TList<Jsonable>);
 
   end;
 
@@ -58,11 +58,12 @@ begin
   TFile.AppendAllText(OutFileName, Obj.ToJson().ToString());
 end;
 
-procedure TJsonSaver.SaveMulti(const FilePath: String; const Items: TObjectList<Jsonable>);
+procedure TJsonSaver.SaveMulti(const FilePath: String; const Items: TList<Jsonable>);
 var
   OutFileName: String;
   builder: TStringBuilder;
   I, L: Integer;
+  Content: String;
 begin
   OutFileName := GetAvailablePath(FilePath, Suffix);
   Builder := TStringBuilder.Create();
@@ -75,7 +76,8 @@ begin
   end;
   Builder.Append(Items[L - 1].toJson.ToString);
   Builder.Append(']');
-  TFile.AppendAllText(OutFileName, Builder.ToString());
+  Content := Builder.ToString();
+  TFile.AppendAllText(OutFileName, Content);
   Builder.DisposeOf;
 
 end;
