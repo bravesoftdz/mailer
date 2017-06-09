@@ -1,0 +1,2 @@
+ECHO "Simulate requests from the Reception server to the Active Queue server" 
+FOR /L %%A IN (1,1,10) DO curl -X POST -H "Content-Type: multipart/form-data;charset=ASCII" -F data="{\"html\":\"html %%A\", \"text\":\"text %%A\", \"token\":\"super secret\"};type=application/json" -F file=@index.html http://localhost/venditori/send

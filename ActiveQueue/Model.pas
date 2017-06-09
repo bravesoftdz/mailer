@@ -5,7 +5,7 @@ interface
 uses
   ActiveQueueResponce, SubscriptionData, ReceptionRequest,
   System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
-  ConditionInterface, AQConfig, StateSaver, JsonSaver;
+  ConditionInterface, AQConfig, JsonSaver;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>

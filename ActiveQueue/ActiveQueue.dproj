@@ -107,7 +107,7 @@
         <DCCReference Include="ActiveQueueAPI.pas"/>
         <DCCReference Include="ConditionInterface.pas"/>
         <DCCReference Include="TokenBasedCondition.pas"/>
-        <DCCReference Include="StateSaver.pas"/>
+        <DCCReference Include="JsonSaver.pas"/>
         <DCCReference Include="JsonableInterface.pas"/>
         <DCCReference Include="CliUsage.pas"/>
         <BuildConfiguration Include="Release">
