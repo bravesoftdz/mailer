@@ -3,14 +3,14 @@ unit JsonSaver;
 interface
 
 uses
-  JsonableInterface;
+  JsonableInterface, System.Generics.Collections;
 
 type
   /// A class that saves given state in a file.
   TJsonSaver = class
   strict private
   const
-    Format = '-YYYY-mm-dd_hh_nn_ss';
+    Suffix = '-YYYY-mm-dd_hh_nn_ss';
 
   var
     /// <summary>Find an available name for a file in the folder which the path referes to.
@@ -20,10 +20,9 @@ type
     /// <param name="Path">Suggested path. If there exists a file, a new path is to generated. </param>
     /// <param name="Format">format of the current timestamp to be prepended to the fila name </param>
     function GetAvailablePath(const Path: String; const Format: String): String;
-
   public
-
     procedure Save(const FilePath: String; const Obj: Jsonable);
+    procedure SaveMulti(const FilePath: String; const Items: TObjectList<Jsonable>);
 
   end;
 
@@ -55,8 +54,30 @@ procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
 var
   OutFileName: String;
 begin
-  OutFileName := GetAvailablePath(FilePath, Format);
+  OutFileName := GetAvailablePath(FilePath, Suffix);
   TFile.AppendAllText(OutFileName, Obj.ToJson().ToString());
+end;
+
+procedure TJsonSaver.SaveMulti(const FilePath: String; const Items: TObjectList<Jsonable>);
+var
+  OutFileName: String;
+  builder: TStringBuilder;
+  I, L: Integer;
+begin
+  OutFileName := GetAvailablePath(FilePath, Suffix);
+  Builder := TStringBuilder.Create();
+  Builder.Append('[');
+  L := Items.Count;
+  for I := 0 to L - 2 do
+  begin
+    Builder.Append(Items[I].toJson.ToString);
+    Builder.Append(',');
+  end;
+  Builder.Append(Items[L - 1].toJson.ToString);
+  Builder.Append(']');
+  TFile.AppendAllText(OutFileName, Builder.ToString());
+  Builder.DisposeOf;
+
 end;
 
 end.

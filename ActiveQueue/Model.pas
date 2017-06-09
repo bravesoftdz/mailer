@@ -153,7 +153,7 @@ type
     property Port: Integer read FPort;
 
     /// <summary>Save the state of the Active Queue server into a file</summary>
-    procedure UpdatePersistedState();
+    procedure PersistState();
 
     /// <summary>Persist the queue in its current state</summary>
     procedure PersistQueue();
@@ -631,20 +631,13 @@ var
 begin
   TMonitor.Enter(FQueueLock);
   try
-    arr := TJsonArray.Create();
-    for Request in FItems do
-    begin
-      arr.AddElement(Request.ToJson);
-    end;
-
-    /// FItems
-
+    FQueueSaver.SaveMulti(FQueueFilePath, FItems);
   finally
     TMonitor.Exit(FQueueLock);
   end;
 end;
 
-procedure TActiveQueueModel.UpdatePersistedState;
+procedure TActiveQueueModel.PersistState;
 var
   State: TAQConfig;
 begin

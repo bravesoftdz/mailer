@@ -44,7 +44,7 @@ begin
     WITH MSG.Recipients.Add DO
     BEGIN
       Name := 'Recep. name';
-      Address := Config.MAIL_TO;
+      Address := TConfig.MAIL_TO;
     END;
     // MSG.BccList.Add.Address := '<Email address of Blind Copy recipient>';
     MSG.From.Name := '<Name of sender>';

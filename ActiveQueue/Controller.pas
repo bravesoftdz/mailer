@@ -334,7 +334,7 @@ begin
   end;
   Responce := Model.AddSubscription(SubscriptionData);
   if Responce.status then
-    Model.UpdatePersistedState();
+    Model.PersistState();
 
   Render(responce);
 end;
@@ -354,7 +354,7 @@ begin
   Ip := Context.Request.ClientIP;
   responce := Model.CancelSubscription(ip, token);
   if Responce.status then
-    Model.UpdatePersistedState();
+    Model.PersistState();
   Render(responce);
 end;
 
