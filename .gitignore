@@ -16,3 +16,4 @@ ActiveQueue.conf
 ActiveQueue*.conf
 Reception.conf
 Reception.res
+QueueStorage*.txt
