@@ -41,6 +41,7 @@ var
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   Port: Integer;
+  Config: TConsumerConfig;
 
 begin
   SetConsoleTitle(PROGRAM_NAME);
@@ -53,10 +54,23 @@ begin
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     TController.LoadConfigFromFile(ConfigFileName);
-    Port := TController.GetPort();
+    Config := TController.GetConfig();
+    if Config <> nil then
+    begin
+      Port := Config.Port;
+      Writeln(Format('Server started on port %d', [Port]));
+
+      Writeln(Format('Data provider ip: %s', [Config.ProviderIp]));
+      Writeln(Format('Data provider port: %d', [Config.ProviderPort]));
+      if Config.SubscriptionStatus then
+        Writeln(Format('It is subscribed to the data provider, token: %s', [Config.SubscriptionToken]))
+      else
+        Writeln('It is not subscribed to the data provider.');
+
+    end;
+
     LServer.DefaultPort := Port;
     LServer.Active := True;
-    Writeln(Format('Server started on port %d', [Port]));
     LServer.MaxConnections := 0;
     LServer.ListenQueue := 200;
 

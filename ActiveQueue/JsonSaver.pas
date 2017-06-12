@@ -7,7 +7,7 @@ uses
 
 type
   /// A class that saves given state in a file.
-  TJsonSaver = class
+  TJsonSaver = class(TObject)
   strict private
   const
     Suffix = '-YYYY-mm-dd_hh_nn_ss';

@@ -3,7 +3,7 @@ unit Controller;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model;
+  MVCFramework, MVCFramework.Commons, Model, ConsumerConfig;
 
 type
 
@@ -23,6 +23,8 @@ type
     class procedure Teardown();
 
     class function GetPort(): Integer;
+
+    class function GetConfig(): TConsumerConfig;
 
     /// <summary> Load the configuration from a file. The config. file must contain a string version
     /// of a json object.
@@ -49,7 +51,7 @@ implementation
 
 uses
   MVCFramework.Logger, MVCFramework.RESTAdapter, ActiveQueueAPI,
-  SubscriptionData, ActiveQueueResponce, IdSMTP, IdMessage, Config,
+  SubscriptionData, IdSMTP, IdMessage, Config, ActiveQueueResponce,
   System.SysUtils;
 
 class procedure TController.Setup;
@@ -60,6 +62,13 @@ end;
 class procedure TController.Teardown;
 begin
   Model.DisposeOf;
+end;
+
+class function TController.GetConfig: TConsumerConfig;
+begin
+  if Model <> nil then
+    Result := Model.GetConfig();
+
 end;
 
 class function TController.GetPort: Integer;
@@ -129,17 +138,10 @@ end;
 
 procedure TController.Subscribe(const Ctx: TWebContext);
 var
-  Adapter: TRestAdapter<IActiveQueueAPI>;
-  Server: IActiveQueueAPI;
   Responce: TActiveQueueResponce;
 begin
-  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
-  Server := Adapter.Build('192.168.5.95', 8070);
-  Responce := Server.Subscribe(TSubscriptionData.Create('1.1.1.1', '', 9001, ''));
-  if Responce.Status then
-    Writeln('subscription token: ' + Responce.Token)
-  else
-    Writeln('Failed to subscribe: ' + Responce.Msg);
+  Responce := Model.Subscribe();
+  Render(Responce)
 end;
 
 procedure TController.Unsubscribe(const Ctx: TWebContext);

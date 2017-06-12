@@ -10,7 +10,7 @@ type
   /// <summary>Abstract data type to represent the responces from the
   /// back end server corresponding to previously made requests.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TActiveQueueResponce = class
+  TActiveQueueResponce = class(TObject)
   strict private
     FStatus: Boolean;
     FMessage: String;
