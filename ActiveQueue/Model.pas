@@ -168,7 +168,7 @@ implementation
 
 uses
   System.SysUtils, MVCFramework.RESTAdapter, System.JSON, System.IOUtils,
-  JsonableInterface;
+  JsonableInterface, System.RegularExpressions;
 { TActiveQueueModel }
 
 function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
@@ -220,9 +220,11 @@ begin
         end
         else
         begin
+
           Repeat
             CreateGUID(Guid);
-            Token := Guid.ToString;
+            Token := TRegEx.Replace(Guid.ToString, '[^a-zA-Z0-9_]', '');
+
           until Not(FSubscriptionRegister.ContainsKey(Token));
           // create a copy of the object
           FSubscriptionRegister.Add(Token, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));

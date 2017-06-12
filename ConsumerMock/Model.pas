@@ -81,7 +81,6 @@ var
   Adapter: TRestAdapter<IActiveQueueAPI>;
   Server: IActiveQueueAPI;
   SubscriptionData: TSubscriptionData;
-  Responce: TActiveQueueResponce;
   ConfigNew: TConsumerConfig;
 begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
@@ -93,13 +92,11 @@ begin
   Result := Server.Subscribe(SubscriptionData);
   if Result.status then
   begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Responce.Status, Responce.Token);
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Result.Status, Result.Token);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
   end;
-
-  // SubscriptionData.DisposeOf;
   Server := nil;
   Adapter := nil;
 end;

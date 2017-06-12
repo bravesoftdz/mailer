@@ -32,6 +32,7 @@ type
     property Path: String read FPath write FPath;
     constructor Create(const Ip, Url: String; const Port: Integer; const Path: String); overload;
     constructor Create(); overload;
+    destructor Destroy(); override;
     /// <summary>Compare objects by their content, not by their references.</summary>
     function Equals(Obj: TObject): Boolean; override;
     /// <summary>Since the  method Equals() is overriden, hash code must be overriden as well. </summary>
@@ -63,6 +64,12 @@ begin
   FUrl := '';
   FPort := 0;
   FPath := '';
+end;
+
+destructor TSubscriptionData.Destroy;
+begin
+  Writeln('Destroying a TSubscriptionData istance');
+  inherited;
 end;
 
 function TSubscriptionData.Equals(Obj: TObject): Boolean;
