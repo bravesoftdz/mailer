@@ -4,6 +4,12 @@ program ConsumerMock;
 
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+
   System.SysUtils,
   MVCFramework.Logger,
   Winapi.Windows,
@@ -16,9 +22,10 @@ uses
   CliParam in '..\CliParam.pas',
   ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
   ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
-  Config in 'Config.pas',
+  SendmailConfig in 'SendmailConfig.pas',
   Model in 'Model.pas',
-  ConsumerConfig in 'ConsumerConfig.pas', System.Generics.Collections,
+  ConsumerConfig in 'ConsumerConfig.pas',
+  System.Generics.Collections,
   CliUsage in '..\ActiveQueue\CliUsage.pas';
 
 {$R *.res}
@@ -55,19 +62,16 @@ begin
   try
     TController.LoadConfigFromFile(ConfigFileName);
     Config := TController.GetConfig();
-    if Config <> nil then
-    begin
-      Port := Config.Port;
-      Writeln(Format('Server started on port %d', [Port]));
+    Port := Config.Port;
+    Writeln(Format('Server started on port %d', [Port]));
+    Writeln(Format('Data provider ip: %s', [Config.ProviderIp]));
+    Writeln(Format('Data provider port: %d', [Config.ProviderPort]));
+    if Config.SubscriptionStatus then
+      Writeln(Format('It is subscribed to the data provider, token: %s', [Config.SubscriptionToken]))
+    else
+      Writeln('It is not subscribed to the data provider.');
 
-      Writeln(Format('Data provider ip: %s', [Config.ProviderIp]));
-      Writeln(Format('Data provider port: %d', [Config.ProviderPort]));
-      if Config.SubscriptionStatus then
-        Writeln(Format('It is subscribed to the data provider, token: %s', [Config.SubscriptionToken]))
-      else
-        Writeln('It is not subscribed to the data provider.');
-
-    end;
+    Config.DisposeOf;
 
     LServer.DefaultPort := Port;
     LServer.Active := True;

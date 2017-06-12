@@ -14,6 +14,17 @@ type
     BACKEND_PORT_KEY = 'data-provider-port';
     SUBSCRIPTION_STATUS_KEY = 'subscription-status';
     SUBSCRIPTION_TOKEN_KEY = 'subscription-token';
+    /// extract the key value from the json object as an integer. In case of failure, the dafualt value
+    /// is returned.
+    function GetIntValue(const jo: TJsonObject; const key: String; const DefaultValue: Integer): Integer;
+
+    /// extract the key value from the json object as a string. In case of failure, the dafualt value
+    /// is returned.
+    function GetStrValue(const jo: TJsonObject; const key: String; const DefaultValue: String): String;
+
+    /// extract the key value from the json object as a boolean. In case of failure, the dafualt value
+    /// is returned.
+    function GetBoolValue(const jo: TJsonObject; const key: String; const DefaultValue: Boolean): Boolean;
 
   var
     FPort: Integer;
@@ -26,7 +37,6 @@ type
     constructor Create(const Port: Integer; const BackEndIp: String; const BackEndPort: Integer;
       const SubscriptionStatus: Boolean; const SubscriptionToken: String); Overload;
     constructor Create(const Json: TJsonObject); Overload;
-    destructor Destroy(); override;
     function ToJson(): TJsonObject;
     property Port: Integer read Fport;
     property ProviderIp: String read FProviderIp;
@@ -44,25 +54,69 @@ uses
 { TConsumerConfig }
 
 constructor TConsumerConfig.Create(const Json: TJsonObject);
-var
-  BoolOptional: TJsonValue;
-  StrOptional: TJsonValue;
 begin
-  FPort := strtoint(Json.GetValue(PORT_KEY).Value);
-  FProviderPort := strtoint(Json.GetValue(BACKEND_PORT_KEY).Value);
-  FProviderIP := Json.GetValue(BACKEND_IP_KEY).Value;
-  BoolOptional := Json.GetValue(SUBSCRIPTION_STATUS_KEY);
-  if (BoolOptional <> nil) AND (BoolOptional is TJSONBool) then
-    FSubscriptionStatus := (BoolOptional as TJSONBool).AsBoolean
+  FPort := GetIntValue(Json, PORT_KEY, -1);
+  FProviderPort := GetIntValue(Json, BACKEND_PORT_KEY, -1);
+  FProviderIP := GetStrValue(Json, BACKEND_IP_KEY, '');
+  FSubscriptionStatus := GetBoolValue(Json, SUBSCRIPTION_STATUS_KEY, False);
+  FSubscriptionToken := GetStrValue(Json, SUBSCRIPTION_TOKEN_KEY, '');
+end;
+
+function TConsumerConfig.GetBoolValue(const jo: TJsonObject; const key: String;
+  const DefaultValue: Boolean): Boolean;
+var
+  value: TJsonValue;
+begin
+  value := jo.GetValue(key);
+  if (Value <> nil) AND (Value is TJsonBool) then
+  begin
+    try
+      Result := (value as TJSONBool).AsBoolean;
+    except
+      on E: Exception do
+        Result := DefaultValue;
+    end;
+  end
   else
-    FSubscriptionStatus := False;
-  BoolOptional.DisposeOf;
-  StrOptional := Json.GetValue(SUBSCRIPTION_TOKEN_KEY);
-  if StrOptional <> nil then
-    FSubscriptionToken := StrOptional.Value
+    Result := DefaultValue;
+end;
+
+function TConsumerConfig.GetIntValue(const jo: TJsonObject; const key: String;
+  const DefaultValue: Integer): Integer;
+var
+  value: TJsonValue;
+begin
+  value := jo.GetValue(key);
+  if Value <> nil then
+  begin
+    try
+      Result := strtoint(value.Value);
+    except
+      on E: Exception do
+        Result := DefaultValue;
+    end;
+  end
   else
-    FSubscriptionToken := '';
-  StrOptional.DisposeOf;
+    Result := DefaultValue;
+end;
+
+function TConsumerConfig.GetStrValue(const jo: TJsonObject; const key,
+  DefaultValue: String): String;
+var
+  value: TJsonValue;
+begin
+  value := jo.GetValue(key);
+  if Value <> nil then
+  begin
+    try
+      Result := value.Value;
+    except
+      on E: Exception do
+        Result := DefaultValue;
+    end;
+  end
+  else
+    Result := DefaultValue;
 end;
 
 constructor TConsumerConfig.Create(const Port: Integer; const BackEndIp: String;
@@ -73,12 +127,6 @@ begin
   FProviderPort := BackEndPort;
   FSubscriptionStatus := SubscriptionStatus;
   FSubscriptionToken := SubscriptionToken;
-end;
-
-destructor TConsumerConfig.Destroy;
-begin
-
-  inherited;
 end;
 
 function TConsumerConfig.ToJson: TJsonObject;

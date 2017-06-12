@@ -51,7 +51,7 @@ implementation
 
 uses
   MVCFramework.Logger, MVCFramework.RESTAdapter, ActiveQueueAPI,
-  SubscriptionData, IdSMTP, IdMessage, Config, ActiveQueueResponce,
+  SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
   System.SysUtils;
 
 class procedure TController.Setup;

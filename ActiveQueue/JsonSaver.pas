@@ -29,7 +29,7 @@ type
 implementation
 
 uses
-  System.IOUtils, System.SysUtils;
+  System.IOUtils, System.SysUtils, System.JSON;
 
 { TStateSaver }
 
@@ -53,9 +53,19 @@ end;
 procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
 var
   OutFileName: String;
+  jo: TJsonObject;
+  Text: String;
 begin
   OutFileName := GetAvailablePath(FilePath, Suffix);
-  TFile.AppendAllText(OutFileName, Obj.ToJson().ToString());
+  jo := Obj.ToJson();
+  if jo <> nil then
+  begin
+    Text := jo.ToString();
+    TFile.AppendAllText(OutFileName, Text);
+    Text := '';
+    jo.DisposeOf;
+  end;
+
 end;
 
 procedure TJsonSaver.SaveMulti(const FilePath: String; const Items: TList<Jsonable>);

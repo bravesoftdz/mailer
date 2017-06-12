@@ -74,7 +74,6 @@ begin
     FConfig.DisposeOf;
   FConfig := TConsumerConfig.Create(Json);
   Json.DisposeOf;
-
 end;
 
 function TConsumerModel.Subscribe: TActiveQueueResponce;
@@ -100,7 +99,8 @@ begin
     FFileSaver.Save(FConfigFilePath, FConfig);
   end;
   Responce.DisposeOf;
-  SubscriptionData.DisposeOf;
+
+  // SubscriptionData.DisposeOf;
   Server := nil;
   Adapter.DisposeOf;
 end;
