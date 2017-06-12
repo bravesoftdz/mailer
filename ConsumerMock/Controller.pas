@@ -54,13 +54,11 @@ uses
 
 class procedure TController.Setup;
 begin
-  Writeln('Set up the controller');
   Model := TConsumerModel.Create();
 end;
 
 class procedure TController.Teardown;
 begin
-  Writeln('Tear down the controller');
   Model.DisposeOf;
 end;
 

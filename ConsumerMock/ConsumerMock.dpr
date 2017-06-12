@@ -13,11 +13,13 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
+  CliParam in '..\CliParam.pas',
   ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
   ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
   Config in 'Config.pas',
   Model in 'Model.pas',
-  ConsumerConfig in 'ConsumerConfig.pas';
+  ConsumerConfig in 'ConsumerConfig.pas', System.Generics.Collections,
+  CliUsage in '..\ActiveQueue\CliUsage.pas';
 
 {$R *.res}
 
@@ -29,6 +31,8 @@ const
 
 var
   ConfigFileName: String;
+  Usage: String;
+  CliParams: TArray<TCliParam>;
 
 procedure RunServer(const ConfigFileName: String);
 var
@@ -82,7 +86,15 @@ begin
     RunServer(ConfigFileName);
   except
     on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+    begin
+      Writeln(E.ClassName + ': ' + E.Message);
+      CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
+      Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
+      Writeln(Usage);
+      CliParams[0].DisposeOf;
+      SetLength(CliParams, 0);
+
+    end;
   end;
 
 end.
