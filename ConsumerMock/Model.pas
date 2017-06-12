@@ -90,24 +90,28 @@ begin
   /// ignored by the data provider server since the ip gets extracted from the http request
   /// that the consumer sends to the data provider.
   SubscriptionData := TSubscriptionData.Create('', '', FConfig.Port, '');
-  Responce := Server.Subscribe(SubscriptionData);
-  if Responce.status then
+  Result := Server.Subscribe(SubscriptionData);
+  if Result.status then
   begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Responce.Status, Responce.Token);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
   end;
-  Responce.DisposeOf;
 
   // SubscriptionData.DisposeOf;
   Server := nil;
-  Adapter.DisposeOf;
+  Adapter := nil;
 end;
 
 function TConsumerModel.Unsubscribe(const Token: String): TActiveQueueResponce;
+var
+  Adapter: TRestAdapter<IActiveQueueAPI>;
+  Server: IActiveQueueAPI;
 begin
-
+  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
+  Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
+  Result := Server.UnSubscribe(Token);
 end;
 
 end.

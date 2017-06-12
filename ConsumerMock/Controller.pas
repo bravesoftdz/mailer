@@ -146,19 +146,12 @@ end;
 
 procedure TController.Unsubscribe(const Ctx: TWebContext);
 var
-  Adapter: TRestAdapter<IActiveQueueAPI>;
-  Server: IActiveQueueAPI;
   Responce: TActiveQueueResponce;
   Token: String;
 begin
-  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
-  Server := Adapter.Build('192.168.5.95', 8070);
   Token := Context.Request.Params['token'];
-  Responce := Server.UnSubscribe(Token);
-  if (Responce.status) then
-    Writeln('unsubscription success.')
-  else
-    Writeln('unsubscription failure')
+  Responce := Model.Unsubscribe(Token);
+  Render(Responce);
 end;
 
 initialization

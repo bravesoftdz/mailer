@@ -1,2 +1,2 @@
 SendmailConfig.pas
-Consumer*.conf
+config_folder\Consumer-*.conf
