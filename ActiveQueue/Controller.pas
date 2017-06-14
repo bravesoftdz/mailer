@@ -70,7 +70,7 @@ type
     /// request given number of items from the ActiveQueue.
     [MVCPath('/items/get/($n)')]
     [MVCHTTPMethod([httpGET])]
-//    [MVCProduces('application/json')]
+    // [MVCProduces('application/json')]
     procedure GetItems(const Context: TWebContext);
 
     /// add items to the ActiveQueue.
@@ -222,12 +222,27 @@ procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
   Items: TObjectList<TReceptionRequest>;
-  N: Integer;
+  QtyString: String;
+  Qty: Integer;
 begin
-  N := Context.Request.Params['n'].ToInteger;
-  ip := Context.Request.ClientIP;
-  Items := Model.GetItems(Ip, N);
-  Render<TReceptionRequest>(Items);
+  QtyString := Context.Request.Params['n'].Trim();
+  if (QtyString <> '') then
+  begin
+    try
+      Qty := QtyString.ToInteger;
+    except
+      on E: Exception do
+        Qty := 0;
+    end;
+    if Qty > 0 then
+    begin
+      ip := Context.Request.ClientIP;
+      Items := Model.GetItems(Ip, Qty);
+      Render<TReceptionRequest>(Items);
+    end;
+
+  end;
+
 end;
 
 class function TController.GetListeners: TObjectList<TListenerInfo>;
