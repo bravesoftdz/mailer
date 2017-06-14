@@ -12,6 +12,7 @@ type
   strict private
     class var
       Model: TConsumerModel;
+
   public
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference  corresponding to the model
@@ -87,39 +88,14 @@ end;
 
 procedure TController.Notify(const Ctx: TWebContext);
 var
-  SMTP: TIdSMTP;
-  Msg: TIdMessage;
+  IP: String;
 begin
-  Render('notified');
-  MSG := TIdMessage.Create(NIL);
-  TRY
-    WITH MSG.Recipients.Add DO
-    BEGIN
-      Name := 'Recep. name';
-      Address := TConfig.MAIL_TO;
-    END;
-    // MSG.BccList.Add.Address := '<Email address of Blind Copy recipient>';
-    MSG.From.Name := '<Name of sender>';
-    MSG.From.Address := TConfig.MAIL_FROM;
-    MSG.Body.Text := 'Ciao!';
-    MSG.Subject := 'test message';
-    SMTP := TIdSMTP.Create(NIL);
-    TRY
-      SMTP.Host := TConfig.HOST;
-      SMTP.Port := TConfig.PORT;
-      SMTP.Connect;
-      TRY
-        SMTP.Send(MSG);
-        Writeln('Mail sent');
-      FINALLY
-        SMTP.Disconnect
-      END
-    FINALLY
-      SMTP.Free
-    END
-  FINALLY
-    MSG.Free
-  END;
+  IP := Context.Request.ClientIP;
+  Writeln('Notified by ' + IP);
+  if Model.isProviderAuthorized(IP) then
+  begin
+    Model.OnProviderStateUpdate();
+  end;
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);

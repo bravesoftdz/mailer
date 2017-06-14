@@ -70,7 +70,7 @@ type
     /// request given number of items from the ActiveQueue.
     [MVCPath('/items/get/($n)')]
     [MVCHTTPMethod([httpGET])]
-    [MVCProduces('application/json')]
+//    [MVCProduces('application/json')]
     procedure GetItems(const Context: TWebContext);
 
     /// add items to the ActiveQueue.
@@ -214,8 +214,8 @@ class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TReceptionRequest>): Boolean;
 begin
   Result := Model.Enqueue(IP, Items);
-//  if Result then
-//    Model.PersistQueue();
+  // if Result then
+  // Model.PersistQueue();
 end;
 
 procedure TController.GetItems(const Context: TWebContext);
@@ -322,8 +322,13 @@ var
   jo: TJsonObject;
 begin
   ip := Context.Request.ClientIP;
-  jo := Context.Request.BodyAsJSONObject;
-  if (Assigned(jo)) then
+  if Context.Request.ThereIsRequestBody then
+  begin
+    jo := Context.Request.BodyAsJSONObject;
+  end
+  else
+    jo := nil;
+  if jo <> nil then
   begin
     try
       SubscriptionData := Mapper.JSONObjectToObject<TSubscriptionData>(jo);

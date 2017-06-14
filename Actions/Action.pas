@@ -99,8 +99,8 @@ begin
   end;
 
   Request := builder.build;
-  adapter := TRestAdapter<ISendServerProxy>.Create();
-  server := adapter.Build(Settings.Url, Settings.Port);
+  Adapter := TRestAdapter<ISendServerProxy>.Create();
+  Server := Adapter.Build(Settings.Url, Settings.Port);
   if (Server = nil) then
   begin
     Result.msg := 'Backend server is not running';
@@ -120,7 +120,8 @@ begin
       end;
     end;
   end;
-
+  Server := nil;
+  Adapter := nil;
 end;
 
 { TActionContact }

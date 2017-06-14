@@ -26,7 +26,7 @@ type
     procedure Save(const FilePath: String; const Obj: Jsonable);
     procedure SaveMulti(const FilePath: String; const Items: TList<Jsonable>);
     constructor Create();
-    destructor Destory(); override;
+    destructor Destroy(); override;
 
   end;
 
@@ -42,7 +42,7 @@ begin
   FLockObject := Tobject.Create();
 end;
 
-destructor TJsonSaver.Destory;
+destructor TJsonSaver.Destroy;
 begin
   FLockObject.DisposeOf;
   inherited;
