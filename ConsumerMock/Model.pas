@@ -105,10 +105,18 @@ function TConsumerModel.Unsubscribe(const Token: String): TActiveQueueResponce;
 var
   Adapter: TRestAdapter<IActiveQueueAPI>;
   Server: IActiveQueueAPI;
+  ConfigNew: TConsumerConfig;
 begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
   Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
   Result := Server.UnSubscribe(Token);
+  if Result.status then
+  begin
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '');
+    FConfig.DisposeOf;
+    FConfig := ConfigNew;
+    FFileSaver.Save(FConfigFilePath, FConfig);
+  end;
 end;
 
 end.
