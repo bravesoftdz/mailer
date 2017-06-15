@@ -273,6 +273,7 @@ var
   item: TReceptionRequest;
   Outcome: Boolean;
   Wrapper: TObjectList<TReceptionRequest>;
+  Responce: TActiveQueueResponce;
   IP: String;
 begin
   Writeln('Posting an item.');
@@ -291,7 +292,8 @@ begin
   end
   else
     Outcome := False;
-  Render(Outcome.ToString(False));
+  Responce := TActiveQueueResponce.Create(OutCome, '', '');
+  Render(Responce);
 end;
 
 procedure TController.PostItems(const Context: TWebContext);

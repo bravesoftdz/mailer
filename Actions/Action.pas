@@ -82,6 +82,7 @@ var
   Request: TReceptionRequest;
   Items: TObjectList<TReceptionRequest>;
 begin
+  Writeln('ActionSend starts...');
   Result := TResponce.Create;
   builder := TReceptionRequestBuilder.Create();
   builder.SetFrom(TVenditoriCredentials.From())
@@ -112,11 +113,11 @@ begin
       if Responce.status then
         Result.msg := 'OK'
       else
-        Result.msg := Responce.Msg;
+        Result.msg := Responce.Msg + ' <--- responce from the server';
     except
       on E: Exception do
       begin
-        Result.msg := E.Message;
+        Result.msg := E.Message + ' <--- error';
       end;
     end;
   end;
