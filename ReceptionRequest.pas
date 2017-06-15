@@ -134,6 +134,22 @@ type
     constructor Create();
   end;
 
+type
+  TReceptionRequests = class(TObject)
+  strict private
+  var
+    FItems: TObjectList<TReceptionRequest>;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure SetItems(Items: TObjectList<TReceptionRequest>);
+
+    [MapperListOf(TReceptionRequest)]
+    property Items: TObjectList<TReceptionRequest> read FItems write SetItems;
+
+  end;
+
 implementation
 
 uses
@@ -318,6 +334,25 @@ begin
   Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
   Result.AddPair(TJsonPair.Create(TOKEN_TEXT, FText));
   { TODO: to finish }
+end;
+
+{ TReceptionRequests }
+
+constructor TReceptionRequests.Create;
+begin
+  FItems := TObjectList<TReceptionRequest>.Create();
+end;
+
+destructor TReceptionRequests.Destroy;
+begin
+  FItems.Clear;
+  inherited;
+end;
+
+procedure TReceptionRequests.SetItems(Items: TObjectList<TReceptionRequest>);
+begin
+  FItems.Clear;
+  FItems := Items;
 end;
 
 end.

@@ -49,7 +49,7 @@ implementation
 
 uses
   System.IOUtils, System.SysUtils, System.JSON, MVCFramework.RESTAdapter,
-  ActiveQueueAPI, SubscriptionData, IdSMTP, IdMessage, SendmailConfig;
+  ActiveQueueAPI, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers;
 
 { TConsumerModel }
 
@@ -133,17 +133,17 @@ var
   Server: IActiveQueueAPI;
   SubscriptionData: TSubscriptionData;
   ConfigNew: TConsumerConfig;
-  Items: TObjectList<TReceptionRequest>;
+  Items: TReceptionRequests;
 begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
   Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
   Writeln('Request data from the data provider');
   try
     Items := Server.GetItems(FConfig.SubscriptionToken, 5);
-    if Items <> nil then
+    if Items = nil then
       Writeln('Received null from the server...')
     else
-      Writeln('Received ' + Items.Count.ToString + ' item(s) from the server');
+      Writeln('Received ' + Items.Items.Count.ToString + ' item(s) from the server');
   except
     on E: Exception do
     begin
@@ -154,7 +154,7 @@ begin
   end;
 
   Writeln('Data received...');
-  Consume(Items);
+  Consume(Items.Items);
 
   Server := nil;
   Adapter := nil;
@@ -173,24 +173,32 @@ begin
   end;
   Msg := TIdMessage.Create(NIL);
   try
+//    MSG.Recipients.Add.Name := Item.sender;
+//    MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
     with MSG.Recipients.Add do
     begin
+      Writeln('Adding recipients...');
       Name := Item.sender;
-      Address := Item.recipto;
+      Address := TSendMailConfig.MAIL_TO;
     end;
-    MSG.BccList.Add.Address := Item.recipbcc;
-    Msg.From.Name := TSendMailConfig.SENDER_NAME;
+    Writeln('Adding address');
+
+    // MSG.BccList.Add.Address := Item.recipbcc;
+    // Msg.From.Name := TSendMailConfig.SENDER_NAME;
     Msg.From.Address := TSendMailConfig.MAIL_FROM;
     Msg.Body.Text := Item.text;
     Msg.Subject := Item.subject;
     Smtp := TIdSMTP.Create(NIL);
     try
+      Writeln('Trying to connect');
       Smtp.Host := TSendMailConfig.HOST;
       Smtp.Port := TSendMailConfig.PORT;
       Smtp.Connect;
       try
         Smtp.Send(MSG);
+        Writeln('Trying to send');
       finally
+        Writeln('Trying to disconnect');
         Smtp.Disconnect
       end
     finally

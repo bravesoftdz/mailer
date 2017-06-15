@@ -3,7 +3,7 @@ unit ActiveQueueAPI;
 interface
 
 uses SubscriptionData, ActiveQueueResponce, ReceptionRequest,
-  System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons;
+  System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
 
 type
   IActiveQueueAPI = interface(IInvokable)
@@ -16,7 +16,7 @@ type
     function Unsubscribe([Param('token')] Token: String): TActiveQueueResponce;
 
     [RESTResource(TMVCHTTPMethodType.httpGET, '/items/get/{token}/{quantity}')]
-    function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TObjectList<TReceptionRequest>;
+    function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TReceptionRequests;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
     function PutItems([Body] Items: TObjectList<TReceptionRequest>): Boolean;

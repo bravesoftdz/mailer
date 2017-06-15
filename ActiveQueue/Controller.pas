@@ -220,7 +220,7 @@ end;
 procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
-  Items: TObjectList<TReceptionRequest>;
+  Items: TReceptionRequests;
   QtyString: String;
   Qty: Integer;
   Token: String;
@@ -238,8 +238,9 @@ begin
     if Qty > 0 then
     begin
       ip := Context.Request.ClientIP;
-      Items := Model.GetItems(Ip, Token, Qty);
-      Writeln('AQ controller: rendering ' + Items.Count.ToString + ' items');
+      Items := TReceptionRequests.Create();
+      Items.Items := Model.GetItems(Ip, Token, Qty);
+      Writeln('AQ controller: rendering ' + Items.Items.Count.ToString + ' items');
       Render(Items);
     end;
 
