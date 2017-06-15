@@ -3,7 +3,8 @@ unit Model;
 interface
 
 uses
-  ConsumerConfig, ActiveQueueResponce, JsonSaver, System.Generics.Collections, ReceptionRequest;
+  ConsumerConfig, ActiveQueueResponce, JsonSaver, System.Generics.Collections, ReceptionRequest,
+  MVCFramework.RESTAdapter, ActiveQueueAPI;
 
 type
   /// The model may be in one of the following statuses:
@@ -20,6 +21,9 @@ type
     FFileSaver: TJsonSaver;
     /// the current model status
     FStatus: TStatus;
+
+    FAdapter: TRestAdapter<IActiveQueueAPI>;
+    FServer: IActiveQueueAPI;
 
   var
     procedure RequestAndExecute();
@@ -40,6 +44,8 @@ type
     /// <summary>Retrieve data from the provider</sumamry>
     procedure OnProviderStateUpdate();
 
+    procedure Start();
+
     constructor Create();
     destructor Destroy(); override;
 
@@ -48,8 +54,7 @@ type
 implementation
 
 uses
-  System.IOUtils, System.SysUtils, System.JSON, MVCFramework.RESTAdapter,
-  ActiveQueueAPI, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers;
+  System.IOUtils, System.SysUtils, System.JSON, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers;
 
 { TConsumerModel }
 
@@ -64,6 +69,8 @@ begin
   if FConfig <> nil then
     FConfig.DisposeOf;
   FFileSaver.DisposeOf;
+  Fserver := nil;
+  FAdapter := nil;
   inherited;
 end;
 
@@ -122,24 +129,18 @@ begin
     finally
       FStatus := TStatus.Ready;
     end;
-
   end;
-
 end;
 
 procedure TConsumerModel.RequestAndExecute;
 var
-  Adapter: TRestAdapter<IActiveQueueAPI>;
-  Server: IActiveQueueAPI;
   SubscriptionData: TSubscriptionData;
   ConfigNew: TConsumerConfig;
   Items: TReceptionRequests;
 begin
-  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
-  Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
   Writeln('Request data from the data provider');
   try
-    Items := Server.GetItems(FConfig.SubscriptionToken, 5);
+    Items := FServer.GetItems(FConfig.SubscriptionToken, FConfig.BlockSize);
     if Items = nil then
       Writeln('Received null from the server...')
     else
@@ -150,14 +151,9 @@ begin
       Writeln('Error while getting items from the data provider');
       Writeln(E.Message);
     end;
-
   end;
-
   Writeln('Data received...');
   Consume(Items.Items);
-
-  Server := nil;
-  Adapter := nil;
 end;
 
 procedure TConsumerModel.SendMail(const Item: TReceptionRequest);
@@ -177,7 +173,6 @@ begin
     // MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
     with MSG.Recipients.Add do
     begin
-      Writeln('Adding recipients...');
       Name := Item.sender;
       Address := TSendMailConfig.MAIL_TO;
     end;
@@ -210,40 +205,37 @@ begin
   Writeln('Message sent');
 end;
 
+procedure TConsumerModel.Start;
+begin
+  FAdapter := TRestAdapter<IActiveQueueAPI>.Create();
+  FServer := FAdapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
+end;
+
 function TConsumerModel.Subscribe: TActiveQueueResponce;
 var
-  Adapter: TRestAdapter<IActiveQueueAPI>;
-  Server: IActiveQueueAPI;
   SubscriptionData: TSubscriptionData;
   ConfigNew: TConsumerConfig;
 begin
-  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
-  Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
   /// the first argument (correponding to an ip at which the consumer operates) gets
   /// ignored by the data provider server since the ip gets extracted from the http request
   /// that the consumer sends to the data provider.
   SubscriptionData := TSubscriptionData.Create('', '', FConfig.Port, '');
-  Result := Server.Subscribe(SubscriptionData);
+  Result := FServer.Subscribe(SubscriptionData);
   if Result.status then
   begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize);
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+      FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
   end;
-  Server := nil;
-  Adapter := nil;
 end;
 
 function TConsumerModel.Unsubscribe(const Token: String): TActiveQueueResponce;
 var
-  Adapter: TRestAdapter<IActiveQueueAPI>;
-  Server: IActiveQueueAPI;
   ConfigNew: TConsumerConfig;
 begin
-  Adapter := TRestAdapter<IActiveQueueAPI>.Create();
-  Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
-  Result := Server.UnSubscribe(Token);
+  Result := FServer.UnSubscribe(Token);
   if Result.status then
   begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize);

@@ -84,6 +84,7 @@ begin
   if Model = nil then
     raise Exception.Create('Consumer model is not set.');
   Model.LoadConfigFromFile(FilePath);
+  Model.Start();
 end;
 
 procedure TController.Notify(const Ctx: TWebContext);
