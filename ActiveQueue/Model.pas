@@ -112,7 +112,7 @@ type
     function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
 
     /// get not more that N items from the queue.
-    function GetItems(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+    function GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TReceptionRequest>;
 
     /// <summary>Add many items to the pull</summary>
     /// <param name="Items">list of elements to be added to the queue</param>
@@ -413,14 +413,14 @@ begin
 
 end;
 
-function TActiveQueueModel.GetItems(const Ip: String; const N: Integer): TObjectList<TReceptionRequest>;
+function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TReceptionRequest>;
 var
   Size, ReturnSize, I: Integer;
 begin
   Result := TObjectList<TReceptionRequest>.Create(True);
   TMonitor.Enter(FListenersLock);
   try
-    if (N >= 0) AND FSubscriptionRegister.ContainsKey(Ip) then
+    if (N >= 0) AND FSubscriptionRegister.ContainsKey(Token) then
     begin
       TMonitor.Enter(FQueueLock);
       Size := FItems.Count;
@@ -434,7 +434,7 @@ begin
       end;
       for I := 0 to ReturnSize - 1 do
       begin
-        FItems[I] := nil;
+//        FItems[I] := nil;
       end;
       TMonitor.Exit(FQueueLock);
     end;

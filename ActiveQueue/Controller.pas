@@ -68,9 +68,8 @@ type
     procedure unsubscribe(const Context: TWebContext);
 
     /// request given number of items from the ActiveQueue.
-    [MVCPath('/items/get/($n)')]
+    [MVCPath('/items/get/($token)/($n)')]
     [MVCHTTPMethod([httpGET])]
-    // [MVCProduces('application/json')]
     procedure GetItems(const Context: TWebContext);
 
     /// add items to the ActiveQueue.
@@ -224,8 +223,10 @@ var
   Items: TObjectList<TReceptionRequest>;
   QtyString: String;
   Qty: Integer;
+  Token: String;
 begin
   QtyString := Context.Request.Params['n'].Trim();
+  Token := Context.Request.Params['token'].Trim();
   if (QtyString <> '') then
   begin
     try
@@ -237,8 +238,8 @@ begin
     if Qty > 0 then
     begin
       ip := Context.Request.ClientIP;
-      Items := Model.GetItems(Ip, Qty);
-      Render<TReceptionRequest>(Items);
+      Items := Model.GetItems(Ip, Token, Qty);
+      Render(Items);
     end;
 
   end;

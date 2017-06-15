@@ -117,7 +117,12 @@ begin
   begin
     Writeln('Take care of requesting data...');
     FStatus := Occupied;
-    RequestAndExecute();
+    try
+      RequestAndExecute();
+    finally
+      FStatus := TStatus.Ready;
+    end;
+
   end;
 
 end;
@@ -133,10 +138,20 @@ begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
   Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
   Writeln('Request data from the data provider');
-  Items := Server.GetItems(5);
+  try
+    Items := Server.GetItems(FConfig.SubscriptionToken, 5);
+  except
+    on E: Exception do
+    begin
+      Writeln('Error while getting items from the data provider');
+      Writeln(E.Message);
+    end;
+
+  end;
+
   Writeln('Data received...');
   Consume(Items);
-  FStatus := TStatus.Ready;
+
   Server := nil;
   Adapter := nil;
 end;
@@ -146,6 +161,12 @@ var
   Smtp: TIdSMTP;
   Msg: TIdMessage;
 begin
+  Writeln('Sending a message');
+  if (Item = nil) then
+  begin
+    Writeln('Null item to send... Exiting.');
+    Exit();
+  end;
   Msg := TIdMessage.Create(NIL);
   try
     with MSG.Recipients.Add do
@@ -174,6 +195,7 @@ begin
   finally
     Msg.DisposeOf;
   end;
+  Writeln('Message sent');
 end;
 
 function TConsumerModel.Subscribe: TActiveQueueResponce;

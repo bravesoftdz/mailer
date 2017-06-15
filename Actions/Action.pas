@@ -113,11 +113,11 @@ begin
       if Responce.status then
         Result.msg := 'OK'
       else
-        Result.msg := Responce.Msg + ' <--- responce from the server';
+        Result.msg := Responce.Msg;
     except
       on E: Exception do
       begin
-        Result.msg := E.Message + ' <--- error';
+        Result.msg := E.Message;
       end;
     end;
   end;

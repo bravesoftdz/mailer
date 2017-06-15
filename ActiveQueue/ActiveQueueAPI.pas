@@ -15,8 +15,8 @@ type
     [RESTResource(TMVCHTTPMethodType.httpPUT, '/unsubscribe/{token}')]
     function Unsubscribe([Param('token')] Token: String): TActiveQueueResponce;
 
-    [RESTResource(TMVCHTTPMethodType.httpGET, '/items/get/{quantity}')]
-    function GetItems([Param('quantity')] N: Integer): TObjectList<TReceptionRequest>;
+    [RESTResource(TMVCHTTPMethodType.httpGET, '/items/get/{token}/{quantity}')]
+    function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TObjectList<TReceptionRequest>;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
     function PutItems([Body] Items: TObjectList<TReceptionRequest>): Boolean;
