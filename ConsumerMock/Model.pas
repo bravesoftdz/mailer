@@ -81,7 +81,7 @@ end;
 function TConsumerModel.GetConfig: TConsumerConfig;
 begin
   if FConfig <> nil then
-    Result := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIp, FConfig.ProviderPort, FConfig.SubscriptionStatus, FConfig.SubscriptionToken);
+    Result := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIp, FConfig.ProviderPort, FConfig.SubscriptionStatus, FConfig.SubscriptionToken, FConfig.BlockSize);
 end;
 
 function TConsumerModel.GetPort: Integer;
@@ -173,8 +173,8 @@ begin
   end;
   Msg := TIdMessage.Create(NIL);
   try
-//    MSG.Recipients.Add.Name := Item.sender;
-//    MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
+    // MSG.Recipients.Add.Name := Item.sender;
+    // MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
     with MSG.Recipients.Add do
     begin
       Writeln('Adding recipients...');
@@ -226,7 +226,7 @@ begin
   Result := Server.Subscribe(SubscriptionData);
   if Result.status then
   begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Result.Status, Result.Token);
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
@@ -246,7 +246,7 @@ begin
   Result := Server.UnSubscribe(Token);
   if Result.status then
   begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '');
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
