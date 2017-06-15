@@ -239,6 +239,7 @@ begin
     begin
       ip := Context.Request.ClientIP;
       Items := Model.GetItems(Ip, Token, Qty);
+      Writeln('AQ controller: rendering ' + Items.Count.ToString + ' items');
       Render(Items);
     end;
 

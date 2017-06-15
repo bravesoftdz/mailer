@@ -140,6 +140,10 @@ begin
   Writeln('Request data from the data provider');
   try
     Items := Server.GetItems(FConfig.SubscriptionToken, 5);
+    if Items <> nil then
+      Writeln('Received null from the server...')
+    else
+      Writeln('Received ' + Items.Count.ToString + ' item(s) from the server');
   except
     on E: Exception do
     begin

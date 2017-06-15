@@ -37,7 +37,7 @@ type
     FProxyRegister: TDictionary<String, IListenerProxy>;
 
     /// items of the queue
-    FItems: TObjectList<TReceptionRequest>;
+    FItems: TQueue<TReceptionRequest>;
 
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FListenersIPs: TArray<String>;
@@ -181,7 +181,7 @@ begin
     try
       for item in Items do
       begin
-        FItems.Add(item);
+        FItems.Enqueue(item);
       end;
       Result := True;
     except
@@ -278,14 +278,15 @@ begin
   TMonitor.Enter(FQueueLock);
   Result := 0;
   try
-    for Item in FItems do
-    begin
-      if Condition.Satisfy(Item) then
-      begin
-        FItems.Remove(Item);
-        Result := Result + 1;
-      end;
-    end;
+    Writeln('cancelling an item is not yet implemented when FItems is of TQueue type');
+    // for Item in FItems do
+    // begin
+    // if Condition.Satisfy(Item) then
+    // begin
+    // FItems.Remove(Item);
+    // Result := Result + 1;
+    // end;
+    // end;
   finally
     TMonitor.Exit(FQueueLock);
   end;
@@ -374,7 +375,7 @@ begin
   FProvidersLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
-  FItems := TObjectList<TReceptionRequest>.Create;
+  FItems := TQueue<TReceptionRequest>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
   FStateSaver := TJsonSaver.Create();
@@ -401,9 +402,9 @@ begin
   FProxyRegister.Clear;
   FProxyRegister.DisposeOf;
   // remove objects from the queue and clean the queue afterwards
-  S := FItems.Count;
-  for I := 0 to S - 1 do
-    FItems[I] := nil;
+  // S := FItems.Count;      /
+  // for I := 0 to S - 1 do
+  // FItems[I] := nil;
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
@@ -430,18 +431,14 @@ begin
         ReturnSize := N;
       for I := 0 to ReturnSize - 1 do
       begin
-        Result.Add(FItems[I]);
-      end;
-      for I := 0 to ReturnSize - 1 do
-      begin
-//        FItems[I] := nil;
+        Result.Add(FItems.Dequeue);
       end;
       TMonitor.Exit(FQueueLock);
     end;
   finally
     TMonitor.Exit(FListenersLock);
   end;
-
+  Writeln('Returning ' + Result.Count.ToString + ' item in request for ' + N.ToString + ' ones.');
 end;
 
 function TActiveQueueModel.GetListenersIPs: TArray<String>;
