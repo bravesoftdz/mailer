@@ -275,6 +275,7 @@ var
   Wrapper: TObjectList<TReceptionRequest>;
   IP: String;
 begin
+  Writeln('Posting an item.');
   if Context.Request.ThereIsRequestBody then
   begin
     try

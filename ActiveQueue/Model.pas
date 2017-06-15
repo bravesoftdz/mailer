@@ -175,10 +175,10 @@ function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TR
 var
   item: TReceptionRequest;
 begin
+  Writeln('Enqueueing ' + inttostr(Items.Count) + ' item(s)');
   TMonitor.Enter(FQueueLock);
   try
     try
-
       for item in Items do
       begin
         FItems.Add(item);
@@ -559,6 +559,7 @@ procedure TActiveQueueModel.NotifyListeners;
 var
   Token: String;
 begin
+  Writeln('Notifying the listeners');
   TMonitor.Enter(FListenersLock);
   try
     for Token in FProxyRegister.Keys do

@@ -112,8 +112,10 @@ end;
 
 procedure TConsumerModel.OnProviderStateUpdate;
 begin
+  Writeln('Data provider state has been changed');
   if FStatus = TStatus.Ready then
   begin
+    Writeln('Take care of requesting data...');
     FStatus := Occupied;
     RequestAndExecute();
   end;
@@ -130,9 +132,13 @@ var
 begin
   Adapter := TRestAdapter<IActiveQueueAPI>.Create();
   Server := Adapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
+  Writeln('Request data from the data provider');
   Items := Server.GetItems(5);
+  Writeln('Data received...');
   Consume(Items);
   FStatus := TStatus.Ready;
+  Server := nil;
+  Adapter := nil;
 end;
 
 procedure TConsumerModel.SendMail(const Item: TReceptionRequest);
