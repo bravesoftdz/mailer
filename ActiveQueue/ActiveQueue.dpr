@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   CliParam in '..\CliParam.pas',
@@ -60,7 +60,6 @@ var
   Listener: TListenerInfo;
   Listeners: TObjectList<TListenerInfo>;
 begin
-  SetConsoleTitle(PROGRAM_NAME);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
   Writeln('');
   Writeln('  ' + PROGRAM_NAME);
@@ -71,6 +70,8 @@ begin
   TController.LoadQueuesFromFile(QueueFileName);
 
   APort := TController.GetPort();
+  SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, APort])));
+
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
 

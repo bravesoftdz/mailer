@@ -66,7 +66,7 @@ var
   Client: TClient;
 begin
   Port := Config.Port;
-  SetConsoleTitle(PROGRAM_NAME);
+  SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, Port])));
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
   Writeln('');
   Writeln('  ' + PROGRAM_NAME);

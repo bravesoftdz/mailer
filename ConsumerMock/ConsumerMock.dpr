@@ -51,7 +51,6 @@ var
   Config: TConsumerConfig;
 
 begin
-  SetConsoleTitle(PROGRAM_NAME);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 13);
   Writeln('');
   Writeln('  ' + PROGRAM_NAME);
@@ -63,6 +62,7 @@ begin
     TController.LoadConfigFromFile(ConfigFileName);
     Config := TController.GetConfig();
     Port := Config.Port;
+    SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, Port])));
     Writeln(Format('Server started on port %d', [Port]));
     Writeln(Format('Data provider ip: %s', [Config.ProviderIp]));
     Writeln(Format('Data provider port: %d', [Config.ProviderPort]));
