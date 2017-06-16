@@ -9,7 +9,6 @@ uses
   madListHardware,
   madListProcesses,
   madListModules,
-
   System.SysUtils,
   MVCFramework.Logger,
   Winapi.Windows,
@@ -19,14 +18,14 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  CliParam in '..\CliParam.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
   ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
   SendmailConfig in 'SendmailConfig.pas',
   Model in 'Model.pas',
   ConsumerConfig in 'ConsumerConfig.pas',
   System.Generics.Collections,
-  CliUsage in '..\ActiveQueue\CliUsage.pas';
+  CliParam in '..\Cli\CliParam.pas',
+  CliUsage in '..\Cli\CliUsage.pas';
 
 {$R *.res}
 

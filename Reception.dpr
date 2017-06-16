@@ -30,7 +30,6 @@ uses
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   ActiveQueueSettings,
   SubscriptionData in 'SubscriptionData.pas',
-  CliParam in 'CliParam.pas',
   System.JSON,
   ObjectsMappers,
   System.IOUtils,
@@ -39,7 +38,8 @@ uses
   System.Generics.Collections,
   ClientFullRequest in 'ClientFullRequest.pas',
   Authentication in 'Authentication.pas',
-  CliUsage in 'ActiveQueue\CliUsage.pas';
+  CliParam in 'Cli\CliParam.pas',
+  CliUsage in 'Cli\CliUsage.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';

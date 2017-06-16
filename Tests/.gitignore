@@ -8,3 +8,4 @@ __recovery/
 *.local
 *.identcache
 *.stat
+*.res
