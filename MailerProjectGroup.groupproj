@@ -3,10 +3,7 @@
         <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="Reception.dproj">
-            <Dependencies/>
-        </Projects>
-        <Projects Include="BackEndMock\BackEndMock.dproj">
+        <Projects Include="Reception\Reception.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="Tests\Tests.dproj">
@@ -16,6 +13,9 @@
             <Dependencies/>
         </Projects>
         <Projects Include="ConsumerMock\ConsumerMock.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Reception.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -34,15 +34,6 @@
     </Target>
     <Target Name="Reception:Make">
         <MSBuild Projects="Reception.dproj" Targets="Make"/>
-    </Target>
-    <Target Name="BackEndMock">
-        <MSBuild Projects="BackEndMock\BackEndMock.dproj"/>
-    </Target>
-    <Target Name="BackEndMock:Clean">
-        <MSBuild Projects="BackEndMock\BackEndMock.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="BackEndMock:Make">
-        <MSBuild Projects="BackEndMock\BackEndMock.dproj" Targets="Make"/>
     </Target>
     <Target Name="Tests">
         <MSBuild Projects="Tests\Tests.dproj"/>
@@ -72,13 +63,13 @@
         <MSBuild Projects="ConsumerMock\ConsumerMock.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;BackEndMock;Tests;ActiveQueue;ConsumerMock"/>
+        <CallTarget Targets="Reception;Tests;ActiveQueue;ConsumerMock;Reception"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;BackEndMock:Clean;Tests:Clean;ActiveQueue:Clean;ConsumerMock:Clean"/>
+        <CallTarget Targets="Reception:Clean;Tests:Clean;ActiveQueue:Clean;ConsumerMock:Clean;Reception:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Reception:Make;BackEndMock:Make;Tests:Make;ActiveQueue:Make;ConsumerMock:Make"/>
+        <CallTarget Targets="Reception:Make;Tests:Make;ActiveQueue:Make;ConsumerMock:Make;Reception:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
