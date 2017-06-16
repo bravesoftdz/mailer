@@ -103,7 +103,6 @@
         <DCCReference Include="Providers\SoluzioneAgenti.pas"/>
         <DCCReference Include="Data\Credentials.pas"/>
         <DCCReference Include="Attachment.pas"/>
-        <DCCReference Include="ActiveQueueProxy.pas"/>
         <DCCReference Include="ClientRequest.pas"/>
         <DCCReference Include="FrontEndRequest.pas"/>
         <DCCReference Include="Provider.pas"/>

@@ -17,7 +17,6 @@ uses
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   Attachment in 'Attachment.pas',
-  ActiveQueueProxy in 'ActiveQueueProxy.pas',
   ClientRequest in 'ClientRequest.pas',
   FrontEndRequest in 'FrontEndRequest.pas',
   Provider in 'Provider.pas',
@@ -75,10 +74,6 @@ begin
   Writeln(Format('Starting HTTP Server on port %d', [Port]));
 
   BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
-
-  // DO you really need them now, when the model stores the backend settings?
-  // BackEndServer := TBackEndProxy.getInstance();
-  // BackEndServer.setSettings(BackEndSettings);
 
   TController.SetBackEndSettings(BackEndSettings);
 
