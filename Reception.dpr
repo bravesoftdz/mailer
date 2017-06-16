@@ -17,13 +17,7 @@ uses
   SoluzioneAgenti in 'Providers\SoluzioneAgenti.pas',
   Credentials in 'Data\Credentials.pas',
   Attachment in 'Attachment.pas',
-  ClientRequest in 'ClientRequest.pas',
-  FrontEndRequest in 'FrontEndRequest.pas',
-  Provider in 'Provider.pas',
-  ProviderFactory in 'ProviderFactory.pas',
   ReceptionModule in 'ReceptionModule.pas',
-  ReceptionRequest in 'ReceptionRequest.pas',
-  Responce in 'Responce.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
   ActiveQueueSettings,
   SubscriptionData in 'SubscriptionData.pas',
@@ -38,7 +32,13 @@ uses
   CliUsage in 'Cli\CliUsage.pas',
   Controller in 'Reception\Controller.pas',
   ReceptionModel in 'Reception\ReceptionModel.pas',
-  ReceptionConfig in 'Reception\ReceptionConfig.pas';
+  ReceptionConfig in 'Reception\ReceptionConfig.pas',
+  ClientRequest in 'Reception\ClientRequest.pas',
+  FrontEndRequest in 'Reception\FrontEndRequest.pas',
+  Provider in 'Reception\Provider.pas',
+  ProviderFactory in 'Reception\ProviderFactory.pas',
+  ReceptionRequest in 'Reception\ReceptionRequest.pas',
+  Responce in 'Reception\Responce.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';

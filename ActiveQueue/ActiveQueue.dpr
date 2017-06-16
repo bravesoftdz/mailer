@@ -13,10 +13,9 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
-  CliParam in '..\CliParam.pas',
   Model in 'Model.pas',
   System.IOUtils,
   System.JSON,
@@ -31,7 +30,8 @@ uses
   TokenBasedCondition in 'TokenBasedCondition.pas',
   JsonSaver in 'JsonSaver.pas',
   JsonableInterface in 'JsonableInterface.pas',
-  CliUsage in 'CliUsage.pas';
+  CliParam in '..\Cli\CliParam.pas',
+  CliUsage in '..\Cli\CliUsage.pas';
 
 {$R *.res}
 

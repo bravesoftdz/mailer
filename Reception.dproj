@@ -103,13 +103,7 @@
         <DCCReference Include="Providers\SoluzioneAgenti.pas"/>
         <DCCReference Include="Data\Credentials.pas"/>
         <DCCReference Include="Attachment.pas"/>
-        <DCCReference Include="ClientRequest.pas"/>
-        <DCCReference Include="FrontEndRequest.pas"/>
-        <DCCReference Include="Provider.pas"/>
-        <DCCReference Include="ProviderFactory.pas"/>
         <DCCReference Include="ReceptionModule.pas"/>
-        <DCCReference Include="ReceptionRequest.pas"/>
-        <DCCReference Include="Responce.pas"/>
         <DCCReference Include="SendServerProxy.interfaces.pas"/>
         <DCCReference Include="SubscriptionData.pas"/>
         <DCCReference Include="Client.pas"/>
@@ -120,6 +114,12 @@
         <DCCReference Include="Reception\Controller.pas"/>
         <DCCReference Include="Reception\ReceptionModel.pas"/>
         <DCCReference Include="Reception\ReceptionConfig.pas"/>
+        <DCCReference Include="Reception\ClientRequest.pas"/>
+        <DCCReference Include="Reception\FrontEndRequest.pas"/>
+        <DCCReference Include="Reception\Provider.pas"/>
+        <DCCReference Include="Reception\ProviderFactory.pas"/>
+        <DCCReference Include="Reception\ReceptionRequest.pas"/>
+        <DCCReference Include="Reception\Responce.pas"/>
         <None Include="ModelSupport_Source\default.txvpck"/>
         <None Include="ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="ModelSupport_Source\Source\default.txvpck"/>
