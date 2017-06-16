@@ -96,7 +96,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="ReceptionModule.pas"/>
         <DCCReference Include="Cli\CliParam.pas"/>
         <DCCReference Include="Cli\CliUsage.pas"/>
         <DCCReference Include="Reception\Controller.pas"/>
@@ -118,6 +117,11 @@
         <DCCReference Include="Reception\Client.pas"/>
         <DCCReference Include="Reception\Authentication.pas"/>
         <DCCReference Include="Reception\Data\Credentials.pas"/>
+        <DCCReference Include="Reception\ReceptionModule.pas">
+            <Form>ReceptionModule</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TWebModule</DesignClass>
+        </DCCReference>
         <None Include="ModelSupport_Source\default.txvpck"/>
         <None Include="ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="ModelSupport_Source\Source\default.txvpck"/>

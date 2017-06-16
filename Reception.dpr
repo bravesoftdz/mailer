@@ -12,7 +12,6 @@ uses
   Web.WebReq,
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
-  ReceptionModule in 'ReceptionModule.pas',
   ActiveQueueSettings,
   System.JSON,
   ObjectsMappers,
@@ -38,7 +37,8 @@ uses
   SubscriptionData in 'Reception\SubscriptionData.pas',
   Client in 'Reception\Client.pas',
   Authentication in 'Reception\Authentication.pas',
-  Credentials in 'Reception\Data\Credentials.pas';
+  Credentials in 'Reception\Data\Credentials.pas',
+  ReceptionModule in 'Reception\ReceptionModule.pas' {ReceptionModule: TWebModule};
 
 const
   BACKEND_URL_SWITCH = 'u';
