@@ -21,9 +21,7 @@ uses
   FrontEndRequest in 'FrontEndRequest.pas',
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
-  Controller in 'Controller.pas',
   ReceptionModule in 'ReceptionModule.pas',
-  ReceptionModel in 'ReceptionModel.pas',
   ReceptionRequest in 'ReceptionRequest.pas',
   Responce in 'Responce.pas',
   SendServerProxy.interfaces in 'SendServerProxy.interfaces.pas',
@@ -32,13 +30,15 @@ uses
   System.JSON,
   ObjectsMappers,
   System.IOUtils,
-  ReceptionConfig in 'ReceptionConfig.pas',
   Client in 'Client.pas',
   System.Generics.Collections,
   ClientFullRequest in 'ClientFullRequest.pas',
   Authentication in 'Authentication.pas',
   CliParam in 'Cli\CliParam.pas',
-  CliUsage in 'Cli\CliUsage.pas';
+  CliUsage in 'Cli\CliUsage.pas',
+  Controller in 'Reception\Controller.pas',
+  ReceptionModel in 'Reception\ReceptionModel.pas',
+  ReceptionConfig in 'Reception\ReceptionConfig.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';
