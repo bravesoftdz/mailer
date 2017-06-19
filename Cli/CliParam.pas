@@ -4,8 +4,8 @@ interface
 
 type
   /// <summary>Immutable ADT that represents a command line argument.</summary>
-  ///  Immutablity is achieved by the fact that all properties are of primitive
-  ///  types (string and boolean) and are read-only.
+  /// Immutablity is achieved by the fact that all properties are of primitive
+  /// types (string and boolean) and are read-only.
   TCliParam = class
   strict private
     FSwitchString: String;
@@ -28,12 +28,19 @@ type
     property CliUsage: String read FCliUsage;
     /// explanation of what the parameter means
     property Explanation: String read FExplanation;
+    /// <summary>Create a new instance with the same values of the fields</summary>
+    function Copy(): TCliParam;
 
   end;
 
 implementation
 
 { TCliParam }
+
+function TCliParam.Copy: TCliParam;
+begin
+  Result := TCliParam.Create(SwitchString, TAG, Description, IsRequired);
+end;
 
 constructor TCliParam.Create(const SwitchString, Tag, Descr: String;
   const IsRequired: Boolean);

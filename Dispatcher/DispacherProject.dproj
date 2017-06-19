@@ -91,7 +91,6 @@
         <DCCReference Include="DispatcherController.pas"/>
         <DCCReference Include="DispatcherProject.pas">
             <Form>DispatcherModule</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Model.pas"/>

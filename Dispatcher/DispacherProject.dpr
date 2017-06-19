@@ -14,7 +14,7 @@ uses
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
   DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
-  Model in 'Model.pas', CliParam, CliUsage;
+  Model in 'Model.pas', CliParam, CliUsage, System.Generics.Collections;
 
 {$R *.res}
 
@@ -26,14 +26,18 @@ const
 var
   Usage: String;
   CliParams: TArray<TCliParam>;
+  ParamUsage: TCliUsage;
+  ParamValues: TDictionary<String, String>;
 
-procedure RunServer(APort: Integer);
+procedure RunServer(const Config: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
+  APort: Integer;
 begin
+  APort := 8081;
   Writeln(PROGRAM_NAME);
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
@@ -67,15 +71,31 @@ end;
 begin
   ReportMemoryLeaksOnShutdown := True;
   CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
-  Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
+  ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   try
-    if WebRequestHandler <> nil then
-      WebRequestHandler.WebModuleClass := WebModuleClass;
-    WebRequestHandlerProc.MaxConnections := 1024;
-    RunServer(8081);
-  except
-    on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+    try
+      ParamValues := ParamUsage.Parse();
+      Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
+      if WebRequestHandler <> nil then
+        WebRequestHandler.WebModuleClass := WebModuleClass;
+      WebRequestHandlerProc.MaxConnections := 1024;
+      RunServer(ParamValues[SWITCH_CONFIG]);
+    except
+      on E: Exception do
+      begin
+        Writeln(E.Message);
+        Writeln(ParamUsage.Text);
+      end;
+    end;
+  finally
+    if ParamValues <> nil then
+    begin
+      ParamValues.Clear;
+      ParamValues.DisposeOf;
+    end;
+    ParamUsage.DisposeOf;
+    CliParams[0].DisposeOf();
+    SetLength(CliParams, 0);
   end;
 
 end.
