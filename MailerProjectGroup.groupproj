@@ -3,7 +3,7 @@
         <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="Reception\Reception.dproj">
+        <Projects Include="Reception.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="Tests\Tests.dproj">
@@ -12,10 +12,10 @@
         <Projects Include="ActiveQueue\ActiveQueue.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="ConsumerMock\ConsumerMock.dproj">
+        <Projects Include="ConsumerMock\Consumer.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Reception.dproj">
+        <Projects Include="Dispatcher\DispacherProject.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -53,23 +53,32 @@
     <Target Name="ActiveQueue:Make">
         <MSBuild Projects="ActiveQueue\ActiveQueue.dproj" Targets="Make"/>
     </Target>
-    <Target Name="ConsumerMock">
-        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj"/>
+    <Target Name="Consumer">
+        <MSBuild Projects="ConsumerMock\Consumer.dproj"/>
     </Target>
-    <Target Name="ConsumerMock:Clean">
-        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj" Targets="Clean"/>
+    <Target Name="Consumer:Clean">
+        <MSBuild Projects="ConsumerMock\Consumer.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="ConsumerMock:Make">
-        <MSBuild Projects="ConsumerMock\ConsumerMock.dproj" Targets="Make"/>
+    <Target Name="Consumer:Make">
+        <MSBuild Projects="ConsumerMock\Consumer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="DispacherProject">
+        <MSBuild Projects="Dispatcher\DispacherProject.dproj"/>
+    </Target>
+    <Target Name="DispacherProject:Clean">
+        <MSBuild Projects="Dispatcher\DispacherProject.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DispacherProject:Make">
+        <MSBuild Projects="Dispatcher\DispacherProject.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;Tests;ActiveQueue;ConsumerMock;Reception"/>
+        <CallTarget Targets="Reception;Tests;ActiveQueue;Consumer;DispacherProject"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;Tests:Clean;ActiveQueue:Clean;ConsumerMock:Clean;Reception:Clean"/>
+        <CallTarget Targets="Reception:Clean;Tests:Clean;ActiveQueue:Clean;Consumer:Clean;DispacherProject:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Reception:Make;Tests:Make;ActiveQueue:Make;ConsumerMock:Make;Reception:Make"/>
+        <CallTarget Targets="Reception:Make;Tests:Make;ActiveQueue:Make;Consumer:Make;DispacherProject:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
