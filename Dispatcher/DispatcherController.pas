@@ -3,13 +3,18 @@ unit DispatcherController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons;
+  MVCFramework, MVCFramework.Commons, Model;
 
 type
 
   [MVCPath('/')]
-  TDispatcherController = class(TMVCController) 
+  TDispatcherController = class(TMVCController)
+  strict private
+    class var Model: TModel;
   public
+    class procedure Setup();
+    class procedure TearDown();
+
     [MVCPath('/')]
     [MVCHTTPMethod([httpGET])]
     procedure Index;
@@ -29,7 +34,7 @@ uses
 
 procedure TDispatcherController.Index;
 begin
-  //use Context property to access to the HTTP request and response 
+  // use Context property to access to the HTTP request and response
   Render('Hello World');
 end;
 
@@ -38,7 +43,7 @@ begin
   Render('Hello ' + FirstName);
 end;
 
-procedure TDispatcherController.OnAfterAction(Context: TWebContext; const AActionName: string); 
+procedure TDispatcherController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
@@ -52,5 +57,22 @@ begin
   inherited;
 end;
 
+class procedure TDispatcherController.Setup;
+begin
+  Model := TModel.Create();
+end;
+
+class procedure TDispatcherController.TearDown;
+begin
+  Model.DisposeOf;
+end;
+
+initialization
+
+TDispatcherController.Setup();
+
+finalization
+
+TDispatcherController.TearDown();
 
 end.

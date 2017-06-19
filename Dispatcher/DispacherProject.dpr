@@ -13,22 +13,26 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in '..\DispatcherProject.pas' {DispatcherModule: TWebModule};
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
+  Model in 'Model.pas', CliParam, CliUsage;
 
 {$R *.res}
 
 
 const
   PROGRAM_NAME = 'Dispatcher server';
+  SWITCH_CONFIG = 'c';
+
+var
+  Usage: String;
+  CliParams: TArray<TCliParam>;
 
 procedure RunServer(APort: Integer);
-
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
-
 begin
   Writeln(PROGRAM_NAME);
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
@@ -62,6 +66,8 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+  CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
+  Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
   try
     if WebRequestHandler <> nil then
       WebRequestHandler.WebModuleClass := WebModuleClass;
