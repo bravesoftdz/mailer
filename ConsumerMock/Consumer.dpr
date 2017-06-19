@@ -1,4 +1,4 @@
-program ConsumerMock;
+program Consumer;
 
 {$APPTYPE CONSOLE}
 

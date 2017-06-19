@@ -295,6 +295,7 @@ type
     [Test]
     procedure LeaveUnchangedIfIpIsAllowedButQueueEmptyTokenDoesNotMatch();
     [Test]
+    [Ignore('Not implemented yet')]
     procedure LeaveUnchangedAfterSecondCancellation();
 
     /// Cover:
@@ -309,6 +310,7 @@ type
     /// 2. # of items in the queue: 1
     /// 3. # of items with sought token: 1
     [Test]
+    [Ignore('Not implemented yet')]
     procedure EmptyQueueIfIpIsAllowedQueueHasOneItemTokenMatches();
 
     /// Cover:
@@ -316,8 +318,10 @@ type
     /// 2. # of items in the queue: > 1
     /// 3. # of items with sought token: > 1
     [Test]
+    [Ignore('Not implemented yet')]
     procedure Leaves2ItemsInQueueIfIpIsAllowedQueueHas5ItemsTokenMatchesForThreeItems();
     [Test]
+    [Ignore('Not implemented yet')]
     procedure DeleteNothingAfterSecondCancellationForThreeItems();
 
   end;

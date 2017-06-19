@@ -22,7 +22,7 @@ type
     TOKEN_SUBJECT = 'subject';
     TOKEN_RECIPTO = 'recipto';
     TOKEN_RECIPBCC = 'recipbcc';
-    TOKEN_RECIPPCC = 'recippcc';
+    TOKEN_RECIPCC = 'recipcc';
 
   var
     FFRom: String;
@@ -71,7 +71,7 @@ type
     [MapperJSONSer(TOKEN_RECIPTO)]
     property recipto: String read FRecipTo write FRecipTo;
     /// <summary> list of email addresses of the recipients (cc) </summary>
-    [MapperJSONSer(TOKEN_RECIPPCC)]
+    [MapperJSONSer(TOKEN_RECIPCC)]
     property recipcc: String read FRecipCc write FRecipCc;
     /// <summary> list of email addresses of the recipients (bcc) </summary>
     [MapperJSONSer(TOKEN_RECIPBCC)]
