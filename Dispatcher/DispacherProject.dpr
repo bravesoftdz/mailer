@@ -14,7 +14,11 @@ uses
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
   DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
-  Model in 'Model.pas', CliParam, CliUsage, System.Generics.Collections;
+  Model in 'Model.pas',
+  CliParam,
+  CliUsage,
+  System.Generics.Collections,
+  DispatcherConfig in 'DispatcherConfig.pas';
 
 {$R *.res}
 
@@ -36,15 +40,23 @@ var
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   APort: Integer;
+  Info: String;
 begin
-  APort := 8081;
-  Writeln(PROGRAM_NAME);
+  TDispatcherController.LoadConfigFromFile(Config);
+  APort := TDispatcherController.GetPort();
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+  Info := Format('%s:%d', [PROGRAM_NAME, APort]);
+  Writeln('');
+  Writeln('  ' + Info);
+  Writeln('');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleTitle(pwidechar(Info));
   Writeln(Format('Starting HTTP Server on port %d', [APort]));
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
-    LogI(Format('Server started on port 8081', [APort]));
+    LogI(Format('Server started on port %d', [APort]));
     { more info about MaxConnections
       http://www.indyproject.org/docsite/html/frames.html?frmname=topic&frmfile=TIdCustomTCPServer_MaxConnections.html }
     LServer.MaxConnections := 0;

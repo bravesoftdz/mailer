@@ -110,6 +110,7 @@ begin
     if Param.IsRequired AND not(isPresent) then
     begin
       Result.Clear();
+      Result.DisposeOf;
       raise Exception.Create('Required parameter ' + Param.SwitchString + ' is missing.');
     end;
     if isPresent then
