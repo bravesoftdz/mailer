@@ -3,7 +3,7 @@ unit Model;
 interface
 
 uses
-  DispatcherConfig;
+  DispatcherConfig, IpAuthentication;
 
 type
   TModel = class(TObject)
@@ -11,6 +11,7 @@ type
   strict private
   var
     FConfig: TDispatcherConfig;
+    FAuthentication: IAuthentication;
 
     function GetConfig(): TDispatcherConfig;
     procedure SetConfig(const Config: TDispatcherConfig);
@@ -38,12 +39,13 @@ begin
   begin
     FConfig.DisposeOf();
   end;
+  FAuthentication := nil;
   inherited;
 end;
 
 function TModel.GetConfig: TDispatcherConfig;
 begin
-  Result := TDispatcherConfig.Create(FConfig.Port);
+  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs);
 end;
 
 function TModel.GetPort: Integer;
@@ -58,7 +60,8 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TDispatcherConfig.Create(Config.Port);
+  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs);
+  FAuthentication := TIpAuthentication.Create(Config.ClientIPs);
 
 end;
 

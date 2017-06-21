@@ -10,48 +10,58 @@ type
   strict private
   const
     PORT_KEY = 'port';
+    CLIENT_WHITELIST_KEY = 'client-whitelist-ip';
 
   var
     FPort: Integer;
+    FClientIPs: String;
   public
     class
       function CreateFromJson(const Json: TJsonObject): TDispatcherConfig;
-    constructor Create(const Port: Integer); overload;
     destructor Destroy(); override;
+    constructor Create(const Port: Integer; const ClientIPs: String);
     property Port: Integer read FPort;
+    property ClientIPs: String read FClientIPs;
   end;
 
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils, System.StrUtils;
 
 { TDispatcherConfig }
 
 class function TDispatcherConfig.CreateFromJson(const Json: TJsonObject): TDispatcherConfig;
 var
   Port: Integer;
-  JValue: TJsonValue;
+  aString, aString2: String;
+  JValue, JValue2: TJsonValue;
 begin
   JValue := Json.GetValue(PORT_KEY);
+  aString := JValue.value;
   if JValue <> nil then
   begin
     try
-      Port := strtoint(JValue.value);
+      Port := strtoint(aString);
     except
       on E: Exception do
-        Port := -1;
+        raise Exception.Create('DipatcherConfig: port number ' + aString + ' found in the config. file is not an integer.');
     end;
   end;
-  if Port > 0 then
-    Result := TDispatcherConfig.Create(Port)
+  JValue2 := Json.GetValue(CLIENT_WHITELIST_KEY);
+  if JValue2 <> nil then
+    aString2 := JValue.Value
   else
-    raise Exception.Create('DipatcherConfig: no valid port number is found in the config. file.');
+    aString2 := '';
+
+  Result := TDispatcherConfig.Create(Port, aString2);
+
 end;
 
-constructor TDispatcherConfig.Create(const Port: Integer);
+constructor TDispatcherConfig.Create(const Port: Integer; const ClientIPs: String);
 begin
   FPort := Port;
+  FClientIPs := ClientIPs;
 end;
 
 destructor TDispatcherConfig.Destroy;
