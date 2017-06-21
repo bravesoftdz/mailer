@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   Model in 'Model.pas',
   CliParam,
   CliUsage,
@@ -42,9 +42,12 @@ var
   LServer: TIdHTTPWebBrokerBridge;
   APort: Integer;
   Info: String;
+  ClientIps: TArray<String>;
+  S, I: Integer;
 begin
   TDispatcherController.LoadConfigFromFile(Config);
   APort := TDispatcherController.GetPort();
+
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
   Info := Format('%s:%d', [PROGRAM_NAME, APort]);
   Writeln('');
@@ -52,7 +55,27 @@ begin
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
   SetConsoleTitle(pwidechar(Info));
-  Writeln(Format('Starting HTTP Server on port %d', [APort]));
+
+  ClientIps := TDispatcherController.GetClientIps();
+  S := Length(ClientIPs);
+  if S = 0 then
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); // red
+    Writeln('No client ip is provided. All requests will be rejected.');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  end
+  else
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10); // green
+    Writeln(S.toString + ' client ip found:');
+    for I := 0 to S - 1 do
+    begin
+      Writeln(Format('%d: %s', [I + 1, ClientIps[I]]));
+    end;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  end;
+  SetLength(ClientIps, 0);
+
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;

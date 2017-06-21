@@ -9,6 +9,7 @@ type
   IAuthentication = interface(IInvokable)
     ['{B5E132F3-D321-48D1-88E9-DFEF2C248381}']
     function isAuthorised(const IP: String): Boolean;
+    function GetIPs(): TArray<String>;
   end;
 
 type
@@ -18,6 +19,7 @@ type
     FItems: TList<String>;
   public
     function isAuthorised(const IP: String): Boolean;
+    function GetIPs(): TArray<String>;
     constructor Create(const Ips: String);
     destructor Destroy(); override;
   end;
@@ -38,7 +40,7 @@ begin
   Items := SplitString(IPs, ',');
   for Item in Items do
     Fitems.Add(Item.Trim([' ']));
-  FItems.Clear;
+  SetLength(Items, 0);
 end;
 
 destructor TIpAuthentication.Destroy;
@@ -46,6 +48,17 @@ begin
   FItems.Clear;
   FItems.DisposeOf;
   inherited;
+end;
+
+function TIpAuthentication.GetIPs: TArray<String>;
+var
+  I, L: Integer;
+begin
+  Result := TArray<String>.Create();
+  L := FItems.Count;
+  SetLength(Result, L);
+  for I := 0 to L - 1 do
+    Result[I] := Fitems[I];
 end;
 
 function TIpAuthentication.isAuthorised(const IP: String): Boolean;

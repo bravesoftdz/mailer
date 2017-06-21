@@ -25,6 +25,7 @@ type
     class procedure TearDown();
     class procedure LoadConfigFromFile(const FilePath: String);
     class function GetPort(): Integer;
+    class function GetClientIps(): TArray<String>;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -87,6 +88,11 @@ begin
   end;
   if not(ErrorMessage.IsEmpty) then
     raise Exception.Create(ErrorMessage);
+end;
+
+class function TDispatcherController.GetClientIps: TArray<String>;
+begin
+  Result := Model.GetClientIps();
 end;
 
 class function TDispatcherController.GetPort: Integer;

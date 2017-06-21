@@ -50,7 +50,7 @@ begin
   end;
   JValue2 := Json.GetValue(CLIENT_WHITELIST_KEY);
   if JValue2 <> nil then
-    aString2 := JValue.Value
+    aString2 := JValue2.Value
   else
     aString2 := '';
 

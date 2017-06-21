@@ -18,6 +18,7 @@ type
 
   public
     function GetPort(): Integer;
+    function GetClientIps(): TArray<String>;
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
@@ -41,6 +42,11 @@ begin
   end;
   FAuthentication := nil;
   inherited;
+end;
+
+function TModel.GetClientIps: TArray<String>;
+begin
+  Result := FAuthentication.GetIps();
 end;
 
 function TModel.GetConfig: TDispatcherConfig;
