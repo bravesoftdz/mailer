@@ -20,6 +20,8 @@ type
     function GetPort(): Integer;
     function GetClientIps(): TArray<String>;
     function isAuthorised(const IP: String): Boolean;
+    function GetBackEndIp(): String;
+    function GetBackEndPort(): Integer;
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
@@ -45,6 +47,16 @@ begin
   inherited;
 end;
 
+function TModel.GetBackEndIp: String;
+begin
+  Result := FConfig.BackEndIp
+end;
+
+function TModel.GetBackEndPort: Integer;
+begin
+  Result := FConfig.BackEndPort
+end;
+
 function TModel.GetClientIps: TArray<String>;
 begin
   Result := FAuthentication.GetIps();
@@ -52,7 +64,7 @@ end;
 
 function TModel.GetConfig: TDispatcherConfig;
 begin
-  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs);
+  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs, FConfig.BackEndIp, FConfig.BackEndPort);
 end;
 
 function TModel.GetPort: Integer;
@@ -72,7 +84,7 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs);
+  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs, Config.BackEndIp, Config.BackEndPort);
   FAuthentication := TIpAuthentication.Create(Config.ClientIPs);
 
 end;

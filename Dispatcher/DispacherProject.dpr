@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   Model in 'Model.pas',
   CliParam,
   CliUsage,
@@ -41,14 +41,14 @@ var
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
-  APort: Integer;
-  Info: String;
+  APort, BackEndPort, S, I: Integer;
+  Info, BackEndIp: String;
   ClientIps: TArray<String>;
-  S, I: Integer;
 begin
   TDispatcherController.LoadConfigFromFile(Config);
   APort := TDispatcherController.GetPort();
-
+  BackEndPort := TDispatcherController.GetBackEndPort();
+  BackEndIp := TDispatcherController.GetBackEndIp();
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
   Info := Format('%s:%d', [PROGRAM_NAME, APort]);
   Writeln('');
@@ -56,6 +56,10 @@ begin
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
   SetConsoleTitle(pwidechar(Info));
+  Write('Backend: ');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+  Writeln(BackEndIp + ':' + BackEndPort.ToString);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);
@@ -68,7 +72,7 @@ begin
   else
   begin
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10); // green
-    Writeln(S.toString + ' client ip found:');
+    Writeln(S.toString + ' client ip(s) found:');
     for I := 0 to S - 1 do
     begin
       Writeln(Format('%d: %s', [I + 1, ClientIps[I]]));

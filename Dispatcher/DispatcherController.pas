@@ -26,6 +26,8 @@ type
     class procedure LoadConfigFromFile(const FilePath: String);
     class function GetPort(): Integer;
     class function GetClientIps(): TArray<String>;
+    class function GetBackEndPort(): Integer;
+    class function GetBackEndIp(): String;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -88,6 +90,16 @@ begin
   end;
   if not(ErrorMessage.IsEmpty) then
     raise Exception.Create(ErrorMessage);
+end;
+
+class function TDispatcherController.GetBackEndIp: String;
+begin
+  Result := Model.GetBackEndIp();
+end;
+
+class function TDispatcherController.GetBackEndPort: Integer;
+begin
+  Result := Model.GetBackEndPort();
 end;
 
 class function TDispatcherController.GetClientIps: TArray<String>;

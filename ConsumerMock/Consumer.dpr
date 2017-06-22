@@ -21,7 +21,8 @@ uses
   System.Generics.Collections,
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  Configuration in '..\Config\Configuration.pas';
+  Configuration in '..\Config\Configuration.pas',
+  ReceptionRequest in '..\Reception\ReceptionRequest.pas';
 
 {$R *.res}
 

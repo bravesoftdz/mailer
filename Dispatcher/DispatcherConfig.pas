@@ -17,13 +17,17 @@ type
   var
     FPort: Integer;
     FClientIPs: String;
+    FBackEndIp: String;
+    FBackEndPort: Integer;
   public
     class
       function CreateFromJson(const Json: TJsonObject): TDispatcherConfig;
     destructor Destroy(); override;
-    constructor Create(const Port: Integer; const ClientIPs: String);
+    constructor Create(const Port: Integer; const ClientIPs: String; const BackEndIp: String; const BackEndPort: Integer);
     property Port: Integer read FPort;
     property ClientIPs: String read FClientIPs;
+    property BackEndIp: String read FBackEndIp;
+    property BackEndPort: Integer read FBackEndPort;
   end;
 
 implementation
@@ -35,8 +39,8 @@ uses
 
 class function TDispatcherConfig.CreateFromJson(const Json: TJsonObject): TDispatcherConfig;
 var
-  Port: Integer;
-  IPs: String;
+  Port, BackEndPort: Integer;
+  IPs, BackEndIp: String;
 begin
   Port := GetIntValue(Json, PORT_KEY, -1);
   if Port <= 0 then
@@ -44,13 +48,17 @@ begin
     raise Exception.Create('DipatcherConfig: port number must be a positive integer.');
   end;
   IPs := GetStrValue(Json, CLIENT_WHITELIST_KEY, '');
-  Result := TDispatcherConfig.Create(Port, IPs);
+  BackEndIP := GetStrValue(Json, BACKEND_IP_KEY, '');
+  BackEndPort := GetIntValue(Json, BACKEND_PORT_KEY, -1);
+  Result := TDispatcherConfig.Create(Port, IPs, BackEndIP, BackEndPort);
 end;
 
-constructor TDispatcherConfig.Create(const Port: Integer; const ClientIPs: String);
+constructor TDispatcherConfig.Create(const Port: Integer; const ClientIPs: String; const BackEndIp: String; const BackEndPort: Integer);
 begin
   FPort := Port;
   FClientIPs := ClientIPs;
+  FBackEndPort := BackEndPort;
+  FBackEndIp := BackEndIp;
 end;
 
 destructor TDispatcherConfig.Destroy;
