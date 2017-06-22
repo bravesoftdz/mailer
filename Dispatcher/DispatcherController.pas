@@ -17,9 +17,9 @@ type
     [MVCHTTPMethod([httpGET])]
     procedure Index;
 
-    [MVCPath('/hellos/($FirstName)')]
-    [MVCHTTPMethod([httpGET])]
-    procedure GetSpecializedHello(const FirstName: String);
+    [MVCPath('/request')]
+    [MVCHTTPMethod([httpPUT])]
+    procedure PutRequest(Context: TWebContext);
 
     class procedure Setup();
     class procedure TearDown();
@@ -100,9 +100,19 @@ begin
   Result := Model.GetPort();
 end;
 
-procedure TDispatcherController.GetSpecializedHello(const FirstName: String);
+procedure TDispatcherController.PutRequest(Context: TWebContext);
+var
+  IP: String;
 begin
-  Render('Hello ' + FirstName);
+  IP := Context.Request.ClientIP;
+  if Model.isAuthorised(IP) then
+  begin
+    Writeln('Authorized ' + IP);
+  end
+  else
+    Writeln('Not authorized ' + IP);
+
+  Render('');
 end;
 
 procedure TDispatcherController.OnAfterAction(Context: TWebContext; const AActionName: string);
@@ -119,12 +129,14 @@ begin
   inherited;
 end;
 
-class procedure TDispatcherController.Setup;
+class
+  procedure TDispatcherController.Setup;
 begin
   Model := TModel.Create();
 end;
 
-class procedure TDispatcherController.TearDown;
+class
+  procedure TDispatcherController.TearDown;
 begin
   Model.DisposeOf;
 end;

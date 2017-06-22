@@ -19,6 +19,7 @@ type
   public
     function GetPort(): Integer;
     function GetClientIps(): TArray<String>;
+    function isAuthorised(const IP: String): Boolean;
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
@@ -58,6 +59,11 @@ function TModel.GetPort: Integer;
 begin
   if FConfig <> nil then
     Result := FConfig.Port;
+end;
+
+function TModel.isAuthorised(const IP: String): Boolean;
+begin
+  Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP);
 end;
 
 procedure TModel.SetConfig(const Config: TDispatcherConfig);

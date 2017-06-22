@@ -3,8 +3,9 @@ unit Model;
 interface
 
 uses
-  ConsumerConfig, ActiveQueueResponce, JsonSaver, System.Generics.Collections, ReceptionRequest,
-  MVCFramework.RESTAdapter, ActiveQueueAPI;
+  ConsumerConfig, ActiveQueueResponce, JsonSaver,
+  MVCFramework.RESTAdapter, ActiveQueueAPI, ReceptionRequest,
+  System.Generics.Collections;
 
 type
   /// The model may be in one of the following statuses:
@@ -113,7 +114,7 @@ begin
   Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
   if FConfig <> nil then
     FConfig.DisposeOf;
-  FConfig := TConsumerConfig.Create(Json);
+  FConfig := TConsumerConfig.CreateFromJson(Json);
   Json.DisposeOf;
 end;
 

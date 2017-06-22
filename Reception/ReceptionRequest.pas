@@ -3,8 +3,8 @@ unit ReceptionRequest;
 interface
 
 uses
-  System.JSON, System.Generics.Collections, Attachment, ObjectsMappers,
-  System.Classes, JsonableInterface;
+  System.JSON, ObjectsMappers,
+  System.Classes, JsonableInterface, System.Generics.Collections, Attachment;
 
 type
 

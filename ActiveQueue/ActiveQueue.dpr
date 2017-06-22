@@ -31,7 +31,8 @@ uses
   JsonSaver in 'JsonSaver.pas',
   JsonableInterface in 'JsonableInterface.pas',
   CliParam in '..\Cli\CliParam.pas',
-  CliUsage in '..\Cli\CliUsage.pas';
+  CliUsage in '..\Cli\CliUsage.pas',
+  ReceptionRequest in '..\Reception\ReceptionRequest.pas';
 
 {$R *.res}
 

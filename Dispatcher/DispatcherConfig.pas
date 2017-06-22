@@ -3,14 +3,16 @@ unit DispatcherConfig;
 interface
 
 uses
-  System.JSON;
+  System.JSON, Configuration;
 
 type
-  TDispatcherConfig = class(TObject)
+  TDispatcherConfig = class(TConfiguration)
   strict private
   const
     PORT_KEY = 'port';
     CLIENT_WHITELIST_KEY = 'client-whitelist-ip';
+    BACKEND_IP_KEY = 'backend-ip';
+    BACKEND_PORT_KEY = 'backend-port';
 
   var
     FPort: Integer;
@@ -34,28 +36,15 @@ uses
 class function TDispatcherConfig.CreateFromJson(const Json: TJsonObject): TDispatcherConfig;
 var
   Port: Integer;
-  aString, aString2: String;
-  JValue, JValue2: TJsonValue;
+  IPs: String;
 begin
-  JValue := Json.GetValue(PORT_KEY);
-  aString := JValue.value;
-  if JValue <> nil then
+  Port := GetIntValue(Json, PORT_KEY, -1);
+  if Port <= 0 then
   begin
-    try
-      Port := strtoint(aString);
-    except
-      on E: Exception do
-        raise Exception.Create('DipatcherConfig: port number ' + aString + ' found in the config. file is not an integer.');
-    end;
+    raise Exception.Create('DipatcherConfig: port number must be a positive integer.');
   end;
-  JValue2 := Json.GetValue(CLIENT_WHITELIST_KEY);
-  if JValue2 <> nil then
-    aString2 := JValue2.Value
-  else
-    aString2 := '';
-
-  Result := TDispatcherConfig.Create(Port, aString2);
-
+  IPs := GetStrValue(Json, CLIENT_WHITELIST_KEY, '');
+  Result := TDispatcherConfig.Create(Port, IPs);
 end;
 
 constructor TDispatcherConfig.Create(const Port: Integer; const ClientIPs: String);

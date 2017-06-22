@@ -4,11 +4,6 @@ program Consumer;
 
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   System.SysUtils,
   MVCFramework.Logger,
   Winapi.Windows,
@@ -25,7 +20,8 @@ uses
   ConsumerConfig in 'ConsumerConfig.pas',
   System.Generics.Collections,
   CliParam in '..\Cli\CliParam.pas',
-  CliUsage in '..\Cli\CliUsage.pas';
+  CliUsage in '..\Cli\CliUsage.pas',
+  Configuration in '..\Config\Configuration.pas';
 
 {$R *.res}
 

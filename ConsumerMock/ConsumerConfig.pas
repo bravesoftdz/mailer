@@ -3,10 +3,10 @@ unit ConsumerConfig;
 interface
 
 uses
-  System.JSON, JsonableInterface;
+  System.JSON, JsonableInterface, Configuration;
 
 type
-  TConsumerConfig = class(TInterfacedObject, JSonable)
+  TConsumerConfig = class(TConfiguration, JSonable)
   strict private
   const
     PORT_KEY = 'port';
@@ -17,17 +17,6 @@ type
     // number of items to request from the data server at once
     BLOCK_SIZE_KEY = 'number-of-items';
     DEFAULT_BLOCK_SIZE_VALUE = 5;
-    /// extract the key value from the json object as an integer. In case of failure, the dafualt value
-    /// is returned.
-    function GetIntValue(const jo: TJsonObject; const key: String; const DefaultValue: Integer): Integer;
-
-    /// extract the key value from the json object as a string. In case of failure, the dafualt value
-    /// is returned.
-    function GetStrValue(const jo: TJsonObject; const key: String; const DefaultValue: String): String;
-
-    /// extract the key value from the json object as a boolean. In case of failure, the dafualt value
-    /// is returned.
-    function GetBoolValue(const jo: TJsonObject; const key: String; const DefaultValue: Boolean): Boolean;
 
   var
     FPort: Integer;
@@ -39,8 +28,8 @@ type
 
   public
     constructor Create(const Port: Integer; const BackEndIp: String; const BackEndPort: Integer;
-      const SubscriptionStatus: Boolean; const SubscriptionToken: String; const BlockSize: Integer); Overload;
-    constructor Create(const Json: TJsonObject); Overload;
+      const SubscriptionStatus: Boolean; const SubscriptionToken: String; const BlockSize: Integer);
+    class function CreateFromJson(const Json: TJsonObject): TConsumerConfig;
     function ToJson(): TJsonObject;
     property Port: Integer read Fport;
     property ProviderIp: String read FProviderIp;
@@ -58,71 +47,20 @@ uses
 
 { TConsumerConfig }
 
-constructor TConsumerConfig.Create(const Json: TJsonObject);
-begin
-  FPort := GetIntValue(Json, PORT_KEY, -1);
-  FProviderPort := GetIntValue(Json, BACKEND_PORT_KEY, -1);
-  FProviderIP := GetStrValue(Json, BACKEND_IP_KEY, '');
-  FSubscriptionStatus := GetBoolValue(Json, SUBSCRIPTION_STATUS_KEY, False);
-  FSubscriptionToken := GetStrValue(Json, SUBSCRIPTION_TOKEN_KEY, '');
-  FBlockSize := GetIntValue(Json, BLOCK_SIZE_KEY, DEFAULT_BLOCK_SIZE_VALUE);
-end;
-
-function TConsumerConfig.GetBoolValue(const jo: TJsonObject; const key: String;
-  const DefaultValue: Boolean): Boolean;
+class function TConsumerConfig.CreateFromJson(const Json: TJsonObject): TConsumerConfig;
 var
-  value: TJsonValue;
-begin
-  value := jo.GetValue(key);
-  if (Value <> nil) AND (Value is TJsonBool) then
-  begin
-    try
-      Result := (value as TJSONBool).AsBoolean;
-    except
-      on E: Exception do
-        Result := DefaultValue;
-    end;
-  end
-  else
-    Result := DefaultValue;
-end;
+  Port, ProviderPort, BlockSize: Integer;
+  ProviderIP, SubscriptionToken: String;
+  SubscriptionStatus: Boolean;
 
-function TConsumerConfig.GetIntValue(const jo: TJsonObject; const key: String;
-  const DefaultValue: Integer): Integer;
-var
-  value: TJsonValue;
 begin
-  value := jo.GetValue(key);
-  if Value <> nil then
-  begin
-    try
-      Result := strtoint(value.Value);
-    except
-      on E: Exception do
-        Result := DefaultValue;
-    end;
-  end
-  else
-    Result := DefaultValue;
-end;
-
-function TConsumerConfig.GetStrValue(const jo: TJsonObject; const key,
-  DefaultValue: String): String;
-var
-  value: TJsonValue;
-begin
-  value := jo.GetValue(key);
-  if Value <> nil then
-  begin
-    try
-      Result := value.Value;
-    except
-      on E: Exception do
-        Result := DefaultValue;
-    end;
-  end
-  else
-    Result := DefaultValue;
+  Port := GetIntValue(Json, PORT_KEY, -1);
+  ProviderPort := GetIntValue(Json, BACKEND_PORT_KEY, -1);
+  ProviderIP := GetStrValue(Json, BACKEND_IP_KEY, '');
+  SubscriptionStatus := GetBoolValue(Json, SUBSCRIPTION_STATUS_KEY, False);
+  SubscriptionToken := GetStrValue(Json, SUBSCRIPTION_TOKEN_KEY, '');
+  BlockSize := GetIntValue(Json, BLOCK_SIZE_KEY, DEFAULT_BLOCK_SIZE_VALUE);
+  Result := TConsumerConfig.Create(Port, ProviderIP, ProviderPort, SubscriptionStatus, SubscriptionToken, BlockSize);
 end;
 
 constructor TConsumerConfig.Create(const Port: Integer; const BackEndIp: String;

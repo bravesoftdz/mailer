@@ -13,13 +13,14 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
   Model in 'Model.pas',
   CliParam,
   CliUsage,
   System.Generics.Collections,
   DispatcherConfig in 'DispatcherConfig.pas',
-  IpAuthentication in '..\Authentication\IpAuthentication.pas';
+  IpAuthentication in '..\Authentication\IpAuthentication.pas',
+  Configuration in '..\Config\Configuration.pas';
 
 {$R *.res}
 
