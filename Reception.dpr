@@ -31,14 +31,14 @@ uses
   Action in 'Reception\Actions\Action.pas',
   SoluzioneAgenti in 'Reception\Providers\SoluzioneAgenti.pas',
   VenditoriSimple in 'Reception\Providers\VenditoriSimple.pas',
-  Attachment in 'Reception\Attachment.pas',
   ClientFullRequest in 'Reception\ClientFullRequest.pas',
   SendServerProxy.interfaces in 'Reception\SendServerProxy.interfaces.pas',
   SubscriptionData in 'Reception\SubscriptionData.pas',
   Client in 'Reception\Client.pas',
   Authentication in 'Reception\Authentication.pas',
   Credentials in 'Reception\Data\Credentials.pas',
-  ReceptionModule in 'Reception\ReceptionModule.pas' {ReceptionModule: TWebModule};
+  ReceptionModule in 'Reception\ReceptionModule.pas' {ReceptionModule: TWebModule},
+  Attachment in 'Reception\Attachment.pas';
 
 const
   BACKEND_URL_SWITCH = 'u';

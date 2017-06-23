@@ -20,7 +20,9 @@ uses
   System.Generics.Collections,
   DispatcherConfig in 'DispatcherConfig.pas',
   IpAuthentication in '..\Authentication\IpAuthentication.pas',
-  Configuration in '..\Config\Configuration.pas';
+  Configuration in '..\Config\Configuration.pas',
+  DispatcherResponce in 'DispatcherResponce.pas',
+  DispatcherEntry in 'DispatcherEntry.pas';
 
 {$R *.res}
 

@@ -13,7 +13,7 @@ type
     class var Model: TModel;
 
   public
-    [MVCPath('/')]
+    [MVCPath('/status')]
     [MVCHTTPMethod([httpGET])]
     procedure Index;
 
@@ -38,12 +38,14 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
-  DispatcherConfig;
+  DispatcherConfig, DispatcherResponce, DispatcherEntry;
 
 procedure TDispatcherController.Index;
+var
+  Str: String;
 begin
-  // use Context property to access to the HTTP request and response
-  Render('Hello World');
+  Str := 'Cogito ergo sum (R. Descartes) ' + formatdatetime('h:n:ss', Now);
+  Render(Str);
 end;
 
 class procedure TDispatcherController.LoadConfigFromFile(const FilePath: String);
@@ -115,10 +117,19 @@ end;
 procedure TDispatcherController.PutRequest(Context: TWebContext);
 var
   IP: String;
+  Request: TDispatcherEntry;
+  Responce: TDispatcherResponce;
 begin
   IP := Context.Request.ClientIP;
   if Model.isAuthorised(IP) then
   begin
+    if Context.Request.ThereIsRequestBody then
+    begin
+      Request := Context.Request.BodyAs<TDispatcherEntry>;
+      Responce := Model.Elaborate(Request);
+
+    end;
+
     Writeln('Authorized ' + IP);
   end
   else

@@ -3,7 +3,7 @@ unit Model;
 interface
 
 uses
-  DispatcherConfig, IpAuthentication;
+  DispatcherConfig, IpAuthentication, DispatcherResponce, DispatcherEntry;
 
 type
   TModel = class(TObject)
@@ -22,6 +22,7 @@ type
     function isAuthorised(const IP: String): Boolean;
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
+    function Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
@@ -45,6 +46,11 @@ begin
   end;
   FAuthentication := nil;
   inherited;
+end;
+
+function TModel.Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
+begin
+  { TODO 1 : Implement this method }
 end;
 
 function TModel.GetBackEndIp: String;
