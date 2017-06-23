@@ -37,13 +37,10 @@ uses
   Client in 'Reception\Client.pas',
   Authentication in 'Reception\Authentication.pas',
   Credentials in 'Reception\Data\Credentials.pas',
-  ReceptionModule in 'Reception\ReceptionModule.pas' {ReceptionModule: TWebModule},
+  ReceptionModule in 'Reception\ReceptionModule.pas' {ReceptionModule: TWebModule} ,
   Attachment in 'Reception\Attachment.pas';
 
 const
-  BACKEND_URL_SWITCH = 'u';
-  BACKEND_PORT_SWITCH = 'p';
-  SWITCH_CHAR = '-';
   SWITCH_CONFIG = 'c';
   PROGRAM_NAME = 'Reception Server';
 
@@ -52,6 +49,9 @@ var
   JsonConfig: TJsonObject;
   FileContent: String;
   Config: TReceptionConfig;
+  CliParams: TArray<TCliParam>;
+  ParamUsage: TCliUsage;
+  ParamValues: TDictionary<String, String>;
 
 procedure RunServer(const Config: TReceptionConfig);
 var
@@ -122,42 +122,60 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
-  FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
-  if Not(TFile.Exists(ConfigFileName)) then
-  begin
-    Writeln('Error: config file ' + ConfigFileName + 'not found.');
-    Writeln(TCliUsage.CreateText(ExtractFileName(paramstr(0)), [TCliParam.Create('c', 'path', 'path to the config file', True)]));
-    Exit();
-  end;
+  CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
+  ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   try
-    FileContent := TFile.ReadAllText(ConfigFileName);
-    JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
-  except
-    on E: Exception do
-    begin
-      Writeln(E.Message);
-      Exit();
-    end;
-  end;
-  if Assigned(JsonConfig) then
-  begin
-    Config := Mapper.JSONObjectToObject<TReceptionConfig>(JsonConfig);
-  end;
-
-  if Assigned(Config) then
-  begin
     try
-      if WebRequestHandler <> nil then
-        WebRequestHandler.WebModuleClass := WebModuleClass;
-      WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(Config);
+      ParamValues := ParamUsage.Parse();
+      ConfigFileName := ParamValues[SWITCH_CONFIG];
+
+      if Not(TFile.Exists(ConfigFileName)) then
+      begin
+        Writeln('Error: config file ' + ConfigFileName + 'not found.');
+        Exit();
+      end;
+      try
+        FileContent := TFile.ReadAllText(ConfigFileName);
+        JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
+      except
+        on E: Exception do
+        begin
+          Writeln(E.Message);
+          Exit();
+        end;
+      end;
+      if Assigned(JsonConfig) then
+      begin
+        Config := Mapper.JSONObjectToObject<TReceptionConfig>(JsonConfig);
+      end;
+      if Assigned(Config) then
+      begin
+
+        if WebRequestHandler <> nil then
+          WebRequestHandler.WebModuleClass := WebModuleClass;
+        WebRequestHandlerProc.MaxConnections := 1024;
+        RunServer(Config);
+      end;
     except
       on E: Exception do
-        Writeln(E.ClassName, ': ', E.Message);
+      begin
+        Writeln(E.Message);
+        Writeln(ParamUsage.Text);
+      end;
+
     end;
 
+  finally
+    if ParamValues <> nil then
+    begin
+      ParamValues.Clear;
+      ParamValues.DisposeOf;
+    end;
+    if Config <> nil then
+      Config.DisposeOf;
+    ParamUsage.DisposeOf;
+    CliParams[0].DisposeOf();
+    SetLength(CliParams, 0);
   end;
-  if Config <> nil then
-    Config.DisposeOf;
 
 end.
