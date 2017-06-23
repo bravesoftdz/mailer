@@ -49,6 +49,7 @@ end;
 destructor TReceptionConfig.Destroy;
 begin
   FClients.Clear;
+  FClients.DisposeOf;
 end;
 
 end.

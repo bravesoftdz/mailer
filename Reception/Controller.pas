@@ -46,6 +46,7 @@ type
     function PickMultipartItem(const Items: TArray<String>; const ContentType: String; const KeyName: String): String;
     /// <summary> Returns a copy of original list in which the elements at specified postions are skipped</summary>
     function SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
+
   public
     // [MVCPath('/($' + REQUESTOR + ')/($' + ACTION + ')')]
     [MVCPath('/($' + REQUESTOR_KEY + ')/($' + ACTION_KEY + ')')]
@@ -78,6 +79,9 @@ type
 
     /// <summary>Get a copy of clients.</summary>
     class function GetClients(): TObjectList<TClient>;
+
+    class procedure Setup();
+    class procedure TearDown();
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -253,22 +257,25 @@ begin
 
 end;
 
-class
-  procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
+class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
 begin
   Model.BackEndSettings := aSettings;
 end;
 
-class
-  function TController.GetClients: TObjectList<TClient>;
+class function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
 end;
 
-class
-  procedure TController.SetClients(const Clients: TObjectList<TClient>);
+class procedure TController.SetClients(const Clients: TObjectList<TClient>);
 begin
   Model.clients := Clients;
+end;
+
+class procedure TController.Setup;
+begin
+  Writeln('Controller set up');
+  Model := TReceptionModel.Create()
 end;
 
 function TController.SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
@@ -285,12 +292,18 @@ begin
 
 end;
 
+class procedure TController.TearDown;
+begin
+  Writeln('Controller tear down');
+  Model.DisposeOf();
+end;
+
 initialization
 
-TController.Model := TReceptionModel.Create();
+TController.Setup();
 
 finalization
 
-TController.Model.DisposeOf;
+TController.TearDown();
 
 end.

@@ -7,7 +7,7 @@ uses
   Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication;
 
 type
-  TReceptionModel = class
+  TReceptionModel = class(TObject)
 
   const
     /// name of the key that contains a token in a json
@@ -45,7 +45,7 @@ type
 
     property BackEndSettings: TActiveQueueSettings read GetSettings write SetSettings;
     constructor Create();
-    destructor Destroy();
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -61,6 +61,7 @@ constructor TReceptionModel.Create;
 var
   Providers: TObjectList<TProvider>;
 begin
+  Writeln('Model create');
   Providers := TObjectList<TProvider>.Create;
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
   FFactory := TProviderFactory.Create(Providers);
@@ -68,9 +69,19 @@ begin
 end;
 
 destructor TReceptionModel.Destroy;
+var
+  I, S: Integer;
 begin
+  Writeln('Model destroy');
+  S := Length(FClients);
+  for I := 0 to S - 1 do
+    FClients[I].DisposeOf();
   SetLength(FClients, 0);
   FFactory.DisposeOf;
+  FSettings.DisposeOf;
+  if FAuthentication <> nil then
+    FAuthentication.DisposeOf;
+
 end;
 
 function TReceptionModel.Elaborate(const Requestor, anAction, IP, Token: String;

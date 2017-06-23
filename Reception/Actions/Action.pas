@@ -7,7 +7,7 @@ uses
   ClientFullRequest;
 
 type
-  TAction = class
+  TAction = class(TObject)
   private
     function GetName: String;
   protected

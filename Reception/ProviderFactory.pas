@@ -8,7 +8,7 @@ uses
 type
   { Abstract factory for producing mailer actions that should perform operations
     for given the requests }
-  TProviderFactory = class
+  TProviderFactory = class(TObject)
   private
   var
     /// <summary> A dictionary of available providers.
@@ -34,6 +34,7 @@ type
     /// <param name="Name">string by which a provider must be found</param>
     function FindByName(const Name: String): TProvider;
     constructor Create(const Providers: TObjectList<TProvider>);
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -45,6 +46,7 @@ uses
 
 constructor TProviderFactory.Create(const Providers: TObjectList<TProvider>);
 begin
+  Writeln('Provider factory create');
   FIndex := CreateIndex(Providers);
 end;
 
@@ -68,6 +70,18 @@ function TProviderFactory.CreateKey(const Provider: TProvider;
   const Action: TAction): String;
 begin
   Result := Provider.getPath() + '/' + Action.Name;
+end;
+
+destructor TProviderFactory.Destroy;
+var
+  key: String;
+begin
+  Writeln('Provider factory destroy');
+  for key in FIndex.Keys do
+    FIndex[key].DisposeOf;
+  FIndex.Clear;
+  FIndex.DisposeOf;
+  inherited;
 end;
 
 function TProviderFactory.FindByName(const Name: String): TProvider;

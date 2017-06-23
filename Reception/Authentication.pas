@@ -5,13 +5,13 @@ interface
 uses System.Generics.Collections, Client;
 
 type
-  TAuthentication = class
+  TAuthentication = class(TObject)
   strict private
     FItems: TDictionary<String, TClient>;
 
   public
     constructor Create(Items: TObjectList<TClient>);
-    destructor Destroy();
+    destructor Destroy(); override;
     /// <summary> Return true if the list of clients contains a one with given IP and token.
     /// Otherwise, return false.
     /// </summary>
@@ -49,7 +49,7 @@ destructor TAuthentication.Destroy;
 begin
   FItems.Clear;
   FItems.DisposeOf;
-
+  inherited;
 end;
 
 function TAuthentication.GetClients: TObjectList<TClient>;

@@ -6,7 +6,7 @@ uses
   Responce, FrontEndRequest, System.Generics.Collections, Action;
 
 type
-  TProvider = class
+  TProvider = class(TObject)
   protected
     FPath: String;
     FIndex: TDictionary<String, TAction>;
@@ -17,6 +17,7 @@ type
     function getPath(): String;
     function FindByName(const Name: String): TAction;
     constructor Create(const Path: String; const Actions: TObjectList<TAction>); virtual;
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -28,6 +29,7 @@ uses
 
 constructor TProvider.Create(const Path: String; const Actions: TObjectList<TAction>);
 begin
+  Writeln('Provider ' + Path + ' create');
   FPath := Path;
   FIndex := CreateIndex(Actions);
 end;
@@ -47,6 +49,16 @@ begin
     else
       raise Exception.Create('Duplicate action name: ' + Name)
   end;
+end;
+
+destructor TProvider.Destroy;
+var
+  Key: String;
+begin
+  Writeln('Provider ' + FPath + ' destroying... (Stub)');
+  for Key in FIndex.Keys do
+    FIndex[Key].DisposeOf;
+  inherited;
 end;
 
 function TProvider.FindByName(const Name: String): TAction;

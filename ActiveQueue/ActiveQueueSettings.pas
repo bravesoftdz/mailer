@@ -4,7 +4,7 @@ interface
 
 type
   /// <summary>Immutable class for storing the back end server url and port.</summary>
-  TActiveQueueSettings = class
+  TActiveQueueSettings = class(TObject)
   strict private
     FUrl: String;
     FPort: Integer;
@@ -17,7 +17,6 @@ type
     property Port: Integer read FPort;
 
     constructor Create(const Url: String; const Port: Integer);
-
   end;
 
 implementation
@@ -32,7 +31,6 @@ begin
   FUrl := Url;
   FPort := Port;
   FSummary := Url + ':' + IntToStr(Port);
-
 end;
 
 end.
