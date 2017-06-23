@@ -80,7 +80,6 @@ var
   server: ISendServerProxy;
   Responce: TActiveQueueResponce;
   Request: TReceptionRequest;
-  Items: TObjectList<TReceptionRequest>;
 begin
   Writeln('ActionSend starts...');
   Result := TResponce.Create;

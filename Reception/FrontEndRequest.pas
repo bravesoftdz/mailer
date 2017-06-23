@@ -25,7 +25,7 @@ type
     [MapperJSONSer('data')]
     property Data: TClientRequest read FData;
     property Attachments: TObjectList<TAttachment> read FAttachments;
-    function ToString(): String;
+    function ToString(): String; override;
   end;
 
 implementation

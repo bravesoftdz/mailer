@@ -63,23 +63,26 @@ var
   BackEndSettings, BackEndSettingsCopy: TActiveQueueSettings;
   Clients: TObjectList<TClient>;
   Client: TClient;
+  Info: String;
 begin
   Port := Config.Port;
-  SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, Port])));
+  Info := Format('%s:%d', [PROGRAM_NAME, Port]);
+  SetConsoleTitle(pwidechar(Info));
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
   Writeln('');
-  Writeln('  ' + PROGRAM_NAME);
+  Writeln(Info);
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
-  Writeln(Format('Starting HTTP Server on port %d', [Port]));
 
   BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
 
   TController.SetBackEndSettings(BackEndSettings);
 
   BackEndSettingsCopy := TController.GetBackEndSettings;
-  Writeln('Back end server:');
-  Writeln('url: ' + BackEndSettingsCopy.URL + ', port: ' + IntToStr(BackEndSettingsCopy.Port));
+  Write('Back end server: ');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+  Writeln(Format('%s:%d', [BackEndSettingsCopy.URL, BackEndSettingsCopy.Port]));
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
   TController.SetClients(Config.Clients);
   Clients := TController.GetClients;
@@ -88,7 +91,12 @@ begin
     Writeln('Clients:');
     for Client in Clients do
     begin
-      Writeln('ip: ' + Format('%15s', [Client.IP]) + ', token: (not shown)');
+      Write('ip: ');
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+      Write(Format('%15s', [Client.IP]));
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+      Writeln(', token: (not shown)');
+
     end;
   end
   else
@@ -128,7 +136,6 @@ begin
     try
       ParamValues := ParamUsage.Parse();
       ConfigFileName := ParamValues[SWITCH_CONFIG];
-
       if Not(TFile.Exists(ConfigFileName)) then
       begin
         Writeln('Error: config file ' + ConfigFileName + 'not found.');
@@ -150,7 +157,6 @@ begin
       end;
       if Assigned(Config) then
       begin
-
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
@@ -164,7 +170,6 @@ begin
       end;
 
     end;
-
   finally
     if ParamValues <> nil then
     begin

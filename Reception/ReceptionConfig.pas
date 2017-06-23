@@ -8,7 +8,7 @@ uses
 type
 
   [MapperJSONNaming(JSONNameLowerCase)]
-  TReceptionConfig = class
+  TReceptionConfig = class(TObject)
   strict private
     FPort: Integer;
     FBackEndPort: Integer;
@@ -34,6 +34,7 @@ type
     property Clients: TObjectList<TClient> read FClients write FClients;
 
     constructor Create(); overload;
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -43,6 +44,11 @@ implementation
 constructor TReceptionConfig.Create;
 begin
   FClients := TObjectList<TClient>.Create();
+end;
+
+destructor TReceptionConfig.Destroy;
+begin
+  FClients.Clear;
 end;
 
 end.

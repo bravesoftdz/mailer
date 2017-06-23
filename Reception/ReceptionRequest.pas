@@ -206,6 +206,7 @@ begin
   FUseAuth := True;
   FUser := ALogin;
   FPassword := APassword;
+  Result := Self;
 end;
 
 function TReceptionRequestBuilder.SetText(
@@ -219,6 +220,7 @@ function TReceptionRequestBuilder.setToken(
   const AToken: String): TReceptionRequestBuilder;
 begin
   FToken := AToken;
+  Result := Self;
 end;
 
 function TReceptionRequestBuilder.SetFrom(
@@ -327,8 +329,6 @@ begin
 end;
 
 function TReceptionRequest.ToJson: TJsonObject;
-var
-  arr: TJsonArray;
 begin
   Result := TJsonObject.Create();
   Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
