@@ -1,4 +1,4 @@
-program DispacherProject;
+program Dispacher;
 
 {$APPTYPE CONSOLE}
 
