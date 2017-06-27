@@ -34,8 +34,7 @@ begin
   FIndex := CreateIndex(Actions);
 end;
 
-function TProvider.createIndex(
-  const Actions: TObjectList<TAction>): TDictionary<String, TAction>;
+function TProvider.createIndex(const Actions: TObjectList<TAction>): TDictionary<String, TAction>;
 var
   Action: TAction;
   Name: String;
@@ -52,12 +51,8 @@ begin
 end;
 
 destructor TProvider.Destroy;
-var
-  Key: String;
 begin
-  Writeln('Provider ' + FPath + ' destroying... (Stub)');
-  for Key in FIndex.Keys do
-    FIndex[Key].DisposeOf;
+  FIndex.DisposeOf;
   inherited;
 end;
 

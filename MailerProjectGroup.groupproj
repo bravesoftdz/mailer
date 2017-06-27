@@ -3,7 +3,7 @@
         <ProjectGuid>{04D3C1C5-D238-4DF4-959F-E5AE792464B4}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="Reception.dproj">
+        <Projects Include="Reception\Reception.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="Tests\Tests.dproj">
@@ -27,13 +27,13 @@
         </BorlandProject>
     </ProjectExtensions>
     <Target Name="Reception">
-        <MSBuild Projects="Reception.dproj"/>
+        <MSBuild Projects="Reception\Reception.dproj"/>
     </Target>
     <Target Name="Reception:Clean">
-        <MSBuild Projects="Reception.dproj" Targets="Clean"/>
+        <MSBuild Projects="Reception\Reception.dproj" Targets="Clean"/>
     </Target>
     <Target Name="Reception:Make">
-        <MSBuild Projects="Reception.dproj" Targets="Make"/>
+        <MSBuild Projects="Reception\Reception.dproj" Targets="Make"/>
     </Target>
     <Target Name="Tests">
         <MSBuild Projects="Tests\Tests.dproj"/>
