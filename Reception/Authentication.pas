@@ -15,7 +15,7 @@ type
     /// <summary> Return true if the list of clients contains a one with given IP and token.
     /// Otherwise, return false.
     /// </summary>
-    function isAuthenticated(item: TClient): Boolean;
+    function isAuthenticated(const item: TClient): Boolean;
 
     /// <summary> return a list of clients</summary>
     function GetClients(): TObjectList<TClient>;
@@ -46,7 +46,11 @@ begin
 end;
 
 destructor TAuthentication.Destroy;
+var
+  Key: String;
 begin
+  for Key in FItems.Keys do
+    FItems[Key].DisposeOf;
   FItems.Clear;
   FItems.DisposeOf;
   inherited;
@@ -64,7 +68,7 @@ begin
 
 end;
 
-function TAuthentication.isAuthenticated(item: TClient): Boolean;
+function TAuthentication.isAuthenticated(const item: TClient): Boolean;
 begin
   Result := FItems.ContainsKey(item.Token) AND (FItems[Item.Token].IP = Item.IP);
 end;

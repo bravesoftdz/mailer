@@ -9,7 +9,7 @@ type
   /// <summary>An ADT for representing a client.
   /// A client is defined by its ip address and a token.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TClient = class
+  TClient = class(TObject)
   strict private
     FToken: String;
     FIP: String;

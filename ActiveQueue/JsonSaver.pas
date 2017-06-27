@@ -93,25 +93,29 @@ var
   OutFileName: String;
   builder: TStringBuilder;
   I, L: Integer;
-  Content: String;
+  Content: TJsonObject;
 begin
   TMonitor.Enter(FLockObject);
   Try
-    OutFileName := GetAvailablePath(FilePath, Suffix);
     Builder := TStringBuilder.Create();
+    OutFileName := GetAvailablePath(FilePath, Suffix);
     Builder.Append('[');
     L := Items.Count;
     for I := 0 to L - 2 do
     begin
-      Builder.Append(Items[I].toJson.ToString);
+      Content := Items[I].toJson;
+      Builder.Append(Content.ToString);
+      Content.DisposeOf;
       Builder.Append(',');
     end;
-    Builder.Append(Items[L - 1].toJson.ToString);
+    Content := Items[L - 1].toJson;
+    Builder.Append(Content.ToString);
+    Content.DisposeOf;
     Builder.Append(']');
     Content := Builder.ToString();
     TFile.AppendAllText(OutFileName, Content);
-    Builder.DisposeOf;
   Finally
+    Builder.DisposeOf;
     TMonitor.Exit(FLockObject);
   End;
 end;

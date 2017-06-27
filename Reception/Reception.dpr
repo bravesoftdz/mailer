@@ -75,13 +75,14 @@ begin
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
   BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
-
+  BackEndSettings.DisposeOf;
   TController.SetBackEndSettings(BackEndSettings);
 
   BackEndSettingsCopy := TController.GetBackEndSettings;
   Write('Back end server: ');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
   Writeln(Format('%s:%d', [BackEndSettingsCopy.URL, BackEndSettingsCopy.Port]));
+  BackEndSettingsCopy.DisposeOf;
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
   TController.SetClients(Config.Clients);

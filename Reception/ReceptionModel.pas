@@ -140,6 +140,8 @@ begin
 end;
 
 function TReceptionModel.isAuthenticated(const IP, Token: String): Boolean;
+var
+  aClient: TClient;
 begin
   if (FAuthentication = nil) then
   begin
@@ -147,7 +149,9 @@ begin
   end
   else
   begin
-    Result := FAuthentication.isAuthenticated(TClient.Create(IP, Token));
+    aClient := TClient.Create(IP, Token);
+    Result := FAuthentication.isAuthenticated(aClient);
+    aClient.DisposeOf;
   end;
 end;
 
