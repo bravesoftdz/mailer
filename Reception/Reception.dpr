@@ -65,7 +65,7 @@ var
   Info: String;
 begin
   TController.SetConfig(Config);
-  Port := Config.Port;
+  Port := TController.GetPort();
   Info := Format('%s:%d', [PROGRAM_NAME, Port]);
   SetConsoleTitle(pwidechar(Info));
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
@@ -91,7 +91,6 @@ begin
       Write(Format('%15s', [Client.IP]));
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
       Writeln(', token: (not shown)');
-
     end;
   end
   else

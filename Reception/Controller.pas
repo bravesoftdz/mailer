@@ -77,6 +77,8 @@ type
 
     class procedure SetConfig(const Config: TReceptionConfig);
 
+    class function GetPort(): Integer;
+
     class procedure Setup();
     class procedure TearDown();
 
@@ -212,6 +214,11 @@ begin
     end
 
   end;
+end;
+
+class function TController.GetPort: Integer;
+begin
+  Result := Model.Port;
 end;
 
 procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);

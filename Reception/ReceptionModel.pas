@@ -18,13 +18,13 @@ type
     FClients: TArray<TClient>;
     FSettings: TActiveQueueSettings;
     FAuthentication: TAuthentication;
+    /// port number at which this server works
+    FPort: Integer;
 
     /// <summary>client setter. Perform the defencieve copying.</summary>
     procedure SetClients(const clients: TObjectList<TClient>);
     /// <summary>return a copy of clients.</summary>
     function GetClients(): TObjectList<TClient>;
-
-    function GetSettings: TActiveQueueSettings;
 
     /// <summary> Return true if the list of clients contains a one with given IP and token.
     /// Otherwise, return false.
@@ -33,7 +33,6 @@ type
     procedure SetSettings(const Value: TActiveQueueSettings);
 
     procedure SetConfig(const Value: TReceptionConfig);
-  private
     function GetBackEndUrl: String;
     function GetBackEndPort: Integer;
 
@@ -55,8 +54,10 @@ type
 
     property BackEndPort: Integer read GetBackEndPort;
 
-    property BackEndSettings: TActiveQueueSettings read GetSettings write SetSettings;
+    property Port: Integer read FPort;
+
     constructor Create();
+
     destructor Destroy(); override;
   end;
 
@@ -161,14 +162,10 @@ var
   BackEndSettings: TActiveQueueSettings;
 begin
   SetClients(Value.Clients);
+  FPort := Value.Port;
   BackEndSettings := TActiveQueueSettings.Create(Value.BackEndUrl, Value.BackEndPort);
   SetSettings(BackEndSettings);
   BackEndSettings.DisposeOf;
-end;
-
-function TReceptionModel.GetSettings: TActiveQueueSettings;
-begin
-  Result := TActiveQueueSettings.Create(FSettings.Url, FSettings.Port);
 end;
 
 function TReceptionModel.isAuthenticated(const IP, Token: String): Boolean;
