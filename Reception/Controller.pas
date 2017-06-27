@@ -5,7 +5,7 @@ interface
 uses
   MVCFramework, MVCFramework.Commons, Action,
   ProviderFactory, Responce, ActiveQueueSettings, ReceptionModel, Client,
-  System.Generics.Collections, System.Classes;
+  System.Generics.Collections, System.Classes, ReceptionConfig;
 
 type
 
@@ -68,17 +68,14 @@ type
     /// <param name="Ctx">a context of the request</param>
     procedure Elaborate(Ctx: TWebContext);
 
-    /// <summary>Set the back end settings (delegate it to the model)</summary>
-    class procedure SetBackEndSettings(const aSettings: TActiveQueueSettings);
-
-    /// <summary>Get the back end settings (delegate it to the model)</summary>
-    class function GetBackEndSettings(): TActiveQueueSettings;
-
-    /// <summary>Set a list of clients. A request is taken into consideration iff it comes from one of the clients.</summary>
-    class procedure SetClients(const Clients: TObjectList<TClient>);
-
     /// <summary>Get a copy of clients.</summary>
     class function GetClients(): TObjectList<TClient>;
+
+    class function GetBackEndUrl: String;
+
+    class function GetBackEndPort: Integer;
+
+    class procedure SetConfig(const Config: TReceptionConfig);
 
     class procedure Setup();
     class procedure TearDown();
@@ -182,10 +179,14 @@ begin
 
 end;
 
-class
-  function TController.GetBackEndSettings: TActiveQueueSettings;
+class function TController.GetBackEndPort: Integer;
 begin
-  Result := Model.BackEndSettings;
+  Result := Model.BackEndPort;
+end;
+
+class function TController.GetBackEndUrl: String;
+begin
+  Result := Model.BackEndUrl;
 end;
 
 function TController.GetParamValue(const Query, Param: String): String;
@@ -257,19 +258,14 @@ begin
 
 end;
 
-class procedure TController.SetBackEndSettings(const aSettings: TActiveQueueSettings);
-begin
-  Model.BackEndSettings := aSettings;
-end;
-
 class function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
 end;
 
-class procedure TController.SetClients(const Clients: TObjectList<TClient>);
+class procedure TController.SetConfig(const Config: TReceptionConfig);
 begin
-  Model.clients := Clients;
+  Model.Config := Config;
 end;
 
 class procedure TController.Setup;

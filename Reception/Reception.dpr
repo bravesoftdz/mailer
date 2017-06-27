@@ -60,11 +60,11 @@ var
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
-  BackEndSettings, BackEndSettingsCopy: TActiveQueueSettings;
   Clients: TObjectList<TClient>;
   Client: TClient;
   Info: String;
 begin
+  TController.SetConfig(Config);
   Port := Config.Port;
   Info := Format('%s:%d', [PROGRAM_NAME, Port]);
   SetConsoleTitle(pwidechar(Info));
@@ -74,18 +74,11 @@ begin
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
-  BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
-  TController.SetBackEndSettings(BackEndSettings);
-  BackEndSettings.DisposeOf;
-
-  BackEndSettingsCopy := TController.GetBackEndSettings;
   Write('Back end server: ');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
-  Writeln(Format('%s:%d', [BackEndSettingsCopy.URL, BackEndSettingsCopy.Port]));
-  BackEndSettingsCopy.DisposeOf;
+  Writeln(Format('%s:%d', [TController.GetBackEndUrl, TController.GetBackEndPort]));
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
-  TController.SetClients(Config.Clients);
   Clients := TController.GetClients;
 
   if (Clients.Count > 0) then
@@ -158,7 +151,7 @@ begin
       begin
         Config := Mapper.JSONObjectToObject<TReceptionConfig>(JsonConfig);
       end;
-      if Assigned(Config) then
+      if Config <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;

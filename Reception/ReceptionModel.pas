@@ -4,7 +4,8 @@ interface
 
 uses
   Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication;
+  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication,
+  ReceptionConfig;
 
 type
   TReceptionModel = class(TObject)
@@ -31,6 +32,11 @@ type
     function isAuthenticated(const IP, Token: String): Boolean;
     procedure SetSettings(const Value: TActiveQueueSettings);
 
+    procedure SetConfig(const Value: TReceptionConfig);
+  private
+    function GetBackEndUrl: String;
+    function GetBackEndPort: Integer;
+
   public
 
     /// <summary>
@@ -42,6 +48,12 @@ type
     function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
+
+    property Config: TReceptionConfig write SetConfig;
+
+    property BackEndUrl: String read GetBackEndUrl;
+
+    property BackEndPort: Integer read GetBackEndPort;
 
     property BackEndSettings: TActiveQueueSettings read GetSettings write SetSettings;
     constructor Create();
@@ -119,6 +131,16 @@ begin
 
 end;
 
+function TReceptionModel.GetBackEndPort: Integer;
+begin
+  Result := FSettings.Port;
+end;
+
+function TReceptionModel.GetBackEndUrl: String;
+begin
+  Result := FSettings.Url;
+end;
+
 function TReceptionModel.GetClients: TObjectList<TClient>;
 begin
   if FAuthentication = nil then
@@ -132,6 +154,16 @@ begin
   if FAuthentication <> nil then
     raise Exception.Create('Reception model can instantiate authentication class only once!');
   FAuthentication := TAuthentication.Create(clients);
+end;
+
+procedure TReceptionModel.SetConfig(const Value: TReceptionConfig);
+var
+  BackEndSettings: TActiveQueueSettings;
+begin
+  SetClients(Value.Clients);
+  BackEndSettings := TActiveQueueSettings.Create(Value.BackEndUrl, Value.BackEndPort);
+  SetSettings(BackEndSettings);
+  BackEndSettings.DisposeOf;
 end;
 
 function TReceptionModel.GetSettings: TActiveQueueSettings;
