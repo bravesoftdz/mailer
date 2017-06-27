@@ -99,6 +99,7 @@ begin
   end;
 
   Request := builder.build;
+  Builder.DisposeOf;
   Adapter := TRestAdapter<ISendServerProxy>.Create();
   Server := Adapter.Build(Settings.Url, Settings.Port);
   if (Server = nil) then

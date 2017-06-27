@@ -112,8 +112,7 @@ begin
     Builder.Append(Content.ToString);
     Content.DisposeOf;
     Builder.Append(']');
-    Content := Builder.ToString();
-    TFile.AppendAllText(OutFileName, Content);
+    TFile.AppendAllText(OutFileName, Builder.ToString());
   Finally
     Builder.DisposeOf;
     TMonitor.Exit(FLockObject);

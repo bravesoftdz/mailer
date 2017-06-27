@@ -86,9 +86,11 @@ type
     /// the TBackEndRequestBuilder. </summary>
     constructor Create(const AFrom: string; const ASender: string; const AServer: string; const APort: Integer; const AUseAuth: Boolean; const aUser: string;
       const APassword: string; const AUseSSL: Boolean; const AnHtml: string; const AText: string; const ASubject: string; const ARecipTo: string; const aRecipCc: string;
-      const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String); overload;
+      const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
+
+    destructor Destroy(); override;
 
     function ToJson(): TJsonObject;
 
@@ -96,7 +98,7 @@ type
 
 type
   { Builder for a type that collects input data for a program that sends emails }
-  TReceptionRequestBuilder = class
+  TReceptionRequestBuilder = class(TObject)
   strict private
     FFRom: String;
     FSender: String;
@@ -132,6 +134,7 @@ type
     function setToken(const AToken: String): TReceptionRequestBuilder;
     function Build(): TReceptionRequest;
     constructor Create();
+    destructor Destroy(); override;
   end;
 
 type
@@ -162,8 +165,11 @@ uses
 
 function TReceptionRequestBuilder.addAttachments(
   const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
+var
+  Item: TAttachment;
 begin
-  FAttach.AddRange(Items);
+  for Item in Items do
+    addAttach(Item);
   Result := Self;
 end;
 
@@ -193,10 +199,16 @@ begin
   FAttach := TObjectList<TAttachment>.Create;
 end;
 
-function TReceptionRequestBuilder.addAttach(
-  const AnAttach: TAttachment): TReceptionRequestBuilder;
+destructor TReceptionRequestBuilder.Destroy;
 begin
-  FAttach.Add(AnAttach);
+  FAttach.Clear;
+  FAttach.DisposeOf;
+  inherited;
+end;
+
+function TReceptionRequestBuilder.addAttach(const AnAttach: TAttachment): TReceptionRequestBuilder;
+begin
+  FAttach.Add(TAttachment.Create(AnAttach.Name, AnAttach.Content));
   Result := Self;
 end;
 
@@ -301,8 +313,9 @@ constructor TReceptionRequest.Create(const AFrom: string; const ASender: string;
   const aUser: string; const APassword: string; const AUseSSL: Boolean;
   const AnHtml: string; const AText: string; const ASubject: string;
   const ARecipTo: string; const aRecipCc: string;
-  const ARecipBcc: string; const AnAttach: TObjectList<TAttachment>; const AToken: String);
-
+  const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String);
+var
+  anAttachment: TAttachment;
 begin
   FFrom := AFrom;
   FSender := ASender;
@@ -318,21 +331,31 @@ begin
   FRecipTo := ARecipTo;
   FRecipCc := aRecipCc;
   FRecipBcc := ARecipBcc;
-  FAttach := AnAttach;
-  FToken := AToken
+  FToken := AToken;
+  /// create a copy. Don't forget to free it!
+  FAttach := TObjectList<TAttachment>.Create();
+  for anAttachment in Attachments do
+    FAttach.Add(TAttachment.Create(anAttachment.Name, anAttachment.Content));
+
 end;
 
 constructor TReceptionRequest.Create;
 begin
   FAttach := TObjectList<TAttachment>.Create;
-  // FData := TMemoryStream.Create();
+end;
+
+destructor TReceptionRequest.Destroy;
+begin
+  FAttach.Clear;
+  FAttach.DisposeOf;
+  inherited;
 end;
 
 function TReceptionRequest.ToJson: TJsonObject;
 begin
   Result := TJsonObject.Create();
-  Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
-  Result.AddPair(TJsonPair.Create(TOKEN_TEXT, FText));
+  // Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
+  // Result.AddPair(TJsonPair.Create(TOKEN_TEXT, FText));
   { TODO: to finish }
 end;
 

@@ -75,8 +75,8 @@ begin
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
   BackEndSettings := TActiveQueueSettings.Create(Config.BackEndUrl, Config.BackEndPort);
-  BackEndSettings.DisposeOf;
   TController.SetBackEndSettings(BackEndSettings);
+  BackEndSettings.DisposeOf;
 
   BackEndSettingsCopy := TController.GetBackEndSettings;
   Write('Back end server: ');

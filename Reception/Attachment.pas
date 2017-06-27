@@ -24,6 +24,7 @@ type
     /// <param name="aName"> name of the attachment</param>
     /// <param name="aContent"> content of the attachment</param>
     constructor Create(const AName: String; const AContent: TMemoryStream);
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -33,7 +34,14 @@ implementation
 constructor TAttachment.Create(const AName: String; const AContent: TMemoryStream);
 begin
   FName := AName;
-  FContent := AContent;
+  FContent := TMemoryStream.Create();
+  FContent.LoadFromStream(AContent);
+end;
+
+destructor TAttachment.Destroy;
+begin
+  FContent.DisposeOf;
+  inherited;
 end;
 
 end.
