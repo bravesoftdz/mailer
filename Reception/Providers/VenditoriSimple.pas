@@ -36,7 +36,8 @@ begin
   ActionSend := TActionSend.Create;
   Actions.AddRange([ActionSend]);
   inherited Create(PATH, Actions);
+  Actions.Clear;
+  Actions.DisposeOf;
 end;
 
 end.
-

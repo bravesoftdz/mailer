@@ -11,10 +11,15 @@ type
     FPath: String;
     FIndex: TDictionary<String, TAction>;
   private
+    /// Create an index of available action. The actions are indexed by their names.
+    /// A TAction instance that gets inserted into the resulting dictionary is a copy of an action
+    /// of the list passed as the parameter to this method.
     function createIndex(const Actions: TObjectList<TAction>): TDictionary<String, TAction>;
   public
     { a part of the RESTful path to which current provider must respond }
     function getPath(): String;
+    /// Returns a copy of actions
+    function getActions(): TObjectList<TAction>;
     function FindByName(const Name: String): TAction;
     constructor Create(const Path: String; const Actions: TObjectList<TAction>); virtual;
     destructor Destroy(); override;
@@ -44,7 +49,7 @@ begin
   begin
     Name := Action.Name;
     if Not(Result.ContainsKey(Name)) then
-      Result.Add(Name, Action)
+      Result.Add(Name, TAction.Create(Name))
     else
       raise Exception.Create('Duplicate action name: ' + Name)
   end;
@@ -62,6 +67,15 @@ begin
     Result := FIndex[Name]
   else
     Result := nil;
+end;
+
+function TProvider.getActions: TObjectList<TAction>;
+var
+  k: String;
+begin
+  Result := TObjectList<TAction>.Create();
+  for k in FIndex.Keys do
+    Result.Add(TAction.Create(FIndex[k].Name));
 end;
 
 function TProvider.getPath: String;

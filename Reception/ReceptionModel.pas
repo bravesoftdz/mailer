@@ -66,6 +66,8 @@ begin
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
   FFactory := TProviderFactory.Create(Providers);
   FClients := TArray<TClient>.Create();
+  Providers.Clear;
+  Providers.DisposeOf;
 end;
 
 destructor TReceptionModel.Destroy;

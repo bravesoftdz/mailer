@@ -50,11 +50,11 @@ begin
   FIndex := CreateIndex(Providers);
 end;
 
-function TProviderFactory.CreateIndex(
-  const Providers: TObjectList<TProvider>): TDictionary<String, TProvider>;
+function TProviderFactory.CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TProvider>;
 var
   Provider: TProvider;
   Path: String;
+  Actions: TObjectList<TAction>;
 begin
   Result := TDictionary<String, TProvider>.Create;
   for Provider in Providers do
@@ -62,7 +62,10 @@ begin
     Path := Provider.getPath();
     if Result.ContainsKey(Path) then
       raise Exception.Create('Failed to create the index of the provider: path "' + Path + '" already exists.');
-    Result.Add(Path, Provider);
+    Actions := Provider.getActions;
+    Result.Add(Path, TProvider.Create(Path, Actions));
+    Actions.Clear;
+    Actions.DisposeOf;
   end;
 end;
 
