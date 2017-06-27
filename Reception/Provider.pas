@@ -56,7 +56,12 @@ begin
 end;
 
 destructor TProvider.Destroy;
+var
+  Key: String;
 begin
+  for Key in FIndex.Keys do
+    FIndex[Key].DisposeOf;
+  FIndex.Clear;
   FIndex.DisposeOf;
   inherited;
 end;
