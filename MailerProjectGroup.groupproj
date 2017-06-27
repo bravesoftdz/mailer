@@ -15,7 +15,7 @@
         <Projects Include="ConsumerMock\Consumer.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Dispatcher\DispacherProject.dproj">
+        <Projects Include="Dispatcher\Dispatcher.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -62,23 +62,23 @@
     <Target Name="Consumer:Make">
         <MSBuild Projects="ConsumerMock\Consumer.dproj" Targets="Make"/>
     </Target>
-    <Target Name="DispacherProject">
-        <MSBuild Projects="Dispatcher\DispacherProject.dproj"/>
+    <Target Name="Dispatcher">
+        <MSBuild Projects="Dispatcher\Dispatcher.dproj"/>
     </Target>
-    <Target Name="DispacherProject:Clean">
-        <MSBuild Projects="Dispatcher\DispacherProject.dproj" Targets="Clean"/>
+    <Target Name="Dispatcher:Clean">
+        <MSBuild Projects="Dispatcher\Dispatcher.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="DispacherProject:Make">
-        <MSBuild Projects="Dispatcher\DispacherProject.dproj" Targets="Make"/>
+    <Target Name="Dispatcher:Make">
+        <MSBuild Projects="Dispatcher\Dispatcher.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;Tests;ActiveQueue;Consumer;DispacherProject"/>
+        <CallTarget Targets="Reception;Tests;ActiveQueue;Consumer;Dispatcher"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;Tests:Clean;ActiveQueue:Clean;Consumer:Clean;DispacherProject:Clean"/>
+        <CallTarget Targets="Reception:Clean;Tests:Clean;ActiveQueue:Clean;Consumer:Clean;Dispatcher:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Reception:Make;Tests:Make;ActiveQueue:Make;Consumer:Make;DispacherProject:Make"/>
+        <CallTarget Targets="Reception:Make;Tests:Make;ActiveQueue:Make;Consumer:Make;Dispatcher:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
