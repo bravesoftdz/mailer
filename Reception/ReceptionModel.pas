@@ -5,7 +5,7 @@ interface
 uses
   Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
   Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication,
-  ReceptionConfig;
+  ReceptionConfig, System.Classes;
 
 type
   TReceptionModel = class(TObject)
@@ -36,8 +36,19 @@ type
     function GetBackEndUrl: String;
     function GetBackEndPort: Integer;
 
-  public
+    /// <summary>Return a first element from the array that has given content type and key name.
+    /// If nothing is found, an empty string is returned.
+    /// Example of the array elements (this is just a one element, it spans many lines):
+    /// Content-Disposition: form-data; name="data"
+    /// Content-Type: application/json
+    /// { "html":"html version of the mail", "text":"text version of the mail", "token":"abcdef" }
+    /// </summary>
+    function PickMultipartItem(const Items: TArray<String>; const ContentType: String; const KeyName: String): String;
 
+    /// <summary> Returns a copy of original list in which the elements at specified postions are skipped</summary>
+    function SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
+
+  public
     /// <summary>
     /// Elaborate an action from a client.</summary>
     /// <param name="Requestor">client name</param>
@@ -45,6 +56,15 @@ type
     /// <param name="IP">client IP</param>
     /// <param name="Request">request obtained from the client</param>
     function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
+
+    /// <summary>Extract a value corresponding to a key in a set of key-value pairs. The pairs
+    /// are separated by semicolon, while the key and value are separated by equality sign. A key is
+    /// optional in the key-value pairs. Example:
+    /// 'multipart/form-data;charset=UTF-8;boundary=--dsds'
+    function GetParamValue(const Query: String; const Param: String): String;
+
+    /// <summary>Extract body from a multipart request body</summary
+    function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -132,6 +152,31 @@ begin
 
 end;
 
+function TReceptionModel.ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
+var
+  items, BodyParts: TArray<string>;
+  separator: String;
+begin
+  if not ContentType.IsEmpty then
+  begin
+    items := ContentType.Split([';']);
+    if not Boundary.IsEmpty then
+    begin
+      /// See section 5.1.1 "Common Syntax" (http://www.ietf.org/rfc/rfc2046.txt):
+      /// The Content-Type field for multipart entities requires one parameter,
+      // "boundary". The boundary delimiter line is then defined as a line
+      // consisting entirely of two hyphen characters ("-", decimal value 45)
+      // followed by the boundary parameter value from the Content-Type header
+      // field, optional linear whitespace, and a terminating CRLF.
+      Separator := '--' + boundary;
+      BodyParts := RawBody.Split([Separator]);
+      Result := PickMultipartItem(BodyParts, ContentType, KeyName);
+    end;
+
+  end;
+
+end;
+
 function TReceptionModel.GetBackEndPort: Integer;
 begin
   Result := FSettings.Port;
@@ -148,6 +193,29 @@ begin
     Result := TObjectList<TClient>.Create
   else
     Result := FAuthentication.GetClients;
+end;
+
+function TReceptionModel.GetParamValue(const Query, Param: String): String;
+var
+  items, keyvalue: TArray<string>;
+  pair: String;
+begin
+  if not Query.IsEmpty then
+  begin
+    items := Query.Split([';']);
+    for pair in items do
+    begin
+      keyvalue := pair.trim().split(['=']);
+      if Length(keyvalue) = 2 then
+      begin
+        if Param.Equals(keyvalue[0].trim()) then
+        begin
+          Result := keyvalue[1];
+          Exit();
+        end;
+      end
+    end
+  end;
 end;
 
 procedure TReceptionModel.SetClients(const clients: TObjectList<TClient>);
@@ -184,9 +252,51 @@ begin
   end;
 end;
 
+function TReceptionModel.PickMultipartItem(const Items: TArray<String>; const ContentType,
+  KeyName: String): String;
+var
+  Elem, Needle1, Needle2: String;
+  Parts: TStringList;
+  positions: TList<Integer>;
+
+begin
+  Needle1 := 'Content-Disposition: form-data; name="' + KeyName + '"';
+  Needle2 := 'Content-Type: ' + ContentType;
+  Parts := TStringList.Create;
+  for Elem in Items do
+  begin
+    Parts.Text := Elem.Trim();
+    if Parts.Count > 2 then
+    begin
+      if (Parts[0] = Needle1) AND (Parts[1] = Needle2) then
+      begin
+        Positions := TList<Integer>.Create;
+        Positions.Add(0);
+        Positions.Add(1);
+        Result := SkipElements(Parts, Positions).Text.trim();
+        Exit();
+      end;
+    end;
+  end;
+end;
+
 procedure TReceptionModel.SetSettings(const Value: TActiveQueueSettings);
 begin
   FSettings := TActiveQueueSettings.Create(Value.Url, Value.Port);
+end;
+
+function TReceptionModel.SkipElements(const Items: TStringList;
+  const positions: TList<Integer>): TStringList;
+var
+  I, L: Integer;
+begin
+  Result := TStringList.Create;
+  L := Items.Count;
+  for I := 0 to L - 1 do
+    if not(Positions.Contains(I)) then
+    begin
+      Result.Add(Items[I]);
+    end;
 end;
 
 end.
