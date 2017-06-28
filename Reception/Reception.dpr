@@ -37,8 +37,9 @@ uses
   Client in 'Client.pas',
   Authentication in 'Authentication.pas',
   Credentials in 'Data\Credentials.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
-  Attachment in 'Attachment.pas';
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
+  Attachment in 'Attachment.pas',
+  DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
 const
   SWITCH_CONFIG = 'c';

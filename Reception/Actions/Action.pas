@@ -82,7 +82,6 @@ var
   Request: TReceptionRequest;
 begin
   Writeln('ActionSend starts...');
-  Result := TResponce.Create;
   builder := TReceptionRequestBuilder.Create();
   builder.SetFrom(TVenditoriCredentials.From())
     .SetSender(TVenditoriCredentials.Name())
@@ -104,20 +103,17 @@ begin
   Server := Adapter.Build(Settings.Url, Settings.Port);
   if (Server = nil) then
   begin
-    Result.msg := 'Backend server is not running';
+    Result := TResponce.Create(False, 'Backend server is not running');
   end
   else
   begin
     try
       Responce := server.PostItem(Request);
-      if Responce.status then
-        Result.msg := 'OK'
-      else
-        Result.msg := Responce.Msg;
+      Result := TResponce.Create(Responce.status, Responce.Msg);
     except
       on E: Exception do
       begin
-        Result.msg := E.Message;
+        Result := TResponce.Create(False, E.Message);
       end;
     end;
   end;
@@ -135,8 +131,7 @@ end;
 function TActionContact.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
-  Result := TResponce.Create;
-  Result.msg := 'contact action: not implemented yet';
+  Result := TResponce.Create(False, 'contact action: not implemented yet');
 
 end;
 
@@ -150,8 +145,7 @@ end;
 function TActionOrder.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
 begin
   /// stub
-  Result := TResponce.Create;
-  Result.msg := 'contact action: not implemented yet';
+  Result := TResponce.Create(False, 'contact action: not implemented yet');
 end;
 
 end.

@@ -5,34 +5,28 @@ interface
 type
 
   /// <summary>
-  /// A responce that a Reception instance provides to a client.
+  /// A reception responce.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TResponce = class
+  TResponce = class(TObject)
   private
     FMessage: String;
-    FToken: String;
-    procedure SetMessage(const Value: String);
-    procedure SetToken(const Value: String);
+    FStatus: Boolean;
   public
-    property msg: String read FMessage write SetMessage;
-
-    { TODO : Does the client really need the token in the responce? }
-    property token: String read FToken write SetToken;
+    property msg: String read FMessage write FMessage;
+    property Status: Boolean read FStatus write FStatus;
+    constructor Create(const Status: Boolean; const Msg: String);
   end;
 
 implementation
 
-{ TSimpleMailerResponce }
 
-procedure TResponce.setMessage(const Value: String);
-begin
-  FMessage := Value;
-end;
+{ TResponce }
 
-procedure TResponce.SetToken(const Value: String);
+constructor TResponce.Create(const Status: Boolean; const Msg: String);
 begin
-  FToken := Value;
+  FMessage := Msg;
+  FStatus := Status;
 end;
 
 end.

@@ -5,14 +5,18 @@ interface
 uses
   MVCFramework, MVCFramework.Commons, Action,
   ProviderFactory, Responce, ActiveQueueSettings, ReceptionModel, Client,
-  System.Generics.Collections, System.Classes, ReceptionConfig;
+  System.Generics.Collections, System.Classes, ReceptionConfig,
+  MVCFramework.RESTAdapter, DispatcherProxyInterface;
 
 type
 
   [MVCPath('/')]
   TController = class(TMVCController)
   private
-    class var Model: TReceptionModel;
+  class var
+    Model: TReceptionModel;
+    FBackEndProxy: IDispatcherProxy;
+    FBackEndAdapter: TRestAdapter<IDispatcherProxy>;
   strict private
   const
 
@@ -27,6 +31,8 @@ type
 
     /// name of the key in the request that by means of which the requestor passes the data
     DATA_KEY = 'data';
+
+    class procedure SetUpBackEndProxy();
 
   public
     /// <summary>Transform the multipart form-data POST requests into a class instance and
@@ -68,7 +74,8 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.SysUtils, DispatcherEntry,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest, Attachment, Web.HTTPApp, ClientFullRequest;
+  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
+  Attachment, Web.HTTPApp, ClientFullRequest, DispatcherResponce;
 
 procedure TController.ElaborateRequest(Ctx: TWebContext);
 var
@@ -80,7 +87,8 @@ var
   AttachedFiles: TAbstractWebRequestFiles;
   MemStream: TMemoryStream;
   AJSon: TJSONObject;
-  DispatherEntry: TDispatcherEntry;
+  DispatcherEntry: TDispatcherEntry;
+  DispatcherResponce: TDispatcherResponce;
   ClientRequest: TClientRequest;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
@@ -89,34 +97,11 @@ begin
   try
     boundary := Model.GetParamValue(Ctx.Request.Headers['Content-Type'], 'boundary');
     Body := Model.ExtractBody(boundary, Ctx.Request.Body, 'application/json', 'data');
+    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Body), 0) as TJSONObject;
   except
     on e: Exception do
       Writeln(e.Message);
   end;
-
-  try
-    AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Body), 0) as TJSONObject;
-  except
-    on E: Exception do
-    begin
-      AJSon := nil;
-    end;
-  end;
-
-  if (AJson <> nil) then
-  begin
-    try
-      ClientRequest := Mapper.JSONObjectToObject<TClientRequest>(AJSon);
-    except
-      on E: Exception do
-      begin
-        Writeln('Failed to convert json into an object');
-      end;
-    end;
-  end;
-
-  if ClientRequest = nil then
-    ClientRequest := TClientRequest.Create();
 
   Attachments := TObjectList<TAttachment>.Create;
   AttachedFiles := Ctx.Request.Files;
@@ -128,8 +113,14 @@ begin
     Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
   end;
 
-  Request := TClientFullRequest.Create(ClientRequest.Text, ClientRequest.Html, Attachments);
-  Responce := Model.Elaborate(RequestorName, ActionName, IP, ClientRequest.Token, Request);
+  DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
+  DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
+  Responce := Model.ConvertToOwnResponce(DispatcherResponce);
+
+  DispatcherResponce.DisposeOf;
+  Attachments.Clear;
+  Attachments.DisposeOf;
+  AJSon.DisposeOf;
 
   Render(Responce);
 end;
@@ -171,18 +162,29 @@ end;
 class procedure TController.SetConfig(const Config: TReceptionConfig);
 begin
   Model.Config := Config;
+  SetUpBackEndProxy();
 end;
 
 class procedure TController.Setup;
 begin
   Writeln('Controller set up');
-  Model := TReceptionModel.Create()
+  Model := TReceptionModel.Create();
+  FBackEndAdapter := TRestAdapter<IDispatcherProxy>.Create();
+end;
+
+class procedure TController.SetUpBackEndProxy;
+begin
+  FBackEndProxy := FBackEndAdapter.Build(Model.BackEndUrl, Model.BackEndPort);
 end;
 
 class procedure TController.TearDown;
 begin
   Writeln('Controller tear down');
   Model.DisposeOf();
+  if (FBackEndProxy <> nil) then
+    FBackEndProxy := nil;
+  if (FBackEndAdapter <> nil) then
+    FBackEndAdapter := nil;
 end;
 
 initialization

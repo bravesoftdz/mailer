@@ -122,6 +122,7 @@
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Attachment.pas"/>
+        <DCCReference Include="DispatcherProxyInterface.pas"/>
         <None Include="..\ModelSupport_Source\default.txvpck"/>
         <None Include="..\ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="..\ModelSupport_Source\Source\default.txvpck"/>

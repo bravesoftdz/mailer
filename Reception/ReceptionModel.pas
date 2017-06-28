@@ -4,8 +4,9 @@ interface
 
 uses
   Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp, System.Generics.Collections, Client, ClientFullRequest, Authentication,
-  ReceptionConfig, System.Classes;
+  Web.HTTPApp, Client, ClientFullRequest, Authentication,
+  ReceptionConfig, System.Classes, DispatcherEntry, System.JSON, Attachment,
+  System.Generics.Collections, DispatcherResponce;
 
 type
   TReceptionModel = class(TObject)
@@ -66,6 +67,11 @@ type
     /// <summary>Extract body from a multipart request body</summary
     function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 
+    function BuildBackEndEntry(const Origin: String; const Action: String; const data: TJSonObject; const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
+
+    /// <summary>Transforms a dispatcher responce into a reception one.<summary>
+    function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TResponce;
+
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
     property Config: TReceptionConfig write SetConfig;
@@ -84,11 +90,27 @@ type
 implementation
 
 uses
-  Provider, Action, System.Contnrs,
-  VenditoriSimple, SoluzioneAgenti, System.JSON, System.SysUtils,
+  Provider, Action,
+  VenditoriSimple, SoluzioneAgenti, System.SysUtils,
   ObjectsMappers, ClientRequest;
 
 { TMailerModel }
+
+function TReceptionModel.BuildBackEndEntry(const Origin, Action: String; const data: TJSonObject;
+  const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
+begin
+  /// stub
+  Result := TDispatcherEntry.Create();
+end;
+
+function TReceptionModel.ConvertToOwnResponce(
+  const BackEndResponce: TDispatcherResponce): TResponce;
+begin
+  if (BackEndResponce = nil) then
+    Result := TResponce.Create(False, 'No responce from the backend server.')
+  else
+    Result := TResponce.Create(BackEndResponce.Status, BackEndResponce.Msg);
+end;
 
 constructor TReceptionModel.Create;
 var
@@ -139,14 +161,13 @@ begin
     end
     else
     begin
-      Responce := TResponce.Create;
-      Responce.msg := 'Action not allowed.';
+      Responce := TResponce.Create(False, 'Action not allowed.');
+
     end;
   end
   else
   begin
-    Responce := TResponce.Create;
-    Responce.msg := 'Access denied';
+    Responce := TResponce.Create(False, 'Access denied');
   end;
   Result := Responce;
 
