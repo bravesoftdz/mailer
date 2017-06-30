@@ -3,8 +3,10 @@
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Action,
-  ProviderFactory, Responce, ActiveQueueSettings, ReceptionModel, Client,
+  MVCFramework, MVCFramework.Commons,
+  // Action,
+  // ProviderFactory,
+  Responce, ActiveQueueSettings, ReceptionModel, Client,
   System.Generics.Collections, System.Classes, ReceptionConfig,
   MVCFramework.RESTAdapter, DispatcherProxyInterface;
 
@@ -74,7 +76,9 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.SysUtils, DispatcherEntry,
-  FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti, ObjectsMappers, ClientRequest,
+  // FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti,
+  ObjectsMappers,
+//  ClientRequest,
   Attachment, Web.HTTPApp, ClientFullRequest, DispatcherResponce;
 
 procedure TController.ElaborateRequest(Ctx: TWebContext);

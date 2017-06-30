@@ -3,8 +3,12 @@ unit ReceptionModel;
 interface
 
 uses
-  Responce, ProviderFactory, FrontEndRequest, ActiveQueueSettings,
-  Web.HTTPApp, Client, ClientFullRequest, Authentication,
+  Responce,
+  // ProviderFactory, FrontEndRequest,
+  ActiveQueueSettings,
+  Web.HTTPApp, Client,
+  // ClientFullRequest,
+  Authentication,
   ReceptionConfig, System.Classes, DispatcherEntry, System.JSON, Attachment,
   System.Generics.Collections, DispatcherResponce;
 
@@ -15,7 +19,7 @@ type
     /// name of the key that contains a token in a json
     TOKEN_KEY = 'token';
   strict private
-    FFactory: TProviderFactory;
+    // FFactory: TProviderFactory;
     FClients: TArray<TClient>;
     FSettings: TActiveQueueSettings;
     FAuthentication: TAuthentication;
@@ -58,7 +62,7 @@ type
     /// <param name="anAction">an action name that the client requests to perform</param>
     /// <param name="IP">client IP</param>
     /// <param name="Request">request obtained from the client</param>
-    function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
+    // function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
 
     /// <summary>Extract a value corresponding to a key in a set of key-value pairs. The pairs
     /// are separated by semicolon, while the key and value are separated by equality sign. A key is
@@ -94,8 +98,10 @@ type
 implementation
 
 uses
-  Provider, Action,
-  VenditoriSimple, SoluzioneAgenti, System.SysUtils,
+  // Provider,
+  // Action,
+  // VenditoriSimple, SoluzioneAgenti,
+  System.SysUtils,
   ObjectsMappers, ClientRequest;
 
 { TMailerModel }
@@ -116,16 +122,16 @@ begin
 end;
 
 constructor TReceptionModel.Create;
-var
-  Providers: TObjectList<TProvider>;
+// var
+// Providers: TObjectList<TProvider>;
 begin
   Writeln('Model create');
-  Providers := TObjectList<TProvider>.Create;
-  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
-  FFactory := TProviderFactory.Create(Providers);
+  // Providers := TObjectList<TProvider>.Create;
+  // Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
+  // FFactory := TProviderFactory.Create(Providers);
   FClients := TArray<TClient>.Create();
-  Providers.Clear;
-  Providers.DisposeOf;
+  // Providers.Clear;
+  // Providers.DisposeOf;
 end;
 
 destructor TReceptionModel.Destroy;
@@ -137,44 +143,44 @@ begin
   for I := 0 to S - 1 do
     FClients[I].DisposeOf();
   SetLength(FClients, 0);
-  FFactory.DisposeOf;
+  // FFactory.DisposeOf;
   FSettings.DisposeOf;
   if FAuthentication <> nil then
     FAuthentication.DisposeOf;
 
 end;
 
-function TReceptionModel.Elaborate(const Requestor, anAction, IP, Token: String;
-  const Request: TClientFullRequest): TResponce;
-var
-  Provider: TProvider;
-  Action: TAction;
-  Responce: TResponce;
-begin
-  if isAuthenticated(IP, Token) then
-  begin
-    Provider := FFactory.FindByName(Requestor);
-    if (Provider <> nil) then
-    begin
-      Action := Provider.FindByName(anAction);
-    end;
-    if (Action <> nil) then
-    begin
-      Responce := Action.Elaborate(Request, FSettings);
-    end
-    else
-    begin
-      Responce := TResponce.Create(False, 'Action not allowed.');
-
-    end;
-  end
-  else
-  begin
-    Responce := TResponce.Create(False, 'Access denied');
-  end;
-  Result := Responce;
-
-end;
+// function TReceptionModel.Elaborate(const Requestor, anAction, IP, Token: String;
+// const Request: TClientFullRequest): TResponce;
+// var
+// Provider: TProvider;
+// Action: TAction;
+// Responce: TResponce;
+// begin
+// if isAuthenticated(IP, Token) then
+// begin
+// Provider := FFactory.FindByName(Requestor);
+// if (Provider <> nil) then
+// begin
+// Action := Provider.FindByName(anAction);
+// end;
+// if (Action <> nil) then
+// begin
+// Responce := Action.Elaborate(Request, FSettings);
+// end
+// else
+// begin
+// Responce := TResponce.Create(False, 'Action not allowed.');
+//
+// end;
+// end
+// else
+// begin
+// Responce := TResponce.Create(False, 'Access denied');
+// end;
+// Result := Responce;
+//
+// end;
 
 function TReceptionModel.ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 var
