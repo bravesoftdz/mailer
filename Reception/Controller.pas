@@ -108,7 +108,10 @@ begin
   begin
     TokenV := AJson.GetValue('token');
     if TokenV <> nil then
+    begin
       Token := TokenV.Value;
+    end;
+
   end;
   if (AJson = nil) OR (TokenV = nil) then
     Responce := TResponce.Create(False, 'Token not found.')
@@ -131,12 +134,13 @@ begin
         MemStream.DisposeOf;
       end;
       try
-        DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments, Token);
+        DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon.ToString, Attachments, Token);
         try
           DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
         except
           on E: Exception do
           begin
+            Writeln('Error while making request: ' + E.Message);
             DispatcherResponce := nil;
           end;
         end;
@@ -212,6 +216,7 @@ end;
 
 class procedure TController.SetUpBackEndProxy;
 begin
+  Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.BackEndUrl, Model.BackEndPort]));
   FBackEndProxy := FBackEndAdapter.Build(Model.BackEndUrl, Model.BackEndPort);
 end;
 

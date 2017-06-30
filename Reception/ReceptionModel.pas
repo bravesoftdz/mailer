@@ -70,8 +70,8 @@ type
     /// <summary>Extract body from a multipart request body</summary
     function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 
-    function BuildBackEndEntry(const Origin: String; const Action: String; const data: TJSonObject; const Attachments: TObjectList<TAttachment>; const Token: String)
-      : TDispatcherEntry;
+    function BuildBackEndEntry(const Origin: String; const Action: String; const Data: String;
+      const Attachments: TObjectList<TAttachment>; const Token: String): TDispatcherEntry;
 
     /// <summary>Transforms a dispatcher responce into a reception one.<summary>
     function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TResponce;
@@ -100,7 +100,7 @@ uses
 
 { TMailerModel }
 
-function TReceptionModel.BuildBackEndEntry(const Origin, Action: String; const data: TJSonObject;
+function TReceptionModel.BuildBackEndEntry(const Origin, Action: String; const data: String;
   const Attachments: TObjectList<TAttachment>; const Token: String): TDispatcherEntry;
 begin
   Result := TDispatcherEntry.Create(Origin, Action, Data, Attachments, Token);

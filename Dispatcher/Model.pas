@@ -50,7 +50,7 @@ end;
 
 function TModel.Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
 begin
-  { TODO 1 : Implement this method }
+  Result := TDispatcherResponce.Create(False, 'Dispatcher is not implemented yet');
 end;
 
 function TModel.GetBackEndIp: String;

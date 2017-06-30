@@ -126,16 +126,14 @@ begin
     if Context.Request.ThereIsRequestBody then
     begin
       Request := Context.Request.BodyAs<TDispatcherEntry>;
-      Responce := Model.Elaborate(Request);
-
-    end;
-
-    Writeln('Authorized ' + IP);
+    end
+    else
+      Request := nil;
+    Responce := Model.Elaborate(Request);
   end
   else
-    Writeln('Not authorized ' + IP);
-
-  Render('');
+    Responce := TDispatcherResponce.Create(False, 'Not authorized');
+  Render(Responce);
 end;
 
 procedure TDispatcherController.OnAfterAction(Context: TWebContext; const AActionName: string);

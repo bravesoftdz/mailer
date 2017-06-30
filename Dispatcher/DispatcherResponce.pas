@@ -2,8 +2,12 @@ unit DispatcherResponce;
 
 interface
 
+uses ObjectsMappers;
+
 type
+
   /// Dispatcher responce to some requests.
+  [MapperJSONNaming(JSONNameLowerCase)]
   TDispatcherResponce = class(TObject)
   strict private
   var
@@ -11,11 +15,9 @@ type
     FMessage: String;
 
   public
-    property Status: Boolean read FStatus;
-    property msg: String read FMessage;
-
+    property Status: Boolean read FStatus write FStatus;
+    property msg: String read FMessage write FMessage;
     constructor Create(const Status: Boolean; const Msg: String);
-
   end;
 
 implementation
