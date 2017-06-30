@@ -89,6 +89,9 @@ var
   AJSon: TJSONObject;
   DispatcherEntry: TDispatcherEntry;
   DispatcherResponce: TDispatcherResponce;
+  Token: String;
+  TokenV: TJsonValue;
+
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   ActionName := Ctx.request.params[ACTION_KEY];
@@ -99,45 +102,63 @@ begin
     AJSon := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Body), 0) as TJSONObject;
   except
     on e: Exception do
-      Writeln(e.Message);
+      AJson := nil;
   end;
-
-  Attachments := TObjectList<TAttachment>.Create;
-  AttachedFiles := Ctx.Request.Files;
-  Len := AttachedFiles.Count;
-  for I := 0 to Len - 1 do
+  if AJson <> nil then
   begin
-    MemStream := TMemoryStream.Create();
-    MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
-    Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
-    MemStream.DisposeOf;
+    TokenV := AJson.GetValue('token');
+    if TokenV <> nil then
+      Token := TokenV.Value;
   end;
-  try
-    DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
-    try
-      DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
-    except
-      on E: Exception do
-      begin
-        DispatcherResponce := nil;
-      end;
-    end;
-    if DispatcherResponce <> nil then
+  if (AJson = nil) OR (TokenV = nil) then
+    Responce := TResponce.Create(False, 'Token not found.')
+  else
+  begin
+    if not(Model.isAuthenticated(IP, Token)) then
     begin
-      Responce := Model.ConvertToOwnResponce(DispatcherResponce);
-      DispatcherResponce.DisposeOf;
+      Responce := TResponce.Create(false, 'Not authorized.');
     end
     else
     begin
-      Responce := TResponce.Create(False, 'No responce from the backend server');
-    end;
-  finally
-    DispatcherEntry.DisposeOf;
-    Attachments.Clear;
-    Attachments.DisposeOf;
-    AJSon.DisposeOf;
-  end;
+      Attachments := TObjectList<TAttachment>.Create;
+      AttachedFiles := Ctx.Request.Files;
+      Len := AttachedFiles.Count;
+      for I := 0 to Len - 1 do
+      begin
+        MemStream := TMemoryStream.Create();
+        MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
+        Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
+        MemStream.DisposeOf;
+      end;
+      try
+        DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments, Token);
+        try
+          DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
+        except
+          on E: Exception do
+          begin
+            DispatcherResponce := nil;
+          end;
+        end;
+        if DispatcherResponce <> nil then
+        begin
+          Responce := Model.ConvertToOwnResponce(DispatcherResponce);
+          DispatcherResponce.DisposeOf;
+        end
+        else
+        begin
+          Responce := TResponce.Create(False, 'No responce from the backend server');
+        end;
+      finally
+        DispatcherEntry.DisposeOf;
+        Attachments.Clear;
+        Attachments.DisposeOf;
 
+      end;
+    end;
+  end;
+  if AJson <> nil then
+    AJSon.DisposeOf;
   Render(Responce);
 end;
 

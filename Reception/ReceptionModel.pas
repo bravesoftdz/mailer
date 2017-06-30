@@ -27,10 +27,6 @@ type
     /// <summary>return a copy of clients.</summary>
     function GetClients(): TObjectList<TClient>;
 
-    /// <summary> Return true if the list of clients contains a one with given IP and token.
-    /// Otherwise, return false.
-    /// </summary>
-    function isAuthenticated(const IP, Token: String): Boolean;
     procedure SetSettings(const Value: TActiveQueueSettings);
 
     procedure SetConfig(const Value: TReceptionConfig);
@@ -50,6 +46,12 @@ type
     function SkipElements(const Items: TStringList; const positions: TList<Integer>): TStringList;
 
   public
+
+    /// <summary> Return true if the list of clients contains a one with given IP and token.
+    /// Otherwise, return false.
+    /// </summary>
+    function isAuthenticated(const IP, Token: String): Boolean;
+
     /// <summary>
     /// Elaborate an action from a client.</summary>
     /// <param name="Requestor">client name</param>
@@ -68,7 +70,8 @@ type
     /// <summary>Extract body from a multipart request body</summary
     function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 
-    function BuildBackEndEntry(const Origin: String; const Action: String; const data: TJSonObject; const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
+    function BuildBackEndEntry(const Origin: String; const Action: String; const data: TJSonObject; const Attachments: TObjectList<TAttachment>; const Token: String)
+      : TDispatcherEntry;
 
     /// <summary>Transforms a dispatcher responce into a reception one.<summary>
     function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TResponce;
@@ -98,10 +101,9 @@ uses
 { TMailerModel }
 
 function TReceptionModel.BuildBackEndEntry(const Origin, Action: String; const data: TJSonObject;
-  const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
+  const Attachments: TObjectList<TAttachment>; const Token: String): TDispatcherEntry;
 begin
-  /// stub
-  Result := TDispatcherEntry.Create();
+  Result := TDispatcherEntry.Create(Origin, Action, Data, Attachments, Token);
 end;
 
 function TReceptionModel.ConvertToOwnResponce(
