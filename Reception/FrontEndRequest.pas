@@ -13,7 +13,7 @@ type
   /// from the front end.
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TFrontEndRequest = class
+  TFrontEndRequest = class(TObject)
   private
     FData: TClientRequest;
     FAttachments: TObjectList<TAttachment>;
@@ -26,6 +26,7 @@ type
     property Data: TClientRequest read FData;
     property Attachments: TObjectList<TAttachment> read FAttachments;
     function ToString(): String; override;
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -56,6 +57,14 @@ constructor TFrontEndRequest.Create;
 begin
   FData := TClientRequest.Create();
   FAttachments := TObjectList<TAttachment>.Create;
+end;
+
+destructor TFrontEndRequest.Destroy;
+begin
+  FData.DisposeOf;
+  FAttachments.Clear;
+  FAttachments.DisposeOf;
+  inherited;
 end;
 
 procedure TFrontEndRequest.SetAttachments(

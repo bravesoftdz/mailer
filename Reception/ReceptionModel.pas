@@ -192,8 +192,10 @@ begin
       Separator := '--' + boundary;
       BodyParts := RawBody.Split([Separator]);
       Result := PickMultipartItem(BodyParts, ContentType, KeyName);
-    end;
 
+    end;
+    BodyParts := nil;
+    Items := nil;
   end;
 
 end;

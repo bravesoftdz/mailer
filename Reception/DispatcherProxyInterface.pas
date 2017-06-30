@@ -3,7 +3,7 @@ unit DispatcherProxyInterface;
 interface
 
 uses
-  DispatcherEntry, DispatcherResponce;
+  MVCFramework.RESTAdapter, MVCFramework.Commons, DispatcherEntry, DispatcherResponce;
 
 type
   IDispatcherProxy = interface(IInvokable)

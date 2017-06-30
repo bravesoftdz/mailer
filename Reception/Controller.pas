@@ -89,7 +89,6 @@ var
   AJSon: TJSONObject;
   DispatcherEntry: TDispatcherEntry;
   DispatcherResponce: TDispatcherResponce;
-  ClientRequest: TClientRequest;
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
   ActionName := Ctx.request.params[ACTION_KEY];
@@ -108,16 +107,21 @@ begin
   Len := AttachedFiles.Count;
   for I := 0 to Len - 1 do
   begin
-    MemStream := TMemoryStream.Create();
-    MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
-    Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
+    // MemStream := TMemoryStream.Create();
+    // MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
+    // Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
+    // MemStream.DisposeOf;
   end;
 
-  DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
+  // DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
   DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
   Responce := Model.ConvertToOwnResponce(DispatcherResponce);
 
+  // DispatcherEntry.DisposeOf;
   DispatcherResponce.DisposeOf;
+  Len := Attachments.Count;
+  for I := 0 to Len - 1 do
+    Attachments[I].DisposeOf;
   Attachments.Clear;
   Attachments.DisposeOf;
   AJSon.DisposeOf;
