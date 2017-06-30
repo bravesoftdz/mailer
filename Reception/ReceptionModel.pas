@@ -62,6 +62,7 @@ type
     /// are separated by semicolon, while the key and value are separated by equality sign. A key is
     /// optional in the key-value pairs. Example:
     /// 'multipart/form-data;charset=UTF-8;boundary=--dsds'
+    /// If no param is found, an empty string is returned.
     function GetParamValue(const Query: String; const Param: String): String;
 
     /// <summary>Extract body from a multipart request body</summary
@@ -223,7 +224,9 @@ var
   items, keyvalue: TArray<string>;
   pair: String;
 begin
-  if not Query.IsEmpty then
+  if Query.IsEmpty then
+    Result := ''
+  else
   begin
     items := Query.Split([';']);
     for pair in items do
@@ -234,10 +237,13 @@ begin
         if Param.Equals(keyvalue[0].trim()) then
         begin
           Result := keyvalue[1];
-          Exit();
-        end;
-      end
-    end
+          Break;
+        end
+      end;
+      keyvalue := nil;
+    end;
+    keyvalue := nil;
+    items := nil;
   end;
 end;
 
@@ -281,26 +287,34 @@ var
   Elem, Needle1, Needle2: String;
   Parts: TStringList;
   positions: TList<Integer>;
-
+  Tail: TStringList;
 begin
   Needle1 := 'Content-Disposition: form-data; name="' + KeyName + '"';
   Needle2 := 'Content-Type: ' + ContentType;
   Parts := TStringList.Create;
-  for Elem in Items do
-  begin
-    Parts.Text := Elem.Trim();
-    if Parts.Count > 2 then
+  Positions := TList<Integer>.Create;
+  try
+    for Elem in Items do
     begin
-      if (Parts[0] = Needle1) AND (Parts[1] = Needle2) then
+      Parts.Text := Elem.Trim();
+      if Parts.Count > 2 then
       begin
-        Positions := TList<Integer>.Create;
-        Positions.Add(0);
-        Positions.Add(1);
-        Result := SkipElements(Parts, Positions).Text.trim();
-        Exit();
+        if (Parts[0] = Needle1) AND (Parts[1] = Needle2) then
+        begin
+          Positions.Add(0);
+          Positions.Add(1);
+          Tail := SkipElements(Parts, Positions);
+          Result := Tail.Text.trim();
+          Tail.DisposeOf;
+          Break;
+        end;
       end;
     end;
+  finally
+    Parts.DisposeOf;
+    Positions.DisposeOf;
   end;
+
 end;
 
 procedure TReceptionModel.SetSettings(const Value: TActiveQueueSettings);

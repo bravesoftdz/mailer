@@ -78,10 +78,13 @@ var
   Builder: TStringBuilder;
 begin
   Builder := TStringBuilder.Create;
-  Builder.Append(', html: ');
-  Builder.Append(FData);
-  Result := Builder.ToString;
-  Builder.DisposeOf;
+  try
+    Builder.Append(', html: ');
+    Builder.Append(FData);
+    Result := Builder.ToString;
+  finally
+    Builder.DisposeOf;
+  end;
 end;
 
 end.

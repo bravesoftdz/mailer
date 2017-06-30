@@ -107,24 +107,36 @@ begin
   Len := AttachedFiles.Count;
   for I := 0 to Len - 1 do
   begin
-    // MemStream := TMemoryStream.Create();
-    // MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
-    // Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
-    // MemStream.DisposeOf;
+    MemStream := TMemoryStream.Create();
+    MemStream.CopyFrom(AttachedFiles[I].Stream, AttachedFiles[I].Stream.Size);
+    Attachments.Add(TAttachment.Create(AttachedFiles[I].FieldName, MemStream));
+    MemStream.DisposeOf;
   end;
-
-  // DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
-  DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
-  Responce := Model.ConvertToOwnResponce(DispatcherResponce);
-
-  // DispatcherEntry.DisposeOf;
-  DispatcherResponce.DisposeOf;
-  Len := Attachments.Count;
-  for I := 0 to Len - 1 do
-    Attachments[I].DisposeOf;
-  Attachments.Clear;
-  Attachments.DisposeOf;
-  AJSon.DisposeOf;
+  try
+    DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon, Attachments);
+    try
+      DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
+    except
+      on E: Exception do
+      begin
+        DispatcherResponce := nil;
+      end;
+    end;
+    if DispatcherResponce <> nil then
+    begin
+      Responce := Model.ConvertToOwnResponce(DispatcherResponce);
+      DispatcherResponce.DisposeOf;
+    end
+    else
+    begin
+      Responce := TResponce.Create(False, 'No responce from the backend server');
+    end;
+  finally
+    DispatcherEntry.DisposeOf;
+    Attachments.Clear;
+    Attachments.DisposeOf;
+    AJSon.DisposeOf;
+  end;
 
   Render(Responce);
 end;
@@ -158,7 +170,8 @@ begin
   inherited;
 end;
 
-class function TController.GetClients: TObjectList<TClient>;
+class
+  function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
 end;
