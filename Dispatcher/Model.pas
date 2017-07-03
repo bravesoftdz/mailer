@@ -27,8 +27,6 @@ type
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
-    function Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
-
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
@@ -38,7 +36,7 @@ type
 implementation
 
 uses
-  Provider, VenditoriSimple, SoluzioneAgenti, Action, ActiveQueueEntry;
+  Provider, VenditoriSimple, SoluzioneAgenti, Action;
 
 { TModel }
 
@@ -63,7 +61,7 @@ begin
   Result := TObjectList<TActiveQueueEntry>.Create();
   for Action in Actions do
   begin
-    Result.Add(Action.MapToBackEndEntries(Entry));
+    Result.AddRange(Action.MapToBackEndEntries(Entry));
   end;
 
 end;
@@ -77,22 +75,6 @@ begin
   FAuthentication := nil;
   FFactory.DisposeOf;
   inherited;
-end;
-
-function TModel.Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
-var
-  BackEndEntries: TObjectList<TActiveQueueEntry>;
-  Actions: TObjectList<TAction>;
-  Action: TAction;
-begin
-  Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
-  BackEndEntries := TObjectList<TActiveQueueEntry>.Create();
-  for Action in Actions do
-  begin
-    BackEndEntries(Action.MapToBackEndEntries(Entry));
-  end;
-
-  Result := TDispatcherResponce.Create(False, 'Dispatcher is not implemented yet');
 end;
 
 function TModel.GetBackEndIp: String;

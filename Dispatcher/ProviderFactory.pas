@@ -60,6 +60,7 @@ var
   Actions: TObjectList<TAction>;
   Action: TAction;
 begin
+  Writeln('Creating the index...');
   Result := TDictionary < String, TObjectList < TAction >>.Create;
   for Provider in Providers do
   begin
@@ -69,8 +70,10 @@ begin
       Key := CreateKey(Provider, Action);
       if not(Result.ContainsKey(Key)) then
       begin
+        Writeln('Create a key ' + Key + ' in the dictionary.');
         Result.Add(Key, TObjectList<TAction>.Create);
       end;
+      Writeln('Append an action to the key ' + Key);
       Result[Key].Add(Action)
     end;
     Actions.Clear;

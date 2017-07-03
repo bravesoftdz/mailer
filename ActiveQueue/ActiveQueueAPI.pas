@@ -2,7 +2,7 @@ unit ActiveQueueAPI;
 
 interface
 
-uses SubscriptionData, ActiveQueueResponce, ReceptionRequest,
+uses SubscriptionData, ActiveQueueResponce, ReceptionRequest, ActiveQueueEntry,
   System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
 
 type
@@ -19,7 +19,7 @@ type
     function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TReceptionRequests;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
-    function PutItems([Body] Items: TObjectList<TReceptionRequest>): Boolean;
+    function PutItems([Body] Items: TObjectList<TActiveQueueEntry>): Boolean;
 
   end;
 
