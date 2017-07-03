@@ -34,7 +34,8 @@ uses
   CliUsage in '..\Cli\CliUsage.pas',
   ReceptionRequest in '..\Reception\ReceptionRequest.pas',
   SubscriptionData in '..\Reception\SubscriptionData.pas',
-  Attachment in '..\Reception\Attachment.pas';
+  Attachment in '..\Reception\Attachment.pas',
+  ActiveQueueEntry in 'ActiveQueueEntry.pas';
 
 {$R *.res}
 
