@@ -22,7 +22,13 @@ uses
   IpAuthentication in '..\Authentication\IpAuthentication.pas',
   Configuration in '..\Config\Configuration.pas',
   DispatcherResponce in 'DispatcherResponce.pas',
-  DispatcherEntry in 'DispatcherEntry.pas';
+  DispatcherEntry in 'DispatcherEntry.pas',
+  Action in 'Action.pas',
+  Provider in 'Provider.pas',
+  ProviderFactory in 'ProviderFactory.pas',
+  Credentials in 'Credentials.pas',
+  SoluzioneAgenti in 'SoluzioneAgenti.pas',
+  VenditoriSimple in 'VenditoriSimple.pas';
 
 {$R *.res}
 

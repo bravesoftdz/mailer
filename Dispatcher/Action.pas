@@ -4,7 +4,7 @@ interface
 
 uses
   Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings,
-  ClientFullRequest;
+  ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry;
 
 type
   TAction = class(TObject)
@@ -25,6 +25,8 @@ type
     /// <summary> Constructor.</summary>
     /// <param name="Name">a name to be given to the operation</param>
     constructor Create(const Name: String);
+
+    function MapToBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
   end;
 
 type
@@ -52,8 +54,7 @@ implementation
 
 uses
   Credentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce,
-  SendServerProxy.interfaces, System.SysUtils, Attachment,
-  System.Generics.Collections;
+  SendServerProxy.interfaces, System.SysUtils, Attachment;
 
 { TMailerAction }
 
@@ -65,6 +66,12 @@ end;
 function TAction.GetName: String;
 begin
   Result := FName;
+end;
+
+function TAction.MapToBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
+begin
+  /// stub
+  Result := TObjectList<TActiveQueueEntry>.Create()
 end;
 
 constructor TActionSend.Create;

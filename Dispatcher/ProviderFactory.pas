@@ -14,25 +14,28 @@ type
     /// <summary> A dictionary of available providers.
     /// In order to avoid perpetous iterations over the list of available providers,
     /// it is better to construct an index in order to access them quickly. </summary>
-    FIndex: TDictionary<String, TProvider>;
+    FIndex: TDictionary<String, TObjectList<TAction>>;
     /// <summary> create the index of available actions. The index is a map from a string
-    /// key to an action. The key is a string calculated for each action.
-    /// No different actions may have equal keys.  </summary>
-    function CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TProvider>;
+    /// key to a list of actions: to a path "agent321/send" might correspond various actions.
+    /// The key is a string calculated based on provider and action.</summary>
+    function CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TObjectList<TAction>>;
 
-    /// <summary> create a key from two strings. These are two strings that are passed as a
+    /// <summary> create a key from two strings. These are two strings that are
     /// received from the controller, so that it is important that the way in which
     /// the key is generated is correlated with the way it is generated for an action.
     /// If those ways are not correlated, no one action can be found to manage
     /// the requests from the controller. </summary>
     /// <param name="Provider">data provider</param>
     /// <param name="Action">action to be performed</param>
-    function CreateKey(const Provider: TProvider; const Action: TAction): String;
+    function CreateKey(const Provider: TProvider; const Action: TAction): String; overload;
+    /// <summary>Create a key from given strings.</summary>
+    function CreateKey(const Part1, Part2: String): String; overload;
   public
-    /// <summary> Find a provider that should manage the request. If no provider
-    /// can handle the request, nil is returned. </summary>
-    /// <param name="Name">string by which a provider must be found</param>
-    function FindByName(const Name: String): TProvider;
+    /// <summary>Find actions of all providers that can elaborate data coming from a Requestor
+    /// with a specific action. For example, if a requestor is "agent321" and the acton is "register",
+    /// then a list of actions should be returned: an action for saving data in db, an action for sending
+    /// a notification to the client etc.</summary>
+    function FindActions(const Requestor: String; const Act: String): TObjectList<TAction>;
     constructor Create(const Providers: TObjectList<TProvider>);
     destructor Destroy(); override;
   end;
@@ -50,29 +53,40 @@ begin
   FIndex := CreateIndex(Providers);
 end;
 
-function TProviderFactory.CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TProvider>;
+function TProviderFactory.CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TObjectList<TAction>>;
 var
   Provider: TProvider;
-  Path: String;
+  Key: String;
   Actions: TObjectList<TAction>;
+  Action: TAction;
 begin
-  Result := TDictionary<String, TProvider>.Create;
+  Result := TDictionary < String, TObjectList < TAction >>.Create;
   for Provider in Providers do
   begin
-    Path := Provider.getPath();
-    if Result.ContainsKey(Path) then
-      raise Exception.Create('Failed to create the index of the provider: path "' + Path + '" already exists.');
     Actions := Provider.getActions;
-    Result.Add(Path, TProvider.Create(Path, Actions));
+    for Action in Actions do
+    begin
+      Key := CreateKey(Provider, Action);
+      if not(Result.ContainsKey(Key)) then
+      begin
+        Result.Add(Key, TObjectList<TAction>.Create);
+      end;
+      Result[Key].Add(Action)
+    end;
     Actions.Clear;
     Actions.DisposeOf;
   end;
 end;
 
+function TProviderFactory.CreateKey(const Part1, Part2: String): String;
+begin
+  Result := Part1 + '/' + Part2;
+end;
+
 function TProviderFactory.CreateKey(const Provider: TProvider;
   const Action: TAction): String;
 begin
-  Result := Provider.getPath() + '/' + Action.Name;
+  Result := CreateKey(Provider.getPath(), Action.Name);
 end;
 
 destructor TProviderFactory.Destroy;
@@ -80,19 +94,20 @@ var
   key: String;
 begin
   Writeln('Provider factory destroy');
-  for key in FIndex.Keys do
-    FIndex[key].DisposeOf;
   FIndex.Clear;
   FIndex.DisposeOf;
   inherited;
 end;
 
-function TProviderFactory.FindByName(const Name: String): TProvider;
+function TProviderFactory.FindActions(const Requestor, Act: String): TObjectList<TAction>;
+var
+  Key: String;
 begin
-  if FIndex.ContainsKey(Name) then
-    Result := FIndex[Name]
+  Key := CreateKey(Requestor, Act);
+  if FIndex.ContainsKey(Key) then
+    Result := FIndex[Key]
   else
-    Result := nil;
+    Result := TObjectList<TAction>.Create();
 end;
 
 end.

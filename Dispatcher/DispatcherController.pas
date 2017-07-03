@@ -3,14 +3,18 @@ unit DispatcherController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model;
+  MVCFramework, MVCFramework.Commons, Model, MVCFramework.RESTAdapter, ActiveQueueAPI;
 
 type
 
   [MVCPath('/')]
   TDispatcherController = class(TMVCController)
   strict private
-    class var Model: TModel;
+  class var
+    Model: TModel;
+    FBackEndProxy: IActiveQueueAPI;
+    FBackEndAdapter: TRestAdapter<IActiveQueueAPI>;
+    class procedure SetUpBackEndProxy();
 
   public
     [MVCPath('/status')]
@@ -38,7 +42,8 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
-  DispatcherConfig, DispatcherResponce, DispatcherEntry;
+  DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
+  System.Generics.Collections;
 
 procedure TDispatcherController.Index;
 var
@@ -88,6 +93,7 @@ begin
   if Config <> nil then
   begin
     Model.Config := Config;
+    SetUpBackEndProxy();
     Config.DisposeOf;
   end;
   if not(ErrorMessage.IsEmpty) then
@@ -118,6 +124,7 @@ procedure TDispatcherController.PutRequest(Context: TWebContext);
 var
   IP: String;
   Request: TDispatcherEntry;
+  Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
 begin
   IP := Context.Request.ClientIP;
@@ -129,7 +136,14 @@ begin
     end
     else
       Request := nil;
-    Responce := Model.Elaborate(Request);
+    if Request <> nil then
+      Entries := Model.CreateBackEndEntries(Request);
+    if Entries <> nil then
+    begin
+      FBackEndProxy.PutItems(Entries);
+      Responce := TDispatcherResponce.Create(True, Entries.Count.toString + ' items are put to the backend server queue.');
+    end;
+
   end
   else
     Responce := TDispatcherResponce.Create(False, 'Not authorized');
@@ -154,12 +168,23 @@ class
   procedure TDispatcherController.Setup;
 begin
   Model := TModel.Create();
+  FBackEndAdapter := TRestAdapter<IActiveQueueAPI>.Create();
+end;
+
+class procedure TDispatcherController.SetUpBackEndProxy;
+begin
+  Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.GetBackEndIp, Model.GetBackEndPort]));
+  FBackEndProxy := FBackEndAdapter.Build(Model.GetBackEndIp, Model.GetBackEndPort);
 end;
 
 class
   procedure TDispatcherController.TearDown;
 begin
   Model.DisposeOf;
+  if (FBackEndAdapter <> nil) then
+    FBackEndAdapter := nil;
+  if (FBackEndProxy <> nil) then
+    FBackEndProxy := nil;
 end;
 
 initialization
