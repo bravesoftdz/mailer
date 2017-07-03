@@ -10,6 +10,7 @@ type
 
   /// <summary>
   /// A request that a Reception instance performs to a back-end server.
+  ///  It is a depricated class in favour of DispatcherEntry
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TReceptionRequest = class(TInterfacedObject, Jsonable)

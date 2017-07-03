@@ -24,7 +24,8 @@ uses
   ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
   SubscriptionDataTest in 'SubscriptionDataTest.pas',
   TokenBasedConditionTest in 'TokenBasedConditionTest.pas',
-  ReceptionConfigTest in 'ReceptionConfigTest.pas';
+  ReceptionConfigTest in 'ReceptionConfigTest.pas',
+  DispatcherEntryTest in 'DispatcherEntryTest.pas';
 
 var
   runner: ITestRunner;

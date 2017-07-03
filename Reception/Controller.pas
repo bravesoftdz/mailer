@@ -78,7 +78,7 @@ uses
   MVCFramework.Logger, System.JSON, System.SysUtils, DispatcherEntry,
   // FrontEndRequest, VenditoriSimple, Provider, SoluzioneAgenti,
   ObjectsMappers,
-//  ClientRequest,
+  // ClientRequest,
   Attachment, Web.HTTPApp, ClientFullRequest, DispatcherResponce;
 
 procedure TController.ElaborateRequest(Ctx: TWebContext);
@@ -161,7 +161,6 @@ begin
         DispatcherEntry.DisposeOf;
         Attachments.Clear;
         Attachments.DisposeOf;
-
       end;
     end;
   end;
