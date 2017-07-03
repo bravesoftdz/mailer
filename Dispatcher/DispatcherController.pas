@@ -142,8 +142,9 @@ begin
     begin
       FBackEndProxy.PutItems(Entries);
       Responce := TDispatcherResponce.Create(True, Entries.Count.toString + ' items are put to the backend server queue.');
-    end;
-
+    end
+    else
+      Responce := TDispatcherResponce.Create(False, 'No items are found.');
   end
   else
     Responce := TDispatcherResponce.Create(False, 'Not authorized');

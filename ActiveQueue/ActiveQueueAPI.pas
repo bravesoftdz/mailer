@@ -19,7 +19,7 @@ type
     function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TReceptionRequests;
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
-    function PutItems([Body] Items: TObjectList<TActiveQueueEntry>): Boolean;
+    function PutItems([Body(False)] Items: TActiveQueueEntry): Boolean;
 
   end;
 

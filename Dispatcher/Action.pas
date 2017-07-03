@@ -9,44 +9,56 @@ uses
 type
   TAction = class(TObject)
   private
-    function GetName: String;
+    function GetCategory: String;
   protected
-    FName: String;
+    FCategory: String;
   public
+    /// <summary>Category to which this action belons. Many actions may belong to the same
+    /// category. </summary>
+    property Category: String read GetCategory;
+
+    /// <summary> Constructor.</summary>
+    /// <param name="Category">Category to which the action belongs.</param>
+    constructor Create(const Category: String);
+
     /// <summary>A virtual method that is supposed to be overwritten in classes
     /// that inherit from this one.</summary>
-    /// <returns>a responce as a TSimpleMailerResponce instance</returns>
-    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; virtual; abstract;
-    /// <summary>A name of the operation that this action performs.
-    /// The operation name is used in order to find an action that is able
-    /// to do a requested operation.
-    /// </summary>
-    property Name: String read GetName;
-    /// <summary> Constructor.</summary>
-    /// <param name="Name">a name to be given to the operation</param>
-    constructor Create(const Name: String);
-
-    function MapToBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
+    /// <returns>return an instance for further elaboration by the ActiveQueue server</returns>
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; virtual; abstract;
   end;
 
 type
   TActionSend = class(TAction)
   public
-    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    constructor Create();
+  end;
+
+type
+  TOMNSendToClient = class(TAction)
+  public
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    constructor Create();
+  end;
+
+type
+  TOMNSendToCodicione = class(TAction)
+  public
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
   end;
 
@@ -58,20 +70,14 @@ uses
 
 { TMailerAction }
 
-constructor TAction.Create(const Name: String);
+constructor TAction.Create(const Category: String);
 begin
-  FName := Name;
+  FCategory := Category;
 end;
 
-function TAction.GetName: String;
+function TAction.GetCategory: String;
 begin
-  Result := FName;
-end;
-
-function TAction.MapToBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
-begin
-  /// stub
-  Result := TObjectList<TActiveQueueEntry>.Create()
+  Result := FCategory;
 end;
 
 constructor TActionSend.Create;
@@ -79,8 +85,7 @@ begin
   inherited Create('send')
 end;
 
-function TActionSend.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
-
+function TActionSend.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
 var
   builder: TReceptionRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -88,44 +93,44 @@ var
   Responce: TActiveQueueResponce;
   Request: TReceptionRequest;
 begin
-  Writeln('ActionSend starts...');
-  builder := TReceptionRequestBuilder.Create();
-  builder.SetFrom(TVenditoriCredentials.From())
-    .SetSender(TVenditoriCredentials.Name())
-    .SetSubject(TVenditoriCredentials.Subject())
-    .SetPort(TVenditoriCredentials.Port)
-    .setServer(TVenditoriCredentials.Server())
-    .SetRecipTo(TVenditoriCredentials.Recipients)
-    .addAttachments(Data.Attachments);
-
-  if (Data <> nil) then
-  begin
-    builder.SetText(Data.Text);
-    builder.SetHtml(Data.Html);
-  end;
-
-  Request := builder.build;
-  Builder.DisposeOf;
-  Adapter := TRestAdapter<ISendServerProxy>.Create();
-  Server := Adapter.Build(Settings.Url, Settings.Port);
-  if (Server = nil) then
-  begin
-    Result := TResponce.Create(False, 'Backend server is not running');
-  end
-  else
-  begin
-    try
-      Responce := server.PostItem(Request);
-      Result := TResponce.Create(Responce.status, Responce.Msg);
-    except
-      on E: Exception do
-      begin
-        Result := TResponce.Create(False, E.Message);
-      end;
-    end;
-  end;
-  Server := nil;
-  Adapter := nil;
+  // Writeln('ActionSend starts...');
+  // builder := TReceptionRequestBuilder.Create();
+  // builder.SetFrom(TVenditoriCredentials.From())
+  // .SetSender(TVenditoriCredentials.Name())
+  // .SetSubject(TVenditoriCredentials.Subject())
+  // .SetPort(TVenditoriCredentials.Port)
+  // .setServer(TVenditoriCredentials.Server())
+  // .SetRecipTo(TVenditoriCredentials.Recipients)
+  // .addAttachments(Entry.Attachments);
+  //
+  // if (Data <> nil) then
+  // begin
+  // builder.SetText(Data.Text);
+  // builder.SetHtml(Data.Html);
+  // end;
+  //
+  // Request := builder.build;
+  // Builder.DisposeOf;
+  // Adapter := TRestAdapter<ISendServerProxy>.Create();
+  // Server := Adapter.Build(Settings.Url, Settings.Port);
+  // if (Server = nil) then
+  // begin
+  // Result := TResponce.Create(False, 'Backend server is not running');
+  // end
+  // else
+  // begin
+  // try
+  // Responce := server.PostItem(Request);
+  // Result := TResponce.Create(Responce.status, Responce.Msg);
+  // except
+  // on E: Exception do
+  // begin
+  // Result := TResponce.Create(False, E.Message);
+  // end;
+  // end;
+  // end;
+  // Server := nil;
+  // Adapter := nil;
 end;
 
 { TActionContact }
@@ -135,10 +140,8 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
+function TActionContact.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
 begin
-  /// stub
-  Result := TResponce.Create(False, 'contact action: not implemented yet');
 
 end;
 
@@ -149,10 +152,71 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.Elaborate(const Data: TClientFullRequest; const Settings: TActiveQueueSettings): TResponce;
+function TActionOrder.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
 begin
-  /// stub
-  Result := TResponce.Create(False, 'contact action: not implemented yet');
+  Result := TActiveQueueEntry.Create();
+end;
+
+{ TOMNSendToClient }
+
+constructor TOMNSendToClient.Create;
+begin
+  inherited Create('register');
+end;
+
+function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+begin
+
+end;
+
+{ TOMNSendToCodicione }
+
+constructor TOMNSendToCodicione.Create;
+begin
+  inherited Create('register');
+end;
+
+function TOMNSendToCodicione.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+begin
+  // Writeln('ActionSend starts...');
+  // builder := TReceptionRequestBuilder.Create();
+  // builder.SetFrom(TVenditoriCredentials.From())
+  // .SetSender(TVenditoriCredentials.Name())
+  // .SetSubject(TVenditoriCredentials.Subject())
+  // .SetPort(TVenditoriCredentials.Port)
+  // .setServer(TVenditoriCredentials.Server())
+  // .SetRecipTo(TVenditoriCredentials.Recipients)
+  // .addAttachments(Entry.Attachments);
+  //
+  // if (Data <> nil) then
+  // begin
+  // builder.SetText(Data.Text);
+  // builder.SetHtml(Data.Html);
+  // end;
+  //
+  // Request := builder.build;
+  // Builder.DisposeOf;
+  // Adapter := TRestAdapter<ISendServerProxy>.Create();
+  // Server := Adapter.Build(Settings.Url, Settings.Port);
+  // if (Server = nil) then
+  // begin
+  // Result := TResponce.Create(False, 'Backend server is not running');
+  // end
+  // else
+  // begin
+  // try
+  // Responce := server.PostItem(Request);
+  // Result := TResponce.Create(Responce.status, Responce.Msg);
+  // except
+  // on E: Exception do
+  // begin
+  // Result := TResponce.Create(False, E.Message);
+  // end;
+  // end;
+  // end;
+  // Server := nil;
+  // Adapter := nil;
+
 end;
 
 end.

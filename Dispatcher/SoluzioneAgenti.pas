@@ -31,10 +31,8 @@ var
   Actions: TObjectList<TAction>;
 begin
   Actions := TObjectList<TAction>.Create();
-  Actions.AddRange([TActionSend.Create(), TActionContact.Create()]);
+  Actions.AddRange([TActionSend.Create(), TActionSend.Create(), TActionContact.Create(), TActionContact.Create(), TActionContact.Create(), TActionContact.Create()]);
   inherited Create(PATH, Actions);
-  Actions.Clear;
-  Actions.DisposeOf;
 end;
 
 end.

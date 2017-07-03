@@ -64,7 +64,7 @@ begin
   Result := TDictionary < String, TObjectList < TAction >>.Create;
   for Provider in Providers do
   begin
-    Actions := Provider.getActions;
+    Actions := Provider.Actions;
     for Action in Actions do
     begin
       Key := CreateKey(Provider, Action);
@@ -73,11 +73,9 @@ begin
         Writeln('Create a key ' + Key + ' in the dictionary.');
         Result.Add(Key, TObjectList<TAction>.Create);
       end;
-      Writeln('Append an action to the key ' + Key);
+      Writeln('Append an action ' + Action.Category + 'to the key ' + Key);
       Result[Key].Add(Action)
     end;
-    Actions.Clear;
-    Actions.DisposeOf;
   end;
 end;
 
@@ -89,7 +87,7 @@ end;
 function TProviderFactory.CreateKey(const Provider: TProvider;
   const Action: TAction): String;
 begin
-  Result := CreateKey(Provider.getPath(), Action.Name);
+  Result := CreateKey(Provider.getPath(), Action.Category);
 end;
 
 destructor TProviderFactory.Destroy;

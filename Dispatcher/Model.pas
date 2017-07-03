@@ -30,13 +30,12 @@ type
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
-
   end;
 
 implementation
 
 uses
-  Provider, VenditoriSimple, SoluzioneAgenti, Action;
+  Provider, VenditoriSimple, SoluzioneAgenti, Action, OfferteNuoviMandati;
 
 { TModel }
 
@@ -45,10 +44,10 @@ var
   Providers: TObjectList<TProvider>;
 begin
   Providers := TObjectList<TProvider>.Create;
-  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
+  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create, TOfferteNuoviMandati.Create]);
   FFactory := TProviderFactory.Create(Providers);
-  Providers.Clear;
-  Providers.DisposeOf;
+//  Providers.Clear;
+//  Providers.DisposeOf;
 end;
 
 function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
@@ -61,7 +60,7 @@ begin
   Result := TObjectList<TActiveQueueEntry>.Create();
   for Action in Actions do
   begin
-    Result.AddRange(Action.MapToBackEndEntries(Entry));
+    Result.Add(Action.MapToBackEndEntry(Entry));
   end;
 
 end;
