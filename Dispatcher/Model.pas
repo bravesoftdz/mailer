@@ -22,6 +22,7 @@ type
     function isAuthorised(const IP: String): Boolean;
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
+    /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function Elaborate(const Entry: TDispatcherEntry): TDispatcherResponce;
     property Config: TDispatcherConfig read GetConfig write SetConfig;
     constructor Create();

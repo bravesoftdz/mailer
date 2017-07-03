@@ -14,12 +14,12 @@ type
     /// Create an index of available action. The actions are indexed by their names.
     /// A TAction instance that gets inserted into the resulting dictionary is a copy of an action
     /// of the list passed as the parameter to this method.
-    function createIndex(const Actions: TObjectList<TAction>): TDictionary<String, TAction>;
+    function CreateIndex(const Actions: TObjectList<TAction>): TDictionary<String, TAction>;
   public
     { a part of the RESTful path to which current provider must respond }
-    function getPath(): String;
+    function GetPath(): String;
     /// Returns a copy of actions
-    function getActions(): TObjectList<TAction>;
+    function GetActions(): TObjectList<TAction>;
     function FindByName(const Name: String): TAction;
     constructor Create(const Path: String; const Actions: TObjectList<TAction>); virtual;
     destructor Destroy(); override;
