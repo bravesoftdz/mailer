@@ -3,7 +3,8 @@ unit Model;
 interface
 
 uses
-  DispatcherConfig, IpAuthentication, DispatcherResponce, DispatcherEntry;
+  DispatcherConfig, IpAuthentication, DispatcherResponce, DispatcherEntry,
+  ProviderFactory;
 
 type
   TModel = class(TObject)
@@ -12,6 +13,7 @@ type
   var
     FConfig: TDispatcherConfig;
     FAuthentication: IAuthentication;
+    FFactory: TProviderFactory;
 
     function GetConfig(): TDispatcherConfig;
     procedure SetConfig(const Config: TDispatcherConfig);
@@ -32,11 +34,20 @@ type
 
 implementation
 
+uses
+  System.Generics.Collections, Provider, VenditoriSimple, SoluzioneAgenti;
+
 { TModel }
 
 constructor TModel.Create;
+var
+  Providers: TObjectList<TProvider>;
 begin
-
+  Providers := TObjectList<TProvider>.Create;
+  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
+  FFactory := TProviderFactory.Create(Providers);
+  Providers.Clear;
+  Providers.DisposeOf;
 end;
 
 destructor TModel.Destroy;
@@ -46,6 +57,7 @@ begin
     FConfig.DisposeOf();
   end;
   FAuthentication := nil;
+  FFactory.DisposeOf;
   inherited;
 end;
 
