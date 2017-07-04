@@ -5,6 +5,7 @@ Data/
 LibrarySupport/
 ModelSupport_Source
 out/
+.svn/
 logs/
 *.tvsconfig
 __recovery/

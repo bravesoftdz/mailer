@@ -6,6 +6,9 @@ uses
   Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings,
   ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry;
 
+//type
+//  TActionCategories = (email = 'email', Diamonds, Clubs, Spades);
+
 type
   TAction = class(TObject)
   private
@@ -24,7 +27,7 @@ type
     /// <summary>A virtual method that is supposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>return an instance for further elaboration by the ActiveQueue server</returns>
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; virtual; abstract;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; virtual; abstract;
 
     /// <summary>Create a clone of this instance. It is supposed to be implemented in classes
     /// that inherit from this one. In the implementation, the return type must be of the
@@ -36,7 +39,7 @@ type
   TActionSend = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -44,7 +47,7 @@ type
   TActionContact = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -52,7 +55,7 @@ type
   TActionOrder = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -60,7 +63,7 @@ type
   TOMNSendToClient = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -68,7 +71,7 @@ type
   TOMNSendToCodicione = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -100,7 +103,7 @@ begin
   inherited Create('send')
 end;
 
-function TActionSend.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+function TActionSend.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 var
   builder: TReceptionRequestBuilder;
   adapter: TRestAdapter<ISendServerProxy>;
@@ -160,7 +163,7 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+function TActionContact.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 begin
 
 end;
@@ -177,7 +180,7 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+function TActionOrder.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 begin
   Result := TActiveQueueEntry.Create();
 end;
@@ -194,13 +197,14 @@ begin
   inherited Create('register');
 end;
 
-function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 var
   jo: TJsonObject;
 
 begin
   jo := TJsonObject.Create();
-  Result := TActiveQueueEntry.Create('omn-register', 'email', jo.ToString, 'token', nil);
+
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo.ToString, Token, Entry.Attachments);
 end;
 
 { TOMNSendToCodicione }
@@ -215,7 +219,7 @@ begin
   inherited Create('register');
 end;
 
-function TOMNSendToCodicione.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
+function TOMNSendToCodicione.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 begin
   // Writeln('ActionSend starts...');
   // builder := TReceptionRequestBuilder.Create();

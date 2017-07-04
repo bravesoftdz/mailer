@@ -54,12 +54,14 @@ function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList
 var
   Actions: TObjectList<TAction>;
   Action: TAction;
+  Token: String;
 begin
   Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
   Result := TObjectList<TActiveQueueEntry>.Create();
+  Token := FConfig.Token;
   for Action in Actions do
   begin
-    Result.Add(Action.MapToBackEndEntry(Entry));
+    Result.Add(Action.MapToBackEndEntry(Entry, Token));
   end;
   Actions.Clear;
   Actions.DisposeOf();
