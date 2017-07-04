@@ -11,6 +11,7 @@ type
   private
     FToken: String;
     FBody: String;
+    FMarker: String;
     FAttachments: TObjectList<TAttachment>;
 
   public
@@ -19,9 +20,11 @@ type
 
     property Token: String read FToken write FToken;
     property Body: String read FBody write FBody;
+    property Marker: String read FMarker write FMarker;
     property Attachments: TObjectList<TAttachment> read FAttachments write FAttachments;
 
-    constructor Create();
+    constructor Create(const Body: string; const Attachments: TObjectList<TAttachment>; const Token: string; const Marker: string); overload;
+    constructor Create(); overload;
     destructor Destroy(); override;
 
   end;
@@ -92,6 +95,21 @@ end;
 constructor TActiveQueueEntry.Create;
 begin
   FAttachments := TObjectList<TAttachment>.Create;
+end;
+
+constructor TActiveQueueEntry.Create(const Body: string; const Attachments: TObjectList<TAttachment>; const Token: string; const Marker: string);
+var
+  Attachment: TAttachment;
+begin
+  Create();
+  FToken := Token;
+  FBody := Body;
+  FMarker := Marker;
+  for Attachment in Attachments do
+  begin
+    FAttachments.add(Attachment.Clone);
+  end;
+
 end;
 
 destructor TActiveQueueEntry.Destroy;
