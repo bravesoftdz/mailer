@@ -25,41 +25,51 @@ type
     /// that inherit from this one.</summary>
     /// <returns>return an instance for further elaboration by the ActiveQueue server</returns>
     function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; virtual; abstract;
+
+    /// <summary>Create a clone of this instance. It is supposed to be implemented in classes
+    /// that inherit from this one. In the implementation, the return type must be of the
+    /// inheriting class and not of the parent one.</summary>
+    function Clone(): TAction; virtual; abstract;
   end;
 
 type
   TActionSend = class(TAction)
   public
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function Clone(): TAction; override;
   end;
 
 type
   TActionContact = class(TAction)
   public
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function Clone(): TAction; override;
   end;
 
 type
   TActionOrder = class(TAction)
   public
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function Clone(): TAction; override;
   end;
 
 type
   TOMNSendToClient = class(TAction)
   public
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function Clone(): TAction; override;
   end;
 
 type
   TOMNSendToCodicione = class(TAction)
   public
-    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
     constructor Create();
+    function MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry; override;
+    function Clone(): TAction; override;
   end;
 
 implementation
@@ -78,6 +88,11 @@ end;
 function TAction.GetCategory: String;
 begin
   Result := FCategory;
+end;
+
+function TActionSend.Clone: TAction;
+begin
+  Result := TActionSend.Create();
 end;
 
 constructor TActionSend.Create;
@@ -135,6 +150,11 @@ end;
 
 { TActionContact }
 
+function TActionContact.Clone: TAction;
+begin
+  Result := TActionContact.Create();
+end;
+
 constructor TActionContact.Create;
 begin
   inherited Create('contact');
@@ -146,6 +166,11 @@ begin
 end;
 
 { TActionOrder }
+
+function TActionOrder.Clone: TAction;
+begin
+  Result := TActionOrder.Create();
+end;
 
 constructor TActionOrder.Create;
 begin
@@ -159,6 +184,11 @@ end;
 
 { TOMNSendToClient }
 
+function TOMNSendToClient.Clone: TAction;
+begin
+  Result := TOMNSendToClient.Create();
+end;
+
 constructor TOMNSendToClient.Create;
 begin
   inherited Create('register');
@@ -170,6 +200,11 @@ begin
 end;
 
 { TOMNSendToCodicione }
+
+function TOMNSendToCodicione.Clone: TAction;
+begin
+  Result := TOMNSendToCodicione.Create();
+end;
 
 constructor TOMNSendToCodicione.Create;
 begin

@@ -126,6 +126,7 @@ var
   Request: TDispatcherEntry;
   Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
+  Wrapper: TActiveQueueEntries;
 begin
   IP := Context.Request.ClientIP;
   if Model.isAuthorised(IP) then
@@ -140,8 +141,13 @@ begin
       Entries := Model.CreateBackEndEntries(Request);
     if Entries <> nil then
     begin
-      FBackEndProxy.PutItems(Entries);
-      Responce := TDispatcherResponce.Create(True, Entries.Count.toString + ' items are put to the backend server queue.');
+      Wrapper := TActiveQueueEntries.Create(Entries);
+      try
+        FBackEndProxy.PutItems(Wrapper);
+        Responce := TDispatcherResponce.Create(True, Entries.Count.toString + ' items are put to the backend server queue.');
+      finally
+        Wrapper.DisposeOf;
+      end;
     end
     else
       Responce := TDispatcherResponce.Create(False, 'No items are found.');

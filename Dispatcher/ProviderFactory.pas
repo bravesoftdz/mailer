@@ -74,7 +74,7 @@ begin
         Result.Add(Key, TObjectList<TAction>.Create);
       end;
       Writeln('Append an action ' + Action.Category + 'to the key ' + Key);
-      Result[Key].Add(Action)
+      Result[Key].Add(Action.Clone())
     end;
   end;
 end;
@@ -103,12 +103,16 @@ end;
 function TProviderFactory.FindActions(const Requestor, Act: String): TObjectList<TAction>;
 var
   Key: String;
+  Action: TAction;
 begin
+  Result := TObjectList<TAction>.Create();
   Key := CreateKey(Requestor, Act);
   if FIndex.ContainsKey(Key) then
-    Result := FIndex[Key]
-  else
-    Result := TObjectList<TAction>.Create();
+  begin
+    for Action in FIndex[Key] do
+      Result.Add(Action.Clone);
+  end;
+
 end;
 
 end.

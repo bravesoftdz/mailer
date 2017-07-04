@@ -28,7 +28,8 @@ uses
   ProviderFactory in 'ProviderFactory.pas',
   Credentials in 'Credentials.pas',
   SoluzioneAgenti in 'SoluzioneAgenti.pas',
-  VenditoriSimple in 'VenditoriSimple.pas';
+  VenditoriSimple in 'VenditoriSimple.pas',
+  OfferteNuoviMandati in 'OfferteNuoviMandati.pas';
 
 {$R *.res}
 

@@ -27,15 +27,17 @@ uses
 { TMailerAction }
 
 constructor TProvider.Create(const Path: String; const Actions: TObjectList<TAction>);
+var
+  Action: TAction;
 begin
   Writeln('Provider ' + Path + ' create');
   FPath := Path;
-  FActions := Actions;
+  FActions := TObjectList<TAction>.Create;
+  for Action in Actions do
+    FActions.Add(Action.Clone())
 end;
 
 destructor TProvider.Destroy;
-var
-  Key: String;
 begin
   FActions.Clear;
   FActions.DisposeOf;

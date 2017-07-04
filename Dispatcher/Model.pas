@@ -46,13 +46,12 @@ begin
   Providers := TObjectList<TProvider>.Create;
   Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create, TOfferteNuoviMandati.Create]);
   FFactory := TProviderFactory.Create(Providers);
-//  Providers.Clear;
-//  Providers.DisposeOf;
+  Providers.Clear;
+  Providers.DisposeOf;
 end;
 
 function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 var
-  BackEndEntries: TObjectList<TActiveQueueEntry>;
   Actions: TObjectList<TAction>;
   Action: TAction;
 begin
@@ -62,6 +61,8 @@ begin
   begin
     Result.Add(Action.MapToBackEndEntry(Entry));
   end;
+  Actions.Clear;
+  Actions.DisposeOf();
 
 end;
 
