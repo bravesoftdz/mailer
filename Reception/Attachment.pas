@@ -29,11 +29,18 @@ type
     /// <param name="aContent"> content of the attachment</param>
     constructor Create(const AName: String; const AContent: TMemoryStream);
     destructor Destroy(); override;
+    /// <sumamry>Create a deep copy of the instance.</summary>
+    function Clone(): TAttachment;
   end;
 
 implementation
 
 { TAttachment }
+
+function TAttachment.Clone: TAttachment;
+begin
+  Result := TAttachment.Create(FName, FContent);
+end;
 
 constructor TAttachment.Create(const AName: String; const AContent: TMemoryStream);
 begin
