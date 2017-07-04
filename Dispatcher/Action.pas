@@ -195,8 +195,12 @@ begin
 end;
 
 function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry): TActiveQueueEntry;
-begin
+var
+  jo: TJsonObject;
 
+begin
+  jo := TJsonObject.Create();
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo.ToString, 'token', nil);
 end;
 
 { TOMNSendToCodicione }

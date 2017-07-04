@@ -9,9 +9,17 @@ type
   /// <summary>An ADT that represents a single entry for the Active Queue server.</summary>
   TActiveQueueEntry = class(TObject)
   private
+    /// <summary>A token based on which the server decides whether to allow the request or not</summary>
     FToken: String;
+    /// <summary>The body of the request. It is a json in a string format</summary>
     FBody: String;
-    FMarker: String;
+    /// <summary>Origin of the request (who has created the request)</summary>
+    FOrigin: String;
+    /// <summary>Category of the request. It might be useful for differentiating btw
+    /// different requests (for example, in order to be able to select specific requests for
+    /// cancelling, postponing etc. by the consumers) </summary>
+    FCategory: String;
+
     FAttachments: TObjectList<TAttachment>;
 
   public
@@ -20,10 +28,11 @@ type
 
     property Token: String read FToken write FToken;
     property Body: String read FBody write FBody;
-    property Marker: String read FMarker write FMarker;
+    property Marker: String read FOrigin write FOrigin;
+    property Category: String read FCategory write FCategory;
     property Attachments: TObjectList<TAttachment> read FAttachments write FAttachments;
 
-    constructor Create(const Body: string; const Attachments: TObjectList<TAttachment>; const Token: string; const Marker: string); overload;
+    constructor Create(const Origin, Category, Body, Token: string; const Attachments: TObjectList<TAttachment>); overload;
     constructor Create(); overload;
     destructor Destroy(); override;
 
@@ -88,8 +97,7 @@ end;
 
 function TActiveQueueEntry.Clone: TActiveQueueEntry;
 begin
-  /// stub
-  Result := TActiveQueueEntry.Create();
+  Result := TActiveQueueEntry.Create(FOrigin, Fcategory, FBody, FToken, FAttachments);
 end;
 
 constructor TActiveQueueEntry.Create;
@@ -97,17 +105,21 @@ begin
   FAttachments := TObjectList<TAttachment>.Create;
 end;
 
-constructor TActiveQueueEntry.Create(const Body: string; const Attachments: TObjectList<TAttachment>; const Token: string; const Marker: string);
+constructor TActiveQueueEntry.Create(const Origin, Category, Body, Token: string; const Attachments: TObjectList<TAttachment>);
 var
   Attachment: TAttachment;
 begin
   Create();
   FToken := Token;
   FBody := Body;
-  FMarker := Marker;
-  for Attachment in Attachments do
+  FOrigin := Origin;
+  FCategory := Category;
+  if Attachments <> nil then
   begin
-    FAttachments.add(Attachment.Clone);
+    for Attachment in Attachments do
+    begin
+      FAttachments.add(Attachment.Clone);
+    end;
   end;
 
 end;

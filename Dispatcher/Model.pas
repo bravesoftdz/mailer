@@ -94,7 +94,7 @@ end;
 
 function TModel.GetConfig: TDispatcherConfig;
 begin
-  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs, FConfig.BackEndIp, FConfig.BackEndPort);
+  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs, FConfig.BackEndIp, FConfig.BackEndPort, FConfig.Token);
 end;
 
 function TModel.GetPort: Integer;
@@ -114,7 +114,7 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs, Config.BackEndIp, Config.BackEndPort);
+  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs, Config.BackEndIp, Config.BackEndPort, Config.Token);
   FAuthentication := TIpAuthentication.Create(Config.ClientIPs);
 
 end;
