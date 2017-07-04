@@ -11,12 +11,13 @@ type
     FPath: String;
     FActions: TObjectList<TAction>;
   private
+    function GetActions: TObjectList<TAction>;
   public
     { a part of the RESTful path to which current provider must respond }
     function GetPath(): String;
-    constructor Create(const Path: String; const Actions: TObjectList<TAction>); virtual;
+    constructor Create(const Path: String; const Actions: TObjectList<TAction>);
     destructor Destroy(); override;
-    property Actions: TObjectList<TAction> read FActions;
+    property Actions: TObjectList<TAction> read GetActions;
   end;
 
 implementation
@@ -28,20 +29,32 @@ uses
 
 constructor TProvider.Create(const Path: String; const Actions: TObjectList<TAction>);
 var
-  Action: TAction;
+  AnAction: TAction;
 begin
   Writeln('Provider ' + Path + ' create');
   FPath := Path;
   FActions := TObjectList<TAction>.Create;
-  for Action in Actions do
-    FActions.Add(Action.Clone())
+  for AnAction in Actions do
+    FActions.Add(AnAction.Clone())
 end;
 
 destructor TProvider.Destroy;
+var
+  Action: TAction;
 begin
   FActions.Clear;
   FActions.DisposeOf;
   inherited;
+end;
+
+function TProvider.GetActions: TObjectList<TAction>;
+var
+  Action: TAction;
+begin
+  Result := TObjectList<TAction>.Create;
+  for Action in FActions do
+    Result.Add(Action.Clone);
+
 end;
 
 function TProvider.getPath: String;

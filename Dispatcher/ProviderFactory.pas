@@ -55,27 +55,29 @@ end;
 
 function TProviderFactory.CreateIndex(const Providers: TObjectList<TProvider>): TDictionary<String, TObjectList<TAction>>;
 var
-  Provider: TProvider;
+  aProvider: TProvider;
   Key: String;
   Actions: TObjectList<TAction>;
-  Action: TAction;
+  anAction: TAction;
 begin
   Writeln('Creating the index...');
-  Result := TDictionary < String, TObjectList < TAction >>.Create;
-  for Provider in Providers do
+  Result := TDictionary < String, TObjectList < TAction >>.Create();
+  for aProvider in Providers do
   begin
-    Actions := Provider.Actions;
-    for Action in Actions do
+    Actions := aProvider.Actions;
+    for anAction in Actions do
     begin
-      Key := CreateKey(Provider, Action);
+      Key := CreateKey(aProvider, anAction);
       if not(Result.ContainsKey(Key)) then
       begin
         Writeln('Create a key ' + Key + ' in the dictionary.');
         Result.Add(Key, TObjectList<TAction>.Create);
       end;
-      Writeln('Append an action ' + Action.Category + 'to the key ' + Key);
-      Result[Key].Add(Action.Clone())
+      Writeln('Append an action ' + anAction.Category + 'to the key ' + Key);
+      Result[Key].Add(anAction.Clone())
     end;
+    Actions.Clear;
+    Actions.DisposeOf;
   end;
 end;
 
@@ -94,7 +96,8 @@ destructor TProviderFactory.Destroy;
 var
   key: String;
 begin
-  Writeln('Provider factory destroy');
+  for Key in FIndex.Keys do
+    FIndex[Key].DisposeOf;
   FIndex.Clear;
   FIndex.DisposeOf;
   inherited;

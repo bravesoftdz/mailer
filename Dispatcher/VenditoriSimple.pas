@@ -29,15 +29,13 @@ uses
 constructor TVenditoriSimple.Create;
 var
   Actions: TObjectList<TAction>;
-  ActionSend: TAction;
-
 begin
   Actions := TObjectList<TAction>.Create();
-  ActionSend := TActionSend.Create;
-  Actions.AddRange([ActionSend]);
+  Actions.AddRange([TActionSend.Create, TActionSend.Create]);
   inherited Create(PATH, Actions);
   Actions.Clear;
   Actions.DisposeOf;
+
 end;
 
 end.

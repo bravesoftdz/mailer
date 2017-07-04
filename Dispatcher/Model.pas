@@ -41,13 +41,13 @@ uses
 
 constructor TModel.Create;
 var
-  Providers: TObjectList<TProvider>;
+  ListOfProviders: TObjectList<TProvider>;
 begin
-  Providers := TObjectList<TProvider>.Create;
-  Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create, TOfferteNuoviMandati.Create]);
-  FFactory := TProviderFactory.Create(Providers);
-  Providers.Clear;
-  Providers.DisposeOf;
+  ListOfProviders := TObjectList<TProvider>.Create;
+  ListOfProviders.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create, TOfferteNuoviMandati.Create]);
+  FFactory := TProviderFactory.Create(ListOfProviders);
+  ListOfProviders.Clear;
+  ListOfProviders.DisposeOf;
 end;
 
 function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
