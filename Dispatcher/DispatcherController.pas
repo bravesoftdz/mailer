@@ -127,33 +127,61 @@ var
   Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
   Wrapper: TActiveQueueEntries;
+  Outcome: Boolean;
 begin
   IP := Context.Request.ClientIP;
-  if Model.isAuthorised(IP) then
+  if not(Model.isAuthorised(IP)) then
   begin
-    if Context.Request.ThereIsRequestBody then
-    begin
+    Responce := TDispatcherResponce.Create(False, 'Not authorized');
+    Render(Responce);
+    Exit();
+  end;
+
+  if Context.Request.ThereIsRequestBody then
+  begin
+    try
       Request := Context.Request.BodyAs<TDispatcherEntry>;
-    end
-    else
-      Request := nil;
-    if Request <> nil then
-      Entries := Model.CreateBackEndEntries(Request);
-    if Entries <> nil then
-    begin
-      Wrapper := TActiveQueueEntries.Create(Entries);
-      try
-        FBackEndProxy.PutItems(Wrapper);
-        Responce := TDispatcherResponce.Create(True, Entries.Count.toString + ' items are put to the backend server queue.');
-      finally
-        Wrapper.DisposeOf;
+    except
+      on E: Exception do
+      begin
+        Responce := TDispatcherResponce.Create(False, 'Invalid request body.');
+        Render(Responce);
+        Exit();
       end;
-    end
-    else
-      Responce := TDispatcherResponce.Create(False, 'No items are found.');
+    end;
   end
   else
-    Responce := TDispatcherResponce.Create(False, 'Not authorized');
+  begin
+    Responce := TDispatcherResponce.Create(False, 'No request body found.');
+    Render(Responce);
+    Exit();
+  end;
+
+  try
+    Entries := Model.CreateBackEndEntries(Request);
+  except
+    on E: Exception do
+    begin
+      Responce := TDispatcherResponce.Create(False, E.Message);
+      Render(Responce);
+      Exit();
+    end;
+  end;
+
+  Wrapper := TActiveQueueEntries.Create(Entries);
+  try
+    try
+      Outcome := FBackEndProxy.PutItems(Wrapper);
+      Responce := TDispatcherResponce.Create(Outcome, Entries.Count.toString + ' items are put to the backend server queue.');
+    except
+      on E: Exception do
+      begin
+        Responce := TDispatcherResponce.Create(False, 'Failed to put items to the back end server: ' + E.Message);
+      end;
+    end;
+  finally
+    Wrapper.DisposeOf;
+  end;
   Render(Responce);
 end;
 

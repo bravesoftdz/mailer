@@ -3,7 +3,7 @@ unit Actions;
 interface
 
 uses
-  Responce, FrontEndRequest, SendDataTemplate, ActiveQueueSettings,
+  Responce, FrontEndRequest, SendDataTemplate, ActiveQueueSettings, Attachment,
   ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry;
 
 // type
@@ -20,14 +20,15 @@ type
     /// category. </summary>
     property Category: String read GetCategory;
 
-    /// <summary> Constructor.</summary>
+    /// <summary> Constructor. The argument is a category of the action. Many action may have the same
+    /// category. It means that various actions can correspond to a given request. </summary>
     /// <param name="Category">Category to which the action belongs.</param>
     constructor Create(const Category: String);
 
     /// <summary>A virtual method that is supposed to be overwritten in classes
     /// that inherit from this one.</summary>
     /// <returns>return an instance for further elaboration by the ActiveQueue server</returns>
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; virtual; abstract;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; virtual; abstract;
 
     /// <summary>Create a clone of this instance. It is supposed to be implemented in classes
     /// that inherit from this one. In the implementation, the return type must be of the
@@ -39,7 +40,7 @@ type
   TActionSend = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -47,7 +48,7 @@ type
   TActionContact = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -55,7 +56,7 @@ type
   TActionOrder = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -63,7 +64,7 @@ type
   TOMNSendToClient = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
@@ -71,14 +72,14 @@ type
   TOMNSendToCodicione = class(TAction)
   public
     constructor Create();
-    function MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry; override;
+    function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
   end;
 
 implementation
 
 uses
-  SenderCredentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils, Attachment;
+  SenderCredentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils;
 
 { TMailerAction }
 
@@ -102,7 +103,7 @@ begin
   inherited Create('send')
 end;
 
-function TActionSend.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
+function TActionSend.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 var
   builder: TSendDataTemplateBuilder;
   // adapter: TRestAdapter<ISendServerProxy>;
@@ -162,7 +163,7 @@ begin
   inherited Create('contact');
 end;
 
-function TActionContact.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
+function TActionContact.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 begin
 
 end;
@@ -179,7 +180,7 @@ begin
   inherited Create('order');
 end;
 
-function TActionOrder.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
+function TActionOrder.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 begin
   Result := TActiveQueueEntry.Create();
 end;
@@ -196,23 +197,53 @@ begin
   inherited Create('register');
 end;
 
-function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
+function TOMNSendToClient.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
+const
+  EMAIL_TOKEN = 'email';
 var
-  jo: TJsonObject;
+  jo1, jo2: TJsonObject;
+  v: TJsonValue;
   builder: TSendDataTemplateBuilder;
+  data: TSendDataTemplate;
+  Emails: String;
 
 begin
-  jo := TJsonObject.Create();
-  builder := TSendDataTemplateBuilder.Create();
-  builder.SetFrom(TVenditoriCredentials.From())
-    .SetSender(TVenditoriCredentials.Name())
-    .SetSubject(TVenditoriCredentials.Subject())
-    .SetPort(TVenditoriCredentials.Port)
-    .setServer(TVenditoriCredentials.Server())
-    .SetRecipTo(TVenditoriCredentials.Recipients)
-    .addAttachments(Entry.Attachments);
+  try
+    jo2 := TJSONObject.ParseJSONValue(Content) as TJsonObject;
+  except
+    on E: Exception do
+    begin
+      raise Exception.Create('A valid stringy version of json is expected.');
+    end;
+  end;
+  v := jo2.GetValue(EMAIL_TOKEN);
+  if v = nil then
+  begin
+    jo2.DisposeOf;
+    raise Exception.Create('No key "' + EMAIL_TOKEN + '" is found.');
+  end;
+  Emails := v.Value;
+  if Trim(Emails) = '' then
+  begin
+    jo2.DisposeOf;
+    raise Exception.Create('Key "' + EMAIL_TOKEN + '" is blank or empty.');
+  end;
 
-  Result := TActiveQueueEntry.Create('omn-register', 'email', jo.ToString, Token, Entry.Attachments);
+  builder := TSendDataTemplateBuilder.Create();
+  builder.SetFrom(TONMCredentials.From)
+    .SetSender(TONMCredentials.Name)
+    .SetSubject(TONMCredentials.Subject)
+    .SetPort(TONMCredentials.Port)
+    .setServer(TONMCredentials.Server)
+    .SetRecipTo(Emails)
+    .addAttachments(Attachments);
+  Data := builder.Build;
+  jo1 := data.ToJson;
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, Attachments);
+  jo1.DisposeOf;
+  Data.DisposeOf;
+  Builder.DisposeOf;
+
 end;
 
 { TOMNSendToCodicione }
@@ -227,7 +258,7 @@ begin
   inherited Create('register');
 end;
 
-function TOMNSendToCodicione.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
+function TOMNSendToCodicione.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 begin
   // Writeln('ActionSend starts...');
   // builder := TSenderDataTemplateBuilder.Create();

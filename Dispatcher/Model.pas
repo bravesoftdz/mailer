@@ -4,7 +4,7 @@ interface
 
 uses
   DispatcherConfig, IpAuthentication, DispatcherResponce, DispatcherEntry,
-  ProviderFactory, System.Generics.Collections, ActiveQueueEntry;
+  ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment;
 
 type
   TModel = class(TObject)
@@ -35,7 +35,8 @@ type
 implementation
 
 uses
-  Provider, VenditoriSimple, SoluzioneAgenti, Actions, OfferteNuoviMandati;
+  Provider, VenditoriSimple, SoluzioneAgenti, Actions, OfferteNuoviMandati,
+  System.SysUtils;
 
 { TModel }
 
@@ -55,16 +56,42 @@ var
   Actions: TObjectList<TAction>;
   Action: TAction;
   Token: String;
+  Attachments: TObjectList<TAttachment>;
+  BackEndEntry: TActiveQueueEntry;
 begin
   Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
   Result := TObjectList<TActiveQueueEntry>.Create();
   Token := FConfig.Token;
-  for Action in Actions do
-  begin
-    Result.Add(Action.MapToBackEndEntry(Entry, Token));
+  try
+    for Action in Actions do
+    begin
+      Attachments := Entry.Attachments;
+      try
+        BackEndEntry := Action.MapToBackEndEntry(Entry.Content, Attachments, Token);
+        Result.Add(BackEndEntry);
+      except
+        on E: Exception do
+        begin
+          Attachments.Clear;
+          Attachments.DisposeOf;
+          Actions.Clear;
+          Actions.DisposeOf();
+          raise Exception.Create('Failed to create back-end entries: ' + e.Message);
+        end;
+      end;
+      Attachments.Clear;
+      Attachments.DisposeOf;
+      Attachments := nil;
+    end;
+  finally
+    Actions.Clear;
+    Actions.DisposeOf();
+    if Attachments <> nil then
+    begin
+      Attachments.Clear;
+      Attachments.DisposeOf;
+    end;
   end;
-  Actions.Clear;
-  Actions.DisposeOf();
 
 end;
 
