@@ -3,7 +3,8 @@ unit DispatcherController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, MVCFramework.RESTAdapter, ActiveQueueAPI;
+  MVCFramework, MVCFramework.Commons, Model, MVCFramework.RESTAdapter, ActiveQueueAPI,
+  ServerConfig;
 
 type
 
@@ -27,7 +28,7 @@ type
 
     class procedure Setup();
     class procedure TearDown();
-    class procedure LoadConfigFromFile(const FilePath: String);
+    class procedure SetConfig(const Config: TServerConfig);
     class function GetPort(): Integer;
     class function GetClientIps(): TArray<String>;
     class function GetBackEndPort(): Integer;
@@ -53,51 +54,50 @@ begin
   Render(Str);
 end;
 
-class procedure TDispatcherController.LoadConfigFromFile(const FilePath: String);
+class procedure TDispatcherController.SetConfig(const Config: TServerConfig);
 var
   Content, ErrorMessage: String;
   Json: TJsonObject;
-  Config: TDispatcherConfig;
 begin
-  if Not(TFile.Exists(FilePath)) then
-    raise Exception.Create('Error: config file ' + FilePath + ' not found.');
-  ErrorMessage := '';
-  Content := TFile.ReadAllText(FilePath);
-  try
-    Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
-  except
-    on E: Exception do
-    begin
-      ErrorMessage := E.message;
-      Json := nil;
-    end;
-  end;
-  if Json <> nil then
-  begin
-    try
-      try
-        Config := TDispatcherConfig.CreateFromJson(Json);
-      except
-        on E: Exception do
-        begin
-          ErrorMessage := ErrorMessage + ', ' + E.Message;
-          Config := nil;
-        end;
-
-      end;
-    finally
-      Json.DisposeOf;
-    end;
-
-  end;
-  if Config <> nil then
-  begin
-    Model.Config := Config;
-    SetUpBackEndProxy();
-    Config.DisposeOf;
-  end;
-  if not(ErrorMessage.IsEmpty) then
-    raise Exception.Create(ErrorMessage);
+  // if Not(TFile.Exists(FilePath)) then
+  // raise Exception.Create('Error: config file ' + FilePath + ' not found.');
+  // ErrorMessage := '';
+  // Content := TFile.ReadAllText(FilePath);
+  // try
+  // Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
+  // except
+  // on E: Exception do
+  // begin
+  // ErrorMessage := E.message;
+  // Json := nil;
+  // end;
+  // end;
+  // if Json <> nil then
+  // begin
+  // try
+  // try
+  // Config := TDispatcherConfig.CreateFromJson(Json);
+  // except
+  // on E: Exception do
+  // begin
+  // ErrorMessage := ErrorMessage + ', ' + E.Message;
+  // Config := nil;
+  // end;
+  //
+  // end;
+  // finally
+  // Json.DisposeOf;
+  // end;
+  //
+  // end;
+  // if Config <> nil then
+  // begin
+  Model.Config := Config;
+  SetUpBackEndProxy();
+  Config.DisposeOf;
+  // end;
+  // if not(ErrorMessage.IsEmpty) then
+  // raise Exception.Create(ErrorMessage);
 end;
 
 class function TDispatcherController.GetBackEndIp: String;
@@ -130,12 +130,6 @@ var
   Outcome: Boolean;
 begin
   IP := Context.Request.ClientIP;
-  if not(Model.isAuthorised(IP)) then
-  begin
-    Responce := TDispatcherResponce.Create(False, 'Not authorized');
-    Render(Responce);
-    Exit();
-  end;
 
   if Context.Request.ThereIsRequestBody then
   begin
@@ -153,6 +147,13 @@ begin
   else
   begin
     Responce := TDispatcherResponce.Create(False, 'No request body found.');
+    Render(Responce);
+    Exit();
+  end;
+
+  if not(Model.isAuthorised(IP, Request.Token)) then
+  begin
+    Responce := TDispatcherResponce.Create(False, 'Not authorized');
     Render(Responce);
     Exit();
   end;

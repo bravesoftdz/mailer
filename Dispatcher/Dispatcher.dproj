@@ -76,7 +76,7 @@
         <Debugger_CWD>C:\Dev\Mailer\Dispatcher</Debugger_CWD>
         <Debugger_RunParams>-c dispatcher.conf</Debugger_RunParams>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>..\;..\Cli;..\Reception;..\ActiveQueue;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\;..\Cli;..\Reception;..\ActiveQueue;..\Config;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -97,7 +97,6 @@
         </DCCReference>
         <DCCReference Include="Model.pas"/>
         <DCCReference Include="DispatcherConfig.pas"/>
-        <DCCReference Include="..\Authentication\IpAuthentication.pas"/>
         <DCCReference Include="..\Config\Configuration.pas"/>
         <DCCReference Include="DispatcherResponce.pas"/>
         <DCCReference Include="DispatcherEntry.pas"/>
@@ -105,10 +104,12 @@
         <DCCReference Include="Provider.pas"/>
         <DCCReference Include="ProviderFactory.pas"/>
         <DCCReference Include="SenderCredentials.pas"/>
+        <DCCReference Include="..\Config\ServerConfig.pas"/>
         <DCCReference Include="SoluzioneAgenti.pas"/>
         <DCCReference Include="VenditoriSimple.pas"/>
         <DCCReference Include="OfferteNuoviMandati.pas"/>
         <DCCReference Include="SendDataTemplate.pas"/>
+        <DCCReference Include="..\Authentication\IpTokenAuthentication.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -3,31 +3,32 @@ unit Model;
 interface
 
 uses
-  DispatcherConfig, IpAuthentication, DispatcherResponce, DispatcherEntry,
-  ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment;
+  DispatcherConfig, DispatcherResponce, DispatcherEntry,
+  ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
+  ServerConfig, IpTokenAuthentication;
 
 type
   TModel = class(TObject)
 
   strict private
   var
-    FConfig: TDispatcherConfig;
-    FAuthentication: IAuthentication;
+    FConfig: TServerConfig;
+    FAuthentication: TIpTokenAuthentication;
     FFactory: TProviderFactory;
 
-    function GetConfig(): TDispatcherConfig;
-    procedure SetConfig(const Config: TDispatcherConfig);
+    function GetConfig(): TServerConfig;
+    procedure SetConfig(const Config: TServerConfig);
 
   public
     function GetPort(): Integer;
     function GetClientIps(): TArray<String>;
-    function isAuthorised(const IP: String): Boolean;
+    function isAuthorised(const IP, Token: String): Boolean;
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
-    property Config: TDispatcherConfig read GetConfig write SetConfig;
+    property Config: TServerConfig read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -36,7 +37,7 @@ implementation
 
 uses
   Provider, VenditoriSimple, SoluzioneAgenti, Actions, OfferteNuoviMandati,
-  System.SysUtils;
+  System.SysUtils, Client, System.Classes;
 
 { TModel }
 
@@ -121,9 +122,9 @@ begin
   Result := FAuthentication.GetIps();
 end;
 
-function TModel.GetConfig: TDispatcherConfig;
+function TModel.GetConfig: TServerConfig;
 begin
-  Result := TDispatcherConfig.Create(FConfig.Port, FConfig.ClientIPs, FConfig.BackEndIp, FConfig.BackEndPort, FConfig.Token);
+  Result := TServerConfig.Create(FConfig.Port, FConfig.Clients, FConfig.BackEndIp, FConfig.BackEndPort, FConfig.Token);
 end;
 
 function TModel.GetPort: Integer;
@@ -132,19 +133,40 @@ begin
     Result := FConfig.Port;
 end;
 
-function TModel.isAuthorised(const IP: String): Boolean;
+function TModel.isAuthorised(const IP, Token: String): Boolean;
 begin
-  Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP);
+  Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
 end;
 
-procedure TModel.SetConfig(const Config: TDispatcherConfig);
+procedure TModel.SetConfig(const Config: TServerConfig);
+var
+  IPs, Tokens: TArray<String>;
+  Client: TClient;
+  Clients: TObjectList<TClient>;
+  L, I: Integer;
+
 begin
   if FConfig <> nil then
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TDispatcherConfig.Create(Config.Port, Config.ClientIPs, Config.BackEndIp, Config.BackEndPort, Config.Token);
-  FAuthentication := TIpAuthentication.Create(Config.ClientIPs);
+  FConfig := TServerConfig.Create(Config.Port, Config.Clients, Config.BackEndIp, Config.BackEndPort, Config.Token);
+  IPs := TArray<String>.Create();
+  Tokens := TArray<String>.Create();
+  Clients := Config.Clients;
+  L := Clients.Count;
+  SetLength(IPs, L);
+  SetLength(Tokens, L);
+  for I := 0 to L - 1 do
+  begin
+    IPs[I] := Clients[I].IP;
+    Tokens[I] := Clients[I].Token;
+  end;
+  FAuthentication := TIpTokenAuthentication.Create(IPs, Tokens);
+  SetLength(IPs, 0);
+  SetLength(Tokens, 0);
+  Clients.Clear;
+  Clients.DisposeOf();
 
 end;
 

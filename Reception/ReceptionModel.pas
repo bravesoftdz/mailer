@@ -8,9 +8,8 @@ uses
   ActiveQueueSettings,
   Web.HTTPApp, Client,
   // ClientFullRequest,
-  Authentication,
-  ReceptionConfig, System.Classes, DispatcherEntry, System.JSON, Attachment,
-  System.Generics.Collections, DispatcherResponce;
+  Authentication, System.Classes, DispatcherEntry, System.JSON, Attachment,
+  System.Generics.Collections, DispatcherResponce, ServerConfig;
 
 type
   TReceptionModel = class(TObject)
@@ -35,7 +34,7 @@ type
 
     procedure SetSettings(const Value: TActiveQueueSettings);
 
-    procedure SetConfig(const Value: TReceptionConfig);
+    procedure SetConfig(const Value: TServerConfig);
     function GetBackEndUrl: String;
     function GetBackEndPort: Integer;
 
@@ -84,7 +83,7 @@ type
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
-    property Config: TReceptionConfig write SetConfig;
+    property Config: TServerConfig write SetConfig;
 
     property BackEndUrl: String read GetBackEndUrl;
 
@@ -264,14 +263,14 @@ begin
   FAuthentication := TAuthentication.Create(clients);
 end;
 
-procedure TReceptionModel.SetConfig(const Value: TReceptionConfig);
+procedure TReceptionModel.SetConfig(const Value: TServerConfig);
 var
   BackEndSettings: TActiveQueueSettings;
 begin
   SetClients(Value.Clients);
   FPort := Value.Port;
   FToken := Value.Token;
-  BackEndSettings := TActiveQueueSettings.Create(Value.BackEndUrl, Value.BackEndPort);
+  BackEndSettings := TActiveQueueSettings.Create(Value.BackEndIP, Value.BackEndPort);
   SetSettings(BackEndSettings);
   BackEndSettings.DisposeOf;
 end;

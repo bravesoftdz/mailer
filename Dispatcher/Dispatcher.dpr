@@ -13,13 +13,13 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   Model in 'Model.pas',
   CliParam,
   CliUsage,
   System.Generics.Collections,
+  ObjectsMappers,
   DispatcherConfig in 'DispatcherConfig.pas',
-  IpAuthentication in '..\Authentication\IpAuthentication.pas',
   Configuration in '..\Config\Configuration.pas',
   DispatcherResponce in 'DispatcherResponce.pas',
   DispatcherEntry in 'DispatcherEntry.pas',
@@ -27,10 +27,14 @@ uses
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
   SenderCredentials in 'SenderCredentials.pas',
+  ServerConfig in '..\Config\ServerConfig.pas',
   SoluzioneAgenti in 'SoluzioneAgenti.pas',
   VenditoriSimple in 'VenditoriSimple.pas',
   OfferteNuoviMandati in 'OfferteNuoviMandati.pas',
-  SendDataTemplate in 'SendDataTemplate.pas';
+  SendDataTemplate in 'SendDataTemplate.pas',
+  System.JSON,
+  System.IOUtils,
+  IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas';
 
 {$R *.res}
 
@@ -40,12 +44,16 @@ const
   SWITCH_CONFIG = 'c';
 
 var
+  ConfigFileName: String;
+  JsonConfig: TJsonObject;
+  FileContent: String;
+  Config: TServerConfig;
   Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: String);
+procedure RunServer(const Config: TServerConfig);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -55,7 +63,7 @@ var
   Info, BackEndIp: String;
   ClientIps: TArray<String>;
 begin
-  TDispatcherController.LoadConfigFromFile(Config);
+  TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
   BackEndPort := TDispatcherController.GetBackEndPort();
   BackEndIp := TDispatcherController.GetBackEndIp();
@@ -126,11 +134,36 @@ begin
   try
     try
       ParamValues := ParamUsage.Parse();
-      Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
-      if WebRequestHandler <> nil then
-        WebRequestHandler.WebModuleClass := WebModuleClass;
-      WebRequestHandlerProc.MaxConnections := 1024;
-      RunServer(ParamValues[SWITCH_CONFIG]);
+
+      ConfigFileName := ParamValues[SWITCH_CONFIG];
+      if Not(TFile.Exists(ConfigFileName)) then
+      begin
+        Writeln('Error: config file ' + ConfigFileName + 'not found.');
+        Exit();
+      end;
+      try
+        FileContent := TFile.ReadAllText(ConfigFileName);
+        JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
+      except
+        on E: Exception do
+        begin
+          Writeln(E.Message);
+          Exit();
+        end;
+      end;
+      if Assigned(JsonConfig) then
+      begin
+        Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+      end;
+
+      if Config <> nil then
+      begin
+        if WebRequestHandler <> nil then
+          WebRequestHandler.WebModuleClass := WebModuleClass;
+        WebRequestHandlerProc.MaxConnections := 1024;
+        RunServer(Config);
+      end;
+
     except
       on E: Exception do
       begin

@@ -21,11 +21,11 @@ uses
   CliUsage in '..\Cli\CliUsage.pas',
   Controller in 'Controller.pas',
   ReceptionModel in 'ReceptionModel.pas',
-  ReceptionConfig in 'ReceptionConfig.pas',
+  ServerConfig in '..\Config\ServerConfig.pas',
   Responce in 'Responce.pas',
   Client in 'Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
   Attachment in 'Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
@@ -37,12 +37,12 @@ var
   ConfigFileName: String;
   JsonConfig: TJsonObject;
   FileContent: String;
-  Config: TReceptionConfig;
+  Config: TServerConfig;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: TReceptionConfig);
+procedure RunServer(const Config: TServerConfig);
 var
   Port: Integer;
   LInputRecord: TInputRecord;
@@ -137,7 +137,7 @@ begin
       end;
       if Assigned(JsonConfig) then
       begin
-        Config := Mapper.JSONObjectToObject<TReceptionConfig>(JsonConfig);
+        Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
       end;
       if Config <> nil then
       begin

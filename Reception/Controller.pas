@@ -7,7 +7,7 @@ uses
   // Action,
   // ProviderFactory,
   Responce, ActiveQueueSettings, ReceptionModel, Client,
-  System.Generics.Collections, System.Classes, ReceptionConfig,
+  System.Generics.Collections, System.Classes, ServerConfig,
   MVCFramework.RESTAdapter, DispatcherProxyInterface;
 
 type
@@ -60,7 +60,7 @@ type
 
     class function GetBackEndPort: Integer;
 
-    class procedure SetConfig(const Config: TReceptionConfig);
+    class procedure SetConfig(const Config: TServerConfig);
 
     class function GetPort(): Integer;
 
@@ -204,7 +204,7 @@ begin
   Result := Model.Clients
 end;
 
-class procedure TController.SetConfig(const Config: TReceptionConfig);
+class procedure TController.SetConfig(const Config: TServerConfig);
 begin
   Model.Config := Config;
   SetUpBackEndProxy();
