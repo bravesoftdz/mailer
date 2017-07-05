@@ -1,4 +1,4 @@
-unit Credentials;
+unit SenderCredentials;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   System.Classes, System.Generics.Collections;
 
 type
-  TVenditoriCredentials = class
+  TVenditoriCredentials = class(TObject)
   strict private
     constructor Create();
   public
@@ -16,6 +16,18 @@ type
     class function Subject(): String;
     class function Server(): String;
     class function Port(): Integer;
+  end;
+
+type
+  TONMCredentials = class abstract(TObject)
+  public
+  class var
+    From: String;
+    Name: String;
+    Recipients: String;
+    Subject: String;
+    Server: String;
+    Port: Integer;
   end;
 
 implementation
@@ -60,5 +72,12 @@ class function TVenditoriCredentials.Subject: String;
 begin
   Result := 'venditori richiesta';
 end;
+
+initialization
+
+TONMCredentials.From := 'redazione@offertenuovimandati.com';
+TONMCredentials.Name := 'Offerte Nuovi Mandati';
+TONMCredentials.Port := 25;
+TONMCredentials.Server := 'mailbus.fastweb.it';
 
 end.

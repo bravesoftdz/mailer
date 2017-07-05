@@ -3,7 +3,7 @@ unit Model;
 interface
 
 uses
-  ActiveQueueResponce, SubscriptionData, ReceptionRequest,
+  ActiveQueueResponce, SubscriptionData, ActiveQueueEntry,
   System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver;
 
@@ -37,7 +37,7 @@ type
     FProxyRegister: TDictionary<String, IListenerProxy>;
 
     /// items of the queue
-    FItems: TQueue<TReceptionRequest>;
+    FItems: TQueue<TActiveQueueEntry>;
 
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FListenersIPs: TArray<String>;
@@ -112,13 +112,13 @@ type
     function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
 
     /// get not more that N items from the queue.
-    function GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TReceptionRequest>;
+    function GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
 
     /// <summary>Add many items to the pull</summary>
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <param name="IP">ip of the computer from which the request originates</param>
     /// <returns>True in case of success, False otherwise</returns>
-    function Enqueue(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
+    function Enqueue(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
 
     /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
     function GetListenersIPs: TArray<String>;
@@ -144,7 +144,7 @@ type
     /// the new state is saved.
     procedure SetState(const FilePath: String; const Config: TAQConfig);
 
-    procedure SetQueue(const FilePath: String; const Items: TObjectList<TReceptionRequest>);
+    procedure SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -171,9 +171,9 @@ uses
   JsonableInterface, System.RegularExpressions;
 { TActiveQueueModel }
 
-function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
+function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
 var
-  item: TReceptionRequest;
+  item: TActiveQueueEntry;
 begin
   Writeln('Enqueueing ' + inttostr(Items.Count) + ' item(s)');
   TMonitor.Enter(FQueueLock);
@@ -273,7 +273,7 @@ end;
 
 function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
 var
-  item: TReceptionRequest;
+  item: TActiveQueueEntry;
 begin
   TMonitor.Enter(FQueueLock);
   Result := 0;
@@ -375,7 +375,7 @@ begin
   FProvidersLock := TObject.Create;
   FSubscriptionRegister := TDictionary<String, TSubscriptionData>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
-  FItems := TQueue<TReceptionRequest>.Create();
+  FItems := TQueue<TActiveQueueEntry>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
   FStateSaver := TJsonSaver.Create();
@@ -414,11 +414,11 @@ begin
 
 end;
 
-function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TReceptionRequest>;
+function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
 var
   Size, ReturnSize, I: Integer;
 begin
-  Result := TObjectList<TReceptionRequest>.Create(True);
+  Result := TObjectList<TActiveQueueEntry>.Create(True);
   TMonitor.Enter(FListenersLock);
   try
     if (N >= 0) AND FSubscriptionRegister.ContainsKey(Token) then
@@ -612,7 +612,7 @@ begin
 end;
 
 procedure TActiveQueueModel.SetQueue(const FilePath: String;
-const Items: TObjectList<TReceptionRequest>);
+const Items: TObjectList<TActiveQueueEntry>);
 begin
   // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
   Writeln('Here, the queue must be saved, but it is yet to be done');
@@ -636,7 +636,7 @@ end;
 procedure TActiveQueueModel.PersistQueue;
 var
   arr: TJsonArray;
-  Request: TReceptionRequest;
+  Request: TActiveQueueEntry;
   items: TList<Jsonable>;
 
 begin

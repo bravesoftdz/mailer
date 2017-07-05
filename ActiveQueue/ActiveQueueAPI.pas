@@ -2,7 +2,7 @@ unit ActiveQueueAPI;
 
 interface
 
-uses SubscriptionData, ActiveQueueResponce, ReceptionRequest, ActiveQueueEntry,
+uses SubscriptionData, ActiveQueueResponce, SendDataTemplate, ActiveQueueEntry,
   System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
 
 type

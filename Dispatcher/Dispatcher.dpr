@@ -23,13 +23,14 @@ uses
   Configuration in '..\Config\Configuration.pas',
   DispatcherResponce in 'DispatcherResponce.pas',
   DispatcherEntry in 'DispatcherEntry.pas',
-  Action in 'Action.pas',
+  Actions in 'Actions.pas',
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
-  Credentials in 'Credentials.pas',
+  SenderCredentials in 'SenderCredentials.pas',
   SoluzioneAgenti in 'SoluzioneAgenti.pas',
   VenditoriSimple in 'VenditoriSimple.pas',
-  OfferteNuoviMandati in 'OfferteNuoviMandati.pas';
+  OfferteNuoviMandati in 'OfferteNuoviMandati.pas',
+  SendDataTemplate in 'SendDataTemplate.pas';
 
 {$R *.res}
 

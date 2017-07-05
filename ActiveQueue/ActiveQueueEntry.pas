@@ -3,11 +3,11 @@ unit ActiveQueueEntry;
 interface
 
 uses
-  System.Generics.Collections, Attachment;
+  System.Generics.Collections, Attachment, JsonableInterface, System.JSON;
 
 type
   /// <summary>An ADT that represents a single entry for the Active Queue server.</summary>
-  TActiveQueueEntry = class(TObject)
+  TActiveQueueEntry = class(TInterfacedObject, Jsonable)
   private
     /// <summary>A token based on which the server decides whether to allow the request or not</summary>
     FToken: String;
@@ -36,6 +36,8 @@ type
     constructor Create(); overload;
     destructor Destroy(); override;
 
+    function ToJson(): TJsonObject;
+
   end;
 
 type
@@ -54,6 +56,9 @@ type
   end;
 
 implementation
+
+uses
+  System.SysUtils;
 
 { TActiveQueueEntries }
 
@@ -129,6 +134,11 @@ begin
   FAttachments.Clear;
   FAttachments.DisposeOf;
   inherited;
+end;
+
+function TActiveQueueEntry.ToJson: TJsonObject;
+begin
+  raise Exception.Create('TActiveQueueEntry.ToJson not implemented yet');
 end;
 
 end.

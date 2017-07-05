@@ -32,7 +32,7 @@ uses
   JsonableInterface in 'JsonableInterface.pas',
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  ReceptionRequest in '..\Reception\ReceptionRequest.pas',
+//  ReceptionRequest in '..\Reception\ReceptionRequest.pas',
   SubscriptionData in '..\Reception\SubscriptionData.pas',
   Attachment in '..\Reception\Attachment.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas';

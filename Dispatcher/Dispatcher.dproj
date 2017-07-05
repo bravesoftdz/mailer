@@ -101,13 +101,14 @@
         <DCCReference Include="..\Config\Configuration.pas"/>
         <DCCReference Include="DispatcherResponce.pas"/>
         <DCCReference Include="DispatcherEntry.pas"/>
-        <DCCReference Include="Action.pas"/>
+        <DCCReference Include="Actions.pas"/>
         <DCCReference Include="Provider.pas"/>
         <DCCReference Include="ProviderFactory.pas"/>
-        <DCCReference Include="Credentials.pas"/>
+        <DCCReference Include="SenderCredentials.pas"/>
         <DCCReference Include="SoluzioneAgenti.pas"/>
         <DCCReference Include="VenditoriSimple.pas"/>
         <DCCReference Include="OfferteNuoviMandati.pas"/>
+        <DCCReference Include="SendDataTemplate.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

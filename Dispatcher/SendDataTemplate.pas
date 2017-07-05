@@ -1,4 +1,4 @@
-unit ReceptionRequest;
+unit SendDataTemplate;
 
 interface
 
@@ -13,7 +13,7 @@ type
   ///  It is a depricated class in favour of DispatcherEntry
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TReceptionRequest = class(TInterfacedObject, Jsonable)
+  TSendDataTemplate = class(TInterfacedObject, Jsonable)
   strict private
   const
     TOKEN_HTML = 'bodyhtml';
@@ -99,7 +99,7 @@ type
 
 type
   { Builder for a type that collects input data for a program that sends emails }
-  TReceptionRequestBuilder = class(TObject)
+  TSendDataTemplateBuilder = class(TObject)
   strict private
     FFRom: String;
     FSender: String;
@@ -118,22 +118,22 @@ type
     FAttach: TObjectList<TAttachment>;
     FToken: String;
   public
-    function SetFrom(const AFrom: String): TReceptionRequestBuilder;
-    function SetSender(const ASender: String): TReceptionRequestBuilder;
-    function SetServer(const AServer: String): TReceptionRequestBuilder;
-    function SetPort(const APort: Integer): TReceptionRequestBuilder;
-    function SetAuthentification(const ALogin, APassword: String): TReceptionRequestBuilder;
-    function SetUseSSL(const AUseSSL: Boolean): TReceptionRequestBuilder;
-    function SetText(const AText: String): TReceptionRequestBuilder;
-    function SetHtml(const AHtml: String): TReceptionRequestBuilder;
-    function SetRecipTo(const ARecipTo: String): TReceptionRequestBuilder;
-    function SetRecipCc(const ARecipCc: String): TReceptionRequestBuilder;
-    function SetRecipBcc(const ARecipBcc: String): TReceptionRequestBuilder;
-    function addAttach(const AnAttach: TAttachment): TReceptionRequestBuilder;
-    function addAttachments(const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
-    function SetSubject(const ASubject: String): TReceptionRequestBuilder;
-    function setToken(const AToken: String): TReceptionRequestBuilder;
-    function Build(): TReceptionRequest;
+    function SetFrom(const AFrom: String): TSendDataTemplateBuilder;
+    function SetSender(const ASender: String): TSendDataTemplateBuilder;
+    function SetServer(const AServer: String): TSendDataTemplateBuilder;
+    function SetPort(const APort: Integer): TSendDataTemplateBuilder;
+    function SetAuthentification(const ALogin, APassword: String): TSendDataTemplateBuilder;
+    function SetUseSSL(const AUseSSL: Boolean): TSendDataTemplateBuilder;
+    function SetText(const AText: String): TSendDataTemplateBuilder;
+    function SetHtml(const AHtml: String): TSendDataTemplateBuilder;
+    function SetRecipTo(const ARecipTo: String): TSendDataTemplateBuilder;
+    function SetRecipCc(const ARecipCc: String): TSendDataTemplateBuilder;
+    function SetRecipBcc(const ARecipBcc: String): TSendDataTemplateBuilder;
+    function addAttach(const AnAttach: TAttachment): TSendDataTemplateBuilder;
+    function addAttachments(const Items: TObjectList<TAttachment>): TSendDataTemplateBuilder;
+    function SetSubject(const ASubject: String): TSendDataTemplateBuilder;
+    function setToken(const AToken: String): TSendDataTemplateBuilder;
+    function Build(): TSendDataTemplate;
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -142,15 +142,15 @@ type
   TReceptionRequests = class(TObject)
   strict private
   var
-    FItems: TObjectList<TReceptionRequest>;
+    FItems: TObjectList<TSendDataTemplate>;
 
   public
     constructor Create;
     destructor Destroy; override;
-    procedure SetItems(Items: TObjectList<TReceptionRequest>);
+    procedure SetItems(Items: TObjectList<TSendDataTemplate>);
 
-    [MapperListOf(TReceptionRequest)]
-    property Items: TObjectList<TReceptionRequest> read FItems write SetItems;
+    [MapperListOf(TSendDataTemplate)]
+    property Items: TObjectList<TSendDataTemplate> read FItems write SetItems;
 
   end;
 
@@ -159,13 +159,9 @@ implementation
 uses
   System.SysUtils;
 
-{ TSendern
 
-  uses
-  System.Generics.Collections;nputDataBuilder }
-
-function TReceptionRequestBuilder.addAttachments(
-  const Items: TObjectList<TAttachment>): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.addAttachments(
+  const Items: TObjectList<TAttachment>): TSendDataTemplateBuilder;
 var
   Item: TAttachment;
 begin
@@ -174,14 +170,14 @@ begin
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.Build: TReceptionRequest;
+function TSendDataTemplateBuilder.Build: TSendDataTemplate;
 begin
-  Result := TReceptionRequest.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
+  Result := TSendDataTemplate.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
     FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
     FRecipCc, FRecipBcc, FAttach, FToken);
 end;
 
-constructor TReceptionRequestBuilder.Create;
+constructor TSendDataTemplateBuilder.Create;
 begin
   FUseAuth := False;
   FPort := 25; // default port number
@@ -200,21 +196,21 @@ begin
   FAttach := TObjectList<TAttachment>.Create;
 end;
 
-destructor TReceptionRequestBuilder.Destroy;
+destructor TSendDataTemplateBuilder.Destroy;
 begin
   FAttach.Clear;
   FAttach.DisposeOf;
   inherited;
 end;
 
-function TReceptionRequestBuilder.addAttach(const AnAttach: TAttachment): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.addAttach(const AnAttach: TAttachment): TSendDataTemplateBuilder;
 begin
   FAttach.Add(TAttachment.Create(AnAttach.Name, AnAttach.Content));
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetAuthentification(const ALogin,
-  APassword: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetAuthentification(const ALogin,
+  APassword: String): TSendDataTemplateBuilder;
 begin
   FUseAuth := True;
   FUser := ALogin;
@@ -222,86 +218,86 @@ begin
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetText(
-  const AText: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetText(
+  const AText: String): TSendDataTemplateBuilder;
 begin
   FText := AText;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.setToken(
-  const AToken: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.setToken(
+  const AToken: String): TSendDataTemplateBuilder;
 begin
   FToken := AToken;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetFrom(
-  const AFrom: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetFrom(
+  const AFrom: String): TSendDataTemplateBuilder;
 begin
   FFrom := AFrom;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetHtml(
-  const AHtml: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetHtml(
+  const AHtml: String): TSendDataTemplateBuilder;
 begin
   FHtml := AHtml;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetPort(
-  const APort: Integer): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetPort(
+  const APort: Integer): TSendDataTemplateBuilder;
 begin
   FPort := APort;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetRecipBcc(
-  const ARecipBcc: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetRecipBcc(
+  const ARecipBcc: String): TSendDataTemplateBuilder;
 begin
   FRecipBcc := ARecipBcc;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetRecipCc(
-  const ARecipCc: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetRecipCc(
+  const ARecipCc: String): TSendDataTemplateBuilder;
 begin
   FRecipCc := ARecipCc;
   Result := Self;
 
 end;
 
-function TReceptionRequestBuilder.SetRecipTo(
-  const ARecipTo: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetRecipTo(
+  const ARecipTo: String): TSendDataTemplateBuilder;
 begin
   FRecipTo := ARecipTo;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetSender(
-  const ASender: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetSender(
+  const ASender: String): TSendDataTemplateBuilder;
 begin
   FSender := ASender;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetServer(
-  const AServer: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetServer(
+  const AServer: String): TSendDataTemplateBuilder;
 begin
   FServer := AServer;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetSubject(
-  const ASubject: String): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetSubject(
+  const ASubject: String): TSendDataTemplateBuilder;
 begin
   FSubject := ASubject;
   Result := Self;
 end;
 
-function TReceptionRequestBuilder.SetUseSSL(
-  const AUseSSL: Boolean): TReceptionRequestBuilder;
+function TSendDataTemplateBuilder.SetUseSSL(
+  const AUseSSL: Boolean): TSendDataTemplateBuilder;
 begin
   FUseSSL := AUseSSL;
   Result := Self;
@@ -309,7 +305,7 @@ end;
 
 { TSenderInputData }
 
-constructor TReceptionRequest.Create(const AFrom: string; const ASender: string;
+constructor TSendDataTemplate.Create(const AFrom: string; const ASender: string;
   const AServer: string; const APort: Integer; const AUseAuth: Boolean;
   const aUser: string; const APassword: string; const AUseSSL: Boolean;
   const AnHtml: string; const AText: string; const ASubject: string;
@@ -340,19 +336,19 @@ begin
 
 end;
 
-constructor TReceptionRequest.Create;
+constructor TSendDataTemplate.Create;
 begin
   FAttach := TObjectList<TAttachment>.Create;
 end;
 
-destructor TReceptionRequest.Destroy;
+destructor TSendDataTemplate.Destroy;
 begin
   FAttach.Clear;
   FAttach.DisposeOf;
   inherited;
 end;
 
-function TReceptionRequest.ToJson: TJsonObject;
+function TSendDataTemplate.ToJson: TJsonObject;
 begin
   Result := TJsonObject.Create();
   // Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
@@ -364,7 +360,7 @@ end;
 
 constructor TReceptionRequests.Create;
 begin
-  FItems := TObjectList<TReceptionRequest>.Create();
+  FItems := TObjectList<TSendDataTemplate>.Create();
 end;
 
 destructor TReceptionRequests.Destroy;
@@ -373,7 +369,7 @@ begin
   inherited;
 end;
 
-procedure TReceptionRequests.SetItems(Items: TObjectList<TReceptionRequest>);
+procedure TReceptionRequests.SetItems(Items: TObjectList<TSendDataTemplate>);
 begin
   FItems.Clear;
   FItems := Items;

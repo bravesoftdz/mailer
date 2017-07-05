@@ -3,11 +3,11 @@ unit Actions;
 interface
 
 uses
-  Responce, FrontEndRequest, ReceptionRequest, ActiveQueueSettings,
+  Responce, FrontEndRequest, SendDataTemplate, ActiveQueueSettings,
   ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry;
 
-//type
-//  TActionCategories = (email = 'email', Diamonds, Clubs, Spades);
+// type
+// TActionCategories = (email = 'email', Diamonds, Clubs, Spades);
 
 type
   TAction = class(TObject)
@@ -78,8 +78,7 @@ type
 implementation
 
 uses
-  Credentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce,
-  SendServerProxy.interfaces, System.SysUtils, Attachment;
+  SenderCredentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils, Attachment;
 
 { TMailerAction }
 
@@ -105,14 +104,14 @@ end;
 
 function TActionSend.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 var
-  builder: TReceptionRequestBuilder;
-  adapter: TRestAdapter<ISendServerProxy>;
-  server: ISendServerProxy;
+  builder: TSendDataTemplateBuilder;
+  // adapter: TRestAdapter<ISendServerProxy>;
+  // server: ISendServerProxy;
   Responce: TActiveQueueResponce;
-  Request: TReceptionRequest;
+  Request: TSendDataTemplate;
 begin
   // Writeln('ActionSend starts...');
-  // builder := TReceptionRequestBuilder.Create();
+  // builder := TSenderDataTemplateBuilder.Create();
   // builder.SetFrom(TVenditoriCredentials.From())
   // .SetSender(TVenditoriCredentials.Name())
   // .SetSubject(TVenditoriCredentials.Subject())
@@ -200,9 +199,18 @@ end;
 function TOMNSendToClient.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 var
   jo: TJsonObject;
+  builder: TSendDataTemplateBuilder;
 
 begin
   jo := TJsonObject.Create();
+  builder := TSendDataTemplateBuilder.Create();
+  builder.SetFrom(TVenditoriCredentials.From())
+    .SetSender(TVenditoriCredentials.Name())
+    .SetSubject(TVenditoriCredentials.Subject())
+    .SetPort(TVenditoriCredentials.Port)
+    .setServer(TVenditoriCredentials.Server())
+    .SetRecipTo(TVenditoriCredentials.Recipients)
+    .addAttachments(Entry.Attachments);
 
   Result := TActiveQueueEntry.Create('omn-register', 'email', jo.ToString, Token, Entry.Attachments);
 end;
@@ -222,7 +230,7 @@ end;
 function TOMNSendToCodicione.MapToBackEndEntry(const Entry: TDispatcherEntry; const Token: String): TActiveQueueEntry;
 begin
   // Writeln('ActionSend starts...');
-  // builder := TReceptionRequestBuilder.Create();
+  // builder := TSenderDataTemplateBuilder.Create();
   // builder.SetFrom(TVenditoriCredentials.From())
   // .SetSender(TVenditoriCredentials.Name())
   // .SetSubject(TVenditoriCredentials.Subject())

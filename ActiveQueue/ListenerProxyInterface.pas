@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework.RESTAdapter, MVCFramework.Commons,
-  ReceptionRequest, System.JSON, ConditionInterface;
+  ActiveQueueEntry, System.JSON, ConditionInterface;
 
 type
   /// <summary>an interface defining API of the listener. </summary>

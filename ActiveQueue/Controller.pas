@@ -3,7 +3,7 @@ unit Controller;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, ReceptionRequest, ObjectsMappers,
+  MVCFramework, MVCFramework.Commons, Model, ActiveQueueEntry, ObjectsMappers,
   System.Generics.Collections, ListenerInfo, AQConfig, System.JSON;
 
 type
@@ -15,10 +15,10 @@ type
     class var Model: TActiveQueueModel;
 
     /// enqueue the requests and persist the queue in case of success
-    class function EnqueueAndPersist(const IP: String; const Items: TObjectList<TReceptionRequest>): Boolean;
+    class function EnqueueAndPersist(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
 
     /// convert json array into a list
-    class function JSonArrayToObjectList(const items: TJsonArray): TObjectList<TReceptionRequest>;
+    class function JSonArrayToObjectList(const items: TJsonArray): TObjectList<TActiveQueueEntry>;
   public
     class function GetListeners(): TObjectList<TListenerInfo>;
 
@@ -30,7 +30,7 @@ type
     class procedure LoadStateFromFile(const FilePath: String);
 
     /// <summary>Load queues from given file. The file might not exist, the argument is used as a file name
-    /// to save the queues. The file content is supposed to be a json string of array of TReceptionRequest instances.</summary>
+    /// to save the queues. The file content is supposed to be a json string of array of TActiveQueueEntry instances.</summary>
     class procedure LoadQueuesFromFile(const FilePath: String);
 
     /// <summary> Get the white list of listeners' ips: requests coming from only these ips
@@ -133,7 +133,7 @@ begin
 end;
 
 class function TController.JSonArrayToObjectList(
-  const items: TJsonArray): TObjectList<TReceptionRequest>;
+  const items: TJsonArray): TObjectList<TActiveQueueEntry>;
 begin
 
 end;
@@ -142,7 +142,7 @@ class procedure TController.LoadQueuesFromFile(const FilePath: String);
 var
   Content: String;
   Json: TJsonArray;
-  Requests: TObjectList<TReceptionRequest>;
+  Requests: TObjectList<TActiveQueueEntry>;
 begin
   Model.SetQueuePath(Filepath);
   if TFile.Exists(FilePath) then
@@ -210,7 +210,7 @@ begin
 end;
 
 class function TController.EnqueueAndPersist(const IP: String;
-  const Items: TObjectList<TReceptionRequest>): Boolean;
+  const Items: TObjectList<TActiveQueueEntry>): Boolean;
 begin
   Result := Model.Enqueue(IP, Items);
   // if Result then
@@ -220,7 +220,7 @@ end;
 procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
-  Items: TReceptionRequests;
+  Items: TActiveQueueEntries;
   QtyString: String;
   Qty: Integer;
   Token: String;
@@ -238,7 +238,7 @@ begin
     if Qty > 0 then
     begin
       ip := Context.Request.ClientIP;
-      Items := TReceptionRequests.Create();
+      Items := TActiveQueueEntries.Create();
       Items.Items := Model.GetItems(Ip, Token, Qty);
       Writeln('AQ controller: rendering ' + Items.Items.Count.ToString + ' items');
       Render(Items);
@@ -273,9 +273,9 @@ end;
 
 procedure TController.PostItem(const Context: TWebContext);
 var
-  item: TReceptionRequest;
+  item: TActiveQueueEntry;
   Outcome: Boolean;
-  Wrapper: TObjectList<TReceptionRequest>;
+  Wrapper: TObjectList<TActiveQueueEntry>;
   Responce: TActiveQueueResponce;
   IP: String;
 begin
@@ -283,9 +283,9 @@ begin
   if Context.Request.ThereIsRequestBody then
   begin
     try
-      item := Context.Request.BodyAs<TReceptionRequest>;
+      item := Context.Request.BodyAs<TActiveQueueEntry>;
       IP := Context.Request.ClientIP;
-      wrapper := TObjectList<TReceptionRequest>.Create();
+      wrapper := TObjectList<TActiveQueueEntry>.Create();
       wrapper.add(item);
       Outcome := EnqueueAndPersist(IP, wrapper);
     except
@@ -301,14 +301,14 @@ end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
-  items: TObjectList<TReceptionRequest>;
+  items: TObjectList<TActiveQueueEntry>;
   Outcome: Boolean;
   IP: String;
 begin
   if Context.Request.ThereIsRequestBody then
   begin
     try
-      items := Context.Request.BodyAsListOf<TReceptionRequest>;
+      items := Context.Request.BodyAsListOf<TActiveQueueEntry>;
       IP := Context.Request.ClientIP;
       Outcome := EnqueueAndPersist(IP, Items);
     except

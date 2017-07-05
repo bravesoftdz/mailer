@@ -3,7 +3,7 @@ unit ProviderFactory;
 interface
 
 uses
-  Action, System.Generics.Collections, Provider;
+  Actions, System.Generics.Collections, Provider;
 
 type
   { Abstract factory for producing mailer actions that should perform operations
