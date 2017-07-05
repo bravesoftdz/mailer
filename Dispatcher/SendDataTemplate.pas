@@ -10,7 +10,7 @@ type
 
   /// <summary>
   /// A request that a Reception instance performs to a back-end server.
-  ///  It is a depricated class in favour of DispatcherEntry
+  /// It is a depricated class in favour of DispatcherEntry
   /// </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TSendDataTemplate = class(TInterfacedObject, Jsonable)
@@ -158,7 +158,6 @@ implementation
 
 uses
   System.SysUtils;
-
 
 function TSendDataTemplateBuilder.addAttachments(
   const Items: TObjectList<TAttachment>): TSendDataTemplateBuilder;
@@ -350,10 +349,7 @@ end;
 
 function TSendDataTemplate.ToJson: TJsonObject;
 begin
-  Result := TJsonObject.Create();
-  // Result.AddPair(TJsonPair.Create(TOKEN_HTML, FHtml));
-  // Result.AddPair(TJsonPair.Create(TOKEN_TEXT, FText));
-  { TODO: to finish }
+  Result := Mapper.ObjectToJSonObject(Self);
 end;
 
 { TReceptionRequests }

@@ -138,7 +138,7 @@ begin
         MemStream.DisposeOf;
       end;
       try
-        DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon.ToString, Attachments, Token);
+        DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon.ToString, Attachments);
         try
           DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
         except

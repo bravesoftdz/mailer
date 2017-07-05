@@ -13,6 +13,7 @@ type
     FPort: Integer;
     FBackEndPort: Integer;
     FBackEndUrl: String;
+    FToken: String;
     FClients: TObjectList<TClient>;
 
   public
@@ -23,6 +24,10 @@ type
     /// <summary> Url of the backend service accepts the connections.</summary>
     [MapperJSONSer('backend-url')]
     property BackEndUrl: String read FBackEndUrl write FBackEndUrl;
+
+    /// <summary>Token that should be given to the backend server for authorisation.</summary>
+    [MapperJSONSer('token')]
+    property Token: String read FToken write FToken;
 
     /// <summary> Port at which the backend service accepts the connections.</summary>
     [MapperJSONSer('backend-port')]

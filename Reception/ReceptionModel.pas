@@ -25,6 +25,8 @@ type
     FAuthentication: TAuthentication;
     /// port number at which this server works
     FPort: Integer;
+    /// <summary>Authorisation token (to be given to the back end server).</summary>
+    FToken: String;
 
     /// <summary>client setter. Perform the defencieve copying.</summary>
     procedure SetClients(const clients: TObjectList<TClient>);
@@ -75,7 +77,7 @@ type
     function ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 
     function BuildBackEndEntry(const Origin: String; const Action: String; const Data: String;
-      const Attachments: TObjectList<TAttachment>; const Token: String): TDispatcherEntry;
+      const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
 
     /// <summary>Transforms a dispatcher responce into a reception one.<summary>
     function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TResponce;
@@ -107,9 +109,9 @@ uses
 { TMailerModel }
 
 function TReceptionModel.BuildBackEndEntry(const Origin, Action: String; const data: String;
-  const Attachments: TObjectList<TAttachment>; const Token: String): TDispatcherEntry;
+  const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
 begin
-  Result := TDispatcherEntry.Create(Origin, Action, Data, Attachments, Token);
+  Result := TDispatcherEntry.Create(Origin, Action, Data, Attachments, FToken);
 end;
 
 function TReceptionModel.ConvertToOwnResponce(
@@ -268,6 +270,7 @@ var
 begin
   SetClients(Value.Clients);
   FPort := Value.Port;
+  FToken := Value.Token;
   BackEndSettings := TActiveQueueSettings.Create(Value.BackEndUrl, Value.BackEndPort);
   SetSettings(BackEndSettings);
   BackEndSettings.DisposeOf;
