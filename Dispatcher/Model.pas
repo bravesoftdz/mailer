@@ -102,7 +102,8 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  FAuthentication := nil;
+  if FAuthentication <> nil then
+    FAuthentication.DisposeOf;
   FFactory.DisposeOf;
   inherited;
 end;

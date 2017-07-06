@@ -164,12 +164,13 @@ class
   procedure TDispatcherController.Setup;
 begin
   Model := TModel.Create();
-  FBackEndAdapter := TRestAdapter<IActiveQueueAPI>.Create();
+
 end;
 
 class procedure TDispatcherController.SetUpBackEndProxy;
 begin
   Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.GetBackEndIp, Model.GetBackEndPort]));
+  FBackEndAdapter := TRestAdapter<IActiveQueueAPI>.Create();
   FBackEndProxy := FBackEndAdapter.Build(Model.GetBackEndIp, Model.GetBackEndPort);
 end;
 

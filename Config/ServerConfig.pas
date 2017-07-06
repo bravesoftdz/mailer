@@ -16,7 +16,7 @@ type
     BACKEND_IP_KEY = 'backend-ip';
     BACKEND_PORT_KEY = 'backend-port';
     TOKEN_KEY = 'token';
-
+  protected
   var
     FPort: Integer;
     FBackEndPort: Integer;
@@ -52,7 +52,7 @@ type
   end;
 
 type
-  TServerConfigImmutable = class(TObject)
+  TServerConfigImmutable = class(TServerConfig)
   strict private
     function GetClients: TObjectList<TClient>;
 
@@ -68,18 +68,20 @@ type
     property Clients: TObjectList<TClient> read GetClients;
 
     /// <summary> Port at which the program accepts the connections.</summary>
-    property Port: Integer read FPort write FPort;
+    property Port: Integer read FPort;
 
     /// <summary> Url of the backend service accepts the connections.</summary>
-    property BackEndIP: String read FBackEndIP write FBackEndIP;
+    property BackEndIP: String read FBackEndIP;
 
     /// <summary>Token that should be given to the backend server for authorisation.</summary>
-    property Token: String read FToken write FToken;
+    property Token: String read FToken;
 
     /// <summary> Port at which the backend service accepts the connections.</summary>
-    property BackEndPort: Integer read FBackEndPort write FBackEndPort;
+    property BackEndPort: Integer read FBackEndPort;
 
-    constructor Create(const Port: Integer; const Clients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
+    constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
+    constructor Create(const Origin: TServerConfig); overload;
+    destructor Destroy(); override;
   end;
 
 implementation
@@ -105,11 +107,12 @@ destructor TServerConfig.Destroy;
 begin
   FClients.Clear;
   FClients.DisposeOf;
+  inherited;
 end;
 
 { TServerConfigImmutable }
 
-constructor TServerConfigImmutable.Create(const Port: Integer; const Clients: TObjectList<TClient>;
+constructor TServerConfigImmutable.Create(const Port: Integer; const TheClients: TObjectList<TClient>;
   const BackEndIp: String; const BackEndPort: Integer; const Token: String);
 var
   Client: TClient;
@@ -119,10 +122,21 @@ begin
   FBackEndPort := BackEndPort;
   FBackEndIp := BackEndIp;
   FToken := Token;
-  for Client in Clients do
+  for Client in TheClients do
   begin
     FClients.Add(TClient.Create(Client.IP, Client.Token));
   end;
+end;
+
+constructor TServerConfigImmutable.Create(const Origin: TServerConfig);
+begin
+  Create(Origin.Port, Origin.Clients, Origin.BackEndIP, Origin.BackEndPort, Origin.Token);
+end;
+
+destructor TServerConfigImmutable.Destroy;
+begin
+  FClients.Clear;
+  FClients.DisposeOf;
 end;
 
 function TServerConfigImmutable.GetClients: TObjectList<TClient>;

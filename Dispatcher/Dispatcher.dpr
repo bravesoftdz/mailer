@@ -154,11 +154,16 @@ begin
       end;
       if Assigned(JsonConfig) then
       begin
-        Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
-        ConfigImm := TServerConfigImmutable.Create(Config.Port, Config.Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
+        try
+          Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+          ConfigImm := TServerConfigImmutable.Create(Config);
+          Config.DisposeOf;
+        finally
+          JsonConfig.DisposeOf;
+        end;
       end;
 
-      if Config <> nil then
+      if ConfigImm <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
@@ -179,6 +184,9 @@ begin
       ParamValues.Clear;
       ParamValues.DisposeOf;
     end;
+    if ConfigImm <> nil then
+      ConfigImm.DisposeOf;
+
     ParamUsage.DisposeOf;
     CliParams[0].DisposeOf();
     SetLength(CliParams, 0);
