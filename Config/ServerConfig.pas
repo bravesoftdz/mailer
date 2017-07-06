@@ -56,13 +56,6 @@ type
   strict private
     function GetClients: TObjectList<TClient>;
 
-  var
-    FPort: Integer;
-    FBackEndPort: Integer;
-    FBackEndIP: String;
-    FToken: String;
-    FClients: TObjectList<TClient>;
-
   public
     /// <summary>Client setter/getter with the use of defencieve copying.</summary>
     property Clients: TObjectList<TClient> read GetClients;
@@ -81,7 +74,6 @@ type
 
     constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
     constructor Create(const Origin: TServerConfig); overload;
-    destructor Destroy(); override;
   end;
 
 implementation
@@ -131,12 +123,6 @@ end;
 constructor TServerConfigImmutable.Create(const Origin: TServerConfig);
 begin
   Create(Origin.Port, Origin.Clients, Origin.BackEndIP, Origin.BackEndPort, Origin.Token);
-end;
-
-destructor TServerConfigImmutable.Destroy;
-begin
-  FClients.Clear;
-  FClients.DisposeOf;
 end;
 
 function TServerConfigImmutable.GetClients: TObjectList<TClient>;

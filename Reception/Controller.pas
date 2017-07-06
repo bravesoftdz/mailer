@@ -198,8 +198,7 @@ begin
   inherited;
 end;
 
-class
-  function TController.GetClients: TObjectList<TClient>;
+class function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
 end;

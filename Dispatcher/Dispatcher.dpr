@@ -49,7 +49,6 @@ var
   FileContent: String;
   Config: TServerConfig;
   ConfigImm: TServerConfigImmutable;
-  Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;

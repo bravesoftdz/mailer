@@ -142,7 +142,6 @@ end;
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);
 var
   IPs, Tokens: TArray<String>;
-  Client: TClient;
   Clients: TObjectList<TClient>;
   L, I: Integer;
 begin
@@ -150,10 +149,10 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TServerConfigImmutable.Create(Config.Port, COnfig.Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
+  Clients := Config.Clients;
+  FConfig := TServerConfigImmutable.Create(Config.Port, Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
-  Clients := Config.Clients;
   L := Clients.Count;
   SetLength(IPs, L);
   SetLength(Tokens, L);
