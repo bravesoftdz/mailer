@@ -48,12 +48,13 @@ var
   JsonConfig: TJsonObject;
   FileContent: String;
   Config: TServerConfig;
+  ConfigImm: TServerConfigImmutable;
   Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: TServerConfig);
+procedure RunServer(const Config: TServerConfigImmutable);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -154,6 +155,7 @@ begin
       if Assigned(JsonConfig) then
       begin
         Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+        ConfigImm := TServerConfigImmutable.Create(Config.Port, Config.Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
       end;
 
       if Config <> nil then
@@ -161,7 +163,7 @@ begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(Config);
+        RunServer(ConfigImm);
       end;
 
     except

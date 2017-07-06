@@ -23,8 +23,6 @@ type
     FBackEndIP: String;
     FToken: String;
     FClients: TObjectList<TClient>;
-    procedure SetClients(const Value: TObjectList<TClient>);
-    function GetClients: TObjectList<TClient>;
 
   public
     /// <summary> Port at which the program accepts the connections.</summary>
@@ -46,11 +44,42 @@ type
     /// <summary>List of clients from which the requests are accepted.</summary>
     [MapperJSONSer(CLIENTS_KEY)]
     [MapperListOf(TClient)]
-    property Clients: TObjectList<TClient> read GetClients write SetClients;
+    property Clients: TObjectList<TClient> read FClients write FClients;
 
     constructor Create(); overload;
     constructor Create(const Port: Integer; const Clients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
     destructor Destroy(); override;
+  end;
+
+type
+  TServerConfigImmutable = class(TObject)
+  strict private
+    function GetClients: TObjectList<TClient>;
+
+  var
+    FPort: Integer;
+    FBackEndPort: Integer;
+    FBackEndIP: String;
+    FToken: String;
+    FClients: TObjectList<TClient>;
+
+  public
+    /// <summary>Client setter/getter with the use of defencieve copying.</summary>
+    property Clients: TObjectList<TClient> read GetClients;
+
+    /// <summary> Port at which the program accepts the connections.</summary>
+    property Port: Integer read FPort write FPort;
+
+    /// <summary> Url of the backend service accepts the connections.</summary>
+    property BackEndIP: String read FBackEndIP write FBackEndIP;
+
+    /// <summary>Token that should be given to the backend server for authorisation.</summary>
+    property Token: String read FToken write FToken;
+
+    /// <summary> Port at which the backend service accepts the connections.</summary>
+    property BackEndPort: Integer read FBackEndPort write FBackEndPort;
+
+    constructor Create(const Port: Integer; const Clients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
   end;
 
 implementation
@@ -69,7 +98,7 @@ begin
   FBackEndPort := BackEndPort;
   FBackEndIp := BackEndIp;
   FToken := Token;
-  SetClients(Clients);
+  FClients := Clients;
 end;
 
 destructor TServerConfig.Destroy;
@@ -78,25 +107,31 @@ begin
   FClients.DisposeOf;
 end;
 
-function TServerConfig.GetClients: TObjectList<TClient>;
+{ TServerConfigImmutable }
+
+constructor TServerConfigImmutable.Create(const Port: Integer; const Clients: TObjectList<TClient>;
+  const BackEndIp: String; const BackEndPort: Integer; const Token: String);
+var
+  Client: TClient;
+begin
+  FClients := TObjectList<TClient>.Create();
+  FPort := Port;
+  FBackEndPort := BackEndPort;
+  FBackEndIp := BackEndIp;
+  FToken := Token;
+  for Client in Clients do
+  begin
+    FClients.Add(TClient.Create(Client.IP, Client.Token));
+  end;
+end;
+
+function TServerConfigImmutable.GetClients: TObjectList<TClient>;
 var
   Client: TClient;
 begin
   Result := TObjectList<TClient>.Create;
-  for Client in Clients do
+  for Client in FClients do
     Result.Add(TClient.Create(Client.IP, Client.Token));
-end;
-
-procedure TServerConfig.SetClients(const Value: TObjectList<TClient>);
-var
-  Client: TClient;
-begin
-  FClients.Clear;
-  for Client in Value do
-  begin
-    FClients.Add(TClient.Create(Client.IP, Client.Token));
-  end;
-
 end;
 
 end.

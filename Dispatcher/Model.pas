@@ -12,12 +12,12 @@ type
 
   strict private
   var
-    FConfig: TServerConfig;
+    FConfig: TServerConfigImmutable;
     FAuthentication: TIpTokenAuthentication;
     FFactory: TProviderFactory;
 
-    function GetConfig(): TServerConfig;
-    procedure SetConfig(const Config: TServerConfig);
+    function GetConfig(): TServerConfigImmutable;
+    procedure SetConfig(const Config: TServerConfigImmutable);
 
   public
     function GetPort(): Integer;
@@ -28,7 +28,7 @@ type
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
-    property Config: TServerConfig read GetConfig write SetConfig;
+    property Config: TServerConfigImmutable read GetConfig write SetConfig;
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -122,9 +122,9 @@ begin
   Result := FAuthentication.GetIps();
 end;
 
-function TModel.GetConfig: TServerConfig;
+function TModel.GetConfig: TServerConfigImmutable;
 begin
-  Result := TServerConfig.Create(FConfig.Port, FConfig.Clients, FConfig.BackEndIp, FConfig.BackEndPort, FConfig.Token);
+  Result := TServerConfigImmutable.Create(FConfig.Port, FConfig.Clients, FConfig.BackEndIP, FConfig.BackEndPort, FConfig.Token);
 end;
 
 function TModel.GetPort: Integer;
@@ -138,19 +138,18 @@ begin
   Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
 end;
 
-procedure TModel.SetConfig(const Config: TServerConfig);
+procedure TModel.SetConfig(const Config: TServerConfigImmutable);
 var
   IPs, Tokens: TArray<String>;
   Client: TClient;
   Clients: TObjectList<TClient>;
   L, I: Integer;
-
 begin
   if FConfig <> nil then
   begin
     FConfig.DisposeOf();
   end;
-  FConfig := TServerConfig.Create(Config.Port, Config.Clients, Config.BackEndIp, Config.BackEndPort, Config.Token);
+  FConfig := TServerConfigImmutable.Create(Config.Port, COnfig.Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
   Clients := Config.Clients;
