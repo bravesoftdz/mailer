@@ -149,10 +149,11 @@ begin
   begin
     FConfig.DisposeOf();
   end;
-  Clients := Config.Clients;
-  FConfig := TServerConfigImmutable.Create(Config.Port, Clients, Config.BackEndIP, Config.BackEndPort, Config.Token);
+
+  FConfig := Config.Clone;
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
+  Clients := Config.Clients;
   L := Clients.Count;
   SetLength(IPs, L);
   SetLength(Tokens, L);

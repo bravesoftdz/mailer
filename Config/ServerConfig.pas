@@ -7,6 +7,9 @@ uses
 
 type
 
+  /// <summary>A mutable abstract data type for a server configuration. It is made mutable
+  /// due to the use of the DMVCFramework's ObjectMapper parser that imposes this
+  /// restriction. Once one gets rid of it here, the data type can be made immutable. </summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TServerConfig = class(TObject)
   strict private
@@ -52,6 +55,7 @@ type
   end;
 
 type
+  /// <summary>This is an immutable version of TServerConfig type.</summary>
   TServerConfigImmutable = class(TServerConfig)
   strict private
     function GetClients: TObjectList<TClient>;
@@ -72,8 +76,10 @@ type
     /// <summary> Port at which the backend service accepts the connections.</summary>
     property BackEndPort: Integer read FBackEndPort;
 
-    constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
+    constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>;
+      const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
     constructor Create(const Origin: TServerConfig); overload;
+    function Clone(): TServerConfigImmutable;
   end;
 
 implementation
@@ -120,8 +126,20 @@ begin
   end;
 end;
 
+function TServerConfigImmutable.Clone: TServerConfigImmutable;
+var
+  TheClients: TObjectList<TClient>;
+begin
+  TheClients := Clients; // a copy of client list gets created
+  Result := TServerConfigImmutable.Create(FPort, TheClients, FBackEndIP, FBackEndPort, FToken);
+  TheClients.Clear;
+  TheClients.DisposeOf;
+end;
+
 constructor TServerConfigImmutable.Create(const Origin: TServerConfig);
 begin
+  // here, Origin.Clients is a reference to the original list, not to a copy. Hence, it should not be
+  // destroyed bere.
   Create(Origin.Port, Origin.Clients, Origin.BackEndIP, Origin.BackEndPort, Origin.Token);
 end;
 

@@ -25,7 +25,7 @@ uses
   Responce in 'Responce.pas',
   Client in 'Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
   Attachment in 'Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
@@ -38,11 +38,12 @@ var
   JsonConfig: TJsonObject;
   FileContent: String;
   Config: TServerConfig;
+  ConfigImm: TServerConfigImmutable;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: TServerConfig);
+procedure RunServer(const Config: TServerConfigImmutable);
 var
   Port: Integer;
   LInputRecord: TInputRecord;
@@ -137,14 +138,20 @@ begin
       end;
       if Assigned(JsonConfig) then
       begin
-        Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+        try
+          Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+          ConfigImm := TServerConfigImmutable.Create(Config);
+          Config.DisposeOf;
+        finally
+          JsonConfig.DisposeOf;
+        end;
       end;
-      if Config <> nil then
+      if ConfigImm <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(Config);
+        RunServer(ConfigImm);
       end;
     except
       on E: Exception do
@@ -160,8 +167,6 @@ begin
       ParamValues.Clear;
       ParamValues.DisposeOf;
     end;
-    if Config <> nil then
-      Config.DisposeOf;
     ParamUsage.DisposeOf;
     CliParams[0].DisposeOf();
     SetLength(CliParams, 0);
