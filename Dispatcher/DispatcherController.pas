@@ -3,7 +3,7 @@ unit DispatcherController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, MVCFramework.RESTAdapter, ActiveQueueAPI,
+  MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, ActiveQueueAPI,
   ServerConfig;
 
 type

@@ -239,7 +239,7 @@ begin
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
-  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, nil);
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token);
   jo1.DisposeOf;
   Data.DisposeOf;
   Builder.DisposeOf;
@@ -274,7 +274,7 @@ begin
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
-  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, nil);
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token);
   jo1.DisposeOf;
   Data.DisposeOf;
   Builder.DisposeOf;
