@@ -5,7 +5,7 @@ interface
 uses
   ActiveQueueResponce, SubscriptionData, ActiveQueueEntry,
   System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
-  ConditionInterface, AQConfig, JsonSaver;
+  ConditionInterface, AQConfig, JsonSaver, Client;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -26,6 +26,12 @@ type
 
     /// a dumb lock object for managing the access to the queue items
     FQueueLock: TObject;
+
+    /// <summary>Current configuration </summary>
+    FConfig: TAQConfig;
+
+    /// <summary>Path to a file into which an updated version of the configuration is to be saved</summary>
+    FTargetConfigPath: String;
 
     /// <summary>A dictionary for subscriptions: the keys are unique ids assigned
     /// to the subscriptions, the values are objects containing subscription information</summary>
@@ -50,10 +56,6 @@ type
 
     /// <summary>Suggestion for the file name under which the model state is to be saved</summary>
     FQueueFilePath: String;
-
-    /// <summary>Port associated with this service. This parameter is not a part of the model state,
-    /// it is a part of the service configuration.</summary>
-    FPort: Integer;
 
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
     FStateSaver: TJsonSaver;
@@ -98,6 +100,18 @@ type
     /// <summary>Set the listeners</summary>
     procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
 
+    function GetConfig: TAQConfig;
+
+    /// <summary>Set the state of the model.</summary>
+    /// This method is placed here in order to be able to persist the model state changes
+    /// (mostly due to the adding/cancelling the listeners) in real time mode: once a change occurs,
+    /// the new state is saved.
+    procedure SetConfig(const Config: TAQConfig);
+
+    function GetPort: Integer;
+
+    function GetClients: TObjectList<TClient>;
+
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
@@ -138,19 +152,20 @@ type
     /// computer with non-allowed IP.</summary>
     function Cancel(const IP: string; const Condition: ICondition): Integer;
 
-    /// <summary>Set the state of the model.</summary>
-    /// This method is placed here in order to be able to persist the model state changes
-    /// (mostly due to the adding/cancelling the listeners) in real time mode: once a change occurs,
-    /// the new state is saved.
-    procedure SetState(const FilePath: String; const Config: TAQConfig);
-
     procedure SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
 
     /// <summary>the number of a port to which this service is bound</summary>
-    property Port: Integer read FPort;
+    property Port: Integer read GetPort;
+
+    property Config: TAQConfig read GetConfig write SetConfig;
+
+    property TargetConfigPath: String read FTargetConfigPath write FTargetConfigPath;
+
+    /// <summary>A copy of  the clients</summary>
+    property Clients: TObjectList<TClient> read GetClients;
 
     /// <summary>Save the state of the Active Queue server into a file</summary>
     procedure PersistState();
@@ -414,7 +429,27 @@ begin
 
 end;
 
-function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
+function TActiveQueueModel.GetClients: TObjectList<TClient>;
+var
+  Client: TClient;
+begin
+  Result := TObjectList<TClient>.Create();
+  for Client in FConfig.Clients do
+    Result.add(TClient.Create(Client.IP, Client.Token));
+end;
+
+function TActiveQueueModel.GetConfig: TAQConfig;
+begin
+
+end;
+
+function TActiveQueueModel.GetItems(const Ip: String;
+  const
+  Token:
+  String;
+  const
+  N:
+  Integer): TObjectList<TActiveQueueEntry>;
 var
   Size, ReturnSize, I: Integer;
 begin
@@ -467,6 +502,15 @@ begin
   TMonitor.Exit(FListenersLock);
 end;
 
+function TActiveQueueModel.GetPort: Integer;
+begin
+  if FConfig <> nil then
+    Result := FConfig.Port
+  else
+    Result := -1;
+
+end;
+
 function TActiveQueueModel.GetProvidersIPs: TArray<String>;
 var
   I, S: Integer;
@@ -514,7 +558,10 @@ begin
 
 end;
 
-function TActiveQueueModel.IsAllowedProvider(const IP: String): Boolean;
+function TActiveQueueModel.IsAllowedProvider(
+  const
+  IP:
+  String): Boolean;
 begin
   TMonitor.Enter(FProvidersLock);
   try
@@ -524,7 +571,10 @@ begin
   end;
 end;
 
-function TActiveQueueModel.IsSubscribable(const IP: String): Boolean;
+function TActiveQueueModel.IsSubscribable(
+  const
+  IP:
+  String): Boolean;
 begin
   TMonitor.Enter(FListenersLock);
   try
@@ -534,12 +584,21 @@ begin
   end;
 end;
 
-function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
+function TActiveQueueModel.IsSubscribed(
+  const
+  Data:
+  TSubscriptionData): Boolean;
 begin
   Result := FSubscriptionRegister.ContainsValue(Data);
 end;
 
-function TActiveQueueModel.Join(const Items: TArray<String>; const delimiter: String): String;
+function TActiveQueueModel.Join(
+  const
+  Items:
+  TArray<String>;
+  const
+  delimiter:
+  String): String;
 var
   I, L: Integer;
 begin
@@ -579,7 +638,10 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetListenersIPs(const IPs: TArray<String>);
+procedure TActiveQueueModel.SetListenersIPs(
+  const
+  IPs:
+  TArray<String>);
 var
   I, S: Integer;
 begin
@@ -595,7 +657,10 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetProvidersIPs(const IPs: TArray<String>);
+procedure TActiveQueueModel.SetProvidersIPs(
+  const
+  IPs:
+  TArray<String>);
 var
   I, S: Integer;
 begin
@@ -611,26 +676,33 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetQueue(const FilePath: String;
-const Items: TObjectList<TActiveQueueEntry>);
+procedure TActiveQueueModel.SetQueue(
+  const
+  FilePath:
+  String;
+const
+  Items:
+  TObjectList<TActiveQueueEntry>);
 begin
   // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
   Writeln('Here, the queue must be saved, but it is yet to be done');
 end;
 
-procedure TActiveQueueModel.SetQueuePath(const Path: String);
+procedure TActiveQueueModel.SetQueuePath(
+  const
+  Path:
+  String);
 begin
   FQueueFilePath := Path;
 
 end;
 
-procedure TActiveQueueModel.SetState(const FilePath: String; const Config: TAQConfig);
+procedure TActiveQueueModel.SetConfig(
+  const
+  Config:
+  TAQConfig);
 begin
-  SetListenersIPs(Config.GetListenersIps());
-  SetProvidersIPs(Config.GetProvidersIps());
-  SetListeners(Config.Listeners);
-  FStateFilePath := FilePath;
-  FPort := Config.Port;
+  FConfig := TAQConfig.Create(Config.Port, Config.Clients, Config.Token, Config.ConsumerWhitelist);
 end;
 
 procedure TActiveQueueModel.PersistQueue;
@@ -659,12 +731,15 @@ procedure TActiveQueueModel.PersistState;
 var
   State: TAQConfig;
 begin
-  State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
-  FStateSaver.save(FStateFilePath, State);
-  State.DisposeOf;
+  // State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
+  // FStateSaver.save(FStateFilePath, State);
+  // State.DisposeOf;
 end;
 
-procedure TActiveQueueModel.SetListeners(const Listeners: TObjectList<TListenerInfo>);
+procedure TActiveQueueModel.SetListeners(
+  const
+  Listeners:
+  TObjectList<TListenerInfo>);
 var
   Listener: TListenerInfo;
 begin

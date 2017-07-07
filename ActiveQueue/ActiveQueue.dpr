@@ -13,10 +13,10 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
-  Model in 'Model.pas',
+  AQModel in 'AQModel.pas',
   System.IOUtils,
   System.JSON,
   ObjectsMappers,
@@ -35,69 +35,75 @@ uses
   SubscriptionData in '..\Reception\SubscriptionData.pas',
   Attachment in '..\Reception\Attachment.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas',
-  ServerConfig in '..\Config\ServerConfig.pas';
+  ServerConfig in '..\Config\ServerConfig.pas',
+  AQConfigBuilder in 'AQConfigBuilder.pas', Client;
 
 {$R *.res}
 
 
 const
-  SWITCH_CONFIG = 'c';
+  SWITCH_ORIGIN_CONFIG = 'c';
+  SWITCH_TARGET_CONFIG = 't';
   SWITCH_QUEUE = 'q';
   SWITCH_CHAR = '-';
   PROGRAM_NAME = 'Active Queue Server';
 
 var
-  ConfigFileName, QueueFileName: String;
+  OriginConfig, TargetConfig, QueueFileName: String;
   JsonConfig: TJsonObject;
   FileContent: String;
-  Config: TServerConfig;
+  Config: TAQConfig;
   ConfigImm: TServerConfigImmutable;
   Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const ConfigFileName, QueueFileName: String);
+procedure RunServer(const Config: TAQConfig; const TargetConfig, QueueFileName: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   WhiteListitem: String;
-  ListenersWhiteList, ProvidersWhiteList: TArray<String>;
+  Clients: TObjectList<TClient>;
+  Client: TClient;
+  ProvidersWhiteList: TArray<String>;
   APort: Integer;
   numberOfListeners, Counter: Integer;
   Listener: TListenerInfo;
   Listeners: TObjectList<TListenerInfo>;
+  I, L: Integer;
+  InfoString: String;
 begin
+  TController.SetConfig(Config, TargetConfig);
+  TController.LoadQueuesFromFile(QueueFileName);
+  APort := TController.GetPort();
+  InfoString := Format('%s:%d', [PROGRAM_NAME, APort]);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
   Writeln('');
-  Writeln('  ' + PROGRAM_NAME);
+  Writeln('  ' + InfoString);
   Writeln('');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleTitle(pwidechar(InfoString));
 
-  TController.LoadStateFromFile(ConfigFileName);
-  TController.LoadQueuesFromFile(QueueFileName);
-
-  APort := TController.GetPort();
-  SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, APort])));
-
-  Writeln(Format('Starting HTTP Server on port %d', [APort]));
-  LServer := TIdHTTPWebBrokerBridge.Create(nil);
-
-  ListenersWhiteList := TController.GetListenersIPs;
-  ProvidersWhiteList := TController.GetProvidersIPs;
-
-  if (Length(ListenersWhiteList) = 0) then
+  Clients := TController.GetClients;
+  L := Clients.Count;
+  if (L = 0) then
   begin
-    Writeln('The listener IP whitelist is empty. No subscriptions will succeed.');
+    Writeln('No clients are specified in the configuration file. No items can be put to the storage.');
   end
   else
   begin
-    Writeln('Allowed IPs for listeners:');
-    for WhiteListitem in ListenersWhiteList do
-      Writeln(WhiteListitem);
+    Writeln(L.toString + ' clients are found:');
+    Counter := 1;
+    for Client in Clients do
+      Writeln(Format('%d) IP: %s, token: (hidden)', [I, Client.IP]));
+    Counter := Counter + 1;
   end;
+  Clients.Clear;
+  Clients.DisposeOf;
+
   if (Length(ProvidersWhiteList) = 0) then
   begin
     Writeln('The provider IP whitelist is empty. No one will succeed to enqueue the data.');
@@ -123,6 +129,7 @@ begin
     end;
     Listeners.Clear;
   end;
+  LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;
     LServer.Active := True;
@@ -147,20 +154,22 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
-  CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True),
+  CliParams := [TCliParam.Create(SWITCH_ORIGIN_CONFIG, 'path', 'path to a file to load the configuration', True),
+    TCliParam.Create(SWITCH_TARGET_CONFIG, 'path', 'path to a file to save the configuration', True),
     TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file in which the queues received from the reception have been saved', True)];
   ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   try
     try
       ParamValues := ParamUsage.Parse();
-      ConfigFileName := ParamValues[SWITCH_CONFIG];
-      if Not(TFile.Exists(ConfigFileName)) then
+      OriginConfig := ParamValues[SWITCH_ORIGIN_CONFIG];
+      TargetConfig := ParamValues[SWITCH_TARGET_CONFIG];
+      if Not(TFile.Exists(OriginConfig)) then
       begin
-        Writeln('Error: config file ' + ConfigFileName + 'not found.');
+        Writeln('Error: config file ' + OriginConfig + 'not found.');
         Exit();
       end;
       try
-        FileContent := TFile.ReadAllText(ConfigFileName);
+        FileContent := TFile.ReadAllText(OriginConfig);
         JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
       except
         on E: Exception do
@@ -172,19 +181,17 @@ begin
       if Assigned(JsonConfig) then
       begin
         try
-          Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
-          ConfigImm := TServerConfigImmutable.Create(Config);
-          Config.DisposeOf;
+          Config := Mapper.JSONObjectToObject<TAQConfig>(JsonConfig);
         finally
           JsonConfig.DisposeOf;
         end;
       end;
-      if ConfigImm <> nil then
+      if Config <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(ConfigFileName, QueueFileName);
+        RunServer(Config, TargetConfig, QueueFileName);
       end
       else
         Writeln('No config is created. Failed to start the service.');

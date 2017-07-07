@@ -98,7 +98,7 @@
         </DCCReference>
         <DCCReference Include="ActiveQueueResponce.pas"/>
         <DCCReference Include="ActiveQueueSettings.pas"/>
-        <DCCReference Include="Model.pas"/>
+        <DCCReference Include="AQModel.pas"/>
         <DCCReference Include="AQConfig.pas"/>
         <DCCReference Include="SubscriptionOutcomeData.pas"/>
         <DCCReference Include="ListenerInfo.pas"/>
@@ -114,6 +114,7 @@
         <DCCReference Include="..\Reception\Attachment.pas"/>
         <DCCReference Include="ActiveQueueEntry.pas"/>
         <DCCReference Include="..\Config\ServerConfig.pas"/>
+        <DCCReference Include="AQConfigBuilder.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

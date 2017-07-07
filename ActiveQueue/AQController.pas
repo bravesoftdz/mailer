@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, AQModel, ActiveQueueEntry, ObjectsMappers,
-  System.Generics.Collections, ListenerInfo, AQConfig, System.JSON;
+  System.Generics.Collections, ListenerInfo, AQConfig, System.JSON, Client;
 
 type
 
@@ -23,19 +23,18 @@ type
     class function GetListeners(): TObjectList<TListenerInfo>;
 
     /// Set the state of the Active Queue server.
-    class procedure SetState(const FilePath: String; const Config: TAQConfig);
+//    class procedure SetState(const FilePath: String; const Config: TAQConfig);
 
     /// Read the given file and try to construct a TAQConfig instance. Then, this instance is
     /// passed to the SetState method.
-    class procedure LoadStateFromFile(const FilePath: String);
+    class procedure SetConfig(const Config: TAQConfig; const TargetConfig: String);
 
     /// <summary>Load queues from given file. The file might not exist, the argument is used as a file name
     /// to save the queues. The file content is supposed to be a json string of array of TActiveQueueEntry instances.</summary>
     class procedure LoadQueuesFromFile(const FilePath: String);
 
-    /// <summary> Get the white list of listeners' ips: requests coming from only these ips
-    /// are to be taken in consideration </summary>
-    class function GetListenersIPs(): TArray<String>;
+    /// <summary> Get the list clients </summary>
+    class function GetClients(): TObjectList<TClient>;
 
     /// <summary> Get the white list of providers' ips: requests to enqueue the data coming from only these ips
     /// are to be taken in consideration </summary>
@@ -98,25 +97,14 @@ uses
   MVCFramework.Logger, ActiveQueueResponce, SubscriptionData,
   System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
 
-class function TController.GetListenersIPs: TArray<String>;
+class function TController.GetClients: TObjectList<TClient>;
 begin
-  if Assigned(Model) then
-  begin
-    Result := Model.GetListenersIPs()
-  end
-  else
-  begin
-    Result := TArray<String>.Create();
-    SetLength(Result, 0);
-  end;
+  Result := Model.Clients
 end;
 
 class function TController.GetPort: Integer;
 begin
-  if Model = nil then
-    raise Exception.Create('The model has not been initialized yet.');
   Result := Model.Port;
-
 end;
 
 class function TController.GetProvidersIPs: TArray<String>;
@@ -164,28 +152,10 @@ begin
 
 end;
 
-class procedure TController.LoadStateFromFile(const FilePath: String);
-var
-  Content: String;
-  Json: TJsonObject;
-  Config: TAQConfig;
+class procedure TController.SetConfig(const Config: TAQConfig; const TargetConfig: String);
 begin
-  if Not(TFile.Exists(FilePath)) then
-    raise Exception.Create('Error: config file ' + FilePath + 'not found.');
-  try
-    Content := TFile.ReadAllText(FilePath);
-    Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
-  except
-    on E: Exception do
-    begin
-      raise Exception.Create('Error: failed to parse the content of file "' + FilePath + '" into a json:' + sLineBreak + E.Message);
-    end;
-  end;
-  if Assigned(Json) then
-  begin
-    Config := Mapper.JSONObjectToObject<TAQConfig>(Json);
-  end;
-  SetState(FilePath, Config);
+  Model.Config := Config;
+  Model.TargetConfigPath := TargetConfig;
 end;
 
 procedure TController.CancelItems(const Context: TWebContext);
@@ -321,12 +291,6 @@ begin
     Outcome := False;
   end;
   Render(Outcome.ToString(False));
-end;
-
-class procedure TController.SetState(const FilePath: String; const Config: TAQConfig);
-begin
-  if Model <> nil then
-    Model.SetState(FilePath, Config);
 end;
 
 class procedure TController.Setup;
