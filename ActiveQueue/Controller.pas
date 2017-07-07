@@ -301,16 +301,16 @@ end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
-  items: TObjectList<TActiveQueueEntry>;
+  items: TActiveQueueEntries;
   Outcome: Boolean;
   IP: String;
 begin
   if Context.Request.ThereIsRequestBody then
   begin
     try
-      items := Context.Request.BodyAsListOf<TActiveQueueEntry>;
+      items := Context.Request.BodyAs<TActiveQueueEntries>;
       IP := Context.Request.ClientIP;
-      Outcome := EnqueueAndPersist(IP, Items);
+      Outcome := EnqueueAndPersist(IP, Items.Items);
     except
       on E: Exception do
         Outcome := False;

@@ -51,7 +51,9 @@ type
   end;
 
 type
+
   /// <summary>A wrapper for a collection of TActiveQueueEntry.</summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TActiveQueueEntries = class(TObject)
   strict private
   const
@@ -67,7 +69,7 @@ type
     destructor Destroy; override;
     [MapperJSONSer(ITEMS_KEY)]
     [MapperListOf(TActiveQueueEntry)]
-    property Items: TObjectList<TActiveQueueEntry> read GetItems write SetItems;
+    property Items: TObjectList<TActiveQueueEntry> read FItems write FItems;
   end;
 
 implementation
