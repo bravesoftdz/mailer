@@ -8,7 +8,15 @@ uses
 type
   /// <summary>An ADT that represents a single entry for the Active Queue server.</summary>
   TActiveQueueEntry = class(TInterfacedObject, Jsonable)
-  private
+  strict private
+  const
+    /// names of keys to be used in a json to store correpsondign property values
+    TOKEN_KEY = 'token';
+    BODY_KEY = 'body';
+    ORIGIN_KEY = 'origin';
+    CATEGORY_KEY = 'category';
+
+  var
     /// <summary>A token based on which the server decides whether to allow the request or not</summary>
     FToken: String;
     /// <summary>The body of the request. It is a json in a string format</summary>
@@ -119,7 +127,11 @@ end;
 
 function TActiveQueueEntry.ToJson: TJsonObject;
 begin
-  raise Exception.Create('TActiveQueueEntry.ToJson not implemented yet');
+  Result := TJsonObject.Create;
+  Result.AddPair(TOKEN_KEY, FTOKEN);
+  Result.AddPair(BODY_KEY, FBODY);
+  Result.AddPair(CATEGORY_KEY, FCategory);
+  Result.AddPair(ORIGIN_KEY, FOrigin);
 end;
 
 end.
