@@ -1,4 +1,4 @@
-﻿unit Controller;
+﻿unit ReceptionController;
 
 interface
 

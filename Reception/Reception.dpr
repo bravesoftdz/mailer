@@ -19,13 +19,13 @@ uses
   System.Generics.Collections,
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  Controller in 'Controller.pas',
+  ReceptionController in 'ReceptionController.pas',
   ReceptionModel in 'ReceptionModel.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   Responce in 'Responce.pas',
   Client in 'Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
   Attachment in 'Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
