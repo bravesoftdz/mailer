@@ -22,7 +22,7 @@ type
     PORT_KEY = 'port';
     CLIENTS_KEY = 'clients';
     TOKEN_KEY = 'token';
-    LISTENER_IPS_KEY = 'listeners-allowed-ips';
+    CONSUMER_IP_WHITELIST_KEY = 'consumer-ip-whitelist';
 
   strict private
     FPort: Integer;
@@ -74,7 +74,7 @@ type
     property Clients: TObjectList<TClient> read FClients write FClients;
 
     /// <summary> List of clients that are allowed to make requests to this server.</summary>
-    [MapperJSONSer(LISTENER_IPS_KEY)]
+    [MapperJSONSer(CONSUMER_IP_WHITELIST_KEY)]
     property ConsumerWhitelist: String read FConsumerWhiteListIps write FConsumerWhiteListIps;
 
 
