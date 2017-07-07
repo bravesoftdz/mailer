@@ -12,8 +12,8 @@ uses
   Web.WebReq,
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
-  Controller in 'Controller.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  AQController in 'AQController.pas',
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   Model in 'Model.pas',
@@ -32,9 +32,9 @@ uses
   JsonableInterface in 'JsonableInterface.pas',
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-//  ReceptionRequest in '..\Reception\ReceptionRequest.pas',
   SubscriptionData in '..\Reception\SubscriptionData.pas',
   Attachment in '..\Reception\Attachment.pas',
+  ServerConfig in '..\Config\ServerConfig.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas';
 
 {$R *.res}
@@ -48,8 +48,14 @@ const
 
 var
   ConfigFileName, QueueFileName: String;
+  JsonConfig: TJsonObject;
+  FileContent: String;
+  Config: TServerConfig;
+  ConfigImm: TServerConfigImmutable;
   Usage: String;
   CliParams: TArray<TCliParam>;
+  ParamUsage: TCliUsage;
+  ParamValues: TDictionary<String, String>;
 
 procedure RunServer(const ConfigFileName, QueueFileName: String);
 var
@@ -141,26 +147,63 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
-  FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
-  FindCmdLineSwitch(SWITCH_QUEUE, QueueFileName, False);
-
+  CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True),
+    TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file in which the queues received from the reception have been saved', True)];
+  ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   try
-    if WebRequestHandler <> nil then
-      WebRequestHandler.WebModuleClass := WebModuleClass;
-    WebRequestHandlerProc.MaxConnections := 1024;
-    RunServer(ConfigFileName, QueueFileName);
-  except
-    on E: Exception do
-    begin
-      Writeln(E.ClassName, ': ', E.Message);
-      CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True),
-        TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file in which the queues received from the reception have been saved', True)];
-      Usage := TCliUsage.CreateText(ExtractFileName(paramstr(0)), CliParams);
-      Writeln(Usage);
-      CliParams[0].DisposeOf;
-      CliParams[1].DisposeOf;
-      SetLength(CliParams, 0);
+    try
+      ParamValues := ParamUsage.Parse();
+      ConfigFileName := ParamValues[SWITCH_CONFIG];
+      if Not(TFile.Exists(ConfigFileName)) then
+      begin
+        Writeln('Error: config file ' + ConfigFileName + 'not found.');
+        Exit();
+      end;
+      try
+        FileContent := TFile.ReadAllText(ConfigFileName);
+        JsonConfig := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FileContent), 0) as TJSONObject;
+      except
+        on E: Exception do
+        begin
+          Writeln(E.Message);
+          Exit();
+        end;
+      end;
+      if Assigned(JsonConfig) then
+      begin
+        try
+          Config := Mapper.JSONObjectToObject<TServerConfig>(JsonConfig);
+          ConfigImm := TServerConfigImmutable.Create(Config);
+          Config.DisposeOf;
+        finally
+          JsonConfig.DisposeOf;
+        end;
+      end;
+      if ConfigImm <> nil then
+      begin
+        if WebRequestHandler <> nil then
+          WebRequestHandler.WebModuleClass := WebModuleClass;
+        WebRequestHandlerProc.MaxConnections := 1024;
+        RunServer(ConfigFileName, QueueFileName);
+      end
+      else
+        Writeln('No config is created. Failed to start the service ');
+    except
+      on E: Exception do
+      begin
+        Writeln(E.Message);
+        Writeln(ParamUsage.Text);
+      end;
     end;
+  finally
+    if ParamValues <> nil then
+    begin
+      ParamValues.Clear;
+      ParamValues.DisposeOf;
+    end;
+    ParamUsage.DisposeOf;
+    CliParams[0].DisposeOf();
+    SetLength(CliParams, 0);
   end;
 
 end.

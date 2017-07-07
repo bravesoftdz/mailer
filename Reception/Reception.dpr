@@ -23,7 +23,7 @@ uses
   ReceptionModel in 'ReceptionModel.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   Responce in 'Responce.pas',
-  Client in 'Client.pas',
+  Client in '..\Config\Client.pas',
   Authentication in 'Authentication.pas',
   ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
   Attachment in 'Attachment.pas',
