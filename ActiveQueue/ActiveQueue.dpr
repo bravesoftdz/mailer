@@ -187,7 +187,7 @@ begin
         RunServer(ConfigFileName, QueueFileName);
       end
       else
-        Writeln('No config is created. Failed to start the service ');
+        Writeln('No config is created. Failed to start the service.');
     except
       on E: Exception do
       begin

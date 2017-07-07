@@ -25,7 +25,7 @@ uses
   Responce in 'Responce.pas',
   Client in '..\Config\Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
   Attachment in 'Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
@@ -152,7 +152,9 @@ begin
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
         RunServer(ConfigImm);
-      end;
+      end
+      else
+        Writeln('No config is created. Failed to start the service.');
     except
       on E: Exception do
       begin

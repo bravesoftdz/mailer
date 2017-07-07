@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   DispatcherModel in 'DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -161,15 +161,15 @@ begin
           JsonConfig.DisposeOf;
         end;
       end;
-
       if ConfigImm <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
         RunServer(ConfigImm);
-      end;
-
+      end
+      else
+        Writeln('No config is created. Failed to start the service.');
     except
       on E: Exception do
       begin
