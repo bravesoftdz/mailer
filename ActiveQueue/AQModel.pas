@@ -112,6 +112,8 @@ type
 
     function GetClients: TObjectList<TClient>;
 
+    function GetConsumerIPWhitelist: String;
+
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
@@ -163,6 +165,8 @@ type
     property Config: TAQConfig read GetConfig write SetConfig;
 
     property TargetConfigPath: String read FTargetConfigPath write FTargetConfigPath;
+
+    property ConsumerIPWhitelist: String read GetConsumerIPWhitelist;
 
     /// <summary>A copy of  the clients</summary>
     property Clients: TObjectList<TClient> read GetClients;
@@ -440,16 +444,15 @@ end;
 
 function TActiveQueueModel.GetConfig: TAQConfig;
 begin
-
+  Result := TAQConfig.Create(FConfig.Port, FConfig.Clients, FConfig.Token, FConfig.ConsumerWhitelist);
 end;
 
-function TActiveQueueModel.GetItems(const Ip: String;
-  const
-  Token:
-  String;
-  const
-  N:
-  Integer): TObjectList<TActiveQueueEntry>;
+function TActiveQueueModel.GetConsumerIPWhitelist: String;
+begin
+  Result := FConfig.ConsumerWhitelist;
+end;
+
+function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
 var
   Size, ReturnSize, I: Integer;
 begin
@@ -688,19 +691,12 @@ begin
   Writeln('Here, the queue must be saved, but it is yet to be done');
 end;
 
-procedure TActiveQueueModel.SetQueuePath(
-  const
-  Path:
-  String);
+procedure TActiveQueueModel.SetQueuePath(const Path: String);
 begin
   FQueueFilePath := Path;
-
 end;
 
-procedure TActiveQueueModel.SetConfig(
-  const
-  Config:
-  TAQConfig);
+procedure TActiveQueueModel.SetConfig(const Config: TAQConfig);
 begin
   FConfig := TAQConfig.Create(Config.Port, Config.Clients, Config.Token, Config.ConsumerWhitelist);
 end;

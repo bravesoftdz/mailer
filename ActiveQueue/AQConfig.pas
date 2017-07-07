@@ -74,7 +74,7 @@ type
     property Clients: TObjectList<TClient> read FClients write FClients;
 
     /// <summary> List of clients that are allowed to make requests to this server.</summary>
-    [MapperJSONSer(CLIENTS_KEY)]
+    [MapperJSONSer(LISTENER_IPS_KEY)]
     property ConsumerWhitelist: String read FConsumerWhiteListIps write FConsumerWhiteListIps;
 
 

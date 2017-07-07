@@ -23,7 +23,7 @@ type
     class function GetListeners(): TObjectList<TListenerInfo>;
 
     /// Set the state of the Active Queue server.
-//    class procedure SetState(const FilePath: String; const Config: TAQConfig);
+    // class procedure SetState(const FilePath: String; const Config: TAQConfig);
 
     /// Read the given file and try to construct a TAQConfig instance. Then, this instance is
     /// passed to the SetState method.
@@ -35,6 +35,9 @@ type
 
     /// <summary> Get the list clients </summary>
     class function GetClients(): TObjectList<TClient>;
+
+    /// <summary>Return the whitelist of the consumer ips</summary>
+    class function GetConsumerIPWhitelist(): String;
 
     /// <summary> Get the white list of providers' ips: requests to enqueue the data coming from only these ips
     /// are to be taken in consideration </summary>
@@ -100,6 +103,11 @@ uses
 class function TController.GetClients: TObjectList<TClient>;
 begin
   Result := Model.Clients
+end;
+
+class function TController.GetConsumerIPWhitelist: String;
+begin
+  Result := Model.ConsumerIPWhitelist;
 end;
 
 class function TController.GetPort: Integer;

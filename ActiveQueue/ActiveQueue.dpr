@@ -73,6 +73,7 @@ var
   numberOfListeners, Counter: Integer;
   Listener: TListenerInfo;
   Listeners: TObjectList<TListenerInfo>;
+  ConsumerWhiteList: String;
   I, L: Integer;
   InfoString: String;
 begin
@@ -91,18 +92,31 @@ begin
   L := Clients.Count;
   if (L = 0) then
   begin
-    Writeln('No clients are specified in the configuration file. No items can be put to the storage.');
+    Writeln('No clients are specified in the configuration file. No one will succeed to enqueue the data.');
   end
   else
   begin
     Writeln(L.toString + ' clients are found:');
-    Counter := 1;
+
     for Client in Clients do
-      Writeln(Format('%d) IP: %s, token: (hidden)', [I, Client.IP]));
-    Counter := Counter + 1;
+    begin
+      Write('ip: ');
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+      Write(Format('%15s', [Client.IP]));
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+      Writeln(', token: (not shown)');
+    end;
   end;
   Clients.Clear;
   Clients.DisposeOf;
+
+  ConsumerWhiteList := TController.GetConsumerIPWhitelist;
+  if ConsumerWhiteList = '' then
+  begin
+    Writeln('The white list of consumer ips is empty. No one will be able to subscribe to the service. ')
+  end
+  else
+    Writeln('White list of consumer ips: ' + ConsumerWhiteList);
 
   if (Length(ProvidersWhiteList) = 0) then
   begin
@@ -124,7 +138,7 @@ begin
     Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');
     for Listener in Listeners do
     begin
-      Writeln(Format('%d) ip: %s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
+      Writeln(Format('%3d) ip: %15s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
       Counter := Counter + 1;
     end;
     Listeners.Clear;
