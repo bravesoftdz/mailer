@@ -3,10 +3,12 @@ unit ActiveQueueEntry;
 interface
 
 uses
-  System.Generics.Collections, Attachment, JsonableInterface, System.JSON;
+  System.Generics.Collections, JsonableInterface, System.JSON, ObjectsMappers;
 
 type
+
   /// <summary>An ADT that represents a single entry for the Active Queue server.</summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TActiveQueueEntry = class(TInterfacedObject, Jsonable)
   strict private
   const
@@ -32,9 +34,13 @@ type
     /// <summary>Create a copy of this instance</summary>
     function Clone(): TActiveQueueEntry;
 
+    [MapperJSONSer(TOKEN_KEY)]
     property Token: String read FToken write FToken;
+    [MapperJSONSer(BODY_KEY)]
     property Body: String read FBody write FBody;
+    [MapperJSONSer(ORIGIN_KEY)]
     property Origin: String read FOrigin write FOrigin;
+    [MapperJSONSer(CATEGORY_KEY)]
     property Category: String read FCategory write FCategory;
 
     constructor Create(const Origin, Category, Body, Token: string); overload;
@@ -48,6 +54,10 @@ type
   /// <summary>A wrapper for a collection of TActiveQueueEntry.</summary>
   TActiveQueueEntries = class(TObject)
   strict private
+  const
+    ITEMS_KEY = 'items';
+
+  var
     FItems: TObjectList<TActiveQueueEntry>;
     function GetItems: TObjectList<TActiveQueueEntry>;
     procedure SetItems(Items: TObjectList<TActiveQueueEntry>);
@@ -55,6 +65,7 @@ type
     constructor Create(const Items: TObjectList<TActiveQueueEntry>); overload;
     constructor Create; overload;
     destructor Destroy; override;
+    [MapperJSONSer(ITEMS_KEY)]
     [MapperListOf(TActiveQueueEntry)]
     property Items: TObjectList<TActiveQueueEntry> read GetItems write SetItems;
   end;
@@ -99,7 +110,6 @@ begin
     for Item in Items do
       FItems.Add(Item.Clone())
   end;
-
 end;
 
 { TActiveQueueEntry }
