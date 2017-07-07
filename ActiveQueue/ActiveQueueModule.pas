@@ -24,7 +24,7 @@ implementation
 
 {$R *.dfm}
 
-uses Controller, MVCFramework.Commons;
+uses AQController, MVCFramework.Commons;
 
 procedure TActiveQueueModule.WebModuleCreate(Sender: TObject);
 begin
