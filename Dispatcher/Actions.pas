@@ -239,7 +239,7 @@ begin
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
-  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, Attachments);
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, nil);
   jo1.DisposeOf;
   Data.DisposeOf;
   Builder.DisposeOf;
@@ -259,45 +259,25 @@ begin
 end;
 
 function TOMNSendToCodicione.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
+var
+  builder: TSendDataTemplateBuilder;
+  jo1: TJsonObject;
+  Data: TSendDataTemplate;
 begin
-  // Writeln('ActionSend starts...');
-  // builder := TSenderDataTemplateBuilder.Create();
-  // builder.SetFrom(TVenditoriCredentials.From())
-  // .SetSender(TVenditoriCredentials.Name())
-  // .SetSubject(TVenditoriCredentials.Subject())
-  // .SetPort(TVenditoriCredentials.Port)
-  // .setServer(TVenditoriCredentials.Server())
-  // .SetRecipTo(TVenditoriCredentials.Recipients)
-  // .addAttachments(Entry.Attachments);
-  //
-  // if (Data <> nil) then
-  // begin
-  // builder.SetText(Data.Text);
-  // builder.SetHtml(Data.Html);
-  // end;
-  //
-  // Request := builder.build;
-  // Builder.DisposeOf;
-  // Adapter := TRestAdapter<ISendServerProxy>.Create();
-  // Server := Adapter.Build(Settings.Url, Settings.Port);
-  // if (Server = nil) then
-  // begin
-  // Result := TResponce.Create(False, 'Backend server is not running');
-  // end
-  // else
-  // begin
-  // try
-  // Responce := server.PostItem(Request);
-  // Result := TResponce.Create(Responce.status, Responce.Msg);
-  // except
-  // on E: Exception do
-  // begin
-  // Result := TResponce.Create(False, E.Message);
-  // end;
-  // end;
-  // end;
-  // Server := nil;
-  // Adapter := nil;
+  builder := TSendDataTemplateBuilder.Create();
+  builder.SetFrom(TONMCredentials.From)
+    .SetSender(TONMCredentials.Name)
+    .SetSubject(TONMCredentials.Subject)
+    .SetPort(TONMCredentials.Port)
+    .setServer(TONMCredentials.Server)
+    .SetRecipTo(TONMCredentials.EmailInternal)
+    .addAttachments(Attachments);
+  Data := builder.Build;
+  jo1 := data.ToJson;
+  Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token, nil);
+  jo1.DisposeOf;
+  Data.DisposeOf;
+  Builder.DisposeOf;
 
 end;
 

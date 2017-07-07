@@ -24,10 +24,11 @@ type
   class var
     From: String;
     Name: String;
-    Recipients: String;
     Subject: String;
     Server: String;
     Port: Integer;
+    EmailInternal: String;
+
   end;
 
 implementation
@@ -75,9 +76,9 @@ end;
 
 initialization
 
-TONMCredentials.From := 'redazione@offertenuovimandati.com';
+TONMCredentials.From := 'info@offertenuovimandati.com';
 TONMCredentials.Name := 'Offerte Nuovi Mandati';
 TONMCredentials.Port := 25;
-TONMCredentials.Server := 'mailbus.fastweb.it';
+TONMCredentials.Server := 'www.offertenuovimandati.it';
 
 end.
