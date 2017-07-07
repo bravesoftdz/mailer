@@ -3,7 +3,7 @@ unit AQController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, ActiveQueueEntry, ObjectsMappers,
+  MVCFramework, MVCFramework.Commons, AQModel, ActiveQueueEntry, ObjectsMappers,
   System.Generics.Collections, ListenerInfo, AQConfig, System.JSON;
 
 type

@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   Model in 'Model.pas',
@@ -34,8 +34,8 @@ uses
   CliUsage in '..\Cli\CliUsage.pas',
   SubscriptionData in '..\Reception\SubscriptionData.pas',
   Attachment in '..\Reception\Attachment.pas',
-  ServerConfig in '..\Config\ServerConfig.pas',
-  ActiveQueueEntry in 'ActiveQueueEntry.pas';
+  ActiveQueueEntry in 'ActiveQueueEntry.pas',
+  ServerConfig in '..\Config\ServerConfig.pas';
 
 {$R *.res}
 
