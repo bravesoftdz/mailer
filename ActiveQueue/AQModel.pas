@@ -17,6 +17,9 @@ type
     /// 3. FIPs length is defined and is not less than zero
     ///
   strict private
+  const
+    WHITELIST_IP_SEPARATOR = ',';
+
   var
     /// a dumb lock object for managing the access to the  subscription register
     FConsumerLock: TObject;
@@ -40,10 +43,14 @@ type
     FTargetConfigPath: String;
 
     /// <summary>The index of the consumers. The index is a map from tokens to corresponding consumer. </summary>
-    FConsumerIndex: TDictionary<String, TSubscriptionData>;
+    FConsumerIndex: TDictionary<String, TConsumer>;
 
     /// <summary>The index of the clients. The index is a map from tokens to corresponding clients.</summary>
     FClientIndex: TDictionary<String, TClient>;
+
+    /// <summary>A set of consumer white list ips. Since Delphi has no data type for hash set,
+    /// a TDictionry is used with dumb values (always set to true).</summary>
+    FConsumerWhiteListHashSet: TDictionary<String, Boolean>;
 
     /// <summary>A map of proxies corresponding to currently subscribed listeners.
     /// Each pair is composed of a key that is a token issued during the subscription
@@ -105,18 +112,19 @@ type
     /// <summary> Set the IPs from which the requests to enqueue the data can be accepted.</summary>
     procedure SetProvidersIPs(const IPs: TArray<String>);
 
-    /// <summary>Set the consumers</summary>
-    /// <param name="Consumers">list of consumers</param>
-    /// <param name="WhiteList">a comma separated string representing a white list of consumer ips</param>
-    procedure SetConsumers(const Consumers: TObjectList<TConsumer>; const WhiteList: String);
-
     /// <summary>Create an index of clients. Assume that that there is no pair of clients with
     /// equal tokens.</summary>
     function CreateClientIndex(const TheClients: TObjectList<TClient>): TDictionary<String, TClient>;
 
     /// <summary>Create an index of consumers. Assume that that there is no pair of consumers with
-    /// equal tokens.</summary>
-    function CreateConsumerIndex(const TheConsumers: TObjectList<TConsumer>): TDictionary<String, TConsumer>;
+    /// equal tokens. Only those consumers are inserted into the index, whose IP is in the whitelist.</summary>
+    /// <param name="TheConsumers">a list of consumers</param>
+    /// <param name="WhiteList">a hash set of IPs. If a consumer IP is in this set, then that consumer is
+    /// added to the index. Otherwise it is ignored.</param>
+    function CreateConsumerIndex(const TheConsumers: TObjectList<TConsumer>; const WhiteList: TDictionary<String, Boolean>): TDictionary<String, TConsumer>;
+
+    /// <summary>Create a hash set from a comma seprated string.</summary>
+    function CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;
 
     function GetConfig: TAQConfigImmutable;
 
@@ -261,10 +269,9 @@ begin
           Repeat
             CreateGUID(Guid);
             Token := TRegEx.Replace(Guid.ToString, '[^a-zA-Z0-9_]', '');
-
           until Not(FConsumerIndex.ContainsKey(Token));
           // create a copy of the object
-          FConsumerIndex.Add(Token, TSubscriptionData.Create(data.Ip, data.Url, data.Port, data.Path));
+          FConsumerIndex.Add(Token, TConsumer.Create(data.Ip, data.Port, Token, data.Path));
           FProxyRegister.Add(Token, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
           Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
         end;
@@ -331,7 +338,7 @@ end;
 
 function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
 var
-  subscription: TSubscriptionData;
+  subscription: TConsumer;
 begin
   TMonitor.Enter(FConsumerLock);
   try
@@ -388,6 +395,27 @@ begin
 
 end;
 
+function TActiveQueueModel.CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;
+var
+  Item, Key: String;
+  Items: TArray<string>;
+begin
+  TMonitor.Enter(FConsumerLock);
+  try
+    Result := TDictionary<String, Boolean>.Create();
+    Items := Data.Split([Separator]);
+    for Item in Items do
+    begin
+      Key := Trim(Item);
+      if (Key <> '') AND Not(Result.ContainsKey(Key)) then
+        Result.Add(Key, True);
+    end;
+    Items := nil;
+  finally
+    TMonitor.Exit(FConsumerLock);
+  end;
+end;
+
 function TActiveQueueModel.Contains(const Haystack: TArray<String>; const Needle: String): Boolean;
 var
   S, I: Integer;
@@ -410,7 +438,7 @@ begin
   FConsumerLock := TObject.Create;
   FQueueLock := TObject.Create;
   FClientLock := TObject.Create;
-  FConsumerIndex := TDictionary<String, TSubscriptionData>.Create;
+  FConsumerIndex := TDictionary<String, TConsumer>.Create;
   FProxyRegister := TDictionary<String, IListenerProxy>.Create();
   FItems := TQueue<TActiveQueueEntry>.Create();
   SetLength(FListenersIPs, 0);
@@ -451,29 +479,32 @@ begin
 end;
 
 function TActiveQueueModel.CreateConsumerIndex(
-  const TheConsumers: TObjectList<TConsumer>): TDictionary<String, TConsumer>;
+  const TheConsumers: TObjectList<TConsumer>; const WhiteList: TDictionary<String, Boolean>): TDictionary<String, TConsumer>;
 var
   item: TConsumer;
-  Token: String;
-  ErrorMessage: String;
+  Token, ErrorMessage: String;
 begin
   TMonitor.Enter(FConsumerLock);
   try
     ErrorMessage := '';
     Result := TDictionary<String, TConsumer>.Create();
-    for Item in TheConsumers do
-    begin
-      Token := Item.Token;
-      if Result.ContainsKey(Token) then
+    if WhiteList <> nil then
+      for Item in TheConsumers do
       begin
-        ErrorMessage := 'A pair of consumers with a token ' + Token + ' is found!';
-        Break;
-      end
-      else
-      begin
-        Result.Add(Token, Item.Clone);
+        if Whitelist.ContainsKey(Item.IP) then
+        begin
+          Token := Item.Token;
+          if Result.ContainsKey(Token) then
+          begin
+            ErrorMessage := 'A pair of consumers with a token ' + Token + ' is found!';
+            Break;
+          end
+          else
+          begin
+            Result.Add(Token, Item.Clone);
+          end;
+        end;
       end;
-    end;
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -483,7 +514,7 @@ end;
 
 destructor TActiveQueueModel.Destroy;
 var
-  ItemKey: String;
+  Key: String;
   I, S: Integer;
 begin
   Writeln('Destroying the model...');
@@ -491,14 +522,23 @@ begin
   FQueueLock.DisposeOf;
   FClientLock.DisposeOf;
   // remove objects from the register and clean the register afterwards
-  for ItemKey in FConsumerIndex.Keys do
+  for Key in FConsumerIndex.Keys do
   begin
-    FConsumerIndex[ItemKey].DisposeOf;
+    FConsumerIndex[Key].DisposeOf;
   end;
-  if FConfig <> nil then
-    FConfig.DisposeOf;
   FConsumerIndex.Clear;
   FConsumerIndex.DisposeOf;
+
+  for Key in FClientIndex.Keys do
+  begin
+    FClientIndex[Key].DisposeOf;
+  end;
+  FClientIndex.Clear;
+  FClientIndex.DisposeOf;
+
+  FConsumerWhiteListHashSet.Clear;
+  FConsumerWhiteListHashSet.DisposeOf;
+
   FProxyRegister.Clear;
   FProxyRegister.DisposeOf;
   // remove objects from the queue and clean the queue afterwards
@@ -516,19 +556,43 @@ end;
 
 function TActiveQueueModel.GetClients: TObjectList<TClient>;
 var
-  Client: TClient;
+  Item: String;
 begin
-  Result := FConfig.Clients;
+  TMonitor.Enter(FClientLock);
+  try
+    Result := TObjectList<TClient>.Create();
+    for Item in FClientIndex.Keys do
+      Result.Add(FClientIndex[Item].Clone())
+  finally
+    TMonitor.Exit(FClientLock);
+  end;
 end;
 
 function TActiveQueueModel.GetConfig: TAQConfigImmutable;
+var
+  TheClients: TObjectList<TClient>;
 begin
-  Result := TAQConfigImmutable.Create(FConfig.Port, FConfig.Clients, FConfig.Token, FConfig.ConsumerWhitelist);
+  TheClients := GetClients();
+  Result := TAQConfigImmutable.Create(FPort, TheClients, FToken, GetConsumerIPWhitelist());
+  TheClients.Clear;
+  TheClients.DisposeOf;
 end;
 
 function TActiveQueueModel.GetConsumerIPWhitelist: String;
+var
+  builder: TStringBuilder;
+  Key: String;
 begin
-  Result := FConfig.ConsumerWhitelist;
+  TMonitor.Enter(FConsumerLock);
+  try
+    Builder := TStringBuilder.Create();
+    for Key in FConsumerWhiteListHashSet.Keys do
+      Builder.Append(Key);
+    Result := Builder.ToString;
+    Builder.DisposeOf;
+  finally
+    TMonitor.Exit(FConsumerLock);
+  end;
 end;
 
 function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
@@ -586,11 +650,7 @@ end;
 
 function TActiveQueueModel.GetPort: Integer;
 begin
-  if FConfig <> nil then
-    Result := FConfig.Port
-  else
-    Result := -1;
-
+  Result := FPort
 end;
 
 function TActiveQueueModel.GetProvidersIPs: TArray<String>;
@@ -622,18 +682,7 @@ begin
   try
     Result := TObjectList<TConsumer>.Create();
     for Token in FConsumerIndex.Keys do
-    begin
-      Subscription := FConsumerIndex[Token];
-      builder := TListenerInfoBuilder.Create();
-      Result.Add(builder
-        .SetToken(Token)
-        .SetIp(Subscription.Ip)
-        .SetPort(Subscription.Port)
-        .SetPath(Subscription.Path)
-        .Build()
-        );
-      builder.DisposeOf;
-    end;
+      Result.Add(FConsumerIndex[Token].Clone())
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -665,7 +714,8 @@ end;
 
 function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
 begin
-  Result := FConsumerIndex.ContainsValue(Data);
+  /// stub
+  Result := False;
 end;
 
 function TActiveQueueModel.Join(
@@ -749,13 +799,7 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetQueue(
-  const
-  FilePath:
-  String;
-const
-  Items:
-  TObjectList<TActiveQueueEntry>);
+procedure TActiveQueueModel.SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 begin
   // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
   Writeln('Here, the queue must be saved, but it is yet to be done');
@@ -774,21 +818,23 @@ begin
   if Config = nil then
     raise Exception.Create('Can not set configuration to a null object!');
 
+  /// set up primitive types
   FPort := Config.Port;
   FToken := Config.Token;
 
+  /// set up clients
   Clients := Config.Clients;
   FClientIndex := CreateClientIndex(Clients);
   Clients.Clear;
   Clients.DisposeOf;
 
-  Consumers := Config.Consumers;
-  FConsumerIndex := CreateConsumerIndex(Consumers);
-  Consumers.Clear;
-  Consumers.DisposeOf;
+  /// set up the consumer whitelist
+  FConsumerWhiteListHashSet := CommaSeparatedStrToHashSet(Config.ConsumerWhitelist, WHITELIST_IP_SEPARATOR);
 
-  CreateClientIndex(Config.Clients);
-  SetConsumers(Consumers, Config.ConsumerWhitelist);
+  /// set up the consumers
+  Consumers := Config.Consumers;
+  FConsumerIndex.DisposeOf;
+  FConsumerIndex := CreateConsumerIndex(Consumers, FConsumerWhiteListHashSet);
   Consumers.Clear;
   Consumers.DisposeOf;
 end;
@@ -824,24 +870,4 @@ begin
   // State.DisposeOf;
 end;
 
-procedure TActiveQueueModel.SetConsumers(const Consumers: TObjectList<TConsumer>; const WhiteList: String);
-var
-  Listener: TConsumer;
-begin
-  TMonitor.Enter(FLFConsumerLock
-    try
-    FConsumerWhitelist := WhiteList;
-  FConsumerIndex.Clear;
-  FProxyRegister.Clear;
-  for Listener in Consumers do
-  begin
-    FConsumerIndex.Add(Listener.token, TSubscriptionData.Create(Listener.IP, '', Listener.Port, Listener.Path));
-  FProxyRegister.Add(Listener.token, TRestAdapter<IListenerProxy>.Create().Build(Listener.IP, Listener.Port));
-  end;
-  CheckRep();
-  finally
-    TMonitor.Exit(FLFConsumerLock
-  end;
-  end;
-
-  end.
+end.
