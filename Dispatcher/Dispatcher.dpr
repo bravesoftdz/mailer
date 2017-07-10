@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
   DispatcherModel in 'DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -34,7 +34,8 @@ uses
   SendDataTemplate in 'SendDataTemplate.pas',
   System.JSON,
   System.IOUtils,
-  IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas';
+  IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas',
+  AQAPIConsumer in '..\ActiveQueue\AQAPIConsumer.pas';
 
 {$R *.res}
 

@@ -13,15 +13,16 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   ConsumerController in 'ConsumerController.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
-  ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
+  AQAPIConsumer in '..\ActiveQueue\AQAPIConsumer.pas',
   SendmailConfig in 'SendmailConfig.pas',
   ConsumerModel in 'ConsumerModel.pas',
   ConsumerConfig in 'ConsumerConfig.pas',
   System.Generics.Collections,
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  Configuration in '..\Config\Configuration.pas';
+  Configuration in '..\Config\Configuration.pas',
+  SubscriptionData in 'SubscriptionData.pas';
 
 {$R *.res}
 

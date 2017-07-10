@@ -51,7 +51,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, MVCFramework.RESTAdapter, ActiveQueueAPI,
+  MVCFramework.Logger, MVCFramework.RESTAdapter, AQAPIConsumer,
   SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
   System.SysUtils;
 

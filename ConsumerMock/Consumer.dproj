@@ -96,13 +96,14 @@
             <Form>ConsumerMockWebModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\ActiveQueue\ActiveQueueAPI.pas"/>
+        <DCCReference Include="..\ActiveQueue\AQAPIConsumer.pas"/>
         <DCCReference Include="SendmailConfig.pas"/>
         <DCCReference Include="ConsumerModel.pas"/>
         <DCCReference Include="ConsumerConfig.pas"/>
         <DCCReference Include="..\Cli\CliParam.pas"/>
         <DCCReference Include="..\Cli\CliUsage.pas"/>
         <DCCReference Include="..\Config\Configuration.pas"/>
+        <DCCReference Include="SubscriptionData.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

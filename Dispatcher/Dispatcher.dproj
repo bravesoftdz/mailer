@@ -110,6 +110,7 @@
         <DCCReference Include="OfferteNuoviMandati.pas"/>
         <DCCReference Include="SendDataTemplate.pas"/>
         <DCCReference Include="..\Authentication\IpTokenAuthentication.pas"/>
+        <DCCReference Include="..\ActiveQueue\AQAPIConsumer.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

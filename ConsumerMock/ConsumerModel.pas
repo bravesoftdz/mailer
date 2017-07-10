@@ -4,7 +4,7 @@ interface
 
 uses
   ConsumerConfig, ActiveQueueResponce, ActiveQueueEntry, JsonSaver,
-  MVCFramework.RESTAdapter, ActiveQueueAPI,
+  MVCFramework.RESTAdapter, AQAPIConsumer,
   System.Generics.Collections;
 
 type
@@ -23,8 +23,8 @@ type
     /// the current model status
     FStatus: TStatus;
 
-    FAdapter: TRestAdapter<IActiveQueueAPI>;
-    FServer: IActiveQueueAPI;
+    FAdapter: TRestAdapter<IAQAPIConsumer>;
+    FServer: IAQAPIConsumer;
 
   var
     procedure RequestAndExecute();
@@ -208,7 +208,7 @@ end;
 
 procedure TConsumerModel.Start;
 begin
-  FAdapter := TRestAdapter<IActiveQueueAPI>.Create();
+  FAdapter := TRestAdapter<IAQAPIConsumer>.Create();
   FServer := FAdapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
 end;
 

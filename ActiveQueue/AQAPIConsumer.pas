@@ -1,14 +1,13 @@
-unit ActiveQueueAPI;
+unit AQAPIConsumer;
 
 interface
 
-uses SubscriptionData, ActiveQueueResponce, ActiveQueueEntry,
+uses ActiveQueueResponce, ActiveQueueEntry, SubscriptionData,
   System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
 
 type
-  IActiveQueueAPI = interface(IInvokable)
-    ['{55AC9696-1A87-48F5-A01A-584FB4EBB738}']
-
+  IAQAPIConsumer = interface(IInvokable)
+    ['{485A42C7-B598-428A-83E3-F524B115604C}']
     [RESTResource(TMVCHTTPMethodType.httpPUT, '/subscribe')]
     function Subscribe([Body] Data: TSubscriptionData): TActiveQueueResponce;
 
@@ -17,12 +16,9 @@ type
 
     [RESTResource(TMVCHTTPMethodType.httpGET, '/items/get/{token}/{quantity}')]
     function GetItems([Param('token')] Token: String; [Param('quantity')] N: Integer): TActiveQueueEntries;
-
-    [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
-    function PutItems([Body(False)] Items: TActiveQueueEntries): Boolean;
-
   end;
 
 implementation
+
 
 end.
