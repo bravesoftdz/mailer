@@ -106,12 +106,6 @@ type
     /// <param name="Needle">a string to find</param>
     function Contains(const Haystack: TArray<String>; const Needle: String): Boolean;
 
-    /// <summary> Set the IPs from which the subscriptions can be accepted.</summary>
-    procedure SetListenersIPs(const IPs: TArray<String>);
-
-    /// <summary> Set the IPs from which the requests to enqueue the data can be accepted.</summary>
-    procedure SetProvidersIPs(const IPs: TArray<String>);
-
     /// <summary>Create an index of clients. Assume that that there is no pair of clients with
     /// equal tokens.</summary>
     function CreateClientIndex(const TheClients: TObjectList<TClient>): TDictionary<String, TClient>;
@@ -265,7 +259,6 @@ begin
         end
         else
         begin
-
           Repeat
             CreateGUID(Guid);
             Token := TRegEx.Replace(Guid.ToString, '[^a-zA-Z0-9_]', '');
@@ -316,8 +309,8 @@ begin
 end;
 
 function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
-var
-  item: TActiveQueueEntry;
+// var
+// item: TActiveQueueEntry;
 begin
   TMonitor.Enter(FQueueLock);
   Result := 0;
@@ -515,7 +508,6 @@ end;
 destructor TActiveQueueModel.Destroy;
 var
   Key: String;
-  I, S: Integer;
 begin
   Writeln('Destroying the model...');
   FConsumerLock.DisposeOf;
@@ -541,10 +533,6 @@ begin
 
   FProxyRegister.Clear;
   FProxyRegister.DisposeOf;
-  // remove objects from the queue and clean the queue afterwards
-  // S := FItems.Count;      /
-  // for I := 0 to S - 1 do
-  // FItems[I] := nil;
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
@@ -674,9 +662,7 @@ end;
 
 function TActiveQueueModel.GetConsumers: TObjectList<TConsumer>;
 var
-  Subscription: TSubscriptionData;
   Token: String;
-  builder: TListenerInfoBuilder;
 begin
   TMonitor.Enter(FConsumerLock);
   try
@@ -764,41 +750,6 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.SetListenersIPs(
-  const
-  IPs:
-  TArray<String>);
-var
-  I, S: Integer;
-begin
-  TMonitor.Enter(FConsumerLock);
-  try
-    S := Length(IPs);
-    SetLength(FListenersIPs, S);
-    for I := 0 to S - 1 do
-      FListenersIPs[I] := IPs[I];
-    CheckRep();
-  finally
-    TMonitor.Exit(FConsumerLock);
-  end;
-end;
-
-procedure TActiveQueueModel.SetProvidersIPs(const IPs: TArray<String>);
-var
-  I, S: Integer;
-begin
-  TMonitor.Enter(FClientLock);
-  try
-    S := Length(IPs);
-    SetLength(FProvidersIPs, S);
-    for I := 0 to S - 1 do
-      FProvidersIPs[I] := IPs[I];
-    CheckRep();
-  finally
-    TMonitor.Exit(FClientLock);
-  end;
-end;
-
 procedure TActiveQueueModel.SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 begin
   // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
@@ -841,10 +792,8 @@ end;
 
 procedure TActiveQueueModel.PersistQueue;
 var
-  arr: TJsonArray;
   Request: TActiveQueueEntry;
   items: TList<Jsonable>;
-
 begin
   TMonitor.Enter(FQueueLock);
   try
@@ -862,8 +811,8 @@ begin
 end;
 
 procedure TActiveQueueModel.PersistState;
-var
-  State: TAQConfig;
+// var
+// State: TAQConfig;
 begin
   // State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
   // FStateSaver.save(FStateFilePath, State);

@@ -99,8 +99,6 @@ end;
 constructor TAQConfig.Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String);
 var
   Client: TClient;
-  I, L: Integer;
-  Items: TArray<String>;
 begin
   Create();
   FPort := Port;

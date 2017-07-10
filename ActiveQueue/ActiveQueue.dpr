@@ -66,15 +66,14 @@ var
   LEvent: DWord;
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
-  WhiteListitem: String;
   Clients: TObjectList<TClient>;
   Client: TClient;
   APort: Integer;
-  numberOfListeners, Counter: Integer;
+  Counter: Integer;
   Consumer: TConsumer;
   Consumers: TObjectList<TConsumer>;
   ConsumerWhiteList: String;
-  I, L: Integer;
+  L: Integer;
   InfoString: String;
 begin
   TController.SetConfig(Config, TargetConfig);
@@ -188,20 +187,21 @@ begin
         try
           Config := Mapper.JSONObjectToObject<TAQConfig>(JsonConfig);
           ConfigImm := TAQConfigImmutable.Create(Config);
-          Config.DisposeOf
+          if ConfigImm <> nil then
+          begin
+            if WebRequestHandler <> nil then
+              WebRequestHandler.WebModuleClass := WebModuleClass;
+            WebRequestHandlerProc.MaxConnections := 1024;
+            RunServer(ConfigImm, TargetConfig, QueueFileName);
+          end
+          else
+            Writeln('No config is created. Failed to start the service.');
         finally
           JsonConfig.DisposeOf;
+          Config.DisposeOf;
         end;
       end;
-      if ConfigImm <> nil then
-      begin
-        if WebRequestHandler <> nil then
-          WebRequestHandler.WebModuleClass := WebModuleClass;
-        WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(ConfigImm, TargetConfig, QueueFileName);
-      end
-      else
-        Writeln('No config is created. Failed to start the service.');
+
     except
       on E: Exception do
       begin
