@@ -114,6 +114,10 @@ type
     /// equal tokens.</summary>
     function CreateClientIndex(const TheClients: TObjectList<TClient>): TDictionary<String, TClient>;
 
+    /// <summary>Create an index of consumers. Assume that that there is no pair of consumers with
+    /// equal tokens.</summary>
+    function CreateConsumerIndex(const TheConsumers: TObjectList<TConsumer>): TDictionary<String, TConsumer>;
+
     function GetConfig: TAQConfigImmutable;
 
     /// <summary>Set the state of the model.</summary>
@@ -431,7 +435,7 @@ begin
       Token := Item.Token;
       if Result.ContainsKey(Token) then
       begin
-        ErrorMessage := 'A pair of non-unique tokens is found!';
+        ErrorMessage := 'A pair of clients with a token ' + Token + ' is found!';
         Break;
       end
       else
@@ -441,6 +445,37 @@ begin
     end;
   finally
     TMonitor.Exit(FClientLock);
+  end;
+  if ErrorMessage <> '' then
+    raise Exception.Create(ErrorMessage);
+end;
+
+function TActiveQueueModel.CreateConsumerIndex(
+  const TheConsumers: TObjectList<TConsumer>): TDictionary<String, TConsumer>;
+var
+  item: TConsumer;
+  Token: String;
+  ErrorMessage: String;
+begin
+  TMonitor.Enter(FConsumerLock);
+  try
+    ErrorMessage := '';
+    Result := TDictionary<String, TConsumer>.Create();
+    for Item in TheConsumers do
+    begin
+      Token := Item.Token;
+      if Result.ContainsKey(Token) then
+      begin
+        ErrorMessage := 'A pair of consumers with a token ' + Token + ' is found!';
+        Break;
+      end
+      else
+      begin
+        Result.Add(Token, Item.Clone);
+      end;
+    end;
+  finally
+    TMonitor.Exit(FConsumerLock);
   end;
   if ErrorMessage <> '' then
     raise Exception.Create(ErrorMessage);
@@ -748,7 +783,9 @@ begin
   Clients.DisposeOf;
 
   Consumers := Config.Consumers;
-
+  FConsumerIndex := CreateConsumerIndex(Consumers);
+  Consumers.Clear;
+  Consumers.DisposeOf;
 
   CreateClientIndex(Config.Clients);
   SetConsumers(Consumers, Config.ConsumerWhitelist);
@@ -792,19 +829,19 @@ var
   Listener: TConsumer;
 begin
   TMonitor.Enter(FLFConsumerLock
-  try
+    try
     FConsumerWhitelist := WhiteList;
-    FConsumerIndex.Clear;
-    FProxyRegister.Clear;
-    for Listener in Consumers do
-    begin
-      FConsumerIndex.Add(Listener.token, TSubscriptionData.Create(Listener.IP, '', Listener.Port, Listener.Path));
-      FProxyRegister.Add(Listener.token, TRestAdapter<IListenerProxy>.Create().Build(Listener.IP, Listener.Port));
-    end;
-    CheckRep();
+  FConsumerIndex.Clear;
+  FProxyRegister.Clear;
+  for Listener in Consumers do
+  begin
+    FConsumerIndex.Add(Listener.token, TSubscriptionData.Create(Listener.IP, '', Listener.Port, Listener.Path));
+  FProxyRegister.Add(Listener.token, TRestAdapter<IListenerProxy>.Create().Build(Listener.IP, Listener.Port));
+  end;
+  CheckRep();
   finally
     TMonitor.Exit(FLFConsumerLock
   end;
-end;
+  end;
 
-end.
+  end.
