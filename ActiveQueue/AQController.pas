@@ -191,8 +191,8 @@ class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TActiveQueueEntry>): Boolean;
 begin
   Result := Model.Enqueue(IP, Items);
-  // if Result then
-  // Model.PersistQueue();
+  if Result then
+    Model.PersistQueue();
 end;
 
 procedure TController.GetItems(const Context: TWebContext);

@@ -77,7 +77,7 @@
         <Debugger_CWD>C:\Dev\Mailer\ConsumerMock</Debugger_CWD>
         <Debugger_RunParams>-c config_folder\Consumer.conf</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <DCC_UnitSearchPath>..\;..\ActiveQueue;..\..\libs\madExcept;..\Reception;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\;..\ActiveQueue;..\..\libs\madExcept;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Manifest_File>(None)</Manifest_File>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -91,19 +91,18 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Controller.pas"/>
+        <DCCReference Include="ConsumerController.pas"/>
         <DCCReference Include="ConsumerWebModule.pas">
             <Form>ConsumerMockWebModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\ActiveQueue\ActiveQueueAPI.pas"/>
         <DCCReference Include="SendmailConfig.pas"/>
-        <DCCReference Include="Model.pas"/>
+        <DCCReference Include="ConsumerModel.pas"/>
         <DCCReference Include="ConsumerConfig.pas"/>
         <DCCReference Include="..\Cli\CliParam.pas"/>
         <DCCReference Include="..\Cli\CliUsage.pas"/>
         <DCCReference Include="..\Config\Configuration.pas"/>
-        <DCCReference Include="..\Reception\ReceptionRequest.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -1,10 +1,10 @@
-unit Model;
+unit ConsumerModel;
 
 interface
 
 uses
-  ConsumerConfig, ActiveQueueResponce, JsonSaver,
-  MVCFramework.RESTAdapter, ActiveQueueAPI, ReceptionRequest,
+  ConsumerConfig, ActiveQueueResponce, ActiveQueueEntry, JsonSaver,
+  MVCFramework.RESTAdapter, ActiveQueueAPI,
   System.Generics.Collections;
 
 type
@@ -28,8 +28,8 @@ type
 
   var
     procedure RequestAndExecute();
-    procedure Consume(const Items: TObjectList<TReceptionRequest>);
-    procedure SendMail(const Item: TReceptionRequest);
+    procedure Consume(const Items: TObjectList<TActiveQueueEntry>);
+    procedure SendMail(const Item: TActiveQueueEntry);
 
   public
     function GetPort(): Integer;
@@ -75,9 +75,9 @@ begin
   inherited;
 end;
 
-procedure TConsumerModel.Consume(const Items: TObjectList<TReceptionRequest>);
+procedure TConsumerModel.Consume(const Items: TObjectList<TActiveQueueEntry>);
 var
-  item: TReceptionRequest;
+  item: TActiveQueueEntry;
 begin
   for Item in Items do
   begin
@@ -137,7 +137,7 @@ procedure TConsumerModel.RequestAndExecute;
 var
   SubscriptionData: TSubscriptionData;
   ConfigNew: TConsumerConfig;
-  Items: TReceptionRequests;
+  Items: TActiveQueueEntries;
 begin
   Writeln('Request data from the data provider');
   try
@@ -157,7 +157,7 @@ begin
   Consume(Items.Items);
 end;
 
-procedure TConsumerModel.SendMail(const Item: TReceptionRequest);
+procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);
 var
   Smtp: TIdSMTP;
   Msg: TIdMessage;
@@ -174,7 +174,7 @@ begin
     // MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
     with MSG.Recipients.Add do
     begin
-      Name := Item.sender;
+      Name := ''; // Item.sender;
       Address := TSendMailConfig.MAIL_TO;
     end;
     Writeln('Adding address');
@@ -182,8 +182,8 @@ begin
     // MSG.BccList.Add.Address := Item.recipbcc;
     // Msg.From.Name := TSendMailConfig.SENDER_NAME;
     Msg.From.Address := TSendMailConfig.MAIL_FROM;
-    Msg.Body.Text := Item.text;
-    Msg.Subject := Item.subject;
+    Msg.Body.Text := ''; // Item.text;
+    Msg.Subject := ''; // Item.subject;
     Smtp := TIdSMTP.Create(NIL);
     try
       Writeln('Trying to connect');

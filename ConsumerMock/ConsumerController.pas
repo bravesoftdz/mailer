@@ -1,14 +1,14 @@
-unit Controller;
+unit ConsumerController;
 
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, Model, ConsumerConfig;
+  MVCFramework, MVCFramework.Commons, ConsumerModel, ConsumerConfig;
 
 type
 
   [MVCPath('/')]
-  TController = class(TMVCController)
+  TConsumerController = class(TMVCController)
   strict private
     class var
       Model: TConsumerModel;
@@ -55,31 +55,31 @@ uses
   SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
   System.SysUtils;
 
-class procedure TController.Setup;
+class procedure TConsumerController.Setup;
 begin
   Model := TConsumerModel.Create();
 end;
 
-class procedure TController.Teardown;
+class procedure TConsumerController.Teardown;
 begin
   Model.DisposeOf;
 end;
 
-class function TController.GetConfig: TConsumerConfig;
+class function TConsumerController.GetConfig: TConsumerConfig;
 begin
   if Model <> nil then
     Result := Model.GetConfig();
 
 end;
 
-class function TController.GetPort: Integer;
+class function TConsumerController.GetPort: Integer;
 begin
   if Model = nil then
     raise Exception.Create('Consumer model is not set.');
   Result := Model.GetPort();
 end;
 
-class procedure TController.LoadConfigFromFile(const FilePath: String);
+class procedure TConsumerController.LoadConfigFromFile(const FilePath: String);
 begin
   if Model = nil then
     raise Exception.Create('Consumer model is not set.');
@@ -87,7 +87,7 @@ begin
   Model.Start();
 end;
 
-procedure TController.Notify(const Ctx: TWebContext);
+procedure TConsumerController.Notify(const Ctx: TWebContext);
 var
   IP: String;
 begin
@@ -99,13 +99,13 @@ begin
   end;
 end;
 
-procedure TController.OnAfterAction(Context: TWebContext; const AActionName: string);
+procedure TConsumerController.OnAfterAction(Context: TWebContext; const AActionName: string);
 begin
   { Executed after each action }
   inherited;
 end;
 
-procedure TController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
+procedure TConsumerController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
 begin
   { Executed before each action
     if handled is true (or an exception is raised) the actual
@@ -113,7 +113,7 @@ begin
   inherited;
 end;
 
-procedure TController.Subscribe(const Ctx: TWebContext);
+procedure TConsumerController.Subscribe(const Ctx: TWebContext);
 var
   Responce: TActiveQueueResponce;
 begin
@@ -121,7 +121,7 @@ begin
   Render(Responce)
 end;
 
-procedure TController.Unsubscribe(const Ctx: TWebContext);
+procedure TConsumerController.Unsubscribe(const Ctx: TWebContext);
 var
   Responce: TActiveQueueResponce;
   Token: String;
@@ -133,10 +133,10 @@ end;
 
 initialization
 
-TController.Setup;
+TConsumerController.Setup;
 
 finalization
 
-TController.Teardown;
+TConsumerController.Teardown;
 
 end.

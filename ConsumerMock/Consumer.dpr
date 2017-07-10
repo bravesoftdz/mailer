@@ -12,17 +12,16 @@ uses
   Web.WebReq,
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
-  Controller in 'Controller.pas',
+  ConsumerController in 'ConsumerController.pas',
   ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
   ActiveQueueAPI in '..\ActiveQueue\ActiveQueueAPI.pas',
   SendmailConfig in 'SendmailConfig.pas',
-  Model in 'Model.pas',
+  ConsumerModel in 'ConsumerModel.pas',
   ConsumerConfig in 'ConsumerConfig.pas',
   System.Generics.Collections,
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  Configuration in '..\Config\Configuration.pas',
-  ReceptionRequest in '..\Reception\ReceptionRequest.pas';
+  Configuration in '..\Config\Configuration.pas';
 
 {$R *.res}
 
@@ -55,8 +54,8 @@ begin
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
-    TController.LoadConfigFromFile(ConfigFileName);
-    Config := TController.GetConfig();
+    TConsumerController.LoadConfigFromFile(ConfigFileName);
+    Config := TConsumerController.GetConfig();
     Port := Config.Port;
     SetConsoleTitle(pwidechar(Format('%s:%d', [PROGRAM_NAME, Port])));
     Writeln(Format('Server started on port %d', [Port]));
