@@ -13,9 +13,10 @@ type
   strict private
   const
     /// names of the keys in order to transform the instance into a json or construct it from a json.
-    TOKEN_KEY_NAME = 'token';
-    IP_KEY_NAME = 'ip';
-    PORT_KEY_NAME = 'port';
+    TOKEN_KEY = 'token';
+    IP_KEY = 'ip';
+    PORT_KEY = 'port';
+    PATH_KEY = 'path';
 
   var
     FToken: String;
@@ -23,17 +24,19 @@ type
     FPort: Integer;
     FPath: String;
   public
-    constructor Create();
-    [MapperJSONSer(TOKEN_KEY_NAME)]
+    constructor Create(); overload;
+    constructor Create(const IP: String; const Port: Integer; const Token, Path: String); overload;
+    [MapperJSONSer(TOKEN_KEY)]
     property token: String read FToken write FToken;
-    [MapperJSONSer(IP_KEY_NAME)]
+    [MapperJSONSer(IP_KEY)]
     property IP: String read FIP write FIP;
-    [MapperJSONSer(PORT_KEY_NAME)]
+    [MapperJSONSer(PORT_KEY)]
     property Port: Integer read FPort write FPort;
-    [MapperJSONSer('path')]
+    [MapperJSONSer(PATH_KEY)]
     property Path: String read FPath write FPath;
 
     function ToJson(): TJsonObject;
+    function Clone(): TListenerInfo;
   end;
 
 type
@@ -58,18 +61,28 @@ implementation
 
 constructor TListenerInfo.Create;
 begin
-  FToken := '';
-  FIP := '';
-  FPort := 0;
-  FPath := '';
+  Create('', 0, '', '');
+end;
+
+function TListenerInfo.Clone: TListenerInfo;
+begin
+  Result := TListenerInfo.Create(FIP, FPort, FToken, FPath);
+end;
+
+constructor TListenerInfo.Create(const IP: String; const Port: Integer; const Token, Path: String);
+begin
+  FToken := Token;
+  FIP := IP;
+  FPort := Port;
+  FPath := Path;
 end;
 
 function TListenerInfo.ToJson: TJsonObject;
 begin
   Result := TJsonObject.Create();
-  Result.AddPair(TOKEN_KEY_NAME, FToken);
-  Result.AddPair(IP_KEY_NAME, FIp);
-  Result.AddPair(TJsonPair.Create(PORT_KEY_NAME, TJsonNumber.Create(FPort)));
+  Result.AddPair(TOKEN_KEY, FToken);
+  Result.AddPair(IP_KEY, FIp);
+  Result.AddPair(TJsonPair.Create(PORT_KEY, TJsonNumber.Create(FPort)));
 end;
 
 { TListenerInfoBuilder }
@@ -77,11 +90,11 @@ end;
 function TListenerInfoBuilder.Build: TListenerInfo;
 
 begin
-  Result := TListenerInfo.Create();
-  Result.token := FToken;
-  Result.IP := FIP;
-  Result.Port := FPort;
-  Result.Path := FPath;
+  Result := TListenerInfo.Create(FIP, FPort, FToken, FPath);
+  // Result.token := FToken;
+  // Result.IP := FIP;
+  // Result.Port := FPort;
+  // Result.Path := FPath;
 end;
 
 constructor TListenerInfoBuilder.Create;

@@ -27,7 +27,7 @@ type
 
     /// Read the given file and try to construct a TAQConfig instance. Then, this instance is
     /// passed to the SetState method.
-    class procedure SetConfig(const Config: TAQConfig; const TargetConfig: String);
+    class procedure SetConfig(const Config: TAQConfigImmutable; const TargetConfig: String);
 
     /// <summary>Load queues from given file. The file might not exist, the argument is used as a file name
     /// to save the queues. The file content is supposed to be a json string of array of TActiveQueueEntry instances.</summary>
@@ -160,7 +160,7 @@ begin
 
 end;
 
-class procedure TController.SetConfig(const Config: TAQConfig; const TargetConfig: String);
+class procedure TController.SetConfig(const Config: TAQConfigImmutable; const TargetConfig: String);
 begin
   Model.Config := Config;
   Model.TargetConfigPath := TargetConfig;

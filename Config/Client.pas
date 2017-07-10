@@ -20,6 +20,7 @@ type
     property Token: String read FToken write FToken;
     constructor Create(const IP: String; const Token: String); overload;
     constructor Create(); overload;
+    function Clone(): TClient;
   end;
 
 implementation
@@ -30,6 +31,11 @@ constructor TClient.Create(const IP, Token: String);
 begin
   FIP := IP;
   FToken := Token;
+end;
+
+function TClient.Clone: TClient;
+begin
+  Result := TClient.Create(FIP, FToken);
 end;
 
 constructor TClient.Create;

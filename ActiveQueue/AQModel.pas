@@ -28,7 +28,7 @@ type
     FQueueLock: TObject;
 
     /// <summary>Current configuration </summary>
-    FConfig: TAQConfig;
+    FConfig: TAQConfigImmutable;
 
     /// <summary>Path to a file into which an updated version of the configuration is to be saved</summary>
     FTargetConfigPath: String;
@@ -100,13 +100,13 @@ type
     /// <summary>Set the listeners</summary>
     procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
 
-    function GetConfig: TAQConfig;
+    function GetConfig: TAQConfigImmutable;
 
     /// <summary>Set the state of the model.</summary>
     /// This method is placed here in order to be able to persist the model state changes
     /// (mostly due to the adding/cancelling the listeners) in real time mode: once a change occurs,
     /// the new state is saved.
-    procedure SetConfig(const Config: TAQConfig);
+    procedure SetConfig(const Config: TAQConfigImmutable);
 
     function GetPort: Integer;
 
@@ -162,7 +162,7 @@ type
     /// <summary>the number of a port to which this service is bound</summary>
     property Port: Integer read GetPort;
 
-    property Config: TAQConfig read GetConfig write SetConfig;
+    property Config: TAQConfigImmutable read GetConfig write SetConfig;
 
     property TargetConfigPath: String read FTargetConfigPath write FTargetConfigPath;
 
@@ -416,6 +416,8 @@ begin
   begin
     FSubscriptionRegister[ItemKey].DisposeOf;
   end;
+  if FConfig <> nil then
+    FConfig.DisposeOf;
   FSubscriptionRegister.Clear;
   FSubscriptionRegister.DisposeOf;
   FProxyRegister.Clear;
@@ -437,14 +439,12 @@ function TActiveQueueModel.GetClients: TObjectList<TClient>;
 var
   Client: TClient;
 begin
-  Result := TObjectList<TClient>.Create();
-  for Client in FConfig.Clients do
-    Result.add(TClient.Create(Client.IP, Client.Token));
+  Result := FConfig.Clients;
 end;
 
-function TActiveQueueModel.GetConfig: TAQConfig;
+function TActiveQueueModel.GetConfig: TAQConfigImmutable;
 begin
-  Result := TAQConfig.Create(FConfig.Port, FConfig.Clients, FConfig.Token, FConfig.ConsumerWhitelist);
+  Result := TAQConfigImmutable.Create(FConfig.Port, FConfig.Clients, FConfig.Token, FConfig.ConsumerWhitelist);
 end;
 
 function TActiveQueueModel.GetConsumerIPWhitelist: String;
@@ -696,9 +696,12 @@ begin
   FQueueFilePath := Path;
 end;
 
-procedure TActiveQueueModel.SetConfig(const Config: TAQConfig);
+procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
 begin
-  FConfig := TAQConfig.Create(Config.Port, Config.Clients, Config.Token, Config.ConsumerWhitelist);
+  if FConfig <> nil then
+    FConfig.DisposeOf;
+
+  FConfig := Config.Clone();
 end;
 
 procedure TActiveQueueModel.PersistQueue;

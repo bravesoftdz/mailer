@@ -53,13 +53,13 @@ var
   JsonConfig: TJsonObject;
   FileContent: String;
   Config: TAQConfig;
-  ConfigImm: TServerConfigImmutable;
+  ConfigImm: TAQConfigImmutable;
   Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: TAQConfig; const TargetConfig, QueueFileName: String);
+procedure RunServer(const Config: TAQConfigImmutable; const TargetConfig, QueueFileName: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -141,8 +141,10 @@ begin
       Writeln(Format('%3d) ip: %15s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
       Counter := Counter + 1;
     end;
-    Listeners.Clear;
   end;
+  Listeners.Clear;
+  Listeners.DisposeOf;
+
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := APort;
@@ -192,20 +194,22 @@ begin
           Exit();
         end;
       end;
-      if Assigned(JsonConfig) then
+      if JsonConfig <> nil then
       begin
         try
           Config := Mapper.JSONObjectToObject<TAQConfig>(JsonConfig);
+          ConfigImm := TAQConfigImmutable.Create(Config);
+          Config.DisposeOf
         finally
           JsonConfig.DisposeOf;
         end;
       end;
-      if Config <> nil then
+      if ConfigImm <> nil then
       begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(Config, TargetConfig, QueueFileName);
+        RunServer(ConfigImm, TargetConfig, QueueFileName);
       end
       else
         Writeln('No config is created. Failed to start the service.');
@@ -222,8 +226,12 @@ begin
       ParamValues.Clear;
       ParamValues.DisposeOf;
     end;
+    if ConfigImm <> nil then
+      ConfigImm.DisposeOf;
     ParamUsage.DisposeOf;
     CliParams[0].DisposeOf();
+    CliParams[1].DisposeOf();
+    CliParams[2].DisposeOf();
     SetLength(CliParams, 0);
   end;
 
