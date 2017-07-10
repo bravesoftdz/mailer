@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -71,8 +71,8 @@ var
   Client: TClient;
   APort: Integer;
   numberOfListeners, Counter: Integer;
-  Listener: TConsumer;
-  Listeners: TObjectList<TConsumer>;
+  Consumer: TConsumer;
+  Consumers: TObjectList<TConsumer>;
   ConsumerWhiteList: String;
   I, L: Integer;
   InfoString: String;
@@ -117,22 +117,22 @@ begin
   else
     Writeln('White list of consumer ips: ' + ConsumerWhiteList);
 
-  Listeners := TController.GetListeners();
-  numberOfListeners := Listeners.Count;
+  Consumers := TController.GetConsumers();
+  L := Consumers.Count;
   Counter := 1;
-  if numberOfListeners = 0 then
+  if L = 0 then
     Writeln('No consumers are found in the config file.')
   else
   begin
-    Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');
-    for Listener in Listeners do
+    Writeln(L.ToString + ' consumer(s) found:');
+    for Consumer in Consumers do
     begin
-      Writeln(Format('%3d) ip: %15s, port: %d, token: (hidden)', [Counter, Listener.IP, Listener.Port]));
+      Writeln(Format('%3d) ip: %15s, port: %d, path: %10s, token: (not shown)', [Counter, Consumer.IP, Consumer.Port, Consumer.Path]));
       Counter := Counter + 1;
     end;
   end;
-  Listeners.Clear;
-  Listeners.DisposeOf;
+  Consumers.Clear;
+  Consumers.DisposeOf;
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try

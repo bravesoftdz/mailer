@@ -98,7 +98,7 @@ type
     procedure SetProvidersIPs(const IPs: TArray<String>);
 
     /// <summary>Set the listeners</summary>
-    procedure SetListeners(const Listeners: TObjectList<TConsumer>);
+    procedure SetConsumers(const Listeners: TObjectList<TConsumer>);
 
     function GetConfig: TAQConfigImmutable;
 
@@ -697,11 +697,16 @@ begin
 end;
 
 procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
+var
+  Consumers: TObjectList<TConsumer>;
 begin
   if FConfig <> nil then
     FConfig.DisposeOf;
-
   FConfig := Config.Clone();
+  Consumers := FConfig.Consumers;
+  SetConsumers(Consumers);
+  Consumers.Clear;
+  Consumers.DisposeOf;
 end;
 
 procedure TActiveQueueModel.PersistQueue;
@@ -735,7 +740,7 @@ begin
   // State.DisposeOf;
 end;
 
-procedure TActiveQueueModel.SetListeners(
+procedure TActiveQueueModel.SetConsumers(
   const
   Listeners:
   TObjectList<TConsumer>);
