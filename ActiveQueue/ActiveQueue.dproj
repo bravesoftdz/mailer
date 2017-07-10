@@ -101,7 +101,7 @@
         <DCCReference Include="AQModel.pas"/>
         <DCCReference Include="AQConfig.pas"/>
         <DCCReference Include="SubscriptionOutcomeData.pas"/>
-        <DCCReference Include="ListenerInfo.pas"/>
+        <DCCReference Include="Consumer.pas"/>
         <DCCReference Include="ListenerProxyInterface.pas"/>
         <DCCReference Include="ActiveQueueAPI.pas"/>
         <DCCReference Include="ConditionInterface.pas"/>

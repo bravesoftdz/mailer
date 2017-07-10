@@ -3,7 +3,7 @@ unit AQConfigBuilder;
 interface
 
 uses
-  AQConfig, System.Generics.Collections, ListenerInfo;
+  AQConfig, System.Generics.Collections, Consumer;
 
 type
   /// <summary>A builder for a previous version of TAQConfig. It is moved into a separate file
@@ -13,7 +13,7 @@ type
     FPort: Integer;
     FListenerIPs: String;
     FProviderIPs: String;
-    FListeners: TObjectList<TListenerInfo>;
+    FListeners: TObjectList<TConsumer>;
     function Join(const Items: TArray<String>; const Separator: String): String;
   public
     function SetPort(const Port: Integer): TAQConfigBuilder;
@@ -21,7 +21,7 @@ type
     function SetListenerIPs(const IPs: TArray<String>): TAQConfigBuilder; overload;
     function SetProviderIPs(const IPs: String): TAQConfigBuilder; overload;
     function SetProviderIPs(const IPs: TArray<String>): TAQConfigBuilder; overload;
-    function SetListeners(const Listeners: TObjectList<TListenerInfo>): TAQConfigBuilder;
+    function SetListeners(const Listeners: TObjectList<TConsumer>): TAQConfigBuilder;
     function Build(): TAQConfig;
     constructor Create();
 
@@ -43,7 +43,7 @@ begin
   FPort := 0;
   FListenerIPs := '';
   FProviderIPs := '';
-  FListeners := TObjectList<TListenerInfo>.Create();
+  FListeners := TObjectList<TConsumer>.Create();
 end;
 
 function TAQConfigBuilder.Join(const Items: TArray<String>; const Separator: String): String;
@@ -72,9 +72,9 @@ begin
 end;
 
 function TAQConfigBuilder.SetListeners(
-  const Listeners: TObjectList<TListenerInfo>): TAQConfigBuilder;
+  const Listeners: TObjectList<TConsumer>): TAQConfigBuilder;
 var
-  ListenerInfo: TListenerInfo;
+  ListenerInfo: TConsumer;
 begin
   FListeners.Clear;
   for ListenerInfo in Listeners do

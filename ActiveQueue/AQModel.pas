@@ -4,7 +4,7 @@ interface
 
 uses
   ActiveQueueResponce, SubscriptionData, ActiveQueueEntry,
-  System.Classes, ListenerInfo, System.Generics.Collections, ListenerProxyInterface,
+  System.Classes, Consumer, System.Generics.Collections, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client;
 
 type
@@ -98,7 +98,7 @@ type
     procedure SetProvidersIPs(const IPs: TArray<String>);
 
     /// <summary>Set the listeners</summary>
-    procedure SetListeners(const Listeners: TObjectList<TListenerInfo>);
+    procedure SetListeners(const Listeners: TObjectList<TConsumer>);
 
     function GetConfig: TAQConfigImmutable;
 
@@ -120,7 +120,7 @@ type
     function AddSubscription(const Data: TSubscriptionData): TActiveQueueResponce;
 
     /// <summary>Get all subscribed listeners</summary>
-    function GetListeners(): TObjectList<TListenerInfo>;
+    function GetConsumers(): TObjectList<TConsumer>;
 
     /// <summary>Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
@@ -533,7 +533,7 @@ begin
   end;
 end;
 
-function TActiveQueueModel.GetListeners: TObjectList<TListenerInfo>;
+function TActiveQueueModel.GetConsumers: TObjectList<TConsumer>;
 var
   Subscription: TSubscriptionData;
   Token: String;
@@ -541,7 +541,7 @@ var
 begin
   TMonitor.Enter(FListenersLock);
   try
-    Result := TObjectList<TListenerInfo>.Create();
+    Result := TObjectList<TConsumer>.Create();
     for Token in FSubscriptionRegister.Keys do
     begin
       Subscription := FSubscriptionRegister[Token];
@@ -738,9 +738,9 @@ end;
 procedure TActiveQueueModel.SetListeners(
   const
   Listeners:
-  TObjectList<TListenerInfo>);
+  TObjectList<TConsumer>);
 var
-  Listener: TListenerInfo;
+  Listener: TConsumer;
 begin
   TMonitor.Enter(FListenersLock);
   try

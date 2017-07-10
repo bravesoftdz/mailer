@@ -1,4 +1,4 @@
-unit ListenerInfo;
+unit Consumer;
 
 interface
 
@@ -9,7 +9,7 @@ type
   /// <summary> An ADT that contains complete information about
   /// a listener (i.e. a subscriptor)</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TListenerInfo = class(TInterfacedObject, JSonable)
+  TConsumer = class(TInterfacedObject, JSonable)
   strict private
   const
     /// names of the keys in order to transform the instance into a json or construct it from a json.
@@ -36,7 +36,7 @@ type
     property Path: String read FPath write FPath;
 
     function ToJson(): TJsonObject;
-    function Clone(): TListenerInfo;
+    function Clone(): TConsumer;
   end;
 
 type
@@ -52,24 +52,24 @@ type
     function SetIP(const AnIP: String): TListenerInfoBuilder;
     function SetPort(const APort: Integer): TListenerInfoBuilder;
     function SetPath(const APath: String): TListenerInfoBuilder;
-    function Build(): TListenerInfo;
+    function Build(): TConsumer;
   end;
 
 implementation
 
 { TListenerInfo }
 
-constructor TListenerInfo.Create;
+constructor TConsumer.Create;
 begin
   Create('', 0, '', '');
 end;
 
-function TListenerInfo.Clone: TListenerInfo;
+function TConsumer.Clone: TConsumer;
 begin
-  Result := TListenerInfo.Create(FIP, FPort, FToken, FPath);
+  Result := TConsumer.Create(FIP, FPort, FToken, FPath);
 end;
 
-constructor TListenerInfo.Create(const IP: String; const Port: Integer; const Token, Path: String);
+constructor TConsumer.Create(const IP: String; const Port: Integer; const Token, Path: String);
 begin
   FToken := Token;
   FIP := IP;
@@ -77,7 +77,7 @@ begin
   FPath := Path;
 end;
 
-function TListenerInfo.ToJson: TJsonObject;
+function TConsumer.ToJson: TJsonObject;
 begin
   Result := TJsonObject.Create();
   Result.AddPair(TOKEN_KEY, FToken);
@@ -87,10 +87,10 @@ end;
 
 { TListenerInfoBuilder }
 
-function TListenerInfoBuilder.Build: TListenerInfo;
+function TListenerInfoBuilder.Build: TConsumer;
 
 begin
-  Result := TListenerInfo.Create(FIP, FPort, FToken, FPath);
+  Result := TConsumer.Create(FIP, FPort, FToken, FPath);
   // Result.token := FToken;
   // Result.IP := FIP;
   // Result.Port := FPort;

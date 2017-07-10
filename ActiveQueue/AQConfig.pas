@@ -4,7 +4,7 @@ interface
 
 uses
   System.JSON, System.Classes, ObjectsMappers,
-  System.SysUtils, JsonableInterface, System.Generics.Collections, Client, ListenerInfo;
+  System.SysUtils, JsonableInterface, System.Generics.Collections, Client, Consumer;
 
 type
   StringMapper = reference to function(const From: String): String;
@@ -31,7 +31,7 @@ type
     FToken: String;
     FClients: TObjectList<TClient>;
     FConsumerWhiteListIps: String;
-    FConsumers: TObjectList<TListenerInfo>;
+    FConsumers: TObjectList<TConsumer>;
 
   public
     constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String); overload;
@@ -82,8 +82,8 @@ type
 
     /// <summary> List of consumers (listeners) that are subscribed to this service.</summary>
     [MapperJSONSer(CONSUMERS_KEY)]
-    [MapperListOf(TListenerInfo)]
-    property Consumers: TObjectList<TListenerInfo> read FConsumers write FConsumers;
+    [MapperListOf(TConsumer)]
+    property Consumers: TObjectList<TConsumer> read FConsumers write FConsumers;
 
 
 
@@ -103,9 +103,9 @@ type
   TAQConfigImmutable = class(TAQConfig)
   strict private
     function GetClients: TObjectList<TClient>;
-    function GetConsumers: TObjectList<TListenerInfo>;
+    function GetConsumers: TObjectList<TConsumer>;
   public
-    constructor Create(const Port: Integer; const Token, WhiteList: String; const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TListenerInfo>); overload;
+    constructor Create(const Port: Integer; const Token, WhiteList: String; const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>); overload;
     constructor Create(const Config: TAQConfig); overload;
     function Clone(): TAQConfigImmutable;
 
@@ -114,7 +114,7 @@ type
     property Token: String read FToken;
     property ConsumerWhitelist: String read FConsumerWhitelistIPs;
     property Clients: TObjectList<TClient> read GetClients;
-    property Consumers: TObjectList<TListenerInfo> read GetConsumers;
+    property Consumers: TObjectList<TConsumer> read GetConsumers;
 
   end;
 
@@ -128,7 +128,7 @@ uses
 constructor TAQConfig.Create;
 begin
   FClients := TObjectList<TClient>.Create();
-  FConsumers := TObjectList<TListenerInfo>.Create();
+  FConsumers := TObjectList<TConsumer>.Create();
 end;
 
 constructor TAQConfig.Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String);
@@ -269,17 +269,17 @@ begin
 end;
 
 constructor TAQConfigImmutable.Create(const Port: Integer; const Token, WhiteList: String;
-  const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TListenerInfo>);
+  const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>);
 var
   AClient: TClient;
-  AConsumer: TListenerInfo;
+  AConsumer: TConsumer;
 
 begin
   FPort := Port;
   FToken := Token;
   FConsumerWhiteListIps := WhiteList;
   FClients := TObjectList<TClient>.Create();
-  FConsumers := TObjectList<TListenerInfo>.Create();
+  FConsumers := TObjectList<TConsumer>.Create();
   if TheClients <> nil then
   begin
     for AClient in TheClients do
@@ -304,11 +304,11 @@ begin
   end;
 end;
 
-function TAQConfigImmutable.GetConsumers: TObjectList<TListenerInfo>;
+function TAQConfigImmutable.GetConsumers: TObjectList<TConsumer>;
 var
-  AConsumer: TListenerInfo;
+  AConsumer: TConsumer;
 begin
-  Result := TObjectList<TListenerInfo>.Create;
+  Result := TObjectList<TConsumer>.Create;
   for AConsumer in FConsumers do
   begin
     Result.Add(AConsumer.Clone());

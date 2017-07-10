@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -23,7 +23,7 @@ uses
   System.Generics.Collections,
   AQConfig in 'AQConfig.pas',
   SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
-  ListenerInfo in 'ListenerInfo.pas',
+  Consumer in 'Consumer.pas',
   ListenerProxyInterface in 'ListenerProxyInterface.pas',
   ActiveQueueAPI in 'ActiveQueueAPI.pas',
   ConditionInterface in 'ConditionInterface.pas',
@@ -36,7 +36,8 @@ uses
   Attachment in '..\Reception\Attachment.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
-  AQConfigBuilder in 'AQConfigBuilder.pas', Client;
+  AQConfigBuilder in 'AQConfigBuilder.pas',
+  Client;
 
 {$R *.res}
 
@@ -68,11 +69,10 @@ var
   WhiteListitem: String;
   Clients: TObjectList<TClient>;
   Client: TClient;
-  ProvidersWhiteList: TArray<String>;
   APort: Integer;
   numberOfListeners, Counter: Integer;
-  Listener: TListenerInfo;
-  Listeners: TObjectList<TListenerInfo>;
+  Listener: TConsumer;
+  Listeners: TObjectList<TConsumer>;
   ConsumerWhiteList: String;
   I, L: Integer;
   InfoString: String;
@@ -97,7 +97,6 @@ begin
   else
   begin
     Writeln(L.toString + ' clients are found:');
-
     for Client in Clients do
     begin
       Write('ip: ');
@@ -118,21 +117,11 @@ begin
   else
     Writeln('White list of consumer ips: ' + ConsumerWhiteList);
 
-  if (Length(ProvidersWhiteList) = 0) then
-  begin
-    Writeln('The provider IP whitelist is empty. No one will succeed to enqueue the data.');
-  end
-  else
-  begin
-    Writeln('Allowed IPs for data providers:');
-    for WhiteListitem in ProvidersWhiteList do
-      Writeln(WhiteListitem);
-  end;
   Listeners := TController.GetListeners();
   numberOfListeners := Listeners.Count;
   Counter := 1;
   if numberOfListeners = 0 then
-    Writeln('No subscriptions found in the config file.')
+    Writeln('No consumers are found in the config file.')
   else
   begin
     Writeln(inttostr(numberOfListeners) + ' subscription(s) found.');

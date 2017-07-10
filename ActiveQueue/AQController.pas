@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, AQModel, ActiveQueueEntry, ObjectsMappers,
-  System.Generics.Collections, ListenerInfo, AQConfig, System.JSON, Client;
+  System.Generics.Collections, Consumer, AQConfig, System.JSON, Client;
 
 type
 
@@ -20,7 +20,7 @@ type
     /// convert json array into a list
     class function JSonArrayToObjectList(const items: TJsonArray): TObjectList<TActiveQueueEntry>;
   public
-    class function GetListeners(): TObjectList<TListenerInfo>;
+    class function GetListeners(): TObjectList<TConsumer>;
 
     /// Set the state of the Active Queue server.
     // class procedure SetState(const FilePath: String; const Config: TAQConfig);
@@ -226,12 +226,12 @@ begin
 
 end;
 
-class function TController.GetListeners: TObjectList<TListenerInfo>;
+class function TController.GetListeners: TObjectList<TConsumer>;
 begin
   if Assigned(Model) then
-    Result := Model.GetListeners()
+    Result := Model.GetConsumers()
   else
-    Result := TObjectList<TListenerInfo>.Create();
+    Result := TObjectList<TConsumer>.Create();
 
 end;
 
