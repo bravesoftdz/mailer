@@ -337,7 +337,7 @@ begin
         SubscriptionData := nil;
     end;
   end;
-  Responce := Model.AddSubscription(SubscriptionData);
+  Responce := Model.AddConsumer(SubscriptionData);
   if Responce.status then
     Model.PersistState();
 
@@ -351,10 +351,7 @@ begin
   Model.DisposeOf;
 end;
 
-procedure TController.unsubscribe(
-  const
-  Context:
-  TWebContext);
+procedure TController.unsubscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
   Ip, Token: String;

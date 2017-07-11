@@ -45,6 +45,9 @@ type
     /// <summary>Retrieve data from the provider</sumamry>
     procedure OnProviderStateUpdate();
 
+    /// <summary>IP based authorisation: if ip is 0:0:0:0:0:0:0:1, returns true, otherwise - false</summary>
+    function isAuthorised(const IP: String): Boolean;
+
     procedure Start();
 
     constructor Create();
@@ -90,12 +93,17 @@ end;
 function TConsumerModel.GetConfig: TConsumerConfig;
 begin
   if FConfig <> nil then
-    Result := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIp, FConfig.ProviderPort, FConfig.SubscriptionStatus, FConfig.SubscriptionToken, FConfig.BlockSize);
+    Result := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIp, FConfig.ProviderPort, FConfig.IsSubscribed, FConfig.SubscriptionToken, FConfig.BlockSize);
 end;
 
 function TConsumerModel.GetPort: Integer;
 begin
   Result := FConfig.Port;
+end;
+
+function TConsumerModel.isAuthorised(const IP: String): Boolean;
+begin
+  Result := IP = '0:0:0:0:0:0:0:1';
 end;
 
 function TConsumerModel.IsProviderAuthorized(const IP: String): Boolean;
@@ -226,6 +234,9 @@ procedure TConsumerModel.Start;
 begin
   FAdapter := TRestAdapter<IAQAPIConsumer>.Create();
   FServer := FAdapter.Build(FConfig.ProviderIp, FConfig.ProviderPort);
+  if not(FConfig.IsSubscribed) then
+    Subscribe();
+
 end;
 
 function TConsumerModel.Subscribe: TActiveQueueResponce;

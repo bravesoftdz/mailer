@@ -115,10 +115,25 @@ end;
 
 procedure TConsumerController.Subscribe(const Ctx: TWebContext);
 var
+  IP: String;
+  Output: String;
   Responce: TActiveQueueResponce;
 begin
-  Responce := Model.Subscribe();
-  Render(Responce)
+  IP := Context.Request.ClientIP;
+  Writeln(IP);
+  if Model.isAuthorised(IP) then
+  begin
+    Responce := Model.Subscribe();
+    if Responce.status then
+      Output := 'Success'
+    else
+      Output := Responce.Msg;
+    Responce.DisposeOf;
+  end
+  else
+    Output := 'not authorized';
+
+  Render(output);
 end;
 
 procedure TConsumerController.Unsubscribe(const Ctx: TWebContext);

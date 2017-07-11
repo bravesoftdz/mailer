@@ -140,7 +140,7 @@ type
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
-    function AddSubscription(const Data: TSubscriptionData): TActiveQueueResponce;
+    function AddConsumer(const Data: TSubscriptionData): TActiveQueueResponce;
 
     /// <summary>Get all subscribed listeners</summary>
     function GetConsumers(): TObjectList<TConsumer>;
@@ -166,7 +166,7 @@ type
     function GetProvidersIPs: TArray<String>;
 
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
-    function IsSubscribable(const IP: String): Boolean;
+    function IsIpInWhiteList(const IP: String): Boolean;
 
     /// <summary>Return true iff given IP is among those from which data can be enqueued.</summary>
     function IsAllowedProvider(const IP: String): Boolean;
@@ -242,7 +242,7 @@ begin
 
 end;
 
-function TActiveQueueModel.AddSubscription(const data: TSubscriptionData): TActiveQueueResponce;
+function TActiveQueueModel.AddConsumer(const data: TSubscriptionData): TActiveQueueResponce;
 var
   Token: String;
   Ip: String;
@@ -257,7 +257,7 @@ begin
     else
     begin
       Ip := data.Ip;
-      if Not(IsSubscribable(Ip)) then
+      if Not(IsIpInWhiteList(Ip)) then
         Result := TActiveQueueResponce.Create(False, 'not authorized')
       else
       begin
@@ -587,11 +587,15 @@ end;
 function TActiveQueueModel.GetConfig: TAQConfigImmutable;
 var
   TheClients: TObjectList<TClient>;
+  TheConsumers: TObjectList<TConsumer>;
 begin
   TheClients := GetClients();
-  Result := TAQConfigImmutable.Create(FPort, TheClients, FToken, GetConsumerIPWhitelist());
+  TheConsumers := GetConsumers();
+  Result := TAQConfigImmutable.Create(FPort, FToken, ConsumerIPWhitelist, TheClients, TheConsumers);
   TheClients.Clear;
   TheClients.DisposeOf;
+  TheConsumers.Clear;
+  TheConsumers.DisposeOf;
 end;
 
 function TActiveQueueModel.GetConsumerIPWhitelist: String;
@@ -616,25 +620,25 @@ var
   Size, ReturnSize, I: Integer;
 begin
   Result := TObjectList<TActiveQueueEntry>.Create();
-   TMonitor.Enter(FConsumerLock);
-   try
-   if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
-   begin
-   TMonitor.Enter(FQueueLock);
-   Size := FItems.Count;
-   if Size < N then
-   ReturnSize := Size
-   else
-   ReturnSize := N;
-   for I := 0 to ReturnSize - 1 do
-   begin
-   Result.Add(FItems.Dequeue);
-   end;
-   TMonitor.Exit(FQueueLock);
-   end;
-   finally
-   TMonitor.Exit(FConsumerLock);
-   end;
+  TMonitor.Enter(FConsumerLock);
+  try
+    if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
+    begin
+      TMonitor.Enter(FQueueLock);
+      Size := FItems.Count;
+      if Size < N then
+        ReturnSize := Size
+      else
+        ReturnSize := N;
+      for I := 0 to ReturnSize - 1 do
+      begin
+        Result.Add(FItems.Dequeue);
+      end;
+      TMonitor.Exit(FQueueLock);
+    end;
+  finally
+    TMonitor.Exit(FConsumerLock);
+  end;
   Writeln('Returning ' + Result.Count.ToString + ' item in request for ' + N.ToString + ' ones.');
 end;
 
@@ -713,14 +717,11 @@ begin
   end;
 end;
 
-function TActiveQueueModel.IsSubscribable(
-  const
-  IP:
-  String): Boolean;
+function TActiveQueueModel.IsIpInWhiteList(const IP: String): Boolean;
 begin
   TMonitor.Enter(FConsumerLock);
   try
-    Result := Contains(FListenersIPs, IP);
+    Result := FConsumerWhiteListHashSet.ContainsKey(IP);
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -852,12 +853,12 @@ begin
 end;
 
 procedure TActiveQueueModel.PersistState;
-// var
-// State: TAQConfig;
+var
+  State: TAQConfigImmutable;
 begin
-  // State := TAQConfig.Create(FPort, Join(FListenersIPs, ','), Join(FProvidersIPs, ','), GetListeners());
-  // FStateSaver.save(FStateFilePath, State);
-  // State.DisposeOf;
+  State := GetConfig();
+  FStateSaver.save(FStateFilePath, State);
+  State.DisposeOf;
 end;
 
 end.

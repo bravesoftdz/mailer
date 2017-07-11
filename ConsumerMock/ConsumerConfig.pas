@@ -34,7 +34,7 @@ type
     property Port: Integer read Fport;
     property ProviderIp: String read FProviderIp;
     property ProviderPort: Integer read FProviderPort;
-    property SubscriptionStatus: Boolean read FSubscriptionStatus;
+    property IsSubscribed: Boolean read FSubscriptionStatus;
     property SubscriptionToken: String read FSubscriptionToken;
     property BlockSize: Integer read FBlockSize;
 

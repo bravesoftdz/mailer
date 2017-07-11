@@ -63,7 +63,7 @@ begin
     Writeln(Format('Server started on port %d', [Port]));
     Writeln(Format('Data provider ip: %s', [Config.ProviderIp]));
     Writeln(Format('Data provider port: %d', [Config.ProviderPort]));
-    if Config.SubscriptionStatus then
+    if Config.IsSubscribed then
       Writeln(Format('It is subscribed to the data provider, token: %s', [Config.SubscriptionToken]))
     else
       Writeln('It is not subscribed to the data provider.');
