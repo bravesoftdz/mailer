@@ -31,7 +31,7 @@ uses
   SoluzioneAgenti in 'SoluzioneAgenti.pas',
   VenditoriSimple in 'VenditoriSimple.pas',
   OfferteNuoviMandati in 'OfferteNuoviMandati.pas',
-  SendDataTemplate in 'SendDataTemplate.pas',
+  SendDataTemplate in '..\EmailTemplate\SendDataTemplate.pas',
   System.JSON,
   System.IOUtils,
   IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas',

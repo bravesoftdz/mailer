@@ -76,7 +76,7 @@
         <Debugger_CWD>C:\Dev\Mailer\Dispatcher</Debugger_CWD>
         <Debugger_RunParams>-c dispatcher.conf</Debugger_RunParams>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>..\;..\Cli;..\Reception;..\ActiveQueue;..\Config;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\;..\Cli;..\Reception;..\ActiveQueue;..\Config;..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -108,7 +108,7 @@
         <DCCReference Include="SoluzioneAgenti.pas"/>
         <DCCReference Include="VenditoriSimple.pas"/>
         <DCCReference Include="OfferteNuoviMandati.pas"/>
-        <DCCReference Include="SendDataTemplate.pas"/>
+        <DCCReference Include="..\EmailTemplate\SendDataTemplate.pas"/>
         <DCCReference Include="..\Authentication\IpTokenAuthentication.pas"/>
         <DCCReference Include="AQAPIClient.pas"/>
         <BuildConfiguration Include="Release">
@@ -143,7 +143,16 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
                         <RemoteDir>Contents\Resources</RemoteDir>
@@ -454,16 +463,7 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>

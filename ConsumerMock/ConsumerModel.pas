@@ -125,12 +125,16 @@ begin
   begin
     Writeln('Take care of requesting data...');
     FStatus := Occupied;
+    Writeln('I am busy now.');
     try
       RequestAndExecute();
     finally
       FStatus := TStatus.Ready;
+      Writeln('I am ready now.');
     end;
-  end;
+  end
+  else
+    Writeln('I am busy hence can not request data...');
 end;
 
 procedure TConsumerModel.RequestAndExecute;

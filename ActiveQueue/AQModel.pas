@@ -616,25 +616,25 @@ var
   Size, ReturnSize, I: Integer;
 begin
   Result := TObjectList<TActiveQueueEntry>.Create();
-  // TMonitor.Enter(FConsumerLock);
-  // try
-  // if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
-  // begin
-  // TMonitor.Enter(FQueueLock);
-  // Size := FItems.Count;
-  // if Size < N then
-  // ReturnSize := Size
-  // else
-  // ReturnSize := N;
-  // for I := 0 to ReturnSize - 1 do
-  // begin
-  // Result.Add(FItems.Dequeue);
-  // end;
-  // TMonitor.Exit(FQueueLock);
-  // end;
-  // finally
-  // TMonitor.Exit(FConsumerLock);
-  // end;
+   TMonitor.Enter(FConsumerLock);
+   try
+   if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
+   begin
+   TMonitor.Enter(FQueueLock);
+   Size := FItems.Count;
+   if Size < N then
+   ReturnSize := Size
+   else
+   ReturnSize := N;
+   for I := 0 to ReturnSize - 1 do
+   begin
+   Result.Add(FItems.Dequeue);
+   end;
+   TMonitor.Exit(FQueueLock);
+   end;
+   finally
+   TMonitor.Exit(FConsumerLock);
+   end;
   Writeln('Returning ' + Result.Count.ToString + ' item in request for ' + N.ToString + ' ones.');
 end;
 
