@@ -21,13 +21,16 @@ type
 type
   TONMCredentials = class abstract(TObject)
   public
-  class var
-    From: String;
-    Name: String;
-    Subject: String;
-    Server: String;
-    Port: Integer;
-    EmailInternal: String;
+  var
+  const
+
+    From = 'info@offertenuovimandati.com';
+    Name = 'Offerte Nuovi Mandati';
+    Port = 25;
+    Server = 'www.offertenuovimandati.it';
+    Subject = 'Offerte Nuovo mandati Rivcezione Dati Agente';
+    SmtpHost = 'mailbus.fastweb.it';
+    EmailInternal = 'webform@offertenuovimandati.it';
 
   end;
 
@@ -75,10 +78,5 @@ begin
 end;
 
 initialization
-
-TONMCredentials.From := 'info@offertenuovimandati.com';
-TONMCredentials.Name := 'Offerte Nuovi Mandati';
-TONMCredentials.Port := 25;
-TONMCredentials.Server := 'www.offertenuovimandati.it';
 
 end.

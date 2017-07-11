@@ -3,7 +3,7 @@ unit DispatcherEntry;
 interface
 
 uses
-  ObjectsMappers, Attachment, System.Generics.Collections;
+  ObjectsMappers, System.Generics.Collections, Attachment;
 
 type
 

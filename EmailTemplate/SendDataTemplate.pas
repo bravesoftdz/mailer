@@ -24,12 +24,14 @@ type
     TOKEN_RECIPTO = 'recipto';
     TOKEN_RECIPBCC = 'recipbcc';
     TOKEN_RECIPCC = 'recipcc';
+    TOKEN_SMPT_HOST = 'smtphost';
 
   var
     FFRom: String;
     FSender: String;
     FServer: String;
-    FPort: Integer;
+    FSmtpPort: Integer;
+    FSmtpHost: String;
     FUseAuth: Boolean;
     FUser: String;
     FPassword: String;
@@ -50,7 +52,7 @@ type
     /// <summary>  Mail server, i.e. "10.341.32.21", "goo.mailer.com"  </summary>
     property server: String read FServer write FServer;
     /// <summary> port number, i.e. 25  </summary>
-    property port: Integer read FPort write FPort;
+    property port: Integer read FSmtpPort write FSmtpPort;
     /// <summary> whether the user authentification is required  </summary>
     property useauth: Boolean read FUseAuth write FUseAuth;
     /// <summary> user name in case the authentification is required </summary>
@@ -83,11 +85,14 @@ type
     [MapperJSONSer(TOKEN_TOKEN)]
     property token: String read FToken write FToken;
 
+    [MapperJSONSer(TOKEN_SMPT_HOST)]
+    property SmtpHost: String read FSmtpHost write FSmtpHost;
+
     /// <summary> Multi argument constructor. It is recommended to use
     /// the TBackEndRequestBuilder. </summary>
     constructor Create(const AFrom: string; const ASender: string; const AServer: string; const APort: Integer; const AUseAuth: Boolean; const aUser: string;
       const APassword: string; const AUseSSL: Boolean; const AnHtml: string; const AText: string; const ASubject: string; const ARecipTo: string; const aRecipCc: string;
-      const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String); overload;
+      const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String; const AHost: String); overload;
     /// <summary> No argument constructor. It is needed for serialization.</summary>
     constructor Create(); overload;
 
@@ -104,6 +109,7 @@ type
     FFRom: String;
     FSender: String;
     FServer: String;
+    FSmtpHost: String;
     FPort: Integer;
     FUseAuth: Boolean;
     FSubject: String;
@@ -133,6 +139,7 @@ type
     function addAttachments(const Items: TObjectList<TAttachment>): TSendDataTemplateBuilder;
     function SetSubject(const ASubject: String): TSendDataTemplateBuilder;
     function setToken(const AToken: String): TSendDataTemplateBuilder;
+    function setSmtpHost(const Host: String): TSendDataTemplateBuilder;
     function Build(): TSendDataTemplate;
     constructor Create();
     destructor Destroy(); override;
@@ -173,7 +180,7 @@ function TSendDataTemplateBuilder.Build: TSendDataTemplate;
 begin
   Result := TSendDataTemplate.Create(FFrom, Fsender, Fserver, FPort, FUseAuth,
     FUser, FPassword, FUseSSL, FHtml, FText, FSubject, FRecipTo,
-    FRecipCc, FRecipBcc, FAttach, FToken);
+    FRecipCc, FRecipBcc, FAttach, FToken, FSmtpHost);
 end;
 
 constructor TSendDataTemplateBuilder.Create;
@@ -288,6 +295,12 @@ begin
   Result := Self;
 end;
 
+function TSendDataTemplateBuilder.setSmtpHost(const Host: String): TSendDataTemplateBuilder;
+begin
+  FSmtpHost := Host;
+  Result := Self;
+end;
+
 function TSendDataTemplateBuilder.SetSubject(
   const ASubject: String): TSendDataTemplateBuilder;
 begin
@@ -309,14 +322,14 @@ constructor TSendDataTemplate.Create(const AFrom: string; const ASender: string;
   const aUser: string; const APassword: string; const AUseSSL: Boolean;
   const AnHtml: string; const AText: string; const ASubject: string;
   const ARecipTo: string; const aRecipCc: string;
-  const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String);
+  const ARecipBcc: string; const Attachments: TObjectList<TAttachment>; const AToken: String; const AHost: String);
 var
   anAttachment: TAttachment;
 begin
   FFrom := AFrom;
   FSender := ASender;
   FServer := AServer;
-  FPort := APort;
+  FSmtpPort := APort;
   FUseAuth := AUseAuth;
   FUser := aUser;
   FPassword := APassword;
@@ -328,6 +341,7 @@ begin
   FRecipCc := aRecipCc;
   FRecipBcc := ARecipBcc;
   FToken := AToken;
+  FSmtpHost := AHost;
   /// create a copy. Don't forget to free it!
   FAttach := TObjectList<TAttachment>.Create();
   for anAttachment in Attachments do

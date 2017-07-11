@@ -26,7 +26,7 @@ uses
   Client in '..\Config\Client.pas',
   Authentication in 'Authentication.pas',
   ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
-  Attachment in 'Attachment.pas',
+  Attachment in '..\Emailtemplate\Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
 const

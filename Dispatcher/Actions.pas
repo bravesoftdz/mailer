@@ -206,7 +206,6 @@ var
   builder: TSendDataTemplateBuilder;
   data: TSendDataTemplate;
   Emails: String;
-
 begin
   try
     jo2 := TJSONObject.ParseJSONValue(Content) as TJsonObject;
@@ -235,7 +234,9 @@ begin
     .SetSubject(TONMCredentials.Subject)
     .SetPort(TONMCredentials.Port)
     .setServer(TONMCredentials.Server)
+    .setSmtpHost(TONMCredentials.SmtpHost)
     .SetRecipTo(Emails)
+    .setText(Content)
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
@@ -272,6 +273,17 @@ begin
     .setServer(TONMCredentials.Server)
     .SetRecipTo(TONMCredentials.EmailInternal)
     .addAttachments(Attachments);
+
+  builder.SetFrom(TONMCredentials.From)
+    .SetSender(TONMCredentials.Name)
+    .SetSubject(TONMCredentials.Subject)
+    .SetPort(TONMCredentials.Port)
+    .setServer(TONMCredentials.Server)
+    .setSmtpHost(TONMCredentials.SmtpHost)
+    .SetRecipTo(TONMCredentials.EmailInternal)
+    .setText(Content)
+    .addAttachments(Attachments);
+
   Data := builder.Build;
   jo1 := data.ToJson;
   Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token);

@@ -55,7 +55,8 @@ type
 implementation
 
 uses
-  System.IOUtils, System.SysUtils, System.JSON, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers;
+  System.IOUtils, System.SysUtils, System.JSON, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers,
+  SendDataTemplate;
 
 { TConsumerModel }
 
@@ -165,6 +166,8 @@ procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);
 var
   Smtp: TIdSMTP;
   Msg: TIdMessage;
+  Data: TSendDataTemplate;
+  jo: TJsonObject;
 begin
   Writeln('Sending a message');
   if (Item = nil) then
@@ -172,27 +175,36 @@ begin
     Writeln('Null item to send... Exiting.');
     Exit();
   end;
+
+  try
+    jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Item.Body), 0) as TJSONObject;
+    Data := Mapper.JSONObjectToObject<TSendDataTemplate>(jo);
+  finally
+
+  end;
+
   Msg := TIdMessage.Create(NIL);
   try
-    // MSG.Recipients.Add.Name := Item.sender;
-    // MSG.Recipients.Add.Address := TSendMailConfig.MAIL_TO;
+    // MSG.Recipients.Add.Name := Data.From;
+    // MSG.Recipients.Add.Address := Data.RecipTo;
     with MSG.Recipients.Add do
     begin
-      Name := ''; // Item.sender;
-      Address := TSendMailConfig.MAIL_TO;
+      Name := Data.From;
+      Address := Data.RecipTo;
     end;
+
     Writeln('Adding address');
 
     // MSG.BccList.Add.Address := Item.recipbcc;
     // Msg.From.Name := TSendMailConfig.SENDER_NAME;
     Msg.From.Address := TSendMailConfig.MAIL_FROM;
-    Msg.Body.Text := ''; // Item.text;
-    Msg.Subject := ''; // Item.subject;
+    Msg.Body.Text := Data.Text;
+    Msg.Subject := Data.Subject;
     Smtp := TIdSMTP.Create(NIL);
     try
       Writeln('Trying to connect');
-      Smtp.Host := TSendMailConfig.HOST;
-      Smtp.Port := TSendMailConfig.PORT;
+      Smtp.Host := Data.SmtpHost;
+      Smtp.Port := Data.Port;
       Smtp.Connect;
       try
         Smtp.Send(MSG);
