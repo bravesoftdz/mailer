@@ -12,6 +12,8 @@ type
   TController = class(TMVCController)
 
   strict private
+  const
+    TAG = 'Active Queue';
     class var Model: TActiveQueueModel;
 
     /// enqueue the requests and persist the queue in case of success
@@ -43,7 +45,7 @@ type
     /// are to be taken in consideration </summary>
     class function GetProvidersIPs(): TArray<String>;
 
-    /// <summary> Get port number to which this service is bound. It is defined in the configuration file. </summary>
+    /// <summary> Get port number to which this service is bound. It is defined in the configuration file.</summary>
     class function GetPort(): Integer;
 
     /// <summary> Initialize the model. Since this controller is added in a static manner,
@@ -191,14 +193,15 @@ class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TActiveQueueEntry>): Boolean;
 begin
   Result := Model.Enqueue(IP, Items);
-  if Result then
-    Model.PersistQueue();
+  // if Result then
+  // Model.PersistQueue();
 end;
 
 procedure TController.GetItems(const Context: TWebContext);
 var
   Ip: String;
-  Items: TActiveQueueEntries;
+  EntriesAsSingleBlock: TActiveQueueEntries;
+  Items: TObjectList<TActiveQueueEntry>;
   QtyString: String;
   Qty: Integer;
   Token: String;
@@ -216,10 +219,13 @@ begin
     if Qty > 0 then
     begin
       ip := Context.Request.ClientIP;
-      Items := TActiveQueueEntries.Create();
-      Items.Items := Model.GetItems(Ip, Token, Qty);
-      Writeln('AQ controller: rendering ' + Items.Items.Count.ToString + ' items');
-      Render(Items);
+      Items := Model.GetItems(Ip, Token, Qty);
+      EntriesAsSingleBlock := TActiveQueueEntries.Create(Items);
+      // Items.Clear;
+      // Items.DisposeOf;
+
+      Writeln('AQ controller: rendering ' + EntriesAsSingleBlock.Items.Count.ToString + ' items');
+      Render(EntriesAsSingleBlock);
     end;
 
   end;
@@ -269,32 +275,37 @@ begin
   end
   else
     Outcome := False;
-  Responce := TActiveQueueResponce.Create(OutCome, '', '');
+  Responce := TActiveQueueResponce.Create(OutCome, '');
   Render(Responce);
 end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
   items: TActiveQueueEntries;
-  Outcome: Boolean;
+  Outcome: TActiveQueueResponce;
   IP: String;
+  Status: Boolean;
 begin
   if Context.Request.ThereIsRequestBody then
   begin
     try
       items := Context.Request.BodyAs<TActiveQueueEntries>;
       IP := Context.Request.ClientIP;
-      Outcome := EnqueueAndPersist(IP, Items.Items);
+      Status := EnqueueAndPersist(IP, Items.Items);
+      if Status then
+        Outcome := TActiveQueueResponce.Create(Status, TAG + ' has enqueued the items.')
+      else
+        Outcome := TActiveQueueResponce.Create(Status, TAG + ' has failed to enqueue the items.');
     except
       on E: Exception do
-        Outcome := False;
+        Outcome := TActiveQueueResponce.Create(False, TAG + ': ' + E.Message);
     end;
   end
   else
   begin
-    Outcome := False;
+    Outcome := TActiveQueueResponce.Create(False, TAG + ': request body is missing.');
   end;
-  Render(Outcome.ToString(False));
+  Render(Outcome);
 end;
 
 class procedure TController.Setup;
@@ -333,13 +344,17 @@ begin
   Render(responce);
 end;
 
-class procedure TController.Teardown;
+class
+  procedure TController.Teardown;
 begin
   Writeln('Tear down the controller');
   Model.DisposeOf;
 end;
 
-procedure TController.unsubscribe(const Context: TWebContext);
+procedure TController.unsubscribe(
+  const
+  Context:
+  TWebContext);
 var
   responce: TActiveQueueResponce;
   Ip, Token: String;

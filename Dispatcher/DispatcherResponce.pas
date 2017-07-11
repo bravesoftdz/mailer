@@ -2,7 +2,7 @@ unit DispatcherResponce;
 
 interface
 
-uses ObjectsMappers;
+uses ObjectsMappers, ActiveQueueResponce;
 
 type
 

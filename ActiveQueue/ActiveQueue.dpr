@@ -25,7 +25,6 @@ uses
   SubscriptionOutcomeData in 'SubscriptionOutcomeData.pas',
   Consumer in 'Consumer.pas',
   ListenerProxyInterface in 'ListenerProxyInterface.pas',
-  AQAPIClient in 'AQAPIClient.pas',
   ConditionInterface in 'ConditionInterface.pas',
   TokenBasedCondition in 'TokenBasedCondition.pas',
   JsonSaver in 'JsonSaver.pas',
@@ -37,8 +36,7 @@ uses
   ActiveQueueEntry in 'ActiveQueueEntry.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   AQConfigBuilder in 'AQConfigBuilder.pas',
-  Client,
-  AQAPIConsumer in 'AQAPIConsumer.pas';
+  Client;
 
 {$R *.res}
 
@@ -168,6 +166,7 @@ begin
       ParamValues := ParamUsage.Parse();
       OriginConfig := ParamValues[SWITCH_ORIGIN_CONFIG];
       TargetConfig := ParamValues[SWITCH_TARGET_CONFIG];
+      QueueFileName := ParamValues[SWITCH_QUEUE];
       if Not(TFile.Exists(OriginConfig)) then
       begin
         Writeln('Error: config file ' + OriginConfig + 'not found.');

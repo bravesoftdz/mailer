@@ -149,7 +149,7 @@ begin
   except
     on E: Exception do
     begin
-      Writeln('Error while getting items from the data provider');
+      Writeln('Error while getting items from the data provider: ' + E.Message);
       Writeln(E.Message);
     end;
   end;

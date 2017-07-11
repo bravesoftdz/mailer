@@ -44,7 +44,7 @@ implementation
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
   DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
-  System.Generics.Collections;
+  System.Generics.Collections, ActiveQueueResponce;
 
 procedure TDispatcherController.Index;
 var
@@ -87,7 +87,7 @@ var
   Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
   Wrapper: TActiveQueueEntries;
-  Outcome: Boolean;
+  BackEndResponce: TActiveQueueResponce;
 begin
   IP := Context.Request.ClientIP;
 
@@ -132,8 +132,11 @@ begin
   Wrapper := TActiveQueueEntries.Create(Entries);
   try
     try
-      Outcome := FBackEndProxy.PutItems(Wrapper);
-      Responce := TDispatcherResponce.Create(Outcome, Entries.Count.toString + ' items are put to the backend server queue.');
+      BackEndResponce := FBackEndProxy.PostItems(Wrapper);
+      if BackEndResponce.status then
+        Responce := TDispatcherResponce.Create(BackEndResponce.status, Entries.Count.toString + ' items are put to the backend server queue.')
+      else
+        Responce := TDispatcherResponce.Create(BackEndResponce.status, 'Dispatcher received failure. Reason: ' + BackEndResponce.Msg)
     except
       on E: Exception do
       begin
@@ -142,6 +145,7 @@ begin
     end;
   finally
     Wrapper.DisposeOf;
+    BackEndResponce.DisposeOf;
   end;
   Render(Responce);
 end;

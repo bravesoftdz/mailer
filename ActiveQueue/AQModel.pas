@@ -55,7 +55,7 @@ type
     /// <summary>A map of proxies corresponding to currently subscribed listeners.
     /// Each pair is composed of a key that is a token issued during the subscription
     /// and a value that is a proxy server of the listener associated with the token.</summary>
-    FProxyRegister: TDictionary<String, IListenerProxy>;
+    FConsumerProxyIndex: TDictionary<String, IConsumerProxy>;
 
     /// items of the queue
     FItems: TQueue<TActiveQueueEntry>;
@@ -116,6 +116,9 @@ type
     /// <param name="WhiteList">a hash set of IPs. If a consumer IP is in this set, then that consumer is
     /// added to the index. Otherwise it is ignored.</param>
     function CreateConsumerIndex(const TheConsumers: TObjectList<TConsumer>; const WhiteList: TDictionary<String, Boolean>): TDictionary<String, TConsumer>;
+
+    /// <summary>Create an index of consumer proxy servers. </summary>
+    function CreateConsumerProxyIndex(const ConsumerIndex: TDictionary<String, TConsumer>): TDictionary<String, IConsumerProxy>;
 
     /// <summary>Create a hash set from a comma seprated string.</summary>
     function CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;
@@ -221,11 +224,16 @@ begin
       for item in Items do
       begin
         FItems.Enqueue(item);
+        Writeln('Item added to the queue...');
       end;
       Result := True;
+      Writeln('returning true');
     except
       on E: Exception do
+      begin
+        Writeln('Error while adding to the queue: ' + E.Message);
         Result := False;
+      end;
     end;
   finally
     TMonitor.Exit(FQueueLock);
@@ -244,18 +252,18 @@ begin
   try
     if Data = nil then
     begin
-      Result := TActiveQueueResponce.Create(False, 'invalid input', '');
+      Result := TActiveQueueResponce.Create(False, 'invalid input');
     end
     else
     begin
       Ip := data.Ip;
       if Not(IsSubscribable(Ip)) then
-        Result := TActiveQueueResponce.Create(False, 'not authorized', '')
+        Result := TActiveQueueResponce.Create(False, 'not authorized')
       else
       begin
         if IsSubscribed(data) then
         begin
-          Result := TActiveQueueResponce.Create(False, 'already subscribed', '');
+          Result := TActiveQueueResponce.Create(False, 'already subscribed');
         end
         else
         begin
@@ -265,8 +273,8 @@ begin
           until Not(FConsumerIndex.ContainsKey(Token));
           // create a copy of the object
           FConsumerIndex.Add(Token, TConsumer.Create(data.Ip, data.Port, Token, data.Path));
-          FProxyRegister.Add(Token, TRestAdapter<IListenerProxy>.Create().Build(Data.Ip, Data.Port));
-          Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
+          FConsumerProxyIndex.Add(Token, TRestAdapter<IConsumerProxy>.Create().Build(Data.Ip, Data.Port));
+          Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port));
         end;
       end;
     end;
@@ -279,11 +287,11 @@ end;
 
 procedure TActiveQueueModel.BroadcastCancel(const Condition: ICondition);
 var
-  Listener: TPair<String, IListenerProxy>;
+  Listener: TPair<String, IConsumerProxy>;
 begin
   TMonitor.Enter(FConsumerLock);
   try
-    for Listener in FProxyRegister do
+    for Listener in FConsumerProxyIndex do
     begin
       try
         Listener.Value.Cancel(Condition);
@@ -342,16 +350,16 @@ begin
       begin
         subscription.DisposeOf;
         FConsumerIndex.Remove(Token);
-        FProxyRegister[Token] := nil;
-        FProxyRegister.Remove(Token);
-        Result := TActiveQueueResponce.Create(True, 'unsubscribed', '');
+        FConsumerProxyIndex[Token] := nil;
+        FConsumerProxyIndex.Remove(Token);
+        Result := TActiveQueueResponce.Create(True, 'unsubscribed');
       end
       else
-        Result := TActiveQueueResponce.Create(False, 'wrong ip or token', '');
+        Result := TActiveQueueResponce.Create(False, 'wrong ip or token');
     end
     else
     begin
-      Result := TActiveQueueResponce.Create(False, 'not subscribed', '');
+      Result := TActiveQueueResponce.Create(False, 'not subscribed');
     end;
     CheckRep();
   finally
@@ -369,12 +377,12 @@ begin
     IsOk := (FConsumerLock <> nil) AND (FClientLock <> nil)
       AND (Length(FListenersIPs) >= 0)
       AND (FConsumerIndex <> nil)
-      AND (FProxyRegister <> nil)
-      AND (FProxyRegister.Count = FConsumerIndex.Count);
+      AND (FConsumerProxyIndex <> nil)
+      AND (FConsumerProxyIndex.Count = FConsumerIndex.Count);
 
     if IsOk then
     begin
-      for Token in FProxyRegister.Keys do
+      for Token in FConsumerProxyIndex.Keys do
         if Not(FConsumerIndex.ContainsKey(Token)) then
         begin
           raise Exception.Create('Inconsistent rep of TActiveQueueModel: token mismatch');
@@ -432,7 +440,7 @@ begin
   FQueueLock := TObject.Create;
   FClientLock := TObject.Create;
   FConsumerIndex := TDictionary<String, TConsumer>.Create;
-  FProxyRegister := TDictionary<String, IListenerProxy>.Create();
+  FConsumerProxyIndex := TDictionary<String, IConsumerProxy>.Create();
   FItems := TQueue<TActiveQueueEntry>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
@@ -505,6 +513,26 @@ begin
     raise Exception.Create(ErrorMessage);
 end;
 
+function TActiveQueueModel.CreateConsumerProxyIndex(
+  const ConsumerIndex: TDictionary<String, TConsumer>): TDictionary<String, IConsumerProxy>;
+var
+  Adapter: TRestAdapter<IConsumerProxy>;
+  Token: String;
+begin
+  TMonitor.Enter(FConsumerLock);
+  try
+    Result := TDictionary<String, IConsumerProxy>.Create();
+    for Token in ConsumerIndex.Keys do
+    begin
+      Adapter := TRestAdapter<IConsumerProxy>.Create();
+      Result.add(Token, Adapter.Build(ConsumerIndex[Token].Ip, ConsumerIndex[Token].Port));
+      // Adapter := nil;
+    end;
+  finally
+    TMonitor.Exit(FConsumerLock);
+  end;
+end;
+
 destructor TActiveQueueModel.Destroy;
 var
   Key: String;
@@ -531,8 +559,8 @@ begin
   FConsumerWhiteListHashSet.Clear;
   FConsumerWhiteListHashSet.DisposeOf;
 
-  FProxyRegister.Clear;
-  FProxyRegister.DisposeOf;
+  FConsumerProxyIndex.Clear;
+  FConsumerProxyIndex.DisposeOf;
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
@@ -587,26 +615,26 @@ function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const
 var
   Size, ReturnSize, I: Integer;
 begin
-  Result := TObjectList<TActiveQueueEntry>.Create(True);
-  TMonitor.Enter(FConsumerLock);
-  try
-    if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
-    begin
-      TMonitor.Enter(FQueueLock);
-      Size := FItems.Count;
-      if Size < N then
-        ReturnSize := Size
-      else
-        ReturnSize := N;
-      for I := 0 to ReturnSize - 1 do
-      begin
-        Result.Add(FItems.Dequeue);
-      end;
-      TMonitor.Exit(FQueueLock);
-    end;
-  finally
-    TMonitor.Exit(FConsumerLock);
-  end;
+  Result := TObjectList<TActiveQueueEntry>.Create();
+  // TMonitor.Enter(FConsumerLock);
+  // try
+  // if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
+  // begin
+  // TMonitor.Enter(FQueueLock);
+  // Size := FItems.Count;
+  // if Size < N then
+  // ReturnSize := Size
+  // else
+  // ReturnSize := N;
+  // for I := 0 to ReturnSize - 1 do
+  // begin
+  // Result.Add(FItems.Dequeue);
+  // end;
+  // TMonitor.Exit(FQueueLock);
+  // end;
+  // finally
+  // TMonitor.Exit(FConsumerLock);
+  // end;
   Writeln('Returning ' + Result.Count.ToString + ' item in request for ' + N.ToString + ' ones.');
 end;
 
@@ -726,25 +754,28 @@ end;
 procedure TActiveQueueModel.NotifyListeners;
 var
   Token: String;
+  // Listener: IListenerProxy;
 begin
   Writeln('Notifying the listeners');
   TMonitor.Enter(FConsumerLock);
   try
-    for Token in FProxyRegister.Keys do
+    for Token in FConsumerProxyIndex.Keys do
       TThread.CreateAnonymousThread(
         procedure
         var
-          Listener: IListenerProxy;
+          Listener: IConsumerProxy;
         begin
-          Listener := FProxyRegister[Token];
+          Listener := FConsumerProxyIndex[Token];
           if Listener <> nil then
             try
               Listener.Notify();
+              Writeln(Format('Listener at %s:%d is notified.', [FConsumerIndex[Token].IP, FConsumerIndex[Token].Port]));
             except
               on E: Exception do
                 Writeln(E.Message);
             end;
-        end).Start;
+        end
+        ).Start;
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -765,6 +796,7 @@ procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
 var
   Consumers: TObjectList<TConsumer>;
   Clients: TObjectList<TClient>;
+
 begin
   if Config = nil then
     raise Exception.Create('Can not set configuration to a null object!');
@@ -788,6 +820,15 @@ begin
   FConsumerIndex := CreateConsumerIndex(Consumers, FConsumerWhiteListHashSet);
   Consumers.Clear;
   Consumers.DisposeOf;
+
+  /// set up consumer proxies
+  if (FConsumerIndex.Count > 0) then
+  begin
+    FConsumerProxyIndex.Clear;
+    FConsumerProxyIndex.DisposeOf;
+  end;
+  FConsumerProxyIndex := CreateConsumerProxyIndex(FConsumerIndex);
+
 end;
 
 procedure TActiveQueueModel.PersistQueue;

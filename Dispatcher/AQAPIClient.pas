@@ -12,7 +12,7 @@ type
     ['{55AC9696-1A87-48F5-A01A-584FB4EBB738}']
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
-    function PutItems([Body(False)] Items: TActiveQueueEntries): Boolean;
+    function PostItems([Body(False)] Items: TActiveQueueEntries): TActiveQueueResponce;
 
   end;
 
