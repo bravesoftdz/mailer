@@ -32,7 +32,7 @@ uses
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
   SubscriptionData in '..\ConsumerMock\SubscriptionData.pas',
-  Attachment in '..\Reception\Attachment.pas',
+  Attachment in '..\EmailTemplate\Attachment.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   AQConfigBuilder in 'AQConfigBuilder.pas',

@@ -3,11 +3,7 @@ unit ReceptionModel;
 interface
 
 uses
-  Responce,
-  // ProviderFactory, FrontEndRequest,
-  ActiveQueueSettings,
-  Web.HTTPApp, Client,
-  // ClientFullRequest,
+  ReceptionResponce, ActiveQueueSettings, Web.HTTPApp, Client,
   Authentication, System.Classes, DispatcherEntry, System.JSON, Attachment,
   System.Generics.Collections, DispatcherResponce, ServerConfig;
 
@@ -79,7 +75,7 @@ type
       const Attachments: TObjectList<TAttachment>): TDispatcherEntry;
 
     /// <summary>Transforms a dispatcher responce into a reception one.<summary>
-    function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TResponce;
+    function ConvertToOwnResponce(const BackEndResponce: TDispatcherResponce): TReceptionResponce;
 
     property clients: TObjectList<TClient> read GetClients write SetClients;
 
@@ -114,12 +110,12 @@ begin
 end;
 
 function TReceptionModel.ConvertToOwnResponce(
-  const BackEndResponce: TDispatcherResponce): TResponce;
+  const BackEndResponce: TDispatcherResponce): TReceptionResponce;
 begin
   if (BackEndResponce = nil) then
-    Result := TResponce.Create(False, 'No responce from the backend server.')
+    Result := TReceptionResponce.Create(False, 'No responce from the backend server.')
   else
-    Result := TResponce.Create(BackEndResponce.Status, BackEndResponce.Msg);
+    Result := TReceptionResponce.Create(BackEndResponce.Status, BackEndResponce.Msg);
 end;
 
 constructor TReceptionModel.Create;

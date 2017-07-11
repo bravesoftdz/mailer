@@ -22,10 +22,10 @@ uses
   ReceptionController in 'ReceptionController.pas',
   ReceptionModel in 'ReceptionModel.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
-  Responce in 'Responce.pas',
+  ReceptionResponce in 'ReceptionResponce.pas',
   Client in '..\Config\Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
   Attachment in '..\Emailtemplate\Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 

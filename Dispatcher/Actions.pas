@@ -236,7 +236,7 @@ begin
     .setServer(TONMCredentials.Server)
     .setSmtpHost(TONMCredentials.SmtpHost)
     .SetRecipTo(Emails)
-    .setText(Content)
+    .setText('text for TOMNSendToClient.MapToBackEndEntry')
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
@@ -281,7 +281,7 @@ begin
     .setServer(TONMCredentials.Server)
     .setSmtpHost(TONMCredentials.SmtpHost)
     .SetRecipTo(TONMCredentials.EmailInternal)
-    .setText(Content)
+    .setText('Text for TOMNSendToCodicione.MapToBackEndEntry')
     .addAttachments(Attachments);
 
   Data := builder.Build;

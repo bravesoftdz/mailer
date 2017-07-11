@@ -4,9 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons,
-  // Action,
-  // ProviderFactory,
-  Responce, ActiveQueueSettings, ReceptionModel, Client,
+  ReceptionResponce, ActiveQueueSettings, ReceptionModel, Client,
   System.Generics.Collections, System.Classes, ServerConfig,
   MVCFramework.RESTAdapter, DispatcherProxyInterface;
 
@@ -83,7 +81,7 @@ uses
 
 procedure TController.ElaborateRequest(Ctx: TWebContext);
 var
-  Responce: TResponce;
+  Responce: TReceptionResponce;
   RequestorName, ActionName, Body, IP, Boundary: String;
   Request: TClientFullRequest;
   Attachments: TObjectList<TAttachment>;
@@ -118,12 +116,12 @@ begin
 
   end;
   if (AJson = nil) OR (TokenV = nil) then
-    Responce := TResponce.Create(False, 'Token not found.')
+    Responce := TReceptionResponce.Create(False, 'Token not found.')
   else
   begin
     if not(Model.isAuthenticated(IP, Token)) then
     begin
-      Responce := TResponce.Create(false, 'Not authorized.');
+      Responce := TReceptionResponce.Create(false, 'Not authorized.');
     end
     else
     begin
@@ -155,7 +153,7 @@ begin
         end
         else
         begin
-          Responce := TResponce.Create(False, 'No responce from the backend server');
+          Responce := TReceptionResponce.Create(False, 'No responce from the backend server');
         end;
       finally
         DispatcherEntry.DisposeOf;
