@@ -14,7 +14,7 @@ uses
   IdHTTPWebBrokerBridge,
   ConsumerController in 'ConsumerController.pas',
   ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
-  AQAPIConsumer in '..\ActiveQueue\AQAPIConsumer.pas',
+  AQAPIConsumer in 'AQAPIConsumer.pas',
   SendmailConfig in 'SendmailConfig.pas',
   ConsumerModel in 'ConsumerModel.pas',
   ConsumerConfig in 'ConsumerConfig.pas',

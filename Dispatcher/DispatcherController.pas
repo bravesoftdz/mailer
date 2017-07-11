@@ -3,7 +3,7 @@ unit DispatcherController;
 interface
 
 uses
-  MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, ActiveQueueAPI,
+  MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, AQAPIClient,
   ServerConfig;
 
 type
@@ -13,8 +13,8 @@ type
   strict private
   class var
     Model: TModel;
-    FBackEndProxy: IActiveQueueAPI;
-    FBackEndAdapter: TRestAdapter<IActiveQueueAPI>;
+    FBackEndProxy: IAQAPIClient;
+    FBackEndAdapter: TRestAdapter<IAQAPIClient>;
     class procedure SetUpBackEndProxy();
 
   public
@@ -170,7 +170,7 @@ end;
 class procedure TDispatcherController.SetUpBackEndProxy;
 begin
   Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.GetBackEndIp, Model.GetBackEndPort]));
-  FBackEndAdapter := TRestAdapter<IActiveQueueAPI>.Create();
+  FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
   FBackEndProxy := FBackEndAdapter.Build(Model.GetBackEndIp, Model.GetBackEndPort);
 end;
 

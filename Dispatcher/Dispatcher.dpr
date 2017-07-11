@@ -35,7 +35,7 @@ uses
   System.JSON,
   System.IOUtils,
   IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas',
-  AQAPIConsumer in '..\ActiveQueue\AQAPIConsumer.pas';
+  AQAPIClient in 'AQAPIClient.pas';
 
 {$R *.res}
 
