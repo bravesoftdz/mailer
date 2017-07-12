@@ -733,13 +733,7 @@ begin
   Result := False;
 end;
 
-function TActiveQueueModel.Join(
-  const
-  Items:
-  TArray<String>;
-  const
-  delimiter:
-  String): String;
+function TActiveQueueModel.Join(const Items: TArray<String>; const delimiter: String): String;
 var
   I, L: Integer;
 begin

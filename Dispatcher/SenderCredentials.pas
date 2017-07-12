@@ -30,7 +30,7 @@ type
     Server = 'www.offertenuovimandati.it';
     Subject = 'Offerte Nuovo mandati Rivcezione Dati Agente';
     SmtpHost = 'mailbus.fastweb.it';
-    EmailInternal = 'webform@offertenuovimandati.it';
+    EmailInternal = 'a.shcherbakov@ritoll.it'; //'webform@offertenuovimandati.it';
 
   end;
 

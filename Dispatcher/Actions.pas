@@ -3,8 +3,9 @@ unit Actions;
 interface
 
 uses
-  Responce, FrontEndRequest, SendDataTemplate, ActiveQueueSettings, Attachment,
-  ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry;
+  FrontEndRequest, SendDataTemplate, ActiveQueueSettings, Attachment,
+  ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry,
+  System.JSON;
 
 // type
 // TActionCategories = (email = 'email', Diamonds, Clubs, Spades);
@@ -66,6 +67,7 @@ type
     constructor Create();
     function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
+    function CreateText(const Data: TJsonObject): String;
   end;
 
 type
@@ -74,12 +76,13 @@ type
     constructor Create();
     function MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry; override;
     function Clone(): TAction; override;
+    function CreateText(const Data: TJsonObject): String;
   end;
 
 implementation
 
 uses
-  SenderCredentials, System.JSON, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils;
+  SenderCredentials, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils;
 
 { TMailerAction }
 
@@ -197,6 +200,43 @@ begin
   inherited Create('register');
 end;
 
+function TOMNSendToClient.CreateText(const Data: TJsonObject): String;
+const
+  NAME_TOKEN = 'name';
+var
+  v: TJsonValue;
+  P: TJsonPair;
+  key: String;
+  I, L: Integer;
+  Builder: TStringBuilder;
+begin
+  if Data <> nil then
+  begin
+    Builder := TStringBuilder.Create();
+    v := Data.getValue(NAME_TOKEN);
+    if v <> nil then
+      key := v.value
+    else
+      key := 'cliente';
+    Builder.AppendLine('Gentile ' + key);
+    Builder.AppendLine('grazie per averci contattato. Di seguito trovi le informazioni da Lei forniti:');
+    L := Data.Count;
+    for I := 0 to L - 1 do
+    begin
+      P := Data.Pairs[I];
+      Key := P.JsonString.Value;
+      if Key = 'token' then
+        Continue;
+      Builder.AppendLine(Key + ': ' + P.JsonValue.Value);
+    end;
+    Result := Builder.ToString;
+    Builder.DisposeOf;
+  end
+  else
+    Result := 'Nessuna informazione ricevuta';
+
+end;
+
 function TOMNSendToClient.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 const
   EMAIL_TOKEN = 'email';
@@ -236,7 +276,7 @@ begin
     .setServer(TONMCredentials.Server)
     .setSmtpHost(TONMCredentials.SmtpHost)
     .SetRecipTo(Emails)
-    .setText('text for TOMNSendToClient.MapToBackEndEntry')
+    .setText(CreateText(jo2))
     .addAttachments(Attachments);
   Data := builder.Build;
   jo1 := data.ToJson;
@@ -259,21 +299,50 @@ begin
   inherited Create('register');
 end;
 
+function TOMNSendToCodicione.CreateText(const Data: TJsonObject): String;
+var
+  v: TJsonValue;
+  P: TJsonPair;
+  key: String;
+  I, L: Integer;
+  Builder: TStringBuilder;
+begin
+  if Data <> nil then
+  begin
+    Builder := TStringBuilder.Create();
+    Builder.AppendLine('Dati cliente');
+    L := Data.Count;
+    for I := 0 to L - 1 do
+    begin
+      P := Data.Pairs[I];
+      Key := P.JsonString.Value;
+      if Key = 'token' then
+        Continue;
+      Builder.AppendLine(Key + ': ' + P.JsonValue.Value);
+    end;
+    Result := Builder.ToString;
+    Builder.DisposeOf;
+  end
+  else
+    Result := 'Nessuna informazione ricevuta';
+
+end;
+
 function TOMNSendToCodicione.MapToBackEndEntry(const Content: String; const Attachments: TObjectList<TAttachment>; const Token: String): TActiveQueueEntry;
 var
   builder: TSendDataTemplateBuilder;
-  jo1: TJsonObject;
+  jo1, jo2: TJsonObject;
   Data: TSendDataTemplate;
 begin
+  try
+    jo2 := TJSONObject.ParseJSONValue(Content) as TJsonObject;
+  except
+    on E: Exception do
+    begin
+      raise Exception.Create('A valid stringy version of json is expected.');
+    end;
+  end;
   builder := TSendDataTemplateBuilder.Create();
-  builder.SetFrom(TONMCredentials.From)
-    .SetSender(TONMCredentials.Name)
-    .SetSubject(TONMCredentials.Subject)
-    .SetPort(TONMCredentials.Port)
-    .setServer(TONMCredentials.Server)
-    .SetRecipTo(TONMCredentials.EmailInternal)
-    .addAttachments(Attachments);
-
   builder.SetFrom(TONMCredentials.From)
     .SetSender(TONMCredentials.Name)
     .SetSubject(TONMCredentials.Subject)
@@ -281,7 +350,7 @@ begin
     .setServer(TONMCredentials.Server)
     .setSmtpHost(TONMCredentials.SmtpHost)
     .SetRecipTo(TONMCredentials.EmailInternal)
-    .setText('Text for TOMNSendToCodicione.MapToBackEndEntry')
+    .setText(CreateText(jo2))
     .addAttachments(Attachments);
 
   Data := builder.Build;
@@ -290,6 +359,8 @@ begin
   jo1.DisposeOf;
   Data.DisposeOf;
   Builder.DisposeOf;
+  if jo2 <> nil then
+    jo2.DisposeOf;
 
 end;
 
