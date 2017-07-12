@@ -3,7 +3,7 @@ unit Provider;
 interface
 
 uses
-  FrontEndRequest, System.Generics.Collections, Actions;
+  System.Generics.Collections, Actions;
 
 type
   TProvider = class(TObject)

@@ -18,6 +18,9 @@ type
     [Test]
     procedure CreateObjFromJson;
 
+    [Test]
+    procedure CreateObjFromJsonOneAttachment;
+
     /// Just to see whether the framework constructs a json object from a DispatcherEntry  one.
     [Test]
     procedure CreateJsonFromDefault;
@@ -61,6 +64,23 @@ begin
   Assert.AreEqual('register', obj.Action);
   Assert.AreEqual('abcdefgh', obj.Token);
   Assert.AreEqual(0, obj.Attachments.Count);
+  Assert.AreEqual('[ddd]', obj.Content);
+end;
+
+procedure TDispatcherEntrytest.CreateObjFromJsonOneAttachment;
+var
+  input: String;
+  jo: TJsonObject;
+  obj: TDispatcherEntry;
+  arr1, arr2: TArray<String>;
+begin
+  input := '{"origin": "external" "action":"register", "token": "abcdefgh", "content":"[ddd]", "attachments":[{"name":"abc", "content":"1234567890"}]}';
+  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
+  obj := Mapper.JSONObjectToObject<TDispatcherEntry>(jo);
+  Assert.AreEqual('external', obj.Origin);
+  Assert.AreEqual('register', obj.Action);
+  Assert.AreEqual('abcdefgh', obj.Token);
+  Assert.AreEqual(1, obj.Attachments.Count);
   Assert.AreEqual('[ddd]', obj.Content);
 end;
 

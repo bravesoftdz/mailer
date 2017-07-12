@@ -3,7 +3,7 @@ unit VenditoriSimple;
 interface
 
 uses
-  Provider, Action;
+  Provider, Actions;
 
 type
   { Perform the operations related to the site "venditori.com".

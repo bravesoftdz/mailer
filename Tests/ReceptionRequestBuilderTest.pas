@@ -19,7 +19,7 @@ type
 implementation
 
 uses
-  ReceptionRequest, System.JSON, ObjectsMappers;
+  SendDataTemplate, System.JSON, ObjectsMappers;
 
 procedure TReceptionRequestBuilderTest.SetText;
 var
@@ -31,7 +31,6 @@ begin
   request := builder.Build;
   Assert.AreEqual(request.text, 'a text');
 end;
-
 
 procedure TReceptionRequestBuilderTest.SetHtml;
 var

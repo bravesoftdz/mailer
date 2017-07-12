@@ -7,7 +7,7 @@ uses
 
 type
 
-  /// <summary>Immutable type to represent a single attachment</summary>
+  /// <summary>A mutable type to represent a single attachment</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TAttachment = class(TObject)
   strict private
@@ -27,7 +27,11 @@ type
     /// <summary> constructor </summary>
     /// <param name="aName"> name of the attachment</param>
     /// <param name="aContent"> content of the attachment</param>
-    constructor Create(const AName: String; const AContent: TMemoryStream);
+    constructor Create(const AName: String; const AContent: TMemoryStream); overload;
+
+    /// <summary>Default constructor</summary>
+    constructor Create(); overload;
+
     destructor Destroy(); override;
     /// <sumamry>Create a deep copy of the instance.</summary>
     function Clone(): TAttachment;
@@ -44,9 +48,14 @@ end;
 
 constructor TAttachment.Create(const AName: String; const AContent: TMemoryStream);
 begin
+  Create();
   FName := AName;
-  FContent := TMemoryStream.Create();
   FreeAndSetContent(AContent);
+end;
+
+constructor TAttachment.Create;
+begin
+  FContent := TMemoryStream.Create();
 end;
 
 destructor TAttachment.Destroy;

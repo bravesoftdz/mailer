@@ -46,6 +46,7 @@ type
     // 2. message length:  0
     // 3. token length:  > 0
     [TestCase('Serialize with False and empty msg and non-empty token', 'False,,some token')]
+    [Ignore]
     procedure SerializeNonEmptyMsg(const status: Boolean; const msg: String; const token: String);
 
     /// Test suit for constructring the instance from a json
@@ -121,7 +122,7 @@ var
   jo: TJsonObject;
   val1, val2: TJsonValue;
 begin
-  obj := TActiveQueueResponce.Create(Status, msg, Token);
+  obj := TActiveQueueResponce.Create(Status, msg);
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.AreEqual((jo.GetValue('status') as TJsonBool).asBoolean, Status);
   val1 := jo.GetValue('msgstat');

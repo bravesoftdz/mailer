@@ -19,7 +19,6 @@ type
     FContent: String;
 
     procedure SetAttachments(const TheAttachments: TObjectList<TAttachment>);
-    function GetAttachmentsCopy: TObjectList<TAttachment>;
 
   public
     constructor Create(); overload;
@@ -64,17 +63,6 @@ begin
   inherited;
 end;
 
-function TDispatcherEntry.GetAttachmentsCopy: TObjectList<TAttachment>;
-var
-  Attachment: TAttachment;
-begin
-  Result := TObjectList<TAttachment>.Create();
-  for Attachment in FAttachments do
-  begin
-    Result.Add(Attachment.Clone());
-  end;
-end;
-
 procedure TDispatcherEntry.SetAttachments(const TheAttachments: TObjectList<TAttachment>);
 var
   Attachment: TAttachment;
@@ -82,7 +70,7 @@ begin
   FAttachments.Clear;
   for Attachment in TheAttachments do
   begin
-    FAttachments.Add(Attachment.Clone());
+    // FAttachments.Add(Attachment.Clone());
   end;
 end;
 

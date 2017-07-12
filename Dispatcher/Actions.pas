@@ -3,7 +3,7 @@ unit Actions;
 interface
 
 uses
-  FrontEndRequest, SendDataTemplate, ActiveQueueSettings,
+  SendDataTemplate, ActiveQueueSettings,
   ClientFullRequest, DispatcherEntry, System.Generics.Collections, ActiveQueueEntry,
   System.JSON, Attachment;
 

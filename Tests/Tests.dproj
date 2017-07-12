@@ -115,7 +115,7 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>..\;..\Reception\Data;..\Reception\Providers;..\ActiveQueue;..\Reception\Actions;..\Reception;..\Dispatcher;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\Reception\Data;..\Reception\Providers;..\ActiveQueue;..\Reception;..\Dispatcher;..\EmailTemplate;..\Config;..\ConsumerMock;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -129,9 +129,6 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="ActionDispatcherTest.pas"/>
-        <DCCReference Include="ReceptionRequestBuilderTest.pas"/>
-        <DCCReference Include="ReceptionRequestTest.pas"/>
-        <DCCReference Include="FrontEndRequestTest.pas"/>
         <DCCReference Include="ClientRequestTest.pas"/>
         <DCCReference Include="ActiveQueueResponceTest.pas"/>
         <DCCReference Include="SubscriptionOutcomeDataTest.pas"/>
@@ -140,7 +137,6 @@
         <DCCReference Include="ActiveQueueControllerTest.pas"/>
         <DCCReference Include="SubscriptionDataTest.pas"/>
         <DCCReference Include="TokenBasedConditionTest.pas"/>
-        <DCCReference Include="ReceptionConfigTest.pas"/>
         <DCCReference Include="DispatcherEntryTest.pas"/>
         <DCCReference Include="..\EmailTemplate\Attachment.pas"/>
         <BuildConfiguration Include="Release">
@@ -195,7 +191,16 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
                         <RemoteDir>Contents\Resources</RemoteDir>
@@ -506,16 +511,7 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>

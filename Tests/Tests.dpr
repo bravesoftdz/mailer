@@ -7,16 +7,13 @@ program Tests;
 
 uses
   System.SysUtils,
-{$IFDEF TESTINSIGHT}
+  {$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-{$ENDIF }
+  {$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
   ActionDispatcherTest in 'ActionDispatcherTest.pas',
-  ReceptionRequestBuilderTest in 'ReceptionRequestBuilderTest.pas',
-  ReceptionRequestTest in 'ReceptionRequestTest.pas',
-  FrontEndRequestTest in 'FrontEndRequestTest.pas',
   ClientRequestTest in 'ClientRequestTest.pas',
   ActiveQueueResponceTest in 'ActiveQueueResponceTest.pas',
   SubscriptionOutcomeDataTest in 'SubscriptionOutcomeDataTest.pas',
@@ -25,7 +22,6 @@ uses
   ActiveQueueControllerTest in 'ActiveQueueControllerTest.pas',
   SubscriptionDataTest in 'SubscriptionDataTest.pas',
   TokenBasedConditionTest in 'TokenBasedConditionTest.pas',
-  ReceptionConfigTest in 'ReceptionConfigTest.pas',
   DispatcherEntryTest in 'DispatcherEntryTest.pas',
   Attachment in '..\EmailTemplate\Attachment.pas';
 
