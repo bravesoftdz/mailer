@@ -23,7 +23,7 @@ type
     property Name: String read FName write FName;
     /// <summary> content of the attachment</summary>
     [MapperJSONSer('content')]
-    property Content: TMemoryStream read GetContentCopy write FreeAndSetContent;
+    property Content: TMemoryStream read FContent write FContent;
     /// <summary> constructor </summary>
     /// <param name="aName"> name of the attachment</param>
     /// <param name="aContent"> content of the attachment</param>
