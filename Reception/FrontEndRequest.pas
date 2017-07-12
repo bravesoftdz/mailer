@@ -3,7 +3,7 @@ unit FrontEndRequest;
 interface
 
 uses
-  System.JSON, System.Generics.Collections, Attachment, ClientRequest,
+  System.JSON, System.Generics.Collections, ClientRequest,
   Web.HTTPApp, ObjectsMappers;
 
 type
@@ -16,15 +16,15 @@ type
   TFrontEndRequest = class(TObject)
   private
     FData: TClientRequest;
-    FAttachments: TObjectList<TAttachment>;
-    procedure SetAttachments(const Value: TObjectList<TAttachment>);
+    // FAttachments: TObjectList<TAttachment>;
+    // procedure SetAttachments(const Value: TObjectList<TAttachment>);
   public
     /// <summary> Constructor</summary>
     constructor Create(const aData: TClientRequest; const AttachedFiles: TAbstractWebRequestFiles); overload;
     constructor Create(); overload;
     [MapperJSONSer('data')]
     property Data: TClientRequest read FData;
-    property Attachments: TObjectList<TAttachment> read FAttachments;
+    // property Attachments: TObjectList<TAttachment> read FAttachments;
     function ToString(): String; override;
     destructor Destroy(); override;
   end;
@@ -40,6 +40,7 @@ constructor TFrontEndRequest.Create(const aData: TClientRequest; const AttachedF
 var
   Len, I: Integer;
   MemStream: TMemoryStream;
+
 begin
   /// defensive copying
   FData := TClientRequest.Create(aData.Text, aData.Html, aData.Token);
@@ -67,8 +68,7 @@ begin
   inherited;
 end;
 
-procedure TFrontEndRequest.SetAttachments(
-  const Value: TObjectList<TAttachment>);
+procedure TFrontEndRequest.SetAttachments(const Value: TObjectList<TAttachment>);
 begin
   FAttachments := Value;
 end;

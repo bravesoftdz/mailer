@@ -29,7 +29,8 @@ type
     property Origin: String read FOrigin write FOrigin;
     property Action: String read FAction write FAction;
     property Token: String read FToken write FToken;
-    property Attachments: TObjectList<TAttachment> read GetAttachmentsCopy write SetAttachments;
+    [MapperListOf(TAttachment)]
+    property Attachments: TObjectList<TAttachment> read FAttachments write FAttachments;
     property Content: String read FContent write FContent;
   end;
 

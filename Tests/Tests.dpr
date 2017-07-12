@@ -4,11 +4,12 @@ program Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}{$STRONGLINKTYPES ON}
 
+
 uses
   System.SysUtils,
-  {$IFDEF TESTINSIGHT}
+{$IFDEF TESTINSIGHT}
   TestInsight.DUnitX,
-  {$ENDIF }
+{$ENDIF }
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestFramework,
@@ -25,7 +26,8 @@ uses
   SubscriptionDataTest in 'SubscriptionDataTest.pas',
   TokenBasedConditionTest in 'TokenBasedConditionTest.pas',
   ReceptionConfigTest in 'ReceptionConfigTest.pas',
-  DispatcherEntryTest in 'DispatcherEntryTest.pas';
+  DispatcherEntryTest in 'DispatcherEntryTest.pas',
+  Attachment in '..\EmailTemplate\Attachment.pas';
 
 var
   runner: ITestRunner;

@@ -3,7 +3,8 @@ unit ActionDispatcherTest;
 interface
 
 uses
-  DUnitX.TestFramework, Action, System.Generics.Collections, ProviderFactory, Provider, VenditoriSimple, SoluzioneAgenti;
+  DUnitX.TestFramework, System.Generics.Collections, ProviderFactory, Provider, VenditoriSimple, SoluzioneAgenti,
+  Actions;
 
 type
 

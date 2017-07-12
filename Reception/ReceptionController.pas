@@ -137,6 +137,7 @@ begin
       end;
       try
         DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon.ToString, Attachments);
+        Writeln('Prepared a request with ' + DispatcherEntry.Attachments.Count.ToString + ' attachment(s).');
         try
           DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
         except

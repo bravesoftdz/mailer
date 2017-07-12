@@ -95,6 +95,7 @@ begin
   begin
     try
       Request := Context.Request.BodyAs<TDispatcherEntry>;
+      Writeln('Recieved a request with ' + Request.Attachments.Count.ToString + ' attachment(s).');
     except
       on E: Exception do
       begin
