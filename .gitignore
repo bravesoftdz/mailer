@@ -18,3 +18,4 @@ ActiveQueue*.conf
 Reception.conf
 Reception.res
 QueueStorage*.txt
+test_requests.bat
