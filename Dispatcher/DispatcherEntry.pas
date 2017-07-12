@@ -18,7 +18,7 @@ type
     FToken: String;
     FContent: String;
 
-    procedure SetAttachments(const Attachments: TObjectList<TAttachment>);
+    procedure SetAttachments(const TheAttachments: TObjectList<TAttachment>);
     function GetAttachmentsCopy: TObjectList<TAttachment>;
 
   public
@@ -66,28 +66,22 @@ end;
 function TDispatcherEntry.GetAttachmentsCopy: TObjectList<TAttachment>;
 var
   Attachment: TAttachment;
-  StreamCopy: TMemoryStream;
 begin
   Result := TObjectList<TAttachment>.Create();
   for Attachment in FAttachments do
   begin
-    StreamCopy := Attachment.Content;
-    Result.Add(TAttachment.Create(Attachment.Name, StreamCopy));
-    StreamCopy.DisposeOf;
+    Result.Add(Attachment.Clone());
   end;
 end;
 
-procedure TDispatcherEntry.SetAttachments(const Attachments: TObjectList<TAttachment>);
+procedure TDispatcherEntry.SetAttachments(const TheAttachments: TObjectList<TAttachment>);
 var
   Attachment: TAttachment;
-  StreamCopy: TMemoryStream;
 begin
   FAttachments.Clear;
-  for Attachment in FAttachments do
+  for Attachment in TheAttachments do
   begin
-    StreamCopy := Attachment.Content;
-    FAttachments.Add(TAttachment.Create(Attachment.Name, StreamCopy));
-    StreamCopy.DisposeOf;
+    FAttachments.Add(Attachment.Clone());
   end;
 end;
 
