@@ -93,6 +93,7 @@ var
   DispatcherResponce: TDispatcherResponce;
   Token: String;
   TokenV: TJsonValue;
+  Attach: TAttachment;
 
 begin
   RequestorName := Ctx.request.params[REQUESTOR_KEY];
@@ -138,6 +139,13 @@ begin
       try
         DispatcherEntry := Model.BuildBackEndEntry(RequestorName, ActionName, AJSon.ToString, Attachments);
         Writeln('Prepared a request with ' + DispatcherEntry.Attachments.Count.ToString + ' attachment(s).');
+        for Attach in DispatcherEntry.Attachments do
+        begin
+          Writeln('name: ' + Attach.Name);
+          Writeln('content: ' + Attach.ContentAsString);
+
+        end;
+
         try
           DispatcherResponce := FBackEndProxy.PutEntry(DispatcherEntry);
         except

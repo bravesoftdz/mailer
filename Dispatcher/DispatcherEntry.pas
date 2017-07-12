@@ -70,7 +70,7 @@ begin
   FAttachments.Clear;
   for Attachment in TheAttachments do
   begin
-    // FAttachments.Add(Attachment.Clone());
+    FAttachments.Add(Attachment.Clone());
   end;
 end;
 

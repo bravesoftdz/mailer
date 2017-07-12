@@ -17,13 +17,16 @@ type
     function GetContentCopy: TMemoryStream;
     /// free FContent and set a new value. Assume that FContent has already been intialized.
     procedure FreeAndSetContent(const Value: TMemoryStream);
+
   public
     /// <summary> name of the attachment</summary>
     [MapperJSONSer('name')]
     property Name: String read FName write FName;
+
     /// <summary> content of the attachment</summary>
     [MapperJSONSer('content')]
     property Content: TMemoryStream read FContent write FContent;
+
     /// <summary> constructor </summary>
     /// <param name="aName"> name of the attachment</param>
     /// <param name="aContent"> content of the attachment</param>
@@ -33,11 +36,18 @@ type
     constructor Create(); overload;
 
     destructor Destroy(); override;
+
     /// <sumamry>Create a deep copy of the instance.</summary>
     function Clone(): TAttachment;
+
+    /// <summary>return Content as string</summary>
+    function ContentAsString(): String;
   end;
 
 implementation
+
+uses
+  System.SysUtils;
 
 { TAttachment }
 
@@ -51,6 +61,16 @@ begin
   Create();
   FName := AName;
   FreeAndSetContent(AContent);
+end;
+
+function TAttachment.ContentAsString: String;
+var
+  aStream: TStringStream;
+begin
+  aStream := TStringStream.Create('', TEncoding.UTF8);
+  aStream.CopyFrom(FContent, 0);
+  Result := aStream.DataString;
+  aStream.DisposeOf;
 end;
 
 constructor TAttachment.Create;
