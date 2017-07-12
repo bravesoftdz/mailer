@@ -44,7 +44,7 @@ implementation
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
   DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
-  System.Generics.Collections, ActiveQueueResponce;
+  System.Generics.Collections, ActiveQueueResponce, Attachment;
 
 procedure TDispatcherController.Index;
 var
@@ -88,14 +88,20 @@ var
   Responce: TDispatcherResponce;
   Wrapper: TActiveQueueEntries;
   BackEndResponce: TActiveQueueResponce;
+  Attach: TAttachment;
 begin
   IP := Context.Request.ClientIP;
-
   if Context.Request.ThereIsRequestBody then
   begin
     try
       Request := Context.Request.BodyAs<TDispatcherEntry>;
       Writeln('Recieved a request with ' + Request.Attachments.Count.ToString + ' attachment(s).');
+      for Attach in Request.Attachments do
+      begin
+        Writeln('name: ' + Attach.Name);
+        Writeln('content: ' + Attach.ContentAsString);
+
+      end;
     except
       on E: Exception do
       begin

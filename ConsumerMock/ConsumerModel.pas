@@ -59,7 +59,7 @@ implementation
 
 uses
   System.IOUtils, System.SysUtils, System.JSON, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers,
-  SendDataTemplate;
+  SendDataTemplate, IdAttachment, IdAttachmentFile, Attachment, System.Classes;
 
 { TConsumerModel }
 
@@ -176,6 +176,9 @@ var
   Msg: TIdMessage;
   Data: TSendDataTemplate;
   jo: TJsonObject;
+  Attachment: TAttachment;
+  AttachFile: TIdAttachmentFile;
+  AStream: TStream;
 begin
   Writeln('Sending a message');
   if (Item = nil) then
@@ -208,6 +211,13 @@ begin
     Msg.From.Address := TSendMailConfig.MAIL_FROM;
     Msg.Body.Text := Data.Text;
     Msg.Subject := Data.Subject;
+
+    for Attachment in Data.attachment do
+    begin
+      AttachFile := TIdAttachmentFile.Create(msg.MessageParts, Attachment.Name);
+      AttachFile.LoadFromStream(Attachment.Content);
+    end;
+
     Smtp := TIdSMTP.Create(NIL);
     try
       Writeln('Trying to connect');

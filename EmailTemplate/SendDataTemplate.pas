@@ -81,6 +81,7 @@ type
     property recipbcc: String read FRecipBcc write FRecipBcc;
     /// <summary> list of attachment contents </summary>
     [MapperJSONSer(TOKEN_ATTACH)]
+    [MapperListOf(TAttachment)]
     property attachment: TObjectList<TAttachment> read FAttach write FAttach;
     [MapperJSONSer(TOKEN_TOKEN)]
     property token: String read FToken write FToken;
@@ -345,7 +346,7 @@ begin
   /// create a copy. Don't forget to free it!
   FAttach := TObjectList<TAttachment>.Create();
   for anAttachment in Attachments do
-    FAttach.Add(TAttachment.Create(anAttachment.Name, anAttachment.Content));
+    FAttach.Add(anAttachment.Clone());
 
 end;
 
