@@ -38,6 +38,8 @@ type
     property SubscriptionToken: String read FSubscriptionToken;
     property BlockSize: Integer read FBlockSize;
 
+    function Clone(): TConsumerConfig;
+
   end;
 
 implementation
@@ -61,6 +63,11 @@ begin
   SubscriptionToken := GetStrValue(Json, SUBSCRIPTION_TOKEN_KEY, '');
   BlockSize := GetIntValue(Json, BLOCK_SIZE_KEY, DEFAULT_BLOCK_SIZE_VALUE);
   Result := TConsumerConfig.Create(Port, ProviderIP, ProviderPort, SubscriptionStatus, SubscriptionToken, BlockSize);
+end;
+
+function TConsumerConfig.Clone: TConsumerConfig;
+begin
+  Result := TConsumerConfig.Create(FPort, FProviderIP, FProviderPort, FSubscriptionStatus, FSubscriptionToken, FBlockSize);
 end;
 
 constructor TConsumerConfig.Create(const Port: Integer; const BackEndIp: String;

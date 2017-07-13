@@ -25,6 +25,10 @@ type
 
     FAdapter: TRestAdapter<IAQAPIConsumer>;
     FServer: IAQAPIConsumer;
+    function GetBlockSize: Integer;
+    function GetSubscriptionStatus: Boolean;
+    function GetSubscriptionToken: String;
+    function GetPort(): Integer;
 
   var
     procedure RequestAndExecute();
@@ -32,8 +36,8 @@ type
     procedure SendMail(const Item: TActiveQueueEntry);
 
   public
-    function GetPort(): Integer;
-    procedure LoadConfigFromFile(const FilePath: String);
+
+    procedure SetConfig(const Config: TConsumerConfig; const TargetConfigFileName: String);
     /// <summary>Get the configuation of the server.</summary>
     function GetConfig(): TConsumerConfig;
     /// <summary>Send a subscription request to the data provider server notifications</summary>
@@ -47,6 +51,11 @@ type
 
     /// <summary>IP based authorisation: if ip is 0:0:0:0:0:0:0:1, returns true, otherwise - false</summary>
     function isAuthorised(const IP: String): Boolean;
+
+    property Port: Integer read GetPort;
+    property BlockSize: Integer read GetBlockSize;
+    property SubscriptionStatus: Boolean read GetSubscriptionStatus;
+    property SubscriptionToken: String read GetSubscriptionToken;
 
     procedure Start();
 
@@ -90,15 +99,42 @@ begin
 
 end;
 
+function TConsumerModel.GetBlockSize: Integer;
+begin
+  if FConfig <> nil then
+    Result := FConfig.Port
+  else
+    Result := -1;
+end;
+
 function TConsumerModel.GetConfig: TConsumerConfig;
 begin
   if FConfig <> nil then
-    Result := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIp, FConfig.ProviderPort, FConfig.IsSubscribed, FConfig.SubscriptionToken, FConfig.BlockSize);
+    Result := FConfig.Clone();
 end;
 
 function TConsumerModel.GetPort: Integer;
 begin
-  Result := FConfig.Port;
+  if FConfig <> nil then
+    Result := FConfig.Port
+  else
+    Result := -1;
+end;
+
+function TConsumerModel.GetSubscriptionStatus: Boolean;
+begin
+  if FConfig <> nil then
+    Result := FConfig.IsSubscribed
+  else
+    Result := False;
+end;
+
+function TConsumerModel.GetSubscriptionToken: String;
+begin
+  if FConfig <> nil then
+    Result := FConfig.SubscriptionToken
+  else
+    Result := '';
 end;
 
 function TConsumerModel.isAuthorised(const IP: String): Boolean;
@@ -109,22 +145,6 @@ end;
 function TConsumerModel.IsProviderAuthorized(const IP: String): Boolean;
 begin
   Result := (FConfig <> nil) AND (FConfig.ProviderIP = IP);
-end;
-
-procedure TConsumerModel.LoadConfigFromFile(const FilePath: String);
-var
-  Content: String;
-  Json: TJsonObject;
-begin
-  if not TFile.Exists(FilePath) then
-    raise Exception.Create('Config file ' + FilePath + ' is not found.');
-  FConfigFilePath := FilePath;
-  Content := TFile.ReadAllText(FilePath);
-  Json := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Content), 0) as TJSONObject;
-  if FConfig <> nil then
-    FConfig.DisposeOf;
-  FConfig := TConsumerConfig.CreateFromJson(Json);
-  Json.DisposeOf;
 end;
 
 procedure TConsumerModel.OnProviderStateUpdate;
@@ -238,6 +258,14 @@ begin
     Msg.DisposeOf;
   end;
   Writeln('Message sent');
+end;
+
+procedure TConsumerModel.SetConfig(const Config: TConsumerConfig;
+  const TargetConfigFileName: String);
+begin
+  if FConfig <> nil then
+    FConfig.DisposeOf;
+  FConfig := Config.Clone();
 end;
 
 procedure TConsumerModel.Start;

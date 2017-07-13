@@ -23,13 +23,18 @@ type
     /// </summary>
     class procedure Teardown();
 
+    class procedure Init();
+
+    /// <summary>Set up the configuration of the server</summary>
+    /// <param name="Config">configuration class instance</param>
+    /// <param name="TargetConfigFileName">defines a name of the file into which a configuration
+    /// should be saved in case it gets updates (due to a possible subscription status change)</param>
+    class procedure SetConfig(const Config: TConsumerConfig; const TargetConfigFileName: String);
+
     class function GetPort(): Integer;
-
-    class function GetConfig(): TConsumerConfig;
-
-    /// <summary> Load the configuration from a file. The config. file must contain a string version
-    /// of a json object.
-    class procedure LoadConfigFromFile(const FilePath: String);
+    class function getSubscriptionStatus(): Boolean;
+    class function GetSubscriptionToken(): String;
+    class function GetBlockSize(): Integer;
 
     [MVCPath('/notify')]
     [MVCHTTPMethod([httpPOST])]
@@ -55,6 +60,12 @@ uses
   SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
   System.SysUtils;
 
+class procedure TConsumerController.SetConfig(const Config: TConsumerConfig;
+  const TargetConfigFileName: String);
+begin
+  Model.SetConfig(Config, TargetConfigFileName);
+end;
+
 class procedure TConsumerController.Setup;
 begin
   Model := TConsumerModel.Create();
@@ -65,25 +76,28 @@ begin
   Model.DisposeOf;
 end;
 
-class function TConsumerController.GetConfig: TConsumerConfig;
+class function TConsumerController.GetBlockSize: Integer;
 begin
-  if Model <> nil then
-    Result := Model.GetConfig();
-
+  Result := Model.BlockSize;
 end;
 
 class function TConsumerController.GetPort: Integer;
 begin
-  if Model = nil then
-    raise Exception.Create('Consumer model is not set.');
   Result := Model.GetPort();
 end;
 
-class procedure TConsumerController.LoadConfigFromFile(const FilePath: String);
+class function TConsumerController.getSubscriptionStatus: Boolean;
 begin
-  if Model = nil then
-    raise Exception.Create('Consumer model is not set.');
-  Model.LoadConfigFromFile(FilePath);
+  Result := Model.SubscriptionStatus;
+end;
+
+class function TConsumerController.GetSubscriptionToken: String;
+begin
+  Result := Model.SubscriptionToken;
+end;
+
+class procedure TConsumerController.Init;
+begin
   Model.Start();
 end;
 
