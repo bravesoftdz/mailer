@@ -8,6 +8,8 @@ uses
 const
   KEEP_ON = 1;
   STOP = 0;
+  DEFAULT_COLOR = 7;
+  WARNING_COLOR = 12;
 
 type
   IKeyStrokeAction = interface(IInvokable)
@@ -117,9 +119,14 @@ begin
       Result := FIndex[KeyCode].Elaborate;
     except
       on E: Exception do
-        Writeln('Action ' + FIndex[KeyCode].GetDescription + ' failed: ' + E.Message);
+      begin
+        Write('Action "' + FIndex[KeyCode].GetDescription + '" failed: ');
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
+        Writeln(E.Message);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+        Result := KEEP_ON;
+      end;
     end;
-
   end
   else
     Result := KEEP_ON;
