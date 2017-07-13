@@ -23,8 +23,10 @@ uses
   CliUsage in '..\Cli\CliUsage.pas',
   Configuration in '..\Config\Configuration.pas',
   SubscriptionData in 'SubscriptionData.pas',
-  SendDataTemplate in '..\EmailTemplate\SendDataTemplate.pas', System.IOUtils,
-  System.JSON;
+  SendDataTemplate in '..\EmailTemplate\SendDataTemplate.pas',
+  System.IOUtils,
+  System.JSON,
+  KeyStroke in 'KeyStroke.pas';
 
 {$R *.res}
 
@@ -57,6 +59,7 @@ var
   Port, BlockSize: Integer;
   InfoString, Token: String;
   SubscriptionStatus: Boolean;
+  KeyStrokehandler: TConsumerKeyStroke;
 
 begin
   TConsumerController.SetConfig(Config, ConfigFileName);
@@ -122,17 +125,21 @@ begin
     LServer.ListenQueue := 200;
 
     Writeln('Press ESC to stop the server');
+    KeyStrokehandler := TConsumerKeyStroke.Create(TConsumerController);
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
     begin
       Win32Check(ReadConsoleInput(LHandle, LInputRecord, 1, LEvent));
       if (LInputRecord.EventType = KEY_EVENT) and
-        LInputRecord.Event.KeyEvent.bKeyDown and
-        (LInputRecord.Event.KeyEvent.wVirtualKeyCode = VK_ESCAPE) then
-        break;
+        LInputRecord.Event.KeyEvent.bKeyDown then
+      begin
+        if KeyStrokehandler.Elaborate(LInputRecord.Event.KeyEvent.wVirtualKeyCode) = 0 then
+          break;
+      end;
     end;
   finally
     LServer.Free;
+    KeyStrokehandler.DisposeOf;
   end;
 end;
 
