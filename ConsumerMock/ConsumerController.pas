@@ -23,8 +23,6 @@ type
     /// </summary>
     class procedure Teardown();
 
-    class procedure Init();
-
     /// <summary>Set up the configuration of the server</summary>
     /// <param name="Config">configuration class instance</param>
     /// <param name="TargetConfigFileName">defines a name of the file into which a configuration
@@ -83,7 +81,7 @@ end;
 
 class function TConsumerController.GetPort: Integer;
 begin
-  Result := Model.GetPort();
+  Result := Model.Port;
 end;
 
 class function TConsumerController.getSubscriptionStatus: Boolean;
@@ -94,11 +92,6 @@ end;
 class function TConsumerController.GetSubscriptionToken: String;
 begin
   Result := Model.SubscriptionToken;
-end;
-
-class procedure TConsumerController.Init;
-begin
-  Model.Start();
 end;
 
 procedure TConsumerController.Notify(const Ctx: TWebContext);

@@ -102,7 +102,7 @@ end;
 function TConsumerModel.GetBlockSize: Integer;
 begin
   if FConfig <> nil then
-    Result := FConfig.Port
+    Result := FConfig.BlockSize
   else
     Result := -1;
 end;
@@ -260,12 +260,15 @@ begin
   Writeln('Message sent');
 end;
 
-procedure TConsumerModel.SetConfig(const Config: TConsumerConfig;
-  const TargetConfigFileName: String);
+procedure TConsumerModel.SetConfig(const Config: TConsumerConfig; const TargetConfigFileName: String);
 begin
   if FConfig <> nil then
-    FConfig.DisposeOf;
+  begin
+    raise Exception.Create('It is not allowed to reset the configuration at runtime. Turn the server off and change the configuration file.');
+  end;
   FConfig := Config.Clone();
+  FConfigFilePath := TargetConfigFileName;
+  Start();
 end;
 
 procedure TConsumerModel.Start;
