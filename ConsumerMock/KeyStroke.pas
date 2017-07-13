@@ -94,7 +94,7 @@ begin
   begin
     Code := Action.GetTriggerKeyStroke;
     if (Code > 31) AND (Code < 128) then
-      Builder.AppendLine(Format('key code: %d (symbol %s): %s', [Code, Char(Code), Action.GetDescription()]))
+      Builder.AppendLine(Format('key code: %d (symbol "%s"): %s', [Code, Char(Code), Action.GetDescription()]))
     else
       Builder.AppendLine(Format('key code: %d: %s', [Code, Action.GetDescription()]));
   end;
@@ -113,7 +113,13 @@ function TKeyStroke.ElaborateKeyStroke(const KeyCode: Integer): Integer;
 begin
   if FIndex.ContainsKey(KeyCode) then
   begin
-    Result := FIndex[KeyCode].Elaborate;
+    try
+      Result := FIndex[KeyCode].Elaborate;
+    except
+      on E: Exception do
+        Writeln('Action ' + FIndex[KeyCode].GetDescription + ' failed: ' + E.Message);
+    end;
+
   end
   else
     Result := KEEP_ON;
@@ -141,7 +147,7 @@ end;
 
 function TConsumerUnSubscribeAction.Elaborate: Integer;
 begin
-  TConsumerController.Subscribe();
+  TConsumerController.UnSubscribe();
   Result := KEEP_ON;
 end;
 

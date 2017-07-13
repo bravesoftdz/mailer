@@ -195,7 +195,6 @@ begin
         Writeln('No config is created. The service is not started.');
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
       end;
-
     except
       on E: Exception do
       begin
@@ -203,7 +202,6 @@ begin
         Writeln(ParamUsage.Text);
       end;
     end;
-
   finally
     if ParamValues <> nil then
     begin
