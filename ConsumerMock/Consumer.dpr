@@ -59,7 +59,7 @@ var
   Port, BlockSize: Integer;
   InfoString, Token: String;
   SubscriptionStatus: Boolean;
-  KeyStrokeHandler: TKeyStroke;
+  KeyStrokeContainer: TKeyStroke;
   Action1, Action2, Action3: IKeyStrokeAction;
 
 begin
@@ -129,8 +129,8 @@ begin
     Action1 := TExitAction.Create();
     Action2 := TConsumerSubscribeAction.Create();
     Action3 := TConsumerUnSubscribeAction.Create();
-    KeyStrokeHandler := TKeyStroke.Create([Action1, Action2, Action3]);
-    Writeln(KeyStrokeHandler.Description);
+    KeyStrokeContainer := TKeyStroke.Create([Action1, Action2, Action3]);
+    Writeln(KeyStrokeContainer.Description);
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
     begin
@@ -138,7 +138,7 @@ begin
       if (LInputRecord.EventType = KEY_EVENT) and
         LInputRecord.Event.KeyEvent.bKeyDown then
       begin
-        if KeyStrokehandler.Elaborate(LInputRecord.Event.KeyEvent.wVirtualKeyCode) = 0 then
+        if KeyStrokeContainer.ElaborateKeyStroke(LInputRecord.Event.KeyEvent.wVirtualKeyCode) = 0 then
           break;
       end;
     end;
@@ -147,7 +147,7 @@ begin
     Action1 := nil;
     Action2 := nil;
     Action3 := nil;
-    KeyStrokehandler.DisposeOf;
+    KeyStrokeContainer.DisposeOf;
 
   end;
 end;

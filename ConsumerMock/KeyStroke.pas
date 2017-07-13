@@ -14,11 +14,14 @@ type
     ['{771C36F5-7A57-4F1F-BC1F-21E7B08A4584}']
     /// <summary>Execute an action. If returns 0, no further action should be executed.</summary>
     function Elaborate(): Integer;
+    /// <summary>return the ascii code of a symbol that triggers this action.</sumamry>
     function GetTriggerKeyStroke(): Integer;
+    /// <summary>A description of what this action does.</summary>
     function GetDescription(): String;
   end;
 
 type
+  /// <summary>A class that wraps many keystroke actions.</summary>
   TKeyStroke = class(TObject)
   strict private
   var
@@ -26,7 +29,9 @@ type
   public
     constructor Create(const EventHandlers: TArray<IKeyStrokeAction>);
     destructor Destroy(); override;
-    function Elaborate(const KeyCode: Integer): Integer;
+    /// <summary>Find a keystroke action associated with given keystroke code and execute it.
+    /// Return the result of that action. </summary>
+    function ElaborateKeyStroke(const KeyCode: Integer): Integer;
     function Description(): String;
   end;
 
@@ -104,7 +109,7 @@ begin
   inherited;
 end;
 
-function TKeyStroke.Elaborate(const KeyCode: Integer): Integer;
+function TKeyStroke.ElaborateKeyStroke(const KeyCode: Integer): Integer;
 begin
   if FIndex.ContainsKey(KeyCode) then
   begin
