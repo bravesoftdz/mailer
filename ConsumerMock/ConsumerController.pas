@@ -38,13 +38,9 @@ type
     [MVCHTTPMethod([httpPOST])]
     procedure Notify(const Ctx: TWebContext);
 
-    [MVCPath('/subscribe')]
-    [MVCHTTPMethod([httpPOST])]
-    procedure Subscribe(const Ctx: TWebContext);
+    class procedure Subscribe();
 
-    [MVCPath('/unsubscribe/($token)')]
-    [MVCHTTPMethod([httpPOST])]
-    procedure Unsubscribe(const Ctx: TWebContext);
+    class procedure Unsubscribe();
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -120,37 +116,27 @@ begin
   inherited;
 end;
 
-procedure TConsumerController.Subscribe(const Ctx: TWebContext);
+class procedure TConsumerController.Subscribe();
 var
   IP: String;
   Output: String;
   Responce: TActiveQueueResponce;
 begin
-  IP := Context.Request.ClientIP;
-  Writeln(IP);
-  if Model.isAuthorised(IP) then
-  begin
-    Responce := Model.Subscribe();
-    if Responce.status then
-      Output := 'Success'
-    else
-      Output := Responce.Msg;
-    Responce.DisposeOf;
-  end
+  Responce := Model.Subscribe();
+  if Responce.status then
+    Output := 'Success'
   else
-    Output := 'not authorized';
+    Output := Responce.Msg;
+  Responce.DisposeOf;
+  // end
+  // else
+  // Output := 'not authorized';
 
-  Render(output);
 end;
 
-procedure TConsumerController.Unsubscribe(const Ctx: TWebContext);
-var
-  Responce: TActiveQueueResponce;
-  Token: String;
+class procedure TConsumerController.Unsubscribe();
 begin
-  Token := Context.Request.Params['token'];
-  Responce := Model.Unsubscribe(Token);
-  Render(Responce);
+  Model.Unsubscribe();
 end;
 
 initialization

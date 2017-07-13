@@ -59,7 +59,8 @@ var
   Port, BlockSize: Integer;
   InfoString, Token: String;
   SubscriptionStatus: Boolean;
-  KeyStrokehandler: TConsumerKeyStroke;
+  KeyStrokeHandler: TKeyStroke;
+  Action1, Action2, Action3: IKeyStrokeAction;
 
 begin
   TConsumerController.SetConfig(Config, ConfigFileName);
@@ -125,7 +126,11 @@ begin
     LServer.ListenQueue := 200;
 
     Writeln('Press ESC to stop the server');
-    KeyStrokehandler := TConsumerKeyStroke.Create(TConsumerController);
+    Action1 := TExitAction.Create();
+    Action2 := TConsumerSubscribeAction.Create();
+    Action3 := TConsumerUnSubscribeAction.Create();
+    KeyStrokeHandler := TKeyStroke.Create([Action1, Action2, Action3]);
+    Writeln(KeyStrokeHandler.Description);
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do
     begin
@@ -139,7 +144,11 @@ begin
     end;
   finally
     LServer.Free;
+    Action1 := nil;
+    Action2 := nil;
+    Action3 := nil;
     KeyStrokehandler.DisposeOf;
+
   end;
 end;
 
@@ -204,6 +213,8 @@ begin
     ParamUsage.DisposeOf;
     CliParams[0].DisposeOf();
     SetLength(CliParams, 0);
+    if Config <> nil then
+      Config.DisposeOf;
   end;
 
 end.

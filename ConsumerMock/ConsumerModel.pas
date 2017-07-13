@@ -43,7 +43,7 @@ type
     /// <summary>Send a subscription request to the data provider server notifications</summary>
     function Subscribe(): TActiveQueueResponce;
     /// <summary>Send a request to cancel the subscription from the data provider notifications</summary>
-    function Unsubscribe(const Token: String): TActiveQueueResponce;
+    function Unsubscribe(): TActiveQueueResponce;
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
     /// <summary>Retrieve data from the provider</sumamry>
@@ -300,11 +300,11 @@ begin
   end;
 end;
 
-function TConsumerModel.Unsubscribe(const Token: String): TActiveQueueResponce;
+function TConsumerModel.Unsubscribe(): TActiveQueueResponce;
 var
   ConfigNew: TConsumerConfig;
 begin
-  Result := FServer.UnSubscribe(Token);
+  Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
   if Result.status then
   begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize);
