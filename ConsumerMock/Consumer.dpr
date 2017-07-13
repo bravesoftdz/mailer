@@ -118,6 +118,11 @@ begin
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
   Writeln(BlockSize.toString());
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  Action1 := TExitAction.Create();
+  Action2 := TConsumerSubscribeAction.Create();
+  Action3 := TConsumerUnSubscribeAction.Create();
+  KeyStrokeContainer := TKeyStroke.Create([Action1, Action2, Action3]);
+
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try
     LServer.DefaultPort := Port;
@@ -125,11 +130,6 @@ begin
     LServer.MaxConnections := 0;
     LServer.ListenQueue := 200;
 
-    Writeln('Press ESC to stop the server');
-    Action1 := TExitAction.Create();
-    Action2 := TConsumerSubscribeAction.Create();
-    Action3 := TConsumerUnSubscribeAction.Create();
-    KeyStrokeContainer := TKeyStroke.Create([Action1, Action2, Action3]);
     Writeln(KeyStrokeContainer.Description);
     LHandle := GetStdHandle(STD_INPUT_HANDLE);
     while True do

@@ -49,9 +49,6 @@ type
     /// <summary>Retrieve data from the provider</sumamry>
     procedure OnProviderStateUpdate();
 
-    /// <summary>IP based authorisation: if ip is 0:0:0:0:0:0:0:1, returns true, otherwise - false</summary>
-    function isAuthorised(const IP: String): Boolean;
-
     property Port: Integer read GetPort;
     property BlockSize: Integer read GetBlockSize;
     property SubscriptionStatus: Boolean read GetSubscriptionStatus;
@@ -135,11 +132,6 @@ begin
     Result := FConfig.SubscriptionToken
   else
     Result := '';
-end;
-
-function TConsumerModel.isAuthorised(const IP: String): Boolean;
-begin
-  Result := IP = '0:0:0:0:0:0:0:1';
 end;
 
 function TConsumerModel.IsProviderAuthorized(const IP: String): Boolean;

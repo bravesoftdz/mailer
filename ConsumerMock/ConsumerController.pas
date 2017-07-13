@@ -122,21 +122,39 @@ var
   Output: String;
   Responce: TActiveQueueResponce;
 begin
-  Responce := Model.Subscribe();
-  if Responce.status then
-    Output := 'Success'
+  if Model.SubscriptionStatus then
+  begin
+    Writeln('Already subscribed.');
+  end
   else
-    Output := Responce.Msg;
-  Responce.DisposeOf;
-  // end
-  // else
-  // Output := 'not authorized';
-
+  begin
+    Responce := Model.Subscribe();
+    if Responce.status then
+      Output := 'Success'
+    else
+      Output := Responce.Msg;
+    Writeln(Output);
+    Responce.DisposeOf;
+  end;
 end;
 
 class procedure TConsumerController.Unsubscribe();
+var
+  Output: String;
+  Responce: TActiveQueueResponce;
 begin
-  Model.Unsubscribe();
+  if Model.SubscriptionStatus then
+  begin
+    Responce := Model.Unsubscribe();
+    if Responce.status then
+      Output := 'Success'
+    else
+      Output := Responce.Msg;
+    Writeln(Output);
+  end
+  else
+    Writeln('Already unsubscribed.');
+
 end;
 
 initialization
