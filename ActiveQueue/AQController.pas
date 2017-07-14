@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce, SubscriptionData,
+  MVCFramework.Logger, ActiveQueueResponce, AQSubscriptionEntry,
   System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
 
 class function TController.GetClients: TObjectList<TClient>;
@@ -316,7 +316,7 @@ end;
 procedure TController.Subscribe(const Context: TWebContext);
 var
   responce: TActiveQueueResponce;
-  SubscriptionData: TSubscriptionData;
+  SubscriptionData: TAQSubscriptionEntry;
   Ip: String;
   jo: TJsonObject;
 begin
@@ -330,7 +330,7 @@ begin
   if jo <> nil then
   begin
     try
-      SubscriptionData := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+      SubscriptionData := Mapper.JSONObjectToObject<TAQSubscriptionEntry>(jo);
       SubscriptionData.Ip := Ip;
     except
       on e: Exception do

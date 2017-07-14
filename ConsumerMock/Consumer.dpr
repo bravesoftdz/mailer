@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   ConsumerController in 'ConsumerController.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
   AQAPIConsumer in 'AQAPIConsumer.pas',
   SendmailConfig in 'SendmailConfig.pas',
   ConsumerModel in 'ConsumerModel.pas',
@@ -22,10 +22,10 @@ uses
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
   Configuration in '..\Config\Configuration.pas',
-  SubscriptionData in 'SubscriptionData.pas',
   SendDataTemplate in '..\EmailTemplate\SendDataTemplate.pas',
   System.IOUtils,
   System.JSON,
+  AQSubscriptionEntry in '..\ActiveQueue\AQSubscriptionEntry.pas',
   KeyStroke in 'KeyStroke.pas';
 
 {$R *.res}

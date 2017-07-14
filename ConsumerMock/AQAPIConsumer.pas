@@ -2,14 +2,14 @@ unit AQAPIConsumer;
 
 interface
 
-uses ActiveQueueResponce, ActiveQueueEntry, SubscriptionData,
-  System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
+uses ActiveQueueResponce, ActiveQueueEntry,  System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers,
+  AQSubscriptionEntry;
 
 type
   IAQAPIConsumer = interface(IInvokable)
     ['{485A42C7-B598-428A-83E3-F524B115604C}']
     [RESTResource(TMVCHTTPMethodType.httpPUT, '/subscribe')]
-    function Subscribe([Body] Data: TSubscriptionData): TActiveQueueResponce;
+    function Subscribe([Body] Data: TAQSubscriptionEntry): TActiveQueueResponce;
 
     [RESTResource(TMVCHTTPMethodType.httpPUT, '/unsubscribe/{token}')]
     function Unsubscribe([Param('token')] Token: String): TActiveQueueResponce;

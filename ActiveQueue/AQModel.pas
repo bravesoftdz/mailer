@@ -3,7 +3,7 @@ unit AQModel;
 interface
 
 uses
-  ActiveQueueResponce, SubscriptionData, ActiveQueueEntry,
+  ActiveQueueResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, System.Generics.Collections, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client;
 
@@ -82,7 +82,7 @@ type
     function GetNumOfSubscriptions: Integer;
 
     /// <summary>Return true if given subscription data is already present in the register.</summary>
-    function IsSubscribed(const Data: TSubscriptionData): Boolean;
+    function IsSubscribed(const Data: TAQSubscriptionEntry): Boolean;
 
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
@@ -140,7 +140,7 @@ type
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
-    function AddConsumer(const Data: TSubscriptionData): TActiveQueueResponce;
+    function AddConsumer(const Data: TAQSubscriptionEntry): TActiveQueueResponce;
 
     /// <summary>Get all subscribed listeners</summary>
     function GetConsumers(): TObjectList<TConsumer>;
@@ -242,7 +242,7 @@ begin
 
 end;
 
-function TActiveQueueModel.AddConsumer(const data: TSubscriptionData): TActiveQueueResponce;
+function TActiveQueueModel.AddConsumer(const data: TAQSubscriptionEntry): TActiveQueueResponce;
 var
   Token: String;
   Ip: String;
@@ -727,7 +727,7 @@ begin
   end;
 end;
 
-function TActiveQueueModel.IsSubscribed(const Data: TSubscriptionData): Boolean;
+function TActiveQueueModel.IsSubscribed(const Data: TAQSubscriptionEntry): Boolean;
 begin
   /// stub
   Result := False;

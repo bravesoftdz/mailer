@@ -64,7 +64,7 @@ type
 implementation
 
 uses
-  System.IOUtils, System.SysUtils, System.JSON, SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers,
+  System.IOUtils, System.SysUtils, System.JSON, AQSubscriptionEntry, IdSMTP, IdMessage, SendmailConfig, ObjectsMappers,
   SendDataTemplate, IdAttachment, IdAttachmentFile, Attachment, System.Classes;
 
 { TConsumerModel }
@@ -160,7 +160,7 @@ end;
 
 procedure TConsumerModel.RequestAndExecute;
 var
-  SubscriptionData: TSubscriptionData;
+  SubscriptionData: TAQSubscriptionEntry;
   ConfigNew: TConsumerConfig;
   Items: TActiveQueueEntries;
 begin
@@ -274,13 +274,13 @@ end;
 
 function TConsumerModel.Subscribe: TActiveQueueResponce;
 var
-  SubscriptionData: TSubscriptionData;
+  SubscriptionData: TAQSubscriptionEntry;
   ConfigNew: TConsumerConfig;
 begin
   /// the first argument (correponding to an ip at which the consumer operates) gets
   /// ignored by the data provider server since the ip gets extracted from the http request
   /// that the consumer sends to the data provider.
-  SubscriptionData := TSubscriptionData.Create('', '', FConfig.Port, '');
+  SubscriptionData := TAQSubscriptionEntry.Create('', '', FConfig.Port, '');
   Result := FServer.Subscribe(SubscriptionData);
   if Result.status then
   begin

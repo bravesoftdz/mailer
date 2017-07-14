@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   ActiveQueueResponce in 'ActiveQueueResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -31,12 +31,12 @@ uses
   JsonableInterface in 'JsonableInterface.pas',
   CliParam in '..\Cli\CliParam.pas',
   CliUsage in '..\Cli\CliUsage.pas',
-  SubscriptionData in '..\ConsumerMock\SubscriptionData.pas',
   Attachment in '..\EmailTemplate\Attachment.pas',
   ActiveQueueEntry in 'ActiveQueueEntry.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   AQConfigBuilder in 'AQConfigBuilder.pas',
-  Client;
+  Client,
+  AQSubscriptionEntry in 'AQSubscriptionEntry.pas';
 
 {$R *.res}
 

@@ -109,11 +109,11 @@
         <DCCReference Include="JsonableInterface.pas"/>
         <DCCReference Include="..\Cli\CliParam.pas"/>
         <DCCReference Include="..\Cli\CliUsage.pas"/>
-        <DCCReference Include="..\ConsumerMock\SubscriptionData.pas"/>
         <DCCReference Include="..\EmailTemplate\Attachment.pas"/>
         <DCCReference Include="ActiveQueueEntry.pas"/>
         <DCCReference Include="..\Config\ServerConfig.pas"/>
         <DCCReference Include="AQConfigBuilder.pas"/>
+        <DCCReference Include="AQSubscriptionEntry.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

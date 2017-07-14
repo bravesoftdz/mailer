@@ -51,7 +51,7 @@ implementation
 
 uses
   MVCFramework.Logger, MVCFramework.RESTAdapter, AQAPIConsumer,
-  SubscriptionData, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
+  AQSubscriptionEntry, IdSMTP, IdMessage, SendmailConfig, ActiveQueueResponce,
   System.SysUtils;
 
 class procedure TConsumerController.SetConfig(const Config: TConsumerConfig;
