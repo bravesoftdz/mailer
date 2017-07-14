@@ -4,17 +4,24 @@ interface
 
 uses ObjectsMappers;
 
-// <summary>Data class that contains information necessary to
-// perform the subscription.</summary>
+// <summary>Data class that contains information about a consumer necessary to
+// subscribe/unsubscribe it.</summary>
 type
 
   [MapperJSONNaming(JSONNameLowerCase)]
   TAQSubscriptionEntry = class(TObject)
   strict private
-    FUrl: String;
-    FIP: String;
+  const
+    PORT_KEY = 'port';
+    CATEGORY_KEY = 'category';
+    Seed = 17; // some mutually prime numbers for calculating a hash code
+    Base = 31;
+
+  var
+    /// consumer's port
     FPort: Integer;
-    FPath: String;
+    /// type of events to which the consumer subscribes
+    FCategory: String;
     /// <summary> Calculate a hash code of a string</summary>
     /// <param name="Text">a text whose hash code should be calculated</param>
     /// <param name="Base">a parameter that influences on the collision frequency.
@@ -22,15 +29,12 @@ type
     /// The bigger, the lower collision frequency.</param>
     function StringHash(const Text: String; const Base: Integer): Integer;
   public
-    [MapperJSONSer('url')]
-    property Url: String read FUrl write FUrl;
-    [MapperJSONSer('ip')]
-    property Ip: String read FIp write FIp;
-    [MapperJSONSer('port')]
+    [MapperJSONSer(PORT_KEY)]
     property Port: Integer read FPort write FPort;
-    [MapperJSONSer('path')]
-    property Path: String read FPath write FPath;
-    constructor Create(const Ip, Url: String; const Port: Integer; const Path: String); overload;
+    [MapperJSONSer(CATEGORY_KEY)]
+    property Category: String read FCategory write FCategory;
+
+    constructor Create(const Port: Integer; const Category: String); overload;
     constructor Create(); overload;
     destructor Destroy(); override;
     /// <summary>Compare objects by their content, not by their references.</summary>
@@ -45,25 +49,20 @@ implementation
 
 { TAQSubscriptionData }
 
-constructor TAQSubscriptionEntry.Create(const Ip, Url: String; const Port: Integer;
-  const Path: String);
-begin
-  FIP := Ip;
-  FUrl := Url;
-  FPort := Port;
-  FPath := Path;
-end;
-
 function TAQSubscriptionEntry.Copy: TAQSubscriptionEntry;
 begin
-  Result := TAQSubscriptionEntry.Create(FIp, FUrl, FPort, FPath);
+  Result := TAQSubscriptionEntry.Create(FPort, FCategory);
 end;
 
 constructor TAQSubscriptionEntry.Create;
 begin
-  FUrl := '';
-  FPort := 0;
-  FPath := '';
+  Create(0, '');
+end;
+
+constructor TAQSubscriptionEntry.Create(const Port: Integer; const Category: String);
+begin
+  FPort := Port;
+  FCategory = Category;
 end;
 
 destructor TAQSubscriptionEntry.Destroy;
@@ -81,19 +80,14 @@ begin
   else
   begin
     that := Obj as TAQSubscriptionEntry;
-    Result := (Self.Url = That.Url) AND (Self.Ip = That.Ip) AND (Self.Port = That.Port) AND (Self.Path = That.Path);
+    Result := (Self.Port = That.Port) AND (Self.Category = That.Category);
   end;
 end;
 
 function TAQSubscriptionEntry.GetHashCode: Integer;
-const
-  Seed = 17; // some mutually prime numbers
-  Base = 31;
 begin
   Result := Seed;
-  Result := Base * Result + StringHash(Url, Base);
-  Result := Base * Result + StringHash(Ip, Base);
-  Result := Base * Result + StringHash(Path, Base);
+  Result := Base * Result + StringHash(Category, Base);
   Result := Base * Result + Port;
 end;
 
