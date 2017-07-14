@@ -106,6 +106,7 @@
         <DCCReference Include="..\EmailTemplate\SendDataTemplate.pas"/>
         <DCCReference Include="..\ActiveQueue\AQSubscriptionEntry.pas"/>
         <DCCReference Include="KeyStroke.pas"/>
+        <DCCReference Include="..\ActiveQueue\AQResponce.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

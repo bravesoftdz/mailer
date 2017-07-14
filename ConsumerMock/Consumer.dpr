@@ -26,7 +26,8 @@ uses
   System.IOUtils,
   System.JSON,
   AQSubscriptionEntry in '..\ActiveQueue\AQSubscriptionEntry.pas',
-  KeyStroke in 'KeyStroke.pas';
+  KeyStroke in 'KeyStroke.pas',
+  AQResponce in '..\ActiveQueue\AQResponce.pas';
 
 {$R *.res}
 

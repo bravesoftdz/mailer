@@ -100,7 +100,8 @@ implementation
 
 uses
   MVCFramework.Logger, AQSubscriptionResponce, AQSubscriptionEntry,
-  System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
+  System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils,
+  AQResponce;
 
 class function TController.GetClients: TObjectList<TClient>;
 begin
@@ -256,7 +257,7 @@ var
   item: TActiveQueueEntry;
   Outcome: Boolean;
   Wrapper: TObjectList<TActiveQueueEntry>;
-  Responce: TAQSubscriptionResponce;
+  Responce: TAQResponce;
   IP: String;
 begin
   Writeln('Posting an item.');
@@ -275,14 +276,14 @@ begin
   end
   else
     Outcome := False;
-  Responce := TAQSubscriptionResponce.Create(OutCome, '');
+  Responce := TAQResponce.Create(OutCome, '');
   Render(Responce);
 end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
   items: TActiveQueueEntries;
-  Outcome: TAQSubscriptionResponce;
+  Outcome: TAQResponce;
   IP: String;
   Status: Boolean;
 begin
@@ -303,7 +304,7 @@ begin
   end
   else
   begin
-    Outcome := TAQSubscriptionResponce.Create(False, TAG + ': request body is missing.');
+    Outcome := TAQResponce.Create(False, TAG + ': request body is missing.');
   end;
   Render(Outcome);
 end;
