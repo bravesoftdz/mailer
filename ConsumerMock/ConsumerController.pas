@@ -152,10 +152,16 @@ begin
   if Model.SubscriptionStatus then
   begin
     Responce := Model.Unsubscribe();
-    if Responce.status then
-      Output := 'Success'
+    if Responce <> nil then
+    begin
+      if Responce.status then
+        Output := 'Success'
+      else
+        Output := Responce.Msg;
+      Responce.DisposeOf;
+    end
     else
-      Output := Responce.Msg;
+      Output := 'No responce from server';
     Writeln(Output);
   end
   else
