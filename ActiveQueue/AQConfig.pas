@@ -64,7 +64,9 @@ type
   end;
 
 type
+
   /// <summary>Immutable version of TAQConfig.</summary>
+  [MapperJSONNaming(JSONNameLowerCase)]
   TAQConfigImmutable = class(TAQConfig)
   strict private
     function GetClients: TObjectList<TClient>;
@@ -75,10 +77,15 @@ type
     function Clone(): TAQConfigImmutable;
 
     /// override the parent fields by making them read-only
+    [MapperTransient]
     property Port: Integer read FPort;
+    [MapperTransient]
     property Token: String read FToken;
+    [MapperTransient]
     property ConsumerWhitelist: String read FConsumerWhitelistIPs;
+    [MapperTransient]
     property Clients: TObjectList<TClient> read GetClients;
+    [MapperTransient]
     property Consumers: TObjectList<TConsumer> read GetConsumers;
 
   end;
@@ -118,8 +125,28 @@ begin
 end;
 
 function TAQConfig.ToJson: TJsonObject;
+var
+  ja1, ja2: TJsonArray;
+  AConsumer: TConsumer;
+  AClient: TClient;
 begin
-  Result := Mapper.ObjectToJSONObject(Self);
+  Result := TJsonObject.Create();
+  Result.AddPair(TJsonPair.Create(PORT_KEY, TJsonNumber.Create(Port)));
+  Result.AddPair(TOKEN_KEY, FToken);
+  Result.AddPair(CONSUMER_IP_WHITELIST_KEY, FConsumerWhiteListIps);
+  ja1 := TJsonArray.Create();
+  for AConsumer in FConsumers do
+  begin
+    ja1.AddElement(AConsumer.ToJson);
+  end;
+  Result.AddPair(CONSUMERS_KEY, ja1);
+  ja2 := TJsonArray.Create();
+  for AClient in FClients do
+  begin
+    ja2.AddElement(AClient.toJson());
+  end;
+    Result.AddPair(CLIENTS_KEY, ja2);
+
 end;
 
 { TAQConfigImmutable }
