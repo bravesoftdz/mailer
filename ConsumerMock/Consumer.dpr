@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   ConsumerController in 'ConsumerController.pas',
-  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
+  ConsumerWebModule in 'ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
   AQAPIConsumer in 'AQAPIConsumer.pas',
   SendmailConfig in 'SendmailConfig.pas',
   ConsumerModel in 'ConsumerModel.pas',
@@ -58,7 +58,7 @@ var
   LHandle: THandle;
   LServer: TIdHTTPWebBrokerBridge;
   Port, BlockSize: Integer;
-  InfoString, Token: String;
+  InfoString, Token, Category: String;
   SubscriptionStatus: Boolean;
   KeyStrokeContainer: TKeyStroke;
   Action1, Action2, Action3: IKeyStrokeAction;
@@ -71,6 +71,7 @@ begin
     SubscriptionStatus := getSubscriptionStatus();
     Token := GetSubscriptionToken();
     BlockSize := GetBlockSize();
+    Category := GetCategory();
   end;
 
   InfoString := Format('%s:%d', [PROGRAM_NAME, Port]);
@@ -86,6 +87,21 @@ begin
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
   Writeln(Format('%s:%d', [Config.ProviderIp, Config.ProviderPort]));
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+
+  if Category = '' then
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
+    Writeln('No category is found. ');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR)
+  end
+  else
+  begin
+    Write('Category: ');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
+    Writeln(Category);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR)
+  end;
+
   Write('The subscription to the data provider: ');
   if SubscriptionStatus then
   begin

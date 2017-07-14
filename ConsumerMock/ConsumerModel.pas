@@ -34,6 +34,8 @@ type
     procedure RequestAndExecute();
     procedure Consume(const Items: TObjectList<TActiveQueueEntry>);
     procedure SendMail(const Item: TActiveQueueEntry);
+  private
+    function GetCategory: String;
 
   public
 
@@ -53,6 +55,7 @@ type
     property BlockSize: Integer read GetBlockSize;
     property SubscriptionStatus: Boolean read GetSubscriptionStatus;
     property SubscriptionToken: String read GetSubscriptionToken;
+    property Category: String read GetCategory;
 
     procedure Start();
 
@@ -102,6 +105,14 @@ begin
     Result := FConfig.BlockSize
   else
     Result := -1;
+end;
+
+function TConsumerModel.GetCategory: String;
+begin
+  if FConfig <> nil then
+    Result := FConfig.Category
+  else
+    Result := '';
 end;
 
 function TConsumerModel.GetConfig: TConsumerConfig;
@@ -280,12 +291,12 @@ begin
   /// the first argument (correponding to an ip at which the consumer operates) gets
   /// ignored by the data provider server since the ip gets extracted from the http request
   /// that the consumer sends to the data provider.
-  SubscriptionData := TAQSubscriptionEntry.Create('', '', FConfig.Port, '');
+  SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
   Result := FServer.Subscribe(SubscriptionData);
   if Result.status then
   begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-      FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize);
+      FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize, FConfig.Category);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);
@@ -299,7 +310,7 @@ begin
   Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
   if Result.status then
   begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize);
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
     FFileSaver.Save(FConfigFilePath, FConfig);

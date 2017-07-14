@@ -14,7 +14,7 @@ uses
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
   ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
-  ActiveQueueResponce in 'ActiveQueueResponce.pas',
+  AQSubscriptionResponce in 'AQSubscriptionResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
   System.IOUtils,
@@ -36,7 +36,8 @@ uses
   ServerConfig in '..\Config\ServerConfig.pas',
   AQConfigBuilder in 'AQConfigBuilder.pas',
   Client,
-  AQSubscriptionEntry in 'AQSubscriptionEntry.pas';
+  AQSubscriptionEntry in 'AQSubscriptionEntry.pas',
+  AQResponce in 'AQResponce.pas';
 
 {$R *.res}
 
@@ -76,7 +77,6 @@ var
   InfoString: String;
 begin
   TController.SetConfig(Config, TargetConfig);
-  TController.LoadQueuesFromFile(QueueFileName);
   APort := TController.GetPort();
   InfoString := Format('%s:%d', [PROGRAM_NAME, APort]);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
@@ -125,7 +125,7 @@ begin
     Writeln(L.ToString + ' consumer(s) found:');
     for Consumer in Consumers do
     begin
-      Writeln(Format('%3d) ip: %15s, port: %d, path: %10s, token: (not shown)', [Counter, Consumer.IP, Consumer.Port, Consumer.Path]));
+      Writeln(Format('%3d) ip: %15s, port: %d, category: %10s, token: (not shown)', [Counter, Consumer.IP, Consumer.Port, Consumer.Category]));
       Counter := Counter + 1;
     end;
   end;

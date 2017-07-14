@@ -96,7 +96,7 @@
             <Form>ActiveQueueModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="ActiveQueueResponce.pas"/>
+        <DCCReference Include="AQSubscriptionResponce.pas"/>
         <DCCReference Include="ActiveQueueSettings.pas"/>
         <DCCReference Include="AQModel.pas"/>
         <DCCReference Include="AQConfig.pas"/>
@@ -114,6 +114,7 @@
         <DCCReference Include="..\Config\ServerConfig.pas"/>
         <DCCReference Include="AQConfigBuilder.pas"/>
         <DCCReference Include="AQSubscriptionEntry.pas"/>
+        <DCCReference Include="AQResponce.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

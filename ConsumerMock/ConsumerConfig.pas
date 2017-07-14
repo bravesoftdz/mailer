@@ -18,6 +18,8 @@ type
     BLOCK_SIZE_KEY = 'number-of-items';
     DEFAULT_BLOCK_SIZE_VALUE = 5;
 
+    CATEGORY_KEY = 'category';
+
   var
     FPort: Integer;
     FProviderIP: String;
@@ -25,10 +27,12 @@ type
     FSubscriptionStatus: Boolean;
     FSubscriptionToken: String;
     FBlockSize: Integer;
+    FCategory: String;
 
   public
     constructor Create(const Port: Integer; const BackEndIp: String; const BackEndPort: Integer;
-      const SubscriptionStatus: Boolean; const SubscriptionToken: String; const BlockSize: Integer);
+      const SubscriptionStatus: Boolean; const SubscriptionToken: String;
+      const BlockSize: Integer; const Category: String);
     class function CreateFromJson(const Json: TJsonObject): TConsumerConfig;
     function ToJson(): TJsonObject;
     property Port: Integer read Fport;
@@ -37,6 +41,7 @@ type
     property IsSubscribed: Boolean read FSubscriptionStatus;
     property SubscriptionToken: String read FSubscriptionToken;
     property BlockSize: Integer read FBlockSize;
+    property Category: String read FCategory;
 
     function Clone(): TConsumerConfig;
 
@@ -52,7 +57,7 @@ uses
 class function TConsumerConfig.CreateFromJson(const Json: TJsonObject): TConsumerConfig;
 var
   Port, ProviderPort, BlockSize: Integer;
-  ProviderIP, SubscriptionToken: String;
+  ProviderIP, SubscriptionToken, Category: String;
   SubscriptionStatus: Boolean;
 
 begin
@@ -62,16 +67,18 @@ begin
   SubscriptionStatus := GetBoolValue(Json, SUBSCRIPTION_STATUS_KEY, False);
   SubscriptionToken := GetStrValue(Json, SUBSCRIPTION_TOKEN_KEY, '');
   BlockSize := GetIntValue(Json, BLOCK_SIZE_KEY, DEFAULT_BLOCK_SIZE_VALUE);
-  Result := TConsumerConfig.Create(Port, ProviderIP, ProviderPort, SubscriptionStatus, SubscriptionToken, BlockSize);
+  Category := GetStrValue(Json, CATEGORY_KEY, '');
+  Result := TConsumerConfig.Create(Port, ProviderIP, ProviderPort, SubscriptionStatus, SubscriptionToken, BlockSize, Category);
 end;
 
 function TConsumerConfig.Clone: TConsumerConfig;
 begin
-  Result := TConsumerConfig.Create(FPort, FProviderIP, FProviderPort, FSubscriptionStatus, FSubscriptionToken, FBlockSize);
+  Result := TConsumerConfig.Create(FPort, FProviderIP, FProviderPort, FSubscriptionStatus, FSubscriptionToken, FBlockSize, FCategory);
 end;
 
 constructor TConsumerConfig.Create(const Port: Integer; const BackEndIp: String;
-  const BackEndPort: Integer; const SubscriptionStatus: Boolean; const SubscriptionToken: String; const BlockSize: Integer);
+  const BackEndPort: Integer; const SubscriptionStatus: Boolean; const SubscriptionToken: String;
+  const BlockSize: Integer; const Category: String);
 begin
   FPort := Port;
   FProviderIP := BackEndIp;
@@ -79,6 +86,7 @@ begin
   FSubscriptionStatus := SubscriptionStatus;
   FSubscriptionToken := SubscriptionToken;
   FBlockSize := BlockSize;
+  FCategory := Category;
 end;
 
 function TConsumerConfig.ToJson: TJsonObject;
@@ -90,6 +98,7 @@ begin
   Result.AddPair(TJsonPair.Create(SUBSCRIPTION_STATUS_KEY, TJsonBool.Create(FSubscriptionStatus)));
   Result.AddPair(TJsonPair.Create(SUBSCRIPTION_TOKEN_KEY, FSubscriptionToken));
   Result.AddPair(TJsonPair.Create(BLOCK_SIZE_KEY, TJsonNumber.Create(FBlockSize)));
+  Result.AddPair(TJsonPair.Create(CATEGORY_KEY, FCategory));
 end;
 
 end.

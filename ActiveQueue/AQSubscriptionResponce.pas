@@ -34,7 +34,7 @@ type
     [MapperJSONSer(TOKEN_KEY)]
     property Token: String read FToken write FToken;
 
-    constructor Create(const Status: Boolean; const Msg: String); overload;
+    constructor Create(const Status: Boolean; const Msg, Token: String); overload;
     constructor Create(); overload;
 
   end;

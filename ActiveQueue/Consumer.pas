@@ -16,42 +16,42 @@ type
     TOKEN_KEY = 'token';
     IP_KEY = 'ip';
     PORT_KEY = 'port';
-    PATH_KEY = 'path';
+    CATEGORY_KEY = 'category';
 
   var
     FToken: String;
     FIP: String;
     FPort: Integer;
-    FPath: String;
+    FCategory: String;
   public
     constructor Create(); overload;
-    constructor Create(const IP: String; const Port: Integer; const Token, Path: String); overload;
+    constructor Create(const IP: String; const Port: Integer; const Token, Category: String); overload;
     [MapperJSONSer(TOKEN_KEY)]
     property token: String read FToken write FToken;
     [MapperJSONSer(IP_KEY)]
     property IP: String read FIP write FIP;
     [MapperJSONSer(PORT_KEY)]
     property Port: Integer read FPort write FPort;
-    [MapperJSONSer(PATH_KEY)]
-    property Path: String read FPath write FPath;
+    [MapperJSONSer(CATEGORY_KEY)]
+    property Category: String read FCategory write FCategory;
 
     function ToJson(): TJsonObject;
     function Clone(): TConsumer;
   end;
 
 type
-  TListenerInfoBuilder = class(TObject)
+  TConsumerBuilder = class(TObject)
   strict private
     FToken: String;
     FIP: String;
     FPort: Integer;
-    FPath: String;
+    FCategory: String;
   public
     constructor Create();
-    function SetToken(const AToken: String): TListenerInfoBuilder;
-    function SetIP(const AnIP: String): TListenerInfoBuilder;
-    function SetPort(const APort: Integer): TListenerInfoBuilder;
-    function SetPath(const APath: String): TListenerInfoBuilder;
+    function SetToken(const AToken: String): TConsumerBuilder;
+    function SetIP(const AnIP: String): TConsumerBuilder;
+    function SetPort(const APort: Integer): TConsumerBuilder;
+    function SetCategory(const ACategory: String): TConsumerBuilder;
     function Build(): TConsumer;
   end;
 
@@ -66,15 +66,15 @@ end;
 
 function TConsumer.Clone: TConsumer;
 begin
-  Result := TConsumer.Create(FIP, FPort, FToken, FPath);
+  Result := TConsumer.Create(FIP, FPort, FToken, FCategory);
 end;
 
-constructor TConsumer.Create(const IP: String; const Port: Integer; const Token, Path: String);
+constructor TConsumer.Create(const IP: String; const Port: Integer; const Token, Category: String);
 begin
   FToken := Token;
   FIP := IP;
   FPort := Port;
-  FPath := Path;
+  FCategory := Category;
 end;
 
 function TConsumer.ToJson: TJsonObject;
@@ -82,52 +82,46 @@ begin
   Result := TJsonObject.Create();
   Result.AddPair(TOKEN_KEY, FToken);
   Result.AddPair(IP_KEY, FIp);
+  Result.AddPair(CATEGORY_KEY, FCategory);
   Result.AddPair(TJsonPair.Create(PORT_KEY, TJsonNumber.Create(FPort)));
 end;
 
 { TListenerInfoBuilder }
 
-function TListenerInfoBuilder.Build: TConsumer;
+function TConsumerBuilder.Build: TConsumer;
 
 begin
-  Result := TConsumer.Create(FIP, FPort, FToken, FPath);
-  // Result.token := FToken;
-  // Result.IP := FIP;
-  // Result.Port := FPort;
-  // Result.Path := FPath;
+  Result := TConsumer.Create(FIP, FPort, FToken, FCategory);
 end;
 
-constructor TListenerInfoBuilder.Create;
+constructor TConsumerBuilder.Create;
 begin
   /// impose the default values
   FPort := 0;
-  FPath := '';
+  FCategory := '';
   FToken := '';
-  FToken := '';
+  FIP := '';
 end;
 
-function TListenerInfoBuilder.SetIP(const AnIP: String): TListenerInfoBuilder;
+function TConsumerBuilder.SetIP(const AnIP: String): TConsumerBuilder;
 begin
   FIP := AnIP;
   Result := Self;
 end;
 
-function TListenerInfoBuilder.SetPath(
-  const APath: String): TListenerInfoBuilder;
+function TConsumerBuilder.SetCategory(const ACategory: String): TConsumerBuilder;
 begin
-  FPath := APath;
+  FCategory := ACategory;
   Result := Self;
 end;
 
-function TListenerInfoBuilder.SetPort(
-  const APort: Integer): TListenerInfoBuilder;
+function TConsumerBuilder.SetPort(const APort: Integer): TConsumerBuilder;
 begin
   FPort := APort;
   Result := Self;
 end;
 
-function TListenerInfoBuilder.SetToken(
-  const AToken: String): TListenerInfoBuilder;
+function TConsumerBuilder.SetToken(const AToken: String): TConsumerBuilder;
 begin
   FToken := AToken;
   Result := Self;

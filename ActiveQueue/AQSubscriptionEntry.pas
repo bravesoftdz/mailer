@@ -62,7 +62,7 @@ end;
 constructor TAQSubscriptionEntry.Create(const Port: Integer; const Category: String);
 begin
   FPort := Port;
-  FCategory = Category;
+  FCategory := Category;
 end;
 
 destructor TAQSubscriptionEntry.Destroy;

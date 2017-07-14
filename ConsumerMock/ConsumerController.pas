@@ -33,6 +33,7 @@ type
     class function getSubscriptionStatus(): Boolean;
     class function GetSubscriptionToken(): String;
     class function GetBlockSize(): Integer;
+    class function GetCategory(): String;
 
     [MVCPath('/notify')]
     [MVCHTTPMethod([httpPOST])]
@@ -73,6 +74,11 @@ end;
 class function TConsumerController.GetBlockSize: Integer;
 begin
   Result := Model.BlockSize;
+end;
+
+class function TConsumerController.GetCategory: String;
+begin
+  Result := Model.Category;
 end;
 
 class function TConsumerController.GetPort: Integer;

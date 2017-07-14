@@ -294,12 +294,12 @@ begin
       IP := Context.Request.ClientIP;
       Status := EnqueueAndPersist(IP, Items.Items);
       if Status then
-        Outcome := TAQSubscriptionResponce.Create(Status, TAG + ' has enqueued the items.')
+        Outcome := TAQResponce.Create(Status, TAG + ' has enqueued the items.')
       else
-        Outcome := TAQSubscriptionResponce.Create(Status, TAG + ' has failed to enqueue the items.');
+        Outcome := TAQResponce.Create(Status, TAG + ' has failed to enqueue the items.');
     except
       on E: Exception do
-        Outcome := TAQSubscriptionResponce.Create(False, TAG + ': ' + E.Message);
+        Outcome := TAQResponce.Create(False, TAG + ': ' + E.Message);
     end;
   end
   else
@@ -332,13 +332,12 @@ begin
   begin
     try
       SubscriptionData := Mapper.JSONObjectToObject<TAQSubscriptionEntry>(jo);
-      SubscriptionData.Ip := Ip;
     except
       on e: Exception do
         SubscriptionData := nil;
     end;
   end;
-  Responce := Model.AddConsumer(SubscriptionData);
+  Responce := Model.AddConsumer(IP, SubscriptionData);
   if Responce.status then
     Model.PersistState();
 
@@ -359,7 +358,7 @@ var
 begin
   Token := Context.Request.Params['token'];
   Ip := Context.Request.ClientIP;
-  responce := Model.CancelSubscription(ip, token);
+  responce := Model.CancelConsumer(ip, token);
   if Responce.status then
     Model.PersistState();
   Render(responce);
