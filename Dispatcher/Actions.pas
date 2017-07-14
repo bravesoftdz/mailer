@@ -82,7 +82,7 @@ type
 implementation
 
 uses
-  SenderCredentials, MVCFramework.RESTAdapter, ActiveQueueResponce, System.SysUtils;
+  SenderCredentials, MVCFramework.RESTAdapter, AQResponce, System.SysUtils;
 
 { TMailerAction }
 
@@ -111,7 +111,7 @@ var
   builder: TSendDataTemplateBuilder;
   // adapter: TRestAdapter<ISendServerProxy>;
   // server: ISendServerProxy;
-  Responce: TActiveQueueResponce;
+  Responce: TAQResponce;
   Request: TSendDataTemplate;
 begin
   // Writeln('ActionSend starts...');

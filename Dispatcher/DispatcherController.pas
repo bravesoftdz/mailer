@@ -44,7 +44,7 @@ implementation
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
   DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
-  System.Generics.Collections, ActiveQueueResponce, Attachment;
+  System.Generics.Collections, AQResponce, Attachment;
 
 procedure TDispatcherController.Index;
 var
@@ -87,7 +87,7 @@ var
   Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
   Wrapper: TActiveQueueEntries;
-  BackEndResponce: TActiveQueueResponce;
+  BackEndResponce: TAQResponce;
   Attach: TAttachment;
 begin
   IP := Context.Request.ClientIP;

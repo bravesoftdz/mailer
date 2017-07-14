@@ -2,7 +2,7 @@ unit AQAPIClient;
 
 interface
 
-uses ActiveQueueResponce, ActiveQueueEntry,
+uses AQResponce, ActiveQueueEntry,
   System.Generics.Collections, MVCFramework.RESTAdapter, MVCFramework.Commons, MVCFramework, ObjectsMappers;
 
 type
@@ -12,7 +12,7 @@ type
     ['{55AC9696-1A87-48F5-A01A-584FB4EBB738}']
 
     [RESTResource(TMVCHTTPMethodType.httpPOST, '/items/post')]
-    function PostItems([Body(False)] Items: TActiveQueueEntries): TActiveQueueResponce;
+    function PostItems([Body(False)] Items: TActiveQueueEntries): TAQResponce;
 
   end;
 
