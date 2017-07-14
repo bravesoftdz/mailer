@@ -23,6 +23,9 @@ type
     /// the current model status
     FStatus: TStatus;
 
+    /// a dumb object to manage thread-safe access to FStatus variable
+    FStatusLock: TObject;
+
     FAdapter: TRestAdapter<IAQAPIConsumer>;
     FServer: IAQAPIConsumer;
     function GetBlockSize: Integer;
@@ -49,7 +52,7 @@ type
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
     /// <summary>Retrieve data from the provider</sumamry>
-    procedure OnProviderStateUpdate();
+    procedure RequestAndElaborate();
 
     property Port: Integer read GetPort;
     property BlockSize: Integer read GetBlockSize;
@@ -76,10 +79,12 @@ constructor TConsumerModel.Create;
 begin
   FFileSaver := TJsonSaver.Create;
   FStatus := TStatus.Ready;
+  FStatusLock := TObject.Create;
 end;
 
 destructor TConsumerModel.Destroy;
 begin
+  FStatusLock.DisposeOf;
   if FConfig <> nil then
     FConfig.DisposeOf;
   FFileSaver.DisposeOf;
@@ -150,23 +155,32 @@ begin
   Result := (FConfig <> nil) AND (FConfig.ProviderIP = IP);
 end;
 
-procedure TConsumerModel.OnProviderStateUpdate;
+procedure TConsumerModel.RequestAndElaborate;
 begin
-  Writeln('Data provider state has been changed');
-  if FStatus = TStatus.Ready then
-  begin
-    Writeln('Take care of requesting data...');
-    FStatus := Occupied;
-    Writeln('I am busy now.');
-    try
-      RequestAndExecute();
-    finally
-      FStatus := TStatus.Ready;
-      Writeln('I am ready now.');
-    end;
-  end
-  else
-    Writeln('I am busy hence can not request data...');
+  TMonitor.Enter(FStatusLock);
+  try
+    if FStatus = TStatus.Ready then
+    begin
+      TThread.CreateAnonymousThread(
+        procedure
+        begin
+          FStatus := Occupied;
+          Writeln('I am busy now.');
+          try
+            RequestAndExecute();
+          finally
+            FStatus := TStatus.Ready;
+            Writeln('I am ready now.');
+          end;
+        end).start;
+    end
+    else
+      Writeln('I am busy hence I ignore this notification...');
+
+  finally
+
+    TMonitor.Exit(FStatusLock);
+  end;
 end;
 
 procedure TConsumerModel.RequestAndExecute;
@@ -174,23 +188,37 @@ var
   SubscriptionData: TAQSubscriptionEntry;
   ConfigNew: TConsumerConfig;
   Items: TActiveQueueEntries;
+  S: Integer;
 begin
   Writeln('Request data from the data provider');
   try
     Items := FServer.GetItems(FConfig.SubscriptionToken, FConfig.BlockSize);
     if Items = nil then
-      Writeln('Received null from the server...')
+    begin
+      Writeln('Received null from the server...');
+      S := 0;
+    end
     else
-      Writeln('Received ' + Items.Items.Count.ToString + ' item(s) from the server');
+    begin
+      S := Items.Items.Count;
+      Writeln('Received ' + S.ToString + ' item(s) from the server');
+    end;
+
   except
     on E: Exception do
     begin
       Writeln('Error while getting items from the data provider: ' + E.Message);
       Writeln(E.Message);
+      S := 0;
     end;
   end;
-  Writeln('Data received...');
-  Consume(Items.Items);
+  Writeln('Received ' + S.toString() + ' tasks.');
+  if S > 0 then
+  begin
+    Consume(Items.Items);
+    Writeln('I finished, ask some other tasks...');
+    RequestAndElaborate(); // start recursively
+  end;
 end;
 
 procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);

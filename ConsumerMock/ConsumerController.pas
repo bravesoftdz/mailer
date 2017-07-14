@@ -104,7 +104,7 @@ begin
   Writeln('Notified by ' + IP);
   if Model.isProviderAuthorized(IP) then
   begin
-    Model.OnProviderStateUpdate();
+    Model.RequestAndElaborate();
   end;
 end;
 
