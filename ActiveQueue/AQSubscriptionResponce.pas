@@ -7,24 +7,33 @@ uses
 
 type
 
-  /// <summary>Abstract data type to represent the responces from the
-  /// back end server corresponding to previously made requests.</summary>
+  /// <summary>Abstract data type to represent a responce to a previously made
+  /// subscribe/unsubscribe request.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
   TAQSubscriptionResponce = class(TObject)
   strict private
+  const
+    STATUS_KEY = 'status';
+    TOKEN_KEY = 'token';
+    MESSAGE_KEY = 'message';
+
+  var
     FStatus: Boolean;
     FMessage: String;
     FToken: String;
   public
-    /// <param name="status">A status of the previously made request.</param>
-    [MapperJSONSer('status')]
+    /// <param name="status">Outcome of the request: true for success, false for failure</param>
+    [MapperJSONSer(STATUS_KEY)]
     property status: Boolean read FStatus write FStatus;
-    /// <param name="Msg">Additional info concerning the outcome of the
-    /// previously made request</param>
-    [MapperJSONSer('msgstat')]
+
+    /// <param name="Msg">Additional info concerning the outcome of the request</param>
+    [MapperJSONSer(MESSAGE_KEY)]
     property Msg: String read FMessage write FMessage;
-    [MapperJSONSer('token')]
+
+    /// <param name="Token">Token assigned to the consumer</param>
+    [MapperJSONSer(TOKEN_KEY)]
     property Token: String read FToken write FToken;
+
     constructor Create(const Status: Boolean; const Msg: String); overload;
     constructor Create(); overload;
 
@@ -36,15 +45,14 @@ implementation
 
 constructor TAQSubscriptionResponce.Create;
 begin
-  FStatus := False;
-  FMessage := '';
-  FToken := '';
+  Create(False, '', '');
 end;
 
-constructor TAQSubscriptionResponce.Create(const Status: Boolean; const Msg: String);
+constructor TAQSubscriptionResponce.Create(const Status: Boolean; const Msg, Token: String);
 begin
   FStatus := Status;
   FMessage := Msg;
+  FToken := Token;
 end;
 
 end.
