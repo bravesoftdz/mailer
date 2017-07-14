@@ -338,8 +338,11 @@ begin
     end;
   end;
   Responce := Model.AddConsumer(IP, SubscriptionData);
+
   if Responce.status then
     Model.PersistState();
+  if SubscriptionData <> nil then
+    SubscriptionData.DisposeOf;
 
   Render(responce);
 end;
