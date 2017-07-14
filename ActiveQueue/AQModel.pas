@@ -3,7 +3,7 @@ unit AQModel;
 interface
 
 uses
-  ActiveQueueResponce, AQSubscriptionEntry, ActiveQueueEntry,
+  AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, System.Generics.Collections, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client;
 
@@ -140,7 +140,7 @@ type
   public
     /// <summary>Create a subscription </summary>
     /// <param name="Data">subscription infomation (port, path etc)</param>
-    function AddConsumer(const Data: TAQSubscriptionEntry): TActiveQueueResponce;
+    function AddConsumer(const Data: TAQSubscriptionEntry): TAQSubscriptionResponce;
 
     /// <summary>Get all subscribed listeners</summary>
     function GetConsumers(): TObjectList<TConsumer>;
@@ -148,7 +148,7 @@ type
     /// <summary>Cancel the subscription corresponding to given ip</summary>
     /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
     /// <param name="Token">token associated with the subscription</param>
-    function CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
+    function CancelSubscription(const Ip, Token: String): TAQSubscriptionResponce;
 
     /// get not more that N items from the queue.
     function GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
@@ -242,7 +242,7 @@ begin
 
 end;
 
-function TActiveQueueModel.AddConsumer(const data: TAQSubscriptionEntry): TActiveQueueResponce;
+function TActiveQueueModel.AddConsumer(const data: TAQSubscriptionEntry): TAQSubscriptionResponce;
 var
   Token: String;
   Ip: String;
@@ -252,18 +252,18 @@ begin
   try
     if Data = nil then
     begin
-      Result := TActiveQueueResponce.Create(False, 'invalid input');
+      Result := TAQSubscriptionResponce.Create(False, 'invalid input');
     end
     else
     begin
       Ip := data.Ip;
       if Not(IsIpInWhiteList(Ip)) then
-        Result := TActiveQueueResponce.Create(False, 'not authorized')
+        Result := TAQSubscriptionResponce.Create(False, 'not authorized')
       else
       begin
         if IsSubscribed(data) then
         begin
-          Result := TActiveQueueResponce.Create(False, 'already subscribed');
+          Result := TAQSubscriptionResponce.Create(False, 'already subscribed');
         end
         else
         begin
@@ -274,7 +274,7 @@ begin
           // create a copy of the object
           FConsumerIndex.Add(Token, TConsumer.Create(data.Ip, data.Port, Token, data.Path));
           FConsumerProxyIndex.Add(Token, TRestAdapter<IConsumerProxy>.Create().Build(Data.Ip, Data.Port));
-          Result := TActiveQueueResponce.Create(True, Ip + ':' + inttostr(data.Port));
+          Result := TAQSubscriptionResponce.Create(True, Ip + ':' + inttostr(data.Port));
         end;
       end;
     end;
@@ -337,7 +337,7 @@ begin
   end;
 end;
 
-function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TActiveQueueResponce;
+function TActiveQueueModel.CancelSubscription(const Ip, Token: String): TAQSubscriptionResponce;
 var
   subscription: TConsumer;
 begin
@@ -352,14 +352,14 @@ begin
         FConsumerIndex.Remove(Token);
         FConsumerProxyIndex[Token] := nil;
         FConsumerProxyIndex.Remove(Token);
-        Result := TActiveQueueResponce.Create(True, 'unsubscribed');
+        Result := TAQSubscriptionResponce.Create(True, 'unsubscribed');
       end
       else
-        Result := TActiveQueueResponce.Create(False, 'wrong ip or token');
+        Result := TAQSubscriptionResponce.Create(False, 'wrong ip or token');
     end
     else
     begin
-      Result := TActiveQueueResponce.Create(False, 'not subscribed');
+      Result := TAQSubscriptionResponce.Create(False, 'not subscribed');
     end;
     CheckRep();
   finally

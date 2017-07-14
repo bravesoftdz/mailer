@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, ActiveQueueResponce, AQSubscriptionEntry,
+  MVCFramework.Logger, AQSubscriptionResponce, AQSubscriptionEntry,
   System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils;
 
 class function TController.GetClients: TObjectList<TClient>;
@@ -256,7 +256,7 @@ var
   item: TActiveQueueEntry;
   Outcome: Boolean;
   Wrapper: TObjectList<TActiveQueueEntry>;
-  Responce: TActiveQueueResponce;
+  Responce: TAQSubscriptionResponce;
   IP: String;
 begin
   Writeln('Posting an item.');
@@ -275,14 +275,14 @@ begin
   end
   else
     Outcome := False;
-  Responce := TActiveQueueResponce.Create(OutCome, '');
+  Responce := TAQSubscriptionResponce.Create(OutCome, '');
   Render(Responce);
 end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
   items: TActiveQueueEntries;
-  Outcome: TActiveQueueResponce;
+  Outcome: TAQSubscriptionResponce;
   IP: String;
   Status: Boolean;
 begin
@@ -293,17 +293,17 @@ begin
       IP := Context.Request.ClientIP;
       Status := EnqueueAndPersist(IP, Items.Items);
       if Status then
-        Outcome := TActiveQueueResponce.Create(Status, TAG + ' has enqueued the items.')
+        Outcome := TAQSubscriptionResponce.Create(Status, TAG + ' has enqueued the items.')
       else
-        Outcome := TActiveQueueResponce.Create(Status, TAG + ' has failed to enqueue the items.');
+        Outcome := TAQSubscriptionResponce.Create(Status, TAG + ' has failed to enqueue the items.');
     except
       on E: Exception do
-        Outcome := TActiveQueueResponce.Create(False, TAG + ': ' + E.Message);
+        Outcome := TAQSubscriptionResponce.Create(False, TAG + ': ' + E.Message);
     end;
   end
   else
   begin
-    Outcome := TActiveQueueResponce.Create(False, TAG + ': request body is missing.');
+    Outcome := TAQSubscriptionResponce.Create(False, TAG + ': request body is missing.');
   end;
   Render(Outcome);
 end;
@@ -315,7 +315,7 @@ end;
 
 procedure TController.Subscribe(const Context: TWebContext);
 var
-  responce: TActiveQueueResponce;
+  responce: TAQSubscriptionResponce;
   SubscriptionData: TAQSubscriptionEntry;
   Ip: String;
   jo: TJsonObject;
@@ -353,7 +353,7 @@ end;
 
 procedure TController.unsubscribe(const Context: TWebContext);
 var
-  responce: TActiveQueueResponce;
+  responce: TAQSubscriptionResponce;
   Ip, Token: String;
 begin
   Token := Context.Request.Params['token'];

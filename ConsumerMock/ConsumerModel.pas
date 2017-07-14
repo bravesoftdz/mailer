@@ -3,7 +3,7 @@ unit ConsumerModel;
 interface
 
 uses
-  ConsumerConfig, ActiveQueueResponce, ActiveQueueEntry, JsonSaver,
+  ConsumerConfig, AQSubscriptionResponce, ActiveQueueEntry, JsonSaver,
   MVCFramework.RESTAdapter, AQAPIConsumer,
   System.Generics.Collections;
 
@@ -41,9 +41,9 @@ type
     /// <summary>Get the configuation of the server.</summary>
     function GetConfig(): TConsumerConfig;
     /// <summary>Send a subscription request to the data provider server notifications</summary>
-    function Subscribe(): TActiveQueueResponce;
+    function Subscribe(): TAQSubscriptionResponce;
     /// <summary>Send a request to cancel the subscription from the data provider notifications</summary>
-    function Unsubscribe(): TActiveQueueResponce;
+    function Unsubscribe(): TAQSubscriptionResponce;
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
     /// <summary>Retrieve data from the provider</sumamry>
@@ -272,7 +272,7 @@ begin
 
 end;
 
-function TConsumerModel.Subscribe: TActiveQueueResponce;
+function TConsumerModel.Subscribe: TAQSubscriptionResponce;
 var
   SubscriptionData: TAQSubscriptionEntry;
   ConfigNew: TConsumerConfig;
@@ -292,7 +292,7 @@ begin
   end;
 end;
 
-function TConsumerModel.Unsubscribe(): TActiveQueueResponce;
+function TConsumerModel.Unsubscribe(): TAQSubscriptionResponce;
 var
   ConfigNew: TConsumerConfig;
 begin

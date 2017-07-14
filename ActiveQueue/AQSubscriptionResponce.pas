@@ -1,4 +1,4 @@
-unit ActiveQueueResponce;
+unit AQSubscriptionResponce;
 
 interface
 
@@ -10,7 +10,7 @@ type
   /// <summary>Abstract data type to represent the responces from the
   /// back end server corresponding to previously made requests.</summary>
   [MapperJSONNaming(JSONNameLowerCase)]
-  TActiveQueueResponce = class(TObject)
+  TAQSubscriptionResponce = class(TObject)
   strict private
     FStatus: Boolean;
     FMessage: String;
@@ -34,14 +34,14 @@ implementation
 
 { TBackEndResponce }
 
-constructor TActiveQueueResponce.Create;
+constructor TAQSubscriptionResponce.Create;
 begin
   FStatus := False;
   FMessage := '';
   FToken := '';
 end;
 
-constructor TActiveQueueResponce.Create(const Status: Boolean; const Msg: String);
+constructor TAQSubscriptionResponce.Create(const Status: Boolean; const Msg: String);
 begin
   FStatus := Status;
   FMessage := Msg;
