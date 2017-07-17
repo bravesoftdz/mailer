@@ -69,7 +69,7 @@ type
     /// request a cancellation of the subscription to the ActiveQueue events
     [MVCPath('/unsubscribe/($token)')]
     [MVCHTTPMethod([httpPUT])]
-    procedure unsubscribe(const Context: TWebContext);
+    procedure Unsubscribe(const Context: TWebContext);
 
     /// request given number of items from the ActiveQueue.
     [MVCPath('/items/get/($token)/($n)')]
@@ -354,7 +354,7 @@ begin
   Model.DisposeOf;
 end;
 
-procedure TController.unsubscribe(const Context: TWebContext);
+procedure TController.Unsubscribe(const Context: TWebContext);
 var
   responce: TAQSubscriptionResponce;
   Ip, Token: String;

@@ -81,8 +81,8 @@ type
     /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
 
-    /// <summary>Return true if given subscription data is already present in the register.</summary>
-    function IsSubscribed(const Data: TAQSubscriptionEntry): Boolean;
+    /// <summary>Return true if given the consumer index contains a client with given ip and port.</summary>
+    function IsSubscribed(const IP: String; const Port: Integer): Boolean;
 
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
@@ -250,6 +250,7 @@ var
 begin
   TMonitor.Enter(FConsumerLock);
   try
+    Writeln('Subscribe: ' + ip + ', data: port ' + data.Port.ToString + ', category' + data.Category);
     if Data = nil then
     begin
       Result := TAQSubscriptionResponce.Create(False, 'invalid input', '');
@@ -260,8 +261,9 @@ begin
         Result := TAQSubscriptionResponce.Create(False, 'not authorized', '')
       else
       begin
-        if IsSubscribed(data) then
+        if IsSubscribed(IP, data.Port) then
         begin
+          Writeln('This IP is already subscribed');
           Result := TAQSubscriptionResponce.Create(False, 'already subscribed', '');
         end
         else
@@ -342,6 +344,7 @@ var
 begin
   TMonitor.Enter(FConsumerLock);
   try
+    Writeln('Unsubscribe: ip = ' + ip + ', token ' + Token);
     if Not(IsIpInWhiteList(Ip)) then
       Result := TAQSubscriptionResponce.Create(False, 'not authorized', '')
     else
@@ -355,13 +358,19 @@ begin
           FConsumerIndex.Remove(Token);
           FConsumerProxyIndex[Token] := nil;
           FConsumerProxyIndex.Remove(Token);
+          Writeln('Unsubscribe successefuly ');
           Result := TAQSubscriptionResponce.Create(True, 'unsubscribed', '');
         end
         else
+        begin
+          Writeln('Unsubscribe fail: IP does not correpospond to the token');
           Result := TAQSubscriptionResponce.Create(False, 'wrong ip or token', '');
+        end;
+
       end
       else
       begin
+        Writeln('Unsubscribe fail: FConsumerIndex does not contain this token.');
         Result := TAQSubscriptionResponce.Create(False, 'not subscribed', '');
       end;
       CheckRep();
@@ -735,10 +744,27 @@ begin
   end;
 end;
 
-function TActiveQueueModel.IsSubscribed(const Data: TAQSubscriptionEntry): Boolean;
+function TActiveQueueModel.IsSubscribed(const IP: String; const Port: Integer): Boolean;
+var
+  aConsumer: TConsumer;
+  Key: String;
 begin
-  /// stub
   Result := False;
+  TMonitor.Enter(FConsumerLock);
+  try
+    for Key in FConsumerIndex.Keys do
+    begin
+      aConsumer := FConsumerIndex[Key];
+      if (aConsumer.IP = IP) AND (aConsumer.Port = Port) then
+      begin
+        Result := True;
+        Break;
+      end;
+    end;
+  finally
+    TMonitor.Exit(FConsumerLock);
+  end;
+
 end;
 
 function TActiveQueueModel.Join(const Items: TArray<String>; const delimiter: String): String;

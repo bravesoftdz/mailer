@@ -16,8 +16,6 @@ type
 type
   TConsumerModel = class(TObject)
   strict private
-    /// <summary>A path to the config. file</summary>
-    FConfigFilePath: String;
     FConfig: TConsumerConfig;
     FFileSaver: TJsonSaver;
     /// the current model status
@@ -300,10 +298,10 @@ procedure TConsumerModel.SetConfig(const Config: TConsumerConfig; const TargetCo
 begin
   if FConfig <> nil then
   begin
-    raise Exception.Create('It is not allowed to reset the configuration at runtime. Turn the server off and change the configuration file.');
+    raise Exception.Create('It is not allowed to re-set the configuration at runtime. Turn the server off and change the configuration file.');
   end;
   FConfig := Config.Clone();
-  FConfigFilePath := TargetConfigFileName;
+  FFileSaver := TJsonSaver.Create(TargetConfigFileName);
   Start();
 end;
 
@@ -332,7 +330,7 @@ begin
       FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize, FConfig.Category);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
-    FFileSaver.Save(FConfigFilePath, FConfig);
+    FFileSaver.Save(FConfig);
   end;
 end;
 
@@ -346,7 +344,7 @@ begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
     FConfig.DisposeOf;
     FConfig := ConfigNew;
-    FFileSaver.Save(FConfigFilePath, FConfig);
+    FFileSaver.Save(FConfig);
   end;
 end;
 
