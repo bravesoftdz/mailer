@@ -51,7 +51,9 @@ type
     function Unsubscribe(): TAQSubscriptionResponce;
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
-    /// <summary>Retrieve data from the provider</sumamry>
+    /// <summary>Retrieve data from the provider and elaborate it. The method turns FStatus into occupied
+    /// one, launch a new thread that takes care of retrieving and elaborating data.
+    /// FStatus gets updated in this thread. </sumamry>
     procedure RequestAndElaborate();
 
     property Port: Integer read GetPort;
@@ -215,10 +217,13 @@ begin
   Writeln('Received ' + S.toString() + ' tasks.');
   if S > 0 then
   begin
+    Writeln('Start consuming received items...');
     Consume(Items.Items);
-    Writeln('I finished, ask some other tasks...');
-    RequestAndElaborate(); // start recursively
-  end;
+    Writeln('I finished consuming the items, ask some other tasks...');
+    RequestAndExecute(); // start recursively
+  end
+  else
+    Writeln('Ask no items since last time ' + S.ToString + ' items were received.');
 end;
 
 procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);
