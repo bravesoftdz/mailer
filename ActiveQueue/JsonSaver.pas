@@ -10,7 +10,7 @@ type
   TJsonSaver = class(TObject)
   strict private
   const
-    Suffix = '-YYYY-mm-dd_hh_nn_ss';
+    Suffix = '-YYYY-mm-dd-hh-nn-ss';
 
   var
     FLockObject: TObject;
@@ -59,6 +59,7 @@ constructor TJsonSaver.Create(const FilePath: String);
 var
   NameExt: String;
 begin
+  Create();
   FFileFolder := ExtractFilePath(FilePath);
   FFileExtension := ExtractFileExt(FilePath);
   NameExt := ExtractFileName(FilePath);
@@ -75,25 +76,28 @@ function TJsonSaver.getAvailableName: String;
 var
   FullPath: String;
   Counter: Integer;
-  NewName: String;
+  NewName, BaseName: String;
 begin
   FullPath := FFileFolder + FFileName + FFileExtension;
-  if not(TFile.Exists(FFileFolder)) then
+  if not(TFile.Exists(FullPath)) then
     Result := FFileName
   else
   begin
-    NewName := formatdatetime(Suffix, Now());
-    FullPath := FFileFolder + NewName + FFileExtension;
-    Counter := 0;
+    BaseName := FFileName + formatdatetime(Suffix, Now());
+    NewName := BaseName;
+    FullPath := FFileFolder + BaseName + FFileExtension;
+    Counter := 1;
     while (TFile.Exists(FullPath)) do
     begin
-      FullPath := Format('%s%s-%d%s', [FFileFolder, NewName, Counter, FFileExtension]);
+      NewName := Format('%s-%d', [BaseName, Counter]);
+      FullPath := FFileFolder + NewName + FFileExtension;;
       Counter := Counter + 1;
+      Writeln('Loop: new name = ' + NewName);
     end;
-    Result := FFileName;
+    Result := NewName;
 
   end;
-
+  Writeln('Available name for config file: ' + Result);
 end;
 
 function TJsonSaver.GetAvailablePath(const Path, Format: String): String;
@@ -140,16 +144,17 @@ procedure TJsonSaver.Save(const Obj: Jsonable);
 var
   OutFileName: String;
   jo: TJsonObject;
-  Text: String;
+  Text, FullPath: String;
 begin
   TMonitor.Enter(FLockObject);
   Try
     OutFileName := GetAvailableName();
+    FullPath := FFileFolder + OutFileName + FFileExtension;
     jo := Obj.ToJson();
     if jo <> nil then
     begin
       Text := jo.ToString();
-      TFile.AppendAllText(OutFileName, Text);
+      TFile.AppendAllText(FullPath, Text);
       Text := '';
       jo.DisposeOf;
     end;

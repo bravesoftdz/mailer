@@ -23,6 +23,8 @@ type
 
     /// a dumb object to manage thread-safe access to FStatus variable
     FStatusLock: TObject;
+    /// a dumb object to make subscribe/unsubscribe requests single-threaded
+    FSubscriptionLock: TObject;
 
     FAdapter: TRestAdapter<IAQAPIConsumer>;
     FServer: IAQAPIConsumer;
@@ -80,11 +82,13 @@ begin
   FFileSaver := TJsonSaver.Create;
   FStatus := TStatus.Ready;
   FStatusLock := TObject.Create;
+  FSubscriptionLock := TObject.Create;
 end;
 
 destructor TConsumerModel.Destroy;
 begin
   FStatusLock.DisposeOf;
+  FSubscriptionLock.DisposeOf;
   if FConfig <> nil then
     FConfig.DisposeOf;
   FFileSaver.DisposeOf;
@@ -322,15 +326,20 @@ begin
   /// the first argument (correponding to an ip at which the consumer operates) gets
   /// ignored by the data provider server since the ip gets extracted from the http request
   /// that the consumer sends to the data provider.
-  SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
-  Result := FServer.Subscribe(SubscriptionData);
-  if Result.status then
-  begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-      FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize, FConfig.Category);
-    FConfig.DisposeOf;
-    FConfig := ConfigNew;
-    FFileSaver.Save(FConfig);
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
+    Result := FServer.Subscribe(SubscriptionData);
+    if Result.status then
+    begin
+      ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+        FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize, FConfig.Category);
+      FConfig.DisposeOf;
+      FConfig := ConfigNew;
+      FFileSaver.Save(FConfig);
+    end;
+  finally
+    TMonitor.Exit(FSubscriptionLock);
   end;
 end;
 
@@ -338,13 +347,18 @@ function TConsumerModel.Unsubscribe(): TAQSubscriptionResponce;
 var
   ConfigNew: TConsumerConfig;
 begin
-  Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
-  if Result.status then
-  begin
-    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
-    FConfig.DisposeOf;
-    FConfig := ConfigNew;
-    FFileSaver.Save(FConfig);
+  TMonitor.Enter(FSubscriptionLock);
+  try
+    Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
+    if Result.status then
+    begin
+      ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
+      FConfig.DisposeOf;
+      FConfig := ConfigNew;
+      FFileSaver.Save(FConfig);
+    end;
+  finally
+    TMonitor.Exit(FSubscriptionLock);
   end;
 end;
 
