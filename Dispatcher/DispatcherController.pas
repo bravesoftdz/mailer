@@ -105,7 +105,7 @@ begin
     except
       on E: Exception do
       begin
-        Responce := TDispatcherResponce.Create(False, 'Invalid request body.');
+        Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.INVALID_BODY);
         Render(Responce);
         Exit();
       end;
@@ -113,14 +113,14 @@ begin
   end
   else
   begin
-    Responce := TDispatcherResponce.Create(False, 'No request body found.');
+    Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.MISSING_BODY);
     Render(Responce);
     Exit();
   end;
 
   if not(Model.isAuthorised(IP, Request.Token)) then
   begin
-    Responce := TDispatcherResponce.Create(False, 'Not authorized');
+    Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.NOT_AUTHORISED);
     Render(Responce);
     Exit();
   end;
@@ -141,13 +141,13 @@ begin
     try
       BackEndResponce := FBackEndProxy.PostItems(Wrapper);
       if BackEndResponce.status then
-        Responce := TDispatcherResponce.Create(BackEndResponce.status, Entries.Count.toString + ' items are put to the backend server queue.')
+        Responce := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.SUCCESS_REPORT, [Entries.Count]))
       else
-        Responce := TDispatcherResponce.Create(BackEndResponce.status, 'Dispatcher received failure. Reason: ' + BackEndResponce.Msg)
+        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [BackEndResponce.Msg]))
     except
       on E: Exception do
       begin
-        Responce := TDispatcherResponce.Create(False, 'Failed to put items to the back end server: ' + E.Message);
+        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
       end;
     end;
   finally
@@ -178,7 +178,8 @@ begin
 
 end;
 
-class procedure TDispatcherController.SetUpBackEndProxy;
+class
+  procedure TDispatcherController.SetUpBackEndProxy;
 begin
   Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.GetBackEndIp, Model.GetBackEndPort]));
   FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
