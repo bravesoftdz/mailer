@@ -67,7 +67,6 @@ end;
 
 destructor TAQSubscriptionEntry.Destroy;
 begin
-  Writeln('Destroying a TAQSubscriptionData istance');
   inherited;
 end;
 

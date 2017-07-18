@@ -57,7 +57,7 @@ type
     /// <summary>Send an unsubscribe request to the data provider.
     /// The method first checks whether there is an active subscribe/unsubscribe request. If there
     /// is such a request, this one is ignored. If there is no such a request, there starts a new thread
-    /// to request a subscription.</summary>
+    /// to request a cancellation of subscription.</summary>
     procedure Unsubscribe();
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
@@ -93,6 +93,7 @@ begin
   FStatus := TStatus.Ready;
   FStatusLock := TObject.Create;
   FSubscriptionLock := TObject.Create;
+  FSubscriptionRequestIsOn := False;
 end;
 
 destructor TConsumerModel.Destroy;
