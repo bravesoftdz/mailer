@@ -82,7 +82,7 @@ type
 implementation
 
 uses
-  MVCFramework.RESTAdapter, AQResponce, System.SysUtils;
+  MVCFramework.RESTAdapter, AQResponce, System.SysUtils, ONMCredentials;
 
 { TMailerAction }
 
@@ -271,10 +271,10 @@ begin
   builder := TSendDataTemplateBuilder.Create();
   builder.SetFrom(TONMCredentials.From)
     .SetSender(TONMCredentials.Name)
-    .SetSubject(TONMCredentials.Subject)
-    .SetPort(TONMCredentials.Port)
-    .setServer(TONMCredentials.Server)
-    .setSmtpHost(TONMCredentials.SmtpHost)
+    .SetSubject(TONMCredentials.Subject_Client)
+    .SetPort(80)
+    .setServer(TONMCredentials.Host)
+    .setSmtpHost(TONMCredentials.Host)
     .SetRecipTo(Emails)
     .setText(CreateText(jo2))
     .addAttachments(Attachments);
@@ -345,10 +345,10 @@ begin
   builder := TSendDataTemplateBuilder.Create();
   builder.SetFrom(TONMCredentials.From)
     .SetSender(TONMCredentials.Name)
-    .SetSubject(TONMCredentials.Subject)
-    .SetPort(TONMCredentials.Port)
-    .setServer(TONMCredentials.Server)
-    .setSmtpHost(TONMCredentials.SmtpHost)
+    .SetSubject(TONMCredentials.Subject_Internal)
+    .SetPort(80)
+    .setServer(TONMCredentials.Host)
+    .setSmtpHost(TONMCredentials.Host)
     .SetRecipTo(TONMCredentials.EmailInternal)
     .setText(CreateText(jo2))
     .addAttachments(Attachments);

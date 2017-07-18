@@ -26,7 +26,6 @@ uses
   Actions in 'Actions.pas',
   Provider in 'Provider.pas',
   ProviderFactory in 'ProviderFactory.pas',
-  SenderCredentials in 'SenderCredentials.pas',
   ServerConfig in '..\Config\ServerConfig.pas',
   SoluzioneAgenti in 'SoluzioneAgenti.pas',
   VenditoriSimple in 'VenditoriSimple.pas',
@@ -35,7 +34,8 @@ uses
   System.JSON,
   System.IOUtils,
   IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas',
-  AQAPIClient in 'AQAPIClient.pas';
+  AQAPIClient in 'AQAPIClient.pas',
+  ONMCredentials in 'ONMCredentials.pas';
 
 {$R *.res}
 

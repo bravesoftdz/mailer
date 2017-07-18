@@ -276,7 +276,7 @@ begin
 
     // MSG.BccList.Add.Address := Item.recipbcc;
     // Msg.From.Name := TSendMailConfig.SENDER_NAME;
-    Msg.From.Address := TSendMailConfig.MAIL_FROM;
+    Msg.From.Address := Data.from;
     Msg.Body.Text := Data.Text;
     Msg.Subject := Data.Subject;
 
@@ -289,8 +289,8 @@ begin
     Smtp := TIdSMTP.Create(NIL);
     try
       Writeln('Trying to connect');
-      Smtp.Host := Data.SmtpHost;
-      Smtp.Port := Data.Port;
+      Smtp.Host := TSendMailConfig.HOST;
+      Smtp.Port := TSendMailConfig.Port;
       Smtp.Connect;
       try
         Smtp.Send(MSG);
