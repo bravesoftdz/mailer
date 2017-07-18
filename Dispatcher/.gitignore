@@ -12,3 +12,4 @@ __recovery/
 *.identcache
 *.stat
 SenderCredentials.pas
+Dispatcher-storage/

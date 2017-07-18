@@ -44,7 +44,8 @@ implementation
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
   DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
-  System.Generics.Collections, AQResponce, Attachment;
+  System.Generics.Collections, AQResponce, Attachment, RequestStorageInterface,
+  RequestToFileSystemStorage;
 
 procedure TDispatcherController.Index;
 var
@@ -89,6 +90,7 @@ var
   Wrapper: TActiveQueueEntries;
   BackEndResponce: TAQResponce;
   Attach: TAttachment;
+  jo: TJsonObject;
 begin
   IP := Context.Request.ClientIP;
   if Context.Request.ThereIsRequestBody then
@@ -123,9 +125,23 @@ begin
     Render(Responce);
     Exit();
   end;
+  try
+    jo := Request.toJson();
+    try
+      Model.Persist(jo);
+    except
+      on E: Exception do
+      begin
+        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.PERSIST_EXCEPTION_REPORT, [E.Message]));
+        Render(Responce);
+        Exit();
+      end;
+    end;
+  finally
+    jo.DisposeOf;
+  end;
 
   try
-
     Entries := Model.CreateBackEndEntries(Request);
   except
     on E: Exception do
@@ -171,15 +187,12 @@ begin
   inherited;
 end;
 
-class
-  procedure TDispatcherController.Setup;
+class procedure TDispatcherController.Setup;
 begin
-  Model := TModel.Create();
-
+  Model := TModel.Create(TRequestToFileSystemStorage.Create('Dispatcher-storage/'));
 end;
 
-class
-  procedure TDispatcherController.SetUpBackEndProxy;
+class procedure TDispatcherController.SetUpBackEndProxy;
 begin
   Writeln(Format('Set up the proxy:  url = %s, port = %d', [Model.GetBackEndIp, Model.GetBackEndPort]));
   FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();

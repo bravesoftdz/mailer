@@ -35,7 +35,9 @@ uses
   System.IOUtils,
   IpTokenAuthentication in '..\Authentication\IpTokenAuthentication.pas',
   AQAPIClient in 'AQAPIClient.pas',
-  ONMCredentials in 'ONMCredentials.pas';
+  ONMCredentials in 'ONMCredentials.pas',
+  RequestStorageInterface in '..\Storage\RequestStorageInterface.pas',
+  RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas';
 
 {$R *.res}
 

@@ -13,6 +13,7 @@ type
     SUCCESS_REPORT = 'Dispatcher successfully put %d items to the backend server queue.';
     FAILURE_REPORT = 'Dispatcher received a failure from the back end server. Reason: %s';
     EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
+    PERSIST_EXCEPTION_REPORT = 'Dispatcher encountered an error when persisting items: %s';
   end;
 
 type

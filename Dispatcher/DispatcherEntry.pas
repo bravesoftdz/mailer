@@ -3,7 +3,7 @@ unit DispatcherEntry;
 interface
 
 uses
-  ObjectsMappers, System.Generics.Collections, Attachment;
+  ObjectsMappers, System.Generics.Collections, Attachment, System.JSON;
 
 type
 
@@ -11,6 +11,13 @@ type
   [MapperJSONNaming(JSONNameLowerCase)]
   TDispatcherEntry = class(TObject)
   strict private
+  const
+    ORIGIN_KEY = 'origin';
+    ACTION_KEY = 'action';
+    TOKEN_KEY = 'token';
+    ATTACHMENT_KEY = 'attachments';
+    CONTENT_KEY = 'content';
+
   var
     FOrigin: String;
     FAction: String;
@@ -31,12 +38,14 @@ type
     [MapperListOf(TAttachment)]
     property Attachments: TObjectList<TAttachment> read FAttachments write FAttachments;
     property Content: String read FContent write FContent;
+
+    function toJson(): TJsonObject;
   end;
 
 implementation
 
 uses
-  System.Classes;
+  System.Classes, System.SysUtils;
 
 { TDispatcherEntry }
 
@@ -72,6 +81,11 @@ begin
   begin
     FAttachments.Add(Attachment.Clone());
   end;
+end;
+
+function TDispatcherEntry.toJson: TJsonObject;
+begin
+  Result := Mapper.ObjectToJSONObject(Self);
 end;
 
 end.

@@ -5,7 +5,7 @@ interface
 uses
   DispatcherConfig, DispatcherResponce, DispatcherEntry,
   ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
-  ServerConfig, IpTokenAuthentication;
+  ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON;
 
 type
   TModel = class(TObject)
@@ -15,6 +15,8 @@ type
     FConfig: TServerConfigImmutable;
     FAuthentication: TIpTokenAuthentication;
     FFactory: TProviderFactory;
+    // persist the requests
+    FRequestSaver: IRequestStorage;
 
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
@@ -28,8 +30,12 @@ type
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
+    /// <summary>Save given object and return its id.
+    /// Throw an  exception in case of failure.</summary>
+    function Persist(const Obj: TJsonObject): String;
+
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
-    constructor Create();
+    constructor Create(const RequestSaver: IRequestStorage);
     destructor Destroy(); override;
   end;
 
@@ -41,7 +47,7 @@ uses
 
 { TModel }
 
-constructor TModel.Create;
+constructor TModel.Create(const RequestSaver: IRequestStorage);
 var
   ListOfProviders: TObjectList<TProvider>;
 begin
@@ -50,6 +56,8 @@ begin
   FFactory := TProviderFactory.Create(ListOfProviders);
   ListOfProviders.Clear;
   ListOfProviders.DisposeOf;
+  FRequestSaver := RequestSaver;
+
 end;
 
 function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
@@ -105,6 +113,7 @@ begin
   if FAuthentication <> nil then
     FAuthentication.DisposeOf;
   FFactory.DisposeOf;
+  FRequestSaver := nil;
   inherited;
 end;
 
@@ -137,6 +146,11 @@ end;
 function TModel.isAuthorised(const IP, Token: String): Boolean;
 begin
   Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
+end;
+
+function TModel.Persist(const Obj: TJsonObject): String;
+begin
+  Result := FRequestSaver.Save(Obj);
 end;
 
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);
