@@ -95,12 +95,11 @@ begin
   begin
     try
       Request := Context.Request.BodyAs<TDispatcherEntry>;
-      Writeln('Recieved a request with ' + Request.Attachments.Count.ToString + ' attachment(s).');
+      Writeln('Received a request with ' + Request.Attachments.Count.ToString + ' attachment(s).');
       for Attach in Request.Attachments do
       begin
         Writeln('name: ' + Attach.Name);
         Writeln('content: ' + Attach.ContentAsString);
-
       end;
     except
       on E: Exception do

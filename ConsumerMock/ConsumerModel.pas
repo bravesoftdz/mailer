@@ -361,7 +361,7 @@ begin
                 Writeln('Responce received: failed to subscribe (' + Responce.Msg + ').');
             end
             else
-              Writeln('No responce recieved...');
+              Writeln('No responce received...');
           finally
             FSubscriptionRequestIsOn := False;
             Writeln('I am ready now.');
