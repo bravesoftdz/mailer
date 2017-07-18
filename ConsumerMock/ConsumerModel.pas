@@ -43,6 +43,7 @@ type
     procedure SendMail(const Item: TActiveQueueEntry);
   private
     function GetCategory: String;
+    procedure UpdateConfig(const Status: Boolean; const Token: String);
 
   public
 
@@ -373,6 +374,8 @@ begin
 end;
 
 procedure TConsumerModel.Unsubscribe();
+var
+  Status: Boolean;
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
@@ -383,26 +386,37 @@ begin
     else
     begin
       FSubscriptionRequestIsOn := True;
+      Status := SubscriptionStatus;
       TThread.CreateAnonymousThread(
         procedure
         var
           Responce: TAQSubscriptionResponce;
-          ConfigNew: TConsumerConfig;
         begin
           Writeln('I am busy now.');
           try
-            Responce := FServer.UnSubscribe(FConfig.SubscriptionToken);;
-            if Responce.status then
+            Responce := FServer.UnSubscribe(FConfig.SubscriptionToken);
+            if Responce <> nil then
             begin
-              Writeln('Responce received: unsubscribed now');
-              ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-                FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
-              FConfig.DisposeOf;
-              FConfig := ConfigNew;
-              FFileSaver.Save(FConfig);
-            end
-            else
-              Writeln('Responce received: failed to unsubscribe (' + Responce.Msg + ').');
+              Writeln('Responce received');
+              if Responce.status then
+              begin
+                Writeln('Responce status: unsubscribed now');
+                UpdateConfig(False, '');
+              end
+              else if (Responce.Msg = TAQSubscriptionResponceMessages.NOT_SUBSCRIBED) then
+              begin
+                if Status then
+                begin
+                  Writeln('A mismatch in subscription is found.');
+                  UpdateConfig(False, '');
+                end
+                else
+                  Writeln('It is confirmed that you are not subscribed');
+              end
+              else
+                Writeln('A mismatch in subscription is found, but not this message is expected: ' + Responce.Msg);
+
+            end;
           finally
             FSubscriptionRequestIsOn := False;
             Writeln('I am ready now.');
@@ -415,23 +429,20 @@ begin
   end;
 end;
 
+procedure TConsumerModel.UpdateConfig(const Status: Boolean; const Token: String);
+begin
+  Writeln('Update config...');
+  if FConfig <> nil then
+    FConfig.DisposeOf;
+  FConfig := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+    FConfig.ProviderPort, Status, Token, FConfig.BlockSize, FConfig.Category);;
+  try
+    FFileSaver.Save(FConfig);
+  except
+    on E: Exception do
+      Writeln('An error occurred while saving updated config: ' + E.Message);
+  end;
 
-
-
-// begin
-// TMonitor.Enter(FSubscriptionLock);
-// try
-// Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
-// if Result.status then
-// begin
-// ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
-// FConfig.DisposeOf;
-// FConfig := ConfigNew;
-// FFileSaver.Save(FConfig);
-// end;
-// finally
-// TMonitor.Exit(FSubscriptionLock);
-// end;
-// end;
+end;
 
 end.

@@ -6,6 +6,18 @@ uses
   ObjectsMappers;
 
 type
+  TAQSubscriptionResponceMessages = class abstract(TObject)
+  const
+    NO_SUBSCRIPTION_DATA = 'No subscription data is found.';
+    NOT_AUTHORISED = 'Not authorised';
+    ALREADY_SUBSCRIBED = 'Already subscribed';
+    SUBSCRIBE_SUCCESS = 'Successfully subscribed.';
+    UNSUBSCRIBE_SUCCESS = 'Successfully unsubscribed.';
+    NOT_AUTHENTICATED = 'Wrong token.';
+    NOT_SUBSCRIBED = 'Not subscribed';
+  end;
+
+type
 
   /// <summary>Abstract data type to represent a responce to a previously made
   /// subscribe/unsubscribe request.</summary>
