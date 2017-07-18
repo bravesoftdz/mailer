@@ -8,6 +8,19 @@ uses
   ConditionInterface, AQConfig, JsonSaver, Client;
 
 type
+  TAQSubscriptionResponceMessages = class abstract(TObject)
+  const
+  var
+  NO_SUBSCRIPTION_DATA = 'No subscription data is found.';
+  NOT_AUTHORISED = 'Not authorised';
+  ALREADY_SUBSCRIBED = 'Already subscribed';
+  SUBSCRIBE_SUCCESS = 'Successfully subscribed.';
+  UNSUBSCRIBE_SUCCESS = 'Successfully unsubscribed.';
+  NOT_AUTHENTICATED = 'Wrong token.';
+  NOT_SUBSCRIBED = 'Not subscribed';
+  end;
+
+type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
   TActiveQueueModel = class(TObject)
     /// Representation invariant:
@@ -255,18 +268,18 @@ begin
     Writeln('Subscribe: ' + ip + ', data: port ' + data.Port.ToString + ', category' + data.Category);
     if Data = nil then
     begin
-      Result := TAQSubscriptionResponce.Create(False, 'invalid input', '');
+      Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.NO_SUBSCRIPTION_DATA, '');
     end
     else
     begin
       if Not(IsIpInWhiteList(Ip)) then
-        Result := TAQSubscriptionResponce.Create(False, 'not authorized', '')
+        Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.NOT_AUTHORISED, '')
       else
       begin
         if IsSubscribed(IP, data.Port) then
         begin
           Writeln('This IP is already subscribed');
-          Result := TAQSubscriptionResponce.Create(False, 'already subscribed', '');
+          Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.ALREADY_SUBSCRIBED, '');
         end
         else
         begin
@@ -277,7 +290,7 @@ begin
           // create a copy of the object
           FConsumerIndex.Add(Token, TConsumer.Create(Ip, data.Port, Token, data.Category));
           FConsumerProxyIndex.Add(Token, TRestAdapter<IConsumerProxy>.Create().Build(Ip, Data.Port));
-          Result := TAQSubscriptionResponce.Create(True, Ip + ':' + inttostr(data.Port), Token);
+          Result := TAQSubscriptionResponce.Create(True, TAQSubscriptionResponceMessages.SUBSCRIBE_SUCCESS, Token);
         end;
       end;
     end;
@@ -348,7 +361,7 @@ begin
   try
     Writeln('Unsubscribe: ip = ' + ip + ', token ' + Token);
     if Not(IsIpInWhiteList(Ip)) then
-      Result := TAQSubscriptionResponce.Create(False, 'not authorized', '')
+      Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.NOT_AUTHORISED, '')
     else
     begin
       if (FConsumerIndex.ContainsKey(Token)) then
@@ -366,14 +379,14 @@ begin
         else
         begin
           Writeln('Unsubscribe fail: IP does not correpospond to the token');
-          Result := TAQSubscriptionResponce.Create(False, 'wrong ip or token', '');
+          Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.NOT_AUTHENTICATED, '');
         end;
 
       end
       else
       begin
         Writeln('Unsubscribe fail: FConsumerIndex does not contain this token.');
-        Result := TAQSubscriptionResponce.Create(False, 'not subscribed', '');
+        Result := TAQSubscriptionResponce.Create(False, TAQSubscriptionResponceMessages.NOT_SUBSCRIBED, '');
       end;
       CheckRep();
     end;
