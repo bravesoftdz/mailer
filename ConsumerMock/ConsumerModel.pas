@@ -43,7 +43,7 @@ type
     procedure SendMail(const Item: TActiveQueueEntry);
   private
     function GetCategory: String;
-    procedure UpdateConfig(const Status: Boolean; const Token: String);
+    procedure UpdateConfigToken(const Token: String);
 
   public
 
@@ -344,23 +344,24 @@ begin
         var
           Responce: TAQSubscriptionResponce;
           SubscriptionData: TAQSubscriptionEntry;
-          ConfigNew: TConsumerConfig;
         begin
           Writeln('I am busy now.');
           try
             SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
             Responce := FServer.Subscribe(SubscriptionData);
-            if Responce.status then
+            if Responce <> nil then
             begin
-              Writeln('Responce received: subscribed now');
-              ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-                FConfig.ProviderPort, Responce.Status, Responce.Token, FConfig.BlockSize, FConfig.Category);
-              FConfig.DisposeOf;
-              FConfig := ConfigNew;
-              FFileSaver.Save(FConfig);
+              if Responce.status then
+              begin
+                Writeln('Responce received: subscribed now');
+                UpdateConfigToken(Responce.Token);
+                RequestAndElaborate();
+              end
+              else
+                Writeln('Responce received: failed to subscribe (' + Responce.Msg + ').');
             end
             else
-              Writeln('Responce received: failed to subscribe (' + Responce.Msg + ').');
+              Writeln('No responce recieved...');
           finally
             FSubscriptionRequestIsOn := False;
             Writeln('I am ready now.');
@@ -401,14 +402,14 @@ begin
               if Responce.status then
               begin
                 Writeln('Responce status: unsubscribed now');
-                UpdateConfig(False, '');
+                UpdateConfigToken('');
               end
               else if (Responce.Msg = TAQSubscriptionResponceMessages.NOT_SUBSCRIBED) then
               begin
                 if Status then
                 begin
                   Writeln('A mismatch in subscription is found.');
-                  UpdateConfig(False, '');
+                  UpdateConfigToken('');
                 end
                 else
                   Writeln('It is confirmed that you are not subscribed');
@@ -429,13 +430,13 @@ begin
   end;
 end;
 
-procedure TConsumerModel.UpdateConfig(const Status: Boolean; const Token: String);
+procedure TConsumerModel.UpdateConfigToken(const Token: String);
 begin
   Writeln('Update config...');
   if FConfig <> nil then
     FConfig.DisposeOf;
   FConfig := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-    FConfig.ProviderPort, Status, Token, FConfig.BlockSize, FConfig.Category);;
+    FConfig.ProviderPort, Token <> '', Token, FConfig.BlockSize, FConfig.Category);;
   try
     FFileSaver.Save(FConfig);
   except
