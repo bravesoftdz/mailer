@@ -26,6 +26,10 @@ type
     /// a dumb object to make subscribe/unsubscribe requests single-threaded
     FSubscriptionLock: TObject;
 
+    /// a flag whether a request to subscribe/unsubscribe has been already been sent and its responce
+    /// is being awaited
+    FSubscriptionRequestIsOn: Boolean;
+
     FAdapter: TRestAdapter<IAQAPIConsumer>;
     FServer: IAQAPIConsumer;
     function GetBlockSize: Integer;
@@ -45,10 +49,16 @@ type
     procedure SetConfig(const Config: TConsumerConfig; const TargetConfigFileName: String);
     /// <summary>Get the configuation of the server.</summary>
     function GetConfig(): TConsumerConfig;
-    /// <summary>Send a subscription request to the data provider server notifications</summary>
-    function Subscribe(): TAQSubscriptionResponce;
-    /// <summary>Send a request to cancel the subscription from the data provider notifications</summary>
-    function Unsubscribe(): TAQSubscriptionResponce;
+    /// <summary>Send a subscribe request to the data provider.
+    /// The method first checks whether there is an active subscribe/unsubscribe request. If there
+    /// is such a request, this one is ignored. If there is no such a request, there starts a new thread
+    /// to request a subscription.</summary>
+    procedure Subscribe();
+    /// <summary>Send an unsubscribe request to the data provider.
+    /// The method first checks whether there is an active subscribe/unsubscribe request. If there
+    /// is such a request, this one is ignored. If there is no such a request, there starts a new thread
+    /// to request a subscription.</summary>
+    procedure Unsubscribe();
     /// <summary>Return true if given IP coincides with the provider IP specified in the consumer config file</summary>
     function IsProviderAuthorized(const IP: String): Boolean;
     /// <summary>Retrieve data from the provider and elaborate it. The method turns FStatus into occupied
@@ -180,9 +190,7 @@ begin
     end
     else
       Writeln('I am busy hence I ignore this notification...');
-
   finally
-
     TMonitor.Exit(FStatusLock);
   end;
 end;
@@ -318,48 +326,111 @@ begin
 
 end;
 
-function TConsumerModel.Subscribe: TAQSubscriptionResponce;
-var
-  SubscriptionData: TAQSubscriptionEntry;
-  ConfigNew: TConsumerConfig;
+procedure TConsumerModel.Subscribe;
 begin
-  /// the first argument (correponding to an ip at which the consumer operates) gets
-  /// ignored by the data provider server since the ip gets extracted from the http request
-  /// that the consumer sends to the data provider.
   TMonitor.Enter(FSubscriptionLock);
   try
-    SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
-    Result := FServer.Subscribe(SubscriptionData);
-    if Result.status then
+    if FSubscriptionRequestIsOn then
     begin
-      ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-        FConfig.ProviderPort, Result.Status, Result.Token, FConfig.BlockSize, FConfig.Category);
-      FConfig.DisposeOf;
-      FConfig := ConfigNew;
-      FFileSaver.Save(FConfig);
+      Writeln('Try to subscribe later... A previous request to subscribe/unsubscribe has to finish yet');
+    end
+    else
+    begin
+      FSubscriptionRequestIsOn := True;
+      TThread.CreateAnonymousThread(
+        procedure
+        var
+          Responce: TAQSubscriptionResponce;
+          SubscriptionData: TAQSubscriptionEntry;
+          ConfigNew: TConsumerConfig;
+        begin
+          Writeln('I am busy now.');
+          try
+            SubscriptionData := TAQSubscriptionEntry.Create(FConfig.Port, FConfig.Category);
+            Responce := FServer.Subscribe(SubscriptionData);
+            if Responce.status then
+            begin
+              Writeln('Responce received: subscribed now');
+              ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+                FConfig.ProviderPort, Responce.Status, Responce.Token, FConfig.BlockSize, FConfig.Category);
+              FConfig.DisposeOf;
+              FConfig := ConfigNew;
+              FFileSaver.Save(FConfig);
+            end
+            else
+              Writeln('Responce received: failed to subscribe (' + Responce.Msg + ').');
+          finally
+            FSubscriptionRequestIsOn := False;
+            Writeln('I am ready now.');
+          end;
+        end).start;
     end;
+
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
 end;
 
-function TConsumerModel.Unsubscribe(): TAQSubscriptionResponce;
-var
-  ConfigNew: TConsumerConfig;
+procedure TConsumerModel.Unsubscribe();
 begin
   TMonitor.Enter(FSubscriptionLock);
   try
-    Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
-    if Result.status then
+    if FSubscriptionRequestIsOn then
     begin
-      ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
-      FConfig.DisposeOf;
-      FConfig := ConfigNew;
-      FFileSaver.Save(FConfig);
+      Writeln('Try to unsubscribe later... A previous request to subscribe/unsubscribe has to finish yet');
+    end
+    else
+    begin
+      FSubscriptionRequestIsOn := True;
+      TThread.CreateAnonymousThread(
+        procedure
+        var
+          Responce: TAQSubscriptionResponce;
+          ConfigNew: TConsumerConfig;
+        begin
+          Writeln('I am busy now.');
+          try
+            Responce := FServer.UnSubscribe(FConfig.SubscriptionToken);;
+            if Responce.status then
+            begin
+              Writeln('Responce received: unsubscribed now');
+              ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+                FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
+              FConfig.DisposeOf;
+              FConfig := ConfigNew;
+              FFileSaver.Save(FConfig);
+            end
+            else
+              Writeln('Responce received: failed to unsubscribe (' + Responce.Msg + ').');
+          finally
+            FSubscriptionRequestIsOn := False;
+            Writeln('I am ready now.');
+          end;
+        end).start;
     end;
+
   finally
     TMonitor.Exit(FSubscriptionLock);
   end;
 end;
+
+
+
+
+// begin
+// TMonitor.Enter(FSubscriptionLock);
+// try
+// Result := FServer.UnSubscribe(FConfig.SubscriptionToken);
+// if Result.status then
+// begin
+// ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP, FConfig.ProviderPort, False, '', FConfig.BlockSize, FConfig.Category);
+// FConfig.DisposeOf;
+// FConfig := ConfigNew;
+// FFileSaver.Save(FConfig);
+// end;
+// finally
+// TMonitor.Exit(FSubscriptionLock);
+// end;
+// end;
 
 end.

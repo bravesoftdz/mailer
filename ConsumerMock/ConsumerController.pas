@@ -123,50 +123,13 @@ begin
 end;
 
 class procedure TConsumerController.Subscribe();
-var
-  IP: String;
-  Output: String;
-  Responce: TAQSubscriptionResponce;
 begin
-  if Model.SubscriptionStatus then
-  begin
-    Writeln('Already subscribed.');
-  end
-  else
-  begin
-    Responce := Model.Subscribe();
-    if Responce.status then
-      Output := 'Success'
-    else
-      Output := Responce.Msg;
-    Writeln(Output);
-    Responce.DisposeOf;
-  end;
+  Model.Subscribe();
 end;
 
 class procedure TConsumerController.Unsubscribe();
-var
-  Output: String;
-  Responce: TAQSubscriptionResponce;
 begin
-  if Model.SubscriptionStatus then
-  begin
-    Responce := Model.Unsubscribe();
-    if Responce <> nil then
-    begin
-      if Responce.status then
-        Output := 'Success'
-      else
-        Output := Responce.Msg;
-      Responce.DisposeOf;
-    end
-    else
-      Output := 'No responce from server';
-    Writeln(Output);
-  end
-  else
-    Writeln('Already unsubscribed.');
-
+  Model.Unsubscribe();
 end;
 
 initialization
