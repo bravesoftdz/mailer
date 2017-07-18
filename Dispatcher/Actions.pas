@@ -82,7 +82,7 @@ type
 implementation
 
 uses
-  SenderCredentials, MVCFramework.RESTAdapter, AQResponce, System.SysUtils;
+  MVCFramework.RESTAdapter, AQResponce, System.SysUtils;
 
 { TMailerAction }
 
