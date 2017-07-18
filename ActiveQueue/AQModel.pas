@@ -136,6 +136,8 @@ type
     function GetClients: TObjectList<TClient>;
 
     function GetConsumerIPWhitelist: String;
+  private
+    procedure SetTargetConfigPath(const Value: String);
 
   public
     /// <summary>Create a subscription </summary>
@@ -188,7 +190,7 @@ type
 
     property Config: TAQConfigImmutable read GetConfig write SetConfig;
 
-    property TargetConfigPath: String read FTargetConfigPath write FTargetConfigPath;
+    property TargetConfigPath: String read FTargetConfigPath write SetTargetConfigPath;
 
     property ConsumerIPWhitelist: String read GetConsumerIPWhitelist;
 
@@ -457,8 +459,8 @@ begin
   FItems := TQueue<TActiveQueueEntry>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
-  FStateSaver := TJsonSaver.Create();
-  FQueueSaver := TJsonSaver.Create();
+
+  // FQueueSaver := TJsonSaver.Create();
   CheckRep();
 end;
 
@@ -577,7 +579,9 @@ begin
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
-  FStateSaver.DisposeOf;
+  if FStateSaver <> nil then
+    FStateSaver.DisposeOf;
+
   FQueueSaver.Disposeof;
   inherited;
 
@@ -821,6 +825,11 @@ begin
   FQueueFilePath := Path;
 end;
 
+procedure TActiveQueueModel.SetTargetConfigPath(const Value: String);
+begin
+  FStateSaver := TJsonSaver.Create(Value);
+end;
+
 procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
 var
   Consumers: TObjectList<TConsumer>;
@@ -872,7 +881,8 @@ begin
     begin
       Items.Add(Request as Jsonable);
     end;
-    FQueueSaver.SaveMulti(FQueueFilePath, Items);
+    Writeln('At this moment, the queue must be saved somewhere, but it is not...');
+    // FQueueSaver.SaveMulti(FQueueFilePath, Items);
     Items.Clear;
     Items.DisposeOf;
   finally
@@ -885,7 +895,7 @@ var
   State: TAQConfigImmutable;
 begin
   State := GetConfig();
-  FStateSaver.save(FTargetConfigPath, State);
+  FStateSaver.save(State);
   State.DisposeOf;
 end;
 

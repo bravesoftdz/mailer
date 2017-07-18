@@ -89,7 +89,6 @@ uses
 
 constructor TConsumerModel.Create;
 begin
-  FFileSaver := TJsonSaver.Create;
   FStatus := TStatus.Ready;
   FStatusLock := TObject.Create;
   FSubscriptionLock := TObject.Create;
@@ -102,7 +101,8 @@ begin
   FSubscriptionLock.DisposeOf;
   if FConfig <> nil then
     FConfig.DisposeOf;
-  FFileSaver.DisposeOf;
+  if FFileSaver <> nil then
+    FFileSaver.DisposeOf;
   Fserver := nil;
   FAdapter := nil;
   inherited;

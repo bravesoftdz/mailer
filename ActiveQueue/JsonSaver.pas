@@ -37,11 +37,10 @@ type
     /// FFileFolder.
     function getAvailableName(): String;
   public
-    procedure Save(const FilePath: String; const Obj: Jsonable); overload;
+    // procedure Save(const FilePath: String; const Obj: Jsonable); overload;
     procedure Save(const Obj: Jsonable); overload;
     procedure SaveMulti(const FilePath: String; const Items: TList<Jsonable>);
-    constructor Create(); overload;
-    constructor Create(const FilePath: String); overload;
+    constructor Create(const FilePath: String);
     destructor Destroy(); override;
 
   end;
@@ -53,16 +52,11 @@ uses
 
 { TStateSaver }
 
-constructor TJsonSaver.Create;
-begin
-  FLockObject := Tobject.Create();
-end;
-
 constructor TJsonSaver.Create(const FilePath: String);
 var
   NameExt: String;
 begin
-  Create();
+  FLockObject := Tobject.Create();
   FFileFolder := ExtractFilePath(FilePath);
   FFileExtension := ExtractFileExt(FilePath);
   NameExt := ExtractFileName(FilePath);
@@ -120,28 +114,27 @@ begin
   Result := TryName;
 end;
 
-procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
-var
-  OutFileName: String;
-  jo: TJsonObject;
-  Text: String;
-begin
-  TMonitor.Enter(FLockObject);
-  Try
-    OutFileName := GetAvailablePath(FilePath, Suffix);
-    jo := Obj.ToJson();
-    if jo <> nil then
-    begin
-      Text := jo.ToString();
-      TFile.AppendAllText(OutFileName, Text);
-      Text := '';
-      jo.DisposeOf;
-    end;
-  Finally
-    TMonitor.Exit(FLockObject);
-  End;
-
-end;
+// procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
+// var
+// OutFileName: String;
+// jo: TJsonObject;
+// Text: String;
+// begin
+// TMonitor.Enter(FLockObject);
+// Try
+// OutFileName := GetAvailablePath(FilePath, Suffix);
+// jo := Obj.ToJson();
+// if jo <> nil then
+// begin
+// Text := jo.ToString();
+// TFile.AppendAllText(OutFileName, Text);
+// Text := '';
+// jo.DisposeOf;
+// end;
+// Finally
+// TMonitor.Exit(FLockObject);
+// End;
+// end;
 
 procedure TJsonSaver.Save(const Obj: Jsonable);
 var
