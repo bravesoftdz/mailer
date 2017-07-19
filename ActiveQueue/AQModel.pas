@@ -5,7 +5,7 @@ interface
 uses
   AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, System.Generics.Collections, ListenerProxyInterface,
-  ConditionInterface, AQConfig, JsonSaver, Client;
+  ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -75,8 +75,8 @@ type
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
     FStateSaver: TJsonSaver;
 
-    /// <summary>a class instance by means of which the queue is persisted<summary>
-    FQueueSaver: TJsonSaver;
+    /// <summary>a class responsable for persisting input requests<summary>
+    FStorage: IRequestStorage;
 
     /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
@@ -210,7 +210,7 @@ type
     /// <summary>Persist given items and return a list of their ids. </summary>
     function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
 
-    constructor Create();
+    constructor Create(const Storage: IRequestStorage);
     destructor Destroy(); override;
   end;
 
@@ -453,7 +453,7 @@ begin
   end;
 end;
 
-constructor TActiveQueueModel.Create();
+constructor TActiveQueueModel.Create(const Storage: IRequestStorage);
 begin
   Writeln('Creating a model...');
   FConsumerLock := TObject.Create;
@@ -465,7 +465,7 @@ begin
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
 
-  // FQueueSaver := TJsonSaver.Create();
+  FStorage := Storage;
   CheckRep();
 end;
 
@@ -587,7 +587,7 @@ begin
   if FStateSaver <> nil then
     FStateSaver.DisposeOf;
 
-  FQueueSaver.Disposeof;
+  FStorage := nil;
   inherited;
 
 end;
@@ -896,8 +896,24 @@ begin
 end;
 
 function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
+var
+  Item: TActiveQueueEntry;
+  Id: String;
 begin
-  raise Exception.Create('TActiveQueueModel.PersistRequests: not implemented yet');
+  Result := TStringList.Create();
+  for Item in Items do
+  begin
+    try
+      Id := FStorage.Save(Item.ToJson);
+    except
+      on E: Exception do
+      begin
+        Result.DisposeOf;
+        raise Exception.Create('AQ model storage failed to save an item. Reason: ' + E.Message);
+      end;
+    end;
+    Result.Add(Id);
+  end;
 end;
 
 procedure TActiveQueueModel.PersistState;

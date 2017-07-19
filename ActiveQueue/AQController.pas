@@ -99,8 +99,8 @@ type
 implementation
 
 uses
-  MVCFramework.Logger, AQSubscriptionResponce, AQSubscriptionEntry,
-  System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils,
+  MVCFramework.Logger, AQSubscriptionResponce, AQSubscriptionEntry, RequestStorageInterface,
+  RequestToFileSystemStorage, System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils,
   AQResponce, System.Classes;
 
 class function TController.GetClients: TObjectList<TClient>;
@@ -336,7 +336,7 @@ end;
 
 class procedure TController.Setup;
 begin
-  Model := TActiveQueueModel.Create();
+  Model := TActiveQueueModel.Create(TRequestToFileSystemStorage.Create('ActiveQueue-storage/'));
 end;
 
 procedure TController.Subscribe(const Context: TWebContext);
