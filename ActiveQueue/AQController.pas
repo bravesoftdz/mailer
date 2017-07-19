@@ -101,7 +101,7 @@ implementation
 uses
   MVCFramework.Logger, AQSubscriptionResponce, AQSubscriptionEntry,
   System.SysUtils, ConditionInterface, TokenBasedCondition, System.IOUtils,
-  AQResponce;
+  AQResponce, System.Classes;
 
 class function TController.GetClients: TObjectList<TClient>;
 begin
@@ -193,9 +193,8 @@ end;
 class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TActiveQueueEntry>): Boolean;
 begin
-  Result := Model.Enqueue(IP, Items);
-  // if Result then
-  // Model.PersistQueue();
+  // Model.Persist(Items);
+  // Result := Model.Enqueue(IP, Items);
 end;
 
 procedure TController.GetItems(const Context: TWebContext);
@@ -282,30 +281,56 @@ end;
 
 procedure TController.PostItems(const Context: TWebContext);
 var
-  items: TActiveQueueEntries;
+  Entries: TActiveQueueEntries;
   Outcome: TAQResponce;
   IP: String;
   Status: Boolean;
+  Ids: TStringList;
 begin
-  if Context.Request.ThereIsRequestBody then
+  IP := Context.Request.ClientIP;
+  if not(Context.Request.ThereIsRequestBody) then
   begin
-    try
-      items := Context.Request.BodyAs<TActiveQueueEntries>;
-      IP := Context.Request.ClientIP;
-      Status := EnqueueAndPersist(IP, Items.Items);
-      if Status then
-        Outcome := TAQResponce.Create(Status, TAG + ' has enqueued the items.')
-      else
-        Outcome := TAQResponce.Create(Status, TAG + ' has failed to enqueue the items.');
-    except
-      on E: Exception do
-        Outcome := TAQResponce.Create(False, TAG + ': ' + E.Message);
-    end;
-  end
-  else
-  begin
-    Outcome := TAQResponce.Create(False, TAG + ': request body is missing.');
+    Outcome := TAQResponce.Create(False, TAQResponceMessages.BODY_MISSING);
+    Render(Outcome);
+    Exit();
   end;
+
+  try
+    Entries := Context.Request.BodyAs<TActiveQueueEntries>;
+  except
+    on E: Exception do
+    begin
+      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_CAST_REPORT, [E.Message]));
+      Entries := nil;
+      Render(Outcome);
+      Exit();
+    end;
+  end;
+  try
+    Ids := Model.PersistRequests(Entries.Items);
+  except
+    on E: Exception do
+    begin
+      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_PERSIST_REPORT, [E.Message]));
+      Render(Outcome);
+      Exit();
+    end;
+  end;
+  try
+    Status := Model.Enqueue(IP, Ids, Entries.Items);
+  except
+    on E: Exception do
+    begin
+      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
+      Render(Outcome);
+      Exit();
+    end;
+  end;
+
+  if Status then
+    Outcome := TAQResponce.Create(True, TAQResponceMessages.SUCCESS)
+  else
+    Outcome := TAQResponce.Create(False, TAQResponceMessages.FAILURE);
   Render(Outcome);
 end;
 

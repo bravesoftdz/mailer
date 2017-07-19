@@ -6,6 +6,17 @@ uses
   ObjectsMappers;
 
 type
+  TAQResponceMessages = class abstract(TObject)
+  const
+    BODY_MISSING = 'AQ: no request body is present';
+    ERROR_CAST_REPORT = 'AQ: failed to cast the request body into TActiveQueueEntries. Reason: %s';
+    ERROR_PERSIST_REPORT = 'AQ: failed to save the requests. Reason: %s';
+    ERROR_ENQUEUE_REPORT = 'AQ: failed to enqueue the requests. Reason: %s';
+    SUCCESS = 'AQ has successfully enqueued the items.';
+    FAILURE = 'AQ has failed to enqueu the items.';
+  end;
+
+type
 
   /// <summary>Abstract data type to represent the responces from the
   /// back end server corresponding to previously made requests.</summary>

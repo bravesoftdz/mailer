@@ -39,8 +39,26 @@ begin
 end;
 
 function TRequestToFileSystemStorage.Delete(const Id: String): Boolean;
+var
+  FullPath: String;
 begin
-  Result := False;
+  FullPath := FTargetFolder + Id + FFileExtension;
+  if not(TFile.Exists(FullPath)) then
+    Result := False
+  else
+  begin
+    try
+      Writeln('Deleting file ' + FullPath);
+      TFile.Delete(FullPath);
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        raise Exception.Create('File system storage failed to remove file ' + id);
+      end;
+    end
+  end;
+
 end;
 
 function TRequestToFileSystemStorage.GetAvailableName: String;
@@ -68,7 +86,7 @@ begin
     Result := NewName;
 
   end;
-  Writeln('Available name for config file: ' + Result);
+  Writeln('Available file name: ' + Result);
 end;
 
 function TRequestToFileSystemStorage.Save(const Obj: TJsonObject): String;

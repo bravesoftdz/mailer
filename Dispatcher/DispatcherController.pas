@@ -83,7 +83,7 @@ end;
 
 procedure TDispatcherController.PutRequest(Context: TWebContext);
 var
-  IP: String;
+  IP, ID: String;
   Request: TDispatcherEntry;
   Entries: TObjectList<TActiveQueueEntry>;
   Responce: TDispatcherResponce;
@@ -128,7 +128,7 @@ begin
   try
     jo := Request.toJson();
     try
-      Model.Persist(jo);
+      ID := Model.Persist(jo);
     except
       on E: Exception do
       begin
@@ -140,7 +140,7 @@ begin
   finally
     jo.DisposeOf;
   end;
-
+  /// at this point, ID must be initialized
   try
     Entries := Model.CreateBackEndEntries(Request);
   except
@@ -157,7 +157,10 @@ begin
     try
       BackEndResponce := FBackEndProxy.PostItems(Wrapper);
       if BackEndResponce.status then
-        Responce := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.SUCCESS_REPORT, [Entries.Count]))
+      begin
+        Responce := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.SUCCESS_REPORT, [Entries.Count]));
+        Model.Delete(Id);
+      end
       else
         Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [BackEndResponce.Msg]))
     except

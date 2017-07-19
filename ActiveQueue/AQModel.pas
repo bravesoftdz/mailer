@@ -156,11 +156,13 @@ type
     /// get not more that N items from the queue.
     function GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
 
-    /// <summary>Add many items to the pull</summary>
+    /// <summary>Add multiple items (that are supposed to be already saved into the storage) to the queue.
+    /// </summary>
     /// <param name="Items">list of elements to be added to the queue</param>
     /// <param name="IP">ip of the computer from which the request originates</param>
+    /// <param name="Ids">ids of the elements saved into the storage.</param>
     /// <returns>True in case of success, False otherwise</returns>
-    function Enqueue(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
+    function Enqueue(const IP: String; const Ids: TStringList; const Items: TObjectList<TActiveQueueEntry>): Boolean;
 
     /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
     function GetListenersIPs: TArray<String>;
@@ -205,6 +207,9 @@ type
 
     procedure SetQueuePath(const path: String);
 
+    /// <summary>Persist given items and return a list of their ids. </summary>
+    function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
+
     constructor Create();
     destructor Destroy(); override;
   end;
@@ -216,7 +221,7 @@ uses
   JsonableInterface, System.RegularExpressions;
 { TActiveQueueModel }
 
-function TActiveQueueModel.Enqueue(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
+function TActiveQueueModel.Enqueue(const IP: String; const Ids: TStringList; const Items: TObjectList<TActiveQueueEntry>): Boolean;
 var
   item: TActiveQueueEntry;
 begin
@@ -888,6 +893,11 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
+end;
+
+function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
+begin
+  raise Exception.Create('TActiveQueueModel.PersistRequests: not implemented yet');
 end;
 
 procedure TActiveQueueModel.PersistState;

@@ -34,6 +34,11 @@ type
     /// Throw an  exception in case of failure.</summary>
     function Persist(const Obj: TJsonObject): String;
 
+    /// <summary>Delete persisted object by its id.
+    /// This method serves just for clean up. If it fails, nothing serious happens.
+    /// Return true in case of success, false otherwise. </summary>
+    function Delete(const Id: String): Boolean;
+
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
     constructor Create(const RequestSaver: IRequestStorage);
     destructor Destroy(); override;
@@ -102,6 +107,11 @@ begin
     end;
   end;
 
+end;
+
+function TModel.Delete(const Id: String): Boolean;
+begin
+  Result := FRequestSaver.Delete(Id);
 end;
 
 destructor TModel.Destroy;
