@@ -285,7 +285,7 @@ var
   Outcome: TAQResponce;
   IP: String;
   Status: Boolean;
-  Ids: TStringList;
+  Ids: TDictionary<String, TActiveQueueEntry>;
 begin
   IP := Context.Request.ClientIP;
   if not(Context.Request.ThereIsRequestBody) then
@@ -317,7 +317,7 @@ begin
     end;
   end;
   try
-    Status := Model.Enqueue(IP, Ids, Entries.Items);
+    Status := Model.Enqueue(IP, Ids);
   except
     on E: Exception do
     begin

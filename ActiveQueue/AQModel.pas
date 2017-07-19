@@ -4,8 +4,9 @@ interface
 
 uses
   AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
-  System.Classes, Consumer, System.Generics.Collections, ListenerProxyInterface,
-  ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface;
+  System.Classes, Consumer, ListenerProxyInterface,
+  ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface,
+  System.Generics.Collections;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -58,7 +59,7 @@ type
     FConsumerProxyIndex: TDictionary<String, IConsumerProxy>;
 
     /// items of the queue
-    FItems: TQueue<TActiveQueueEntry>;
+    FItems: TQueue<TPair<String, TActiveQueueEntry>>;
 
     /// <summary>Set the IPs from which the subscriptions can be accepted.</summary>
     FListenersIPs: TArray<String>;
@@ -158,11 +159,10 @@ type
 
     /// <summary>Add multiple items (that are supposed to be already saved into the storage) to the queue.
     /// </summary>
-    /// <param name="Items">list of elements to be added to the queue</param>
     /// <param name="IP">ip of the computer from which the request originates</param>
-    /// <param name="Ids">ids of the elements saved into the storage.</param>
+    /// <param name="Ids">map of ids to corresponding items. </param>
     /// <returns>True in case of success, False otherwise</returns>
-    function Enqueue(const IP: String; const Ids: TStringList; const Items: TObjectList<TActiveQueueEntry>): Boolean;
+    function Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 
     /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
     function GetListenersIPs: TArray<String>;
@@ -207,8 +207,8 @@ type
 
     procedure SetQueuePath(const path: String);
 
-    /// <summary>Persist given items and return a list of their ids. </summary>
-    function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
+    /// <summary>Persist given items and return a map from ids to those items. </summary>
+    function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 
     constructor Create(const Storage: IRequestStorage);
     destructor Destroy(); override;
@@ -221,17 +221,18 @@ uses
   JsonableInterface, System.RegularExpressions;
 { TActiveQueueModel }
 
-function TActiveQueueModel.Enqueue(const IP: String; const Ids: TStringList; const Items: TObjectList<TActiveQueueEntry>): Boolean;
+function TActiveQueueModel.Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 var
-  item: TActiveQueueEntry;
+  item: TPair<String, TActiveQueueEntry>;
+  id: String;
 begin
-  Writeln('Enqueueing ' + inttostr(Items.Count) + ' item(s)');
+  Writeln('Enqueueing ' + inttostr(IdToItem.Count) + ' item(s)');
   TMonitor.Enter(FQueueLock);
   try
     try
-      for item in Items do
+      for id in IdToItem.Keys do
       begin
-        FItems.Enqueue(item);
+        FItems.Enqueue(TPair<String, TActiveQueueEntry>.Create(id, IdToItem[id]));
         Writeln('Item added to the queue...');
       end;
       Result := True;
@@ -461,7 +462,7 @@ begin
   FClientLock := TObject.Create;
   FConsumerIndex := TDictionary<String, TConsumer>.Create;
   FConsumerProxyIndex := TDictionary<String, IConsumerProxy>.Create();
-  FItems := TQueue<TActiveQueueEntry>.Create();
+  FItems := TQueue < TPair < String, TActiveQueueEntry >>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
 
@@ -644,6 +645,7 @@ end;
 function TActiveQueueModel.GetItems(const Ip: String; const Token: String; const N: Integer): TObjectList<TActiveQueueEntry>;
 var
   Size, ReturnSize, I: Integer;
+  Item: TPair<String, TActiveQueueEntry>;
 begin
   Result := TObjectList<TActiveQueueEntry>.Create();
   TMonitor.Enter(FConsumerLock);
@@ -658,7 +660,9 @@ begin
         ReturnSize := N;
       for I := 0 to ReturnSize - 1 do
       begin
-        Result.Add(FItems.Dequeue);
+        Item := FItems.Dequeue;
+        Writeln('What to do with file ' + Item.Key + '?');
+        Result.Add(Item.Value);
       end;
       TMonitor.Exit(FQueueLock);
     end;
@@ -881,26 +885,27 @@ var
 begin
   TMonitor.Enter(FQueueLock);
   try
-    Items := TList<Jsonable>.Create();
-    for Request in FItems do
-    begin
-      Items.Add(Request as Jsonable);
-    end;
-    Writeln('At this moment, the queue must be saved somewhere, but it is not...');
+    raise Exception.Create('TActiveQueueModel.PersistQueue is deprecated.');
+    // Items := TList<Jsonable>.Create();
+    // for Request in FItems do
+    // begin
+    // Items.Add(Request as Jsonable);
+    // end;
+    // Writeln('At this moment, the queue must be saved somewhere, but it is not...');
     // FQueueSaver.SaveMulti(FQueueFilePath, Items);
-    Items.Clear;
-    Items.DisposeOf;
+    // Items.Clear;
+    // Items.DisposeOf;
   finally
     TMonitor.Exit(FQueueLock);
   end;
 end;
 
-function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TStringList;
+function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 var
   Item: TActiveQueueEntry;
   Id: String;
 begin
-  Result := TStringList.Create();
+  Result := TDictionary<String, TActiveQueueEntry>.Create;
   for Item in Items do
   begin
     try
@@ -912,7 +917,7 @@ begin
         raise Exception.Create('AQ model storage failed to save an item. Reason: ' + E.Message);
       end;
     end;
-    Result.Add(Id);
+    Result.Add(Id, Item);
   end;
 end;
 
