@@ -117,7 +117,7 @@ begin
   begin
     try
       IdToEntries := Model.PersistDispatchConvert(Request);
-      /// decompose the pair immideately since afterwords you have no way to know whether it
+      /// decompose the pair immediately since afterwords you have no way to know whether it
       /// has been instantiated or not
       ID := IdToEntries.Key;
       Entries := IdToEntries.Value;
@@ -159,8 +159,8 @@ begin
   /// clean up the objects that might have been created
   if Request <> nil then
     Request.DisposeOf;
-  if Entries <> nil then
-    Entries.DisposeOf;
+  // if Entries <> nil then
+  // Entries.DisposeOf;
   if BackEndResponce <> nil then
     BackEndResponce.DisposeOf;
 

@@ -62,7 +62,7 @@ type
   var
     FItems: TObjectList<TActiveQueueEntry>;
     function GetItems: TObjectList<TActiveQueueEntry>;
-    procedure SetItems(Items: TObjectList<TActiveQueueEntry>);
+    procedure SetItems(const Items: TObjectList<TActiveQueueEntry>);
   public
     constructor Create(const Items: TObjectList<TActiveQueueEntry>); overload;
     constructor Create; overload;
@@ -102,7 +102,7 @@ begin
   Result := TObjectList<TActiveQueueEntry>.Create();
 end;
 
-procedure TActiveQueueEntries.SetItems(Items: TObjectList<TActiveQueueEntry>);
+procedure TActiveQueueEntries.SetItems(const Items: TObjectList<TActiveQueueEntry>);
 var
   Item: TActiveQueueEntry;
 begin
