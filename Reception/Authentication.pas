@@ -40,7 +40,7 @@ begin
     Token := Item.Token;
     if FItems.ContainsKey(Token) then
       raise Exception.Create('Dublicate token: every token must be registered not more than once.');
-    FItems.add(Token, TClient.Create(Item.IP, Token));
+    FItems.add(Token, Item.Clone);
   end;
 
 end;

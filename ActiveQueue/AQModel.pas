@@ -558,37 +558,72 @@ destructor TActiveQueueModel.Destroy;
 var
   Key: String;
 begin
-  Writeln('Destroying the model...');
+  Writeln('Start destroying the model...');
+  Writeln('Destroying three lock objects...');
   FConsumerLock.DisposeOf;
   FQueueLock.DisposeOf;
   FClientLock.DisposeOf;
   // remove objects from the register and clean the register afterwards
-  for Key in FConsumerIndex.Keys do
+  Writeln('Iterate over FConsumerIndex ...');
+  if FConsumerIndex <> nil then
   begin
-    FConsumerIndex[Key].DisposeOf;
+    Writeln('FConsumerIndex is not nil');
+    for Key in FConsumerIndex.Keys do
+    begin
+      Writeln('Destroying key ' + Key);
+      FConsumerIndex[Key].DisposeOf;
+    end;
+    Writeln('Cleaning and disposing FConsumerIndex...');
+    FConsumerIndex.Clear;
+    FConsumerIndex.DisposeOf;
   end;
-  FConsumerIndex.Clear;
-  FConsumerIndex.DisposeOf;
 
-  for Key in FClientIndex.Keys do
+  Writeln('Iterate over FClientIndex...');
+  if FClientIndex <> nil then
   begin
-    FClientIndex[Key].DisposeOf;
+    Writeln('FClientIndex is not nil');
+    for Key in FClientIndex.Keys do
+    begin
+      Writeln('Destroying key ' + Key);
+      FClientIndex[Key].DisposeOf;
+    end;
+    Writeln('Cleaning and disposing FClientIndex...');
+    FClientIndex.Clear;
+    FClientIndex.DisposeOf;
   end;
-  FClientIndex.Clear;
-  FClientIndex.DisposeOf;
 
-  FConsumerWhiteListHashSet.Clear;
-  FConsumerWhiteListHashSet.DisposeOf;
+  Writeln('Cleaning and disposing FConsumerWhiteListHashSet...');
+  if FConsumerWhiteListHashSet <> nil then
+  begin
+    Writeln('FConsumerWhiteListHashSet is not nil');
+    FConsumerWhiteListHashSet.Clear;
+    FConsumerWhiteListHashSet.DisposeOf;
+  end;
 
+  Writeln('Itearet over FConsumerProxyIndex...');
+  for Key in FConsumerProxyIndex.Keys do
+  begin
+    Writeln('Set to nil ' + Key);
+    FConsumerProxyIndex[Key] := nil;
+  end;
+  Writeln('Cleaning and disposing FConsumerProxyIndex...');
   FConsumerProxyIndex.Clear;
   FConsumerProxyIndex.DisposeOf;
+
+  Writeln('Cleaning and disposing FItems...');
   FItems.Clear;
   FItems.DisposeOf;
   SetLength(FListenersIPs, 0);
-  if FStateSaver <> nil then
-    FStateSaver.DisposeOf;
 
+  if FStateSaver <> nil then
+  begin
+    Writeln('Disposing FStateSaver...');
+    FStateSaver.DisposeOf;
+  end;
+
+  Writeln('Setting FStorage to nil...');
   FStorage := nil;
+  Writeln('Finish destroying the model...');
   inherited;
 
 end;

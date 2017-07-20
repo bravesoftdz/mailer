@@ -25,7 +25,7 @@ uses
   ReceptionResponce in 'ReceptionResponce.pas',
   Client in '..\Config\Client.pas',
   Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule},
+  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
   Attachment in '..\Emailtemplate\Attachment.pas',
   DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
 
@@ -161,7 +161,6 @@ begin
         Writeln(E.Message);
         Writeln(ParamUsage.Text);
       end;
-
     end;
   finally
     if ParamValues <> nil then
@@ -169,6 +168,8 @@ begin
       ParamValues.Clear;
       ParamValues.DisposeOf;
     end;
+    if ConfigImm <> nil then
+      ConfigImm.DisposeOf;
     ParamUsage.DisposeOf;
     CliParams[0].DisposeOf();
     SetLength(CliParams, 0);
