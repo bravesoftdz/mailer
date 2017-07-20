@@ -106,6 +106,8 @@ begin
     except
       on E: Exception do
       begin
+        if Request <> nil then
+          Request.DisposeOf;
         Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.INVALID_BODY);
         Render(Responce);
         Exit();
@@ -121,6 +123,9 @@ begin
 
   if not(Model.isAuthorised(IP, Request.Token)) then
   begin
+    if Request <> nil then
+      Request.DisposeOf;
+
     Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.NOT_AUTHORISED);
     Render(Responce);
     Exit();
@@ -132,6 +137,9 @@ begin
     except
       on E: Exception do
       begin
+        if Request <> nil then
+          Request.DisposeOf;
+
         Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.PERSIST_EXCEPTION_REPORT, [E.Message]));
         Render(Responce);
         Exit();
@@ -146,17 +154,24 @@ begin
   except
     on E: Exception do
     begin
+      if Request <> nil then
+        Request.DisposeOf;
+
       Responce := TDispatcherResponce.Create(False, E.Message);
       Render(Responce);
       Exit();
     end;
   end;
-
   Wrapper := TActiveQueueEntries.Create(Entries);
+  Entries.DisposeOf();
   try
     try
       BackEndResponce := FBackEndProxy.PostItems(Wrapper);
-      if BackEndResponce.status then
+      if BackEndResponce = nil then
+      begin
+        Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE_NO_BACKEND_RESPONSE)
+      end
+      else if BackEndResponce.status then
       begin
         Responce := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.SUCCESS_REPORT, [Entries.Count]));
         Model.Delete(Id);
@@ -170,8 +185,10 @@ begin
       end;
     end;
   finally
-    Wrapper.DisposeOf;
-    BackEndResponce.DisposeOf;
+    if Wrapper <> nil then
+      Wrapper.DisposeOf;
+    if BackEndResponce <> nil then
+      BackEndResponce.DisposeOf;
   end;
   Render(Responce);
 end;

@@ -14,6 +14,7 @@ type
     FAILURE_REPORT = 'Dispatcher received a failure from the back end server. Reason: %s';
     EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
     PERSIST_EXCEPTION_REPORT = 'Dispatcher encountered an error when persisting items: %s';
+    FAILURE_NO_BACKEND_RESPONSE = 'Dispatcher has received nil from the back end server';
   end;
 
 type

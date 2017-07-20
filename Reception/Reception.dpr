@@ -149,7 +149,7 @@ begin
       if ConfigImm <> nil then
       begin
         if WebRequestHandler <> nil then
-          WebRequestHandler.WebModuleClass := WebModuleClass;
+          WebRequestHandConfigImmler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
         RunServer(ConfigImm);
       end
