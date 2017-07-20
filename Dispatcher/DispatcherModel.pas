@@ -28,7 +28,7 @@ type
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
-    function CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
+    function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
     /// <summary>Save given object and return its id.
     /// Throw an  exception in case of failure.</summary>
@@ -38,6 +38,16 @@ type
     /// This method serves just for clean up. If it fails, nothing serious happens.
     /// Return true in case of success, false otherwise. </summary>
     function Delete(const Id: String): Boolean;
+
+    /// <summary>Persist the given request and transform it in a form that the back end server can accept.
+    /// The method first tries to persist the request. If it fails, it remembers the error and tries
+    /// to accomplish the second step - dispatch the request and convert the result into a form for the
+    /// back end server.
+    /// Return a pair whose key is an id under which the entry has been persisted (in case of success)
+    /// and value is an instance for the back end server.<summary>
+    ///
+    /// <param name="Entry">a dispatcher entry to be elaborated</param>
+    function PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
     constructor Create(const RequestSaver: IRequestStorage);
@@ -65,7 +75,7 @@ begin
 
 end;
 
-function TModel.CreateBackEndEntries(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
+function TModel.Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 var
   Actions: TObjectList<TAction>;
   Action: TAction;
@@ -105,6 +115,58 @@ begin
       Attachments.Clear;
       Attachments.DisposeOf;
     end;
+  end;
+
+end;
+
+function TModel.PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
+var
+  jo: TJsonObject;
+  ID: String;
+  Items: TObjectList<TActiveQueueEntry>;
+  ErrorMessages: TStringList;
+  ErrorSummary: String;
+begin
+  ErrorMessages := TStringList.Create;
+  jo := Entry.toJson();
+  try
+    ID := Persist(jo);
+  except
+    on E: Exception do
+    begin
+      ErrorMessages.Add(E.Message);
+    end;
+  end;
+  if jo <> nil then
+  begin
+    jo.DisposeOf;
+  end;
+  try
+    Items := Dispatch(Entry);
+  except
+    on E: Exception do
+    begin
+      ErrorMessages.Add(E.Message);
+    end;
+  end;
+  if (ID <> '') AND (Items <> nil) then
+  begin
+    Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(Items));
+  end;
+  if Items <> nil then
+  begin
+    Items.DisposeOf;
+  end;
+
+  if ErrorMessages.Count > 0 then
+  begin
+    ErrorSummary := ErrorMessages.Text;
+    ErrorMessages.DisposeOf;
+    raise Exception.Create('Dispatcher has encountered the following errors: ' + ErrorSummary);
+  end
+  else
+  begin
+    ErrorMessages.DisposeOf;
   end;
 
 end;

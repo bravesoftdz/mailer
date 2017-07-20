@@ -85,111 +85,85 @@ procedure TDispatcherController.PutRequest(Context: TWebContext);
 var
   IP, ID: String;
   Request: TDispatcherEntry;
-  Entries: TObjectList<TActiveQueueEntry>;
+  IdToEntries: TPair<String, TActiveQueueEntries>;
+  Entries: TActiveQueueEntries;
   Responce: TDispatcherResponce;
-  Wrapper: TActiveQueueEntries;
   BackEndResponce: TAQResponce;
-  Attach: TAttachment;
-  jo: TJsonObject;
 begin
   IP := Context.Request.ClientIP;
+  Responce := nil;
   if Context.Request.ThereIsRequestBody then
   begin
     try
       Request := Context.Request.BodyAs<TDispatcherEntry>;
-      Writeln('Received a request with ' + Request.Attachments.Count.ToString + ' attachment(s).');
-      for Attach in Request.Attachments do
-      begin
-        Writeln('name: ' + Attach.Name);
-        Writeln('content: ' + Attach.ContentAsString);
-      end;
     except
       on E: Exception do
       begin
-        if Request <> nil then
-          Request.DisposeOf;
-        Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.INVALID_BODY);
-        Render(Responce);
-        Exit();
+        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.INVALID_BODY_REPORT, [E.Message]));
       end;
     end;
   end
   else
   begin
     Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.MISSING_BODY);
-    Render(Responce);
-    Exit();
   end;
 
-  if not(Model.isAuthorised(IP, Request.Token)) then
+  if (Responce = nil) AND not(Model.isAuthorised(IP, Request.Token)) then
   begin
-    if Request <> nil then
-      Request.DisposeOf;
-
     Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.NOT_AUTHORISED);
-    Render(Responce);
-    Exit();
   end;
-  try
-    jo := Request.toJson();
+
+  if Responce = nil then
+  begin
     try
-      ID := Model.Persist(jo);
+      IdToEntries := Model.PersistDispatchConvert(Request);
+      /// decompose the pair immideately since afterwords you have no way to know whether it
+      /// has been instantiated or not
+      ID := IdToEntries.Key;
+      Entries := IdToEntries.Value;
     except
       on E: Exception do
       begin
-        if Request <> nil then
-          Request.DisposeOf;
-
-        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.PERSIST_EXCEPTION_REPORT, [E.Message]));
-        Render(Responce);
-        Exit();
+        Responce := TDispatcherResponce.Create(False, E.Message);
       end;
     end;
-  finally
-    jo.DisposeOf;
   end;
-  /// at this point, ID must be initialized
-  try
-    Entries := Model.CreateBackEndEntries(Request);
-  except
-    on E: Exception do
-    begin
-      if Request <> nil then
-        Request.DisposeOf;
 
-      Responce := TDispatcherResponce.Create(False, E.Message);
-      Render(Responce);
-      Exit();
-    end;
-  end;
-  Wrapper := TActiveQueueEntries.Create(Entries);
-  Entries.DisposeOf();
-  try
+  if Responce = nil then
+  begin
     try
-      BackEndResponce := FBackEndProxy.PostItems(Wrapper);
-      if BackEndResponce = nil then
-      begin
-        Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE_NO_BACKEND_RESPONSE)
-      end
-      else if BackEndResponce.status then
-      begin
-        Responce := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.SUCCESS_REPORT, [Entries.Count]));
-        Model.Delete(Id);
-      end
-      else
-        Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [BackEndResponce.Msg]))
+      BackEndResponce := FBackEndProxy.PostItems(Entries);
     except
       on E: Exception do
       begin
         Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
       end;
     end;
-  finally
-    if Wrapper <> nil then
-      Wrapper.DisposeOf;
-    if BackEndResponce <> nil then
-      BackEndResponce.DisposeOf;
   end;
+
+  if Responce = nil then
+  begin
+    if BackEndResponce = nil then
+    begin
+      Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE_NO_BACKEND_RESPONSE)
+    end
+    else if BackEndResponce.status then
+    begin
+      Responce := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
+      Model.Delete(Id);
+    end
+    else
+      Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [BackEndResponce.Msg]))
+  end;
+
+  /// clean up the objects that might have been created
+  if Request <> nil then
+    Request.DisposeOf;
+  if Entries <> nil then
+    Entries.DisposeOf;
+  if BackEndResponce <> nil then
+    BackEndResponce.DisposeOf;
+
   Render(Responce);
 end;
 

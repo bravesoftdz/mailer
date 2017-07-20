@@ -7,10 +7,10 @@ uses ObjectsMappers, AQResponce;
 type
   TDispatcherResponceMessages = class abstract(TObject)
   const
-    INVALID_BODY = 'Invalid request body.';
+    INVALID_BODY_REPORT = 'Dispatcher failed to cast the request: %s';
     MISSING_BODY = 'No request body found.';
     NOT_AUTHORISED = 'Not authorized';
-    SUCCESS_REPORT = 'Dispatcher successfully put %d items to the backend server queue.';
+    SUCCESS = 'Dispatcher successfully passed data to the backend server.';
     FAILURE_REPORT = 'Dispatcher received a failure from the back end server. Reason: %s';
     EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
     PERSIST_EXCEPTION_REPORT = 'Dispatcher encountered an error when persisting items: %s';
