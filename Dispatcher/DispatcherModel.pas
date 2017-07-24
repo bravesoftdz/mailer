@@ -96,25 +96,15 @@ begin
       except
         on E: Exception do
         begin
-          // Attachments.Clear;
-          // Attachments.DisposeOf;
-          // Actions.Clear;
+          Actions.Clear;
           Actions.DisposeOf();
           raise Exception.Create('Failed to create back-end entries: ' + e.Message);
         end;
       end;
-      // Attachments.Clear;
-      // Attachments.DisposeOf;
-      // Attachments := nil;
     end;
   finally
     Actions.Clear;
     Actions.DisposeOf();
-    if Attachments <> nil then
-    begin
-      Attachments.Clear;
-      Attachments.DisposeOf;
-    end;
   end;
 
 end;

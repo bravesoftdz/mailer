@@ -87,11 +87,13 @@ end;
 
 constructor TActiveQueueEntries.Create;
 begin
+  Writeln('TActiveQueueEntries - base constructor');
   FItems := TObjectList<TActiveQueueEntry>.Create();
 end;
 
 destructor TActiveQueueEntries.Destroy;
 begin
+  Writeln('TActiveQueueEntries - destroy ');
   FItems.Clear;
   FItems.DisposeOf;
   inherited;

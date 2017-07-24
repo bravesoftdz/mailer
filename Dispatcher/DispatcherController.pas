@@ -89,6 +89,8 @@ var
   Entries: TActiveQueueEntries;
   Responce: TDispatcherResponce;
   BackEndResponce: TAQResponce;
+  ItemsTmp: TObjectList<TActiveQueueEntry>;
+  AQTmp: TActiveQueueEntry;
 begin
   IP := Context.Request.ClientIP;
   Responce := nil;
@@ -116,11 +118,21 @@ begin
   if Responce = nil then
   begin
     try
-      IdToEntries := Model.PersistDispatchConvert(Request);
+      // IdToEntries := Model.PersistDispatchConvert(Request);
+      ItemsTmp := TObjectList<TActiveQueueEntry>.Create(False);
+      AQTmp := TActiveQueueEntry.Create('onm', 'email', 'body', 'some token');
+      ItemsTmp.Add(AQTmp);
+      IdToEntries := TPair<String, TActiveQueueEntries>.Create('aaaa-1-2', TActiveQueueEntries.Create(ItemsTmp));
+      AQtmp.DisposeOf;
+      ItemsTmp.Clear;
+      ItemsTmp.DisposeOf;
       /// decompose the pair immediately since afterwords you have no way to know whether it
       /// has been instantiated or not
       ID := IdToEntries.Key;
       Entries := IdToEntries.Value;
+
+      // Entries := TActiveQueueEntries.Create();
+      // ID := 'aaaaaa';
     except
       on E: Exception do
       begin
@@ -132,6 +144,7 @@ begin
   if Responce = nil then
   begin
     try
+      // BackEndResponce := TAQResponce.Create(False, 'stubbed...');
       BackEndResponce := FBackEndProxy.PostItems(Entries);
     except
       on E: Exception do
@@ -159,8 +172,8 @@ begin
   /// clean up the objects that might have been created
   if Request <> nil then
     Request.DisposeOf;
-  // if Entries <> nil then
-  // Entries.DisposeOf;
+  if Entries <> nil then
+    Entries.DisposeOf;
   if BackEndResponce <> nil then
     BackEndResponce.DisposeOf;
 
