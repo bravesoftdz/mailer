@@ -288,49 +288,60 @@ var
   Ids: TDictionary<String, TActiveQueueEntry>;
 begin
   IP := Context.Request.ClientIP;
+  Outcome := nil;
   if not(Context.Request.ThereIsRequestBody) then
   begin
     Outcome := TAQResponce.Create(False, TAQResponceMessages.BODY_MISSING);
-    Render(Outcome);
-    Exit();
-  end;
-
-  try
-    Entries := Context.Request.BodyAs<TActiveQueueEntries>;
-  except
-    on E: Exception do
-    begin
-      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_CAST_REPORT, [E.Message]));
-      Entries := nil;
-      Render(Outcome);
-      Exit();
-    end;
-  end;
-  try
-    Ids := Model.PersistRequests(Entries.Items);
-  except
-    on E: Exception do
-    begin
-      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_PERSIST_REPORT, [E.Message]));
-      Render(Outcome);
-      Exit();
-    end;
-  end;
-  try
-    Status := Model.Enqueue(IP, Ids);
-  except
-    on E: Exception do
-    begin
-      Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
-      Render(Outcome);
-      Exit();
-    end;
-  end;
-
-  if Status then
-    Outcome := TAQResponce.Create(True, TAQResponceMessages.SUCCESS)
+  end
   else
-    Outcome := TAQResponce.Create(False, TAQResponceMessages.FAILURE);
+  begin
+    try
+      Entries := Context.Request.BodyAs<TActiveQueueEntries>;
+    except
+      on E: Exception do
+      begin
+        Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_CAST_REPORT, [E.Message]));
+      end;
+    end;
+  end;
+  if Outcome = nil then
+  begin
+    try
+      Ids := Model.PersistRequests(Entries.Items);
+    except
+      on E: Exception do
+      begin
+        Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_PERSIST_REPORT, [E.Message]));
+      end;
+    end;
+  end;
+  if Outcome = nil then
+  begin
+    try
+      Status := Model.Enqueue(IP, Ids);
+    except
+      on E: Exception do
+      begin
+        Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
+      end;
+    end;
+  end;
+  if Outcome = nil then
+  begin
+    if Status then
+      Outcome := TAQResponce.Create(True, TAQResponceMessages.SUCCESS)
+    else
+      Outcome := TAQResponce.Create(False, TAQResponceMessages.FAILURE);
+  end;
+  /// clean up
+  if Entries <> nil then
+    Entries.DisposeOf;
+  if Ids <> nil then
+  begin
+    Ids.Clear;
+    Ids.DisposeOf;
+  end;
+
   Render(Outcome);
 end;
 

@@ -232,7 +232,7 @@ begin
     try
       for id in IdToItem.Keys do
       begin
-        FItems.Enqueue(TPair<String, TActiveQueueEntry>.Create(id, IdToItem[id]));
+        FItems.Enqueue(TPair<String, TActiveQueueEntry>.Create(id, IdToItem[id].Clone()));
         Writeln('Item added to the queue...');
       end;
       Result := True;
