@@ -699,7 +699,6 @@ begin
         Writeln('What to do with file ' + Item.Key + '?');
         Result.Add(Item.Value.Clone);
         Item.Value.DisposeOf;
-
       end;
       TMonitor.Exit(FQueueLock);
     end;
@@ -941,12 +940,15 @@ function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueue
 var
   Item: TActiveQueueEntry;
   Id: String;
+  Jo: TJsonObject;
 begin
   Result := TDictionary<String, TActiveQueueEntry>.Create;
   for Item in Items do
   begin
     try
-      Id := FStorage.Save(Item.ToJson);
+      Jo := Item.ToJson;
+      Id := FStorage.Save(Jo);
+      Jo.DisposeOf;
     except
       on E: Exception do
       begin
