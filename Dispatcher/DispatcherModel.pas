@@ -82,7 +82,13 @@ var
   Token: String;
   Attachments: TObjectList<TAttachment>;
   BackEndEntry: TActiveQueueEntry;
+  AQTmp: TActiveQueueEntry;
 begin
+  // Result := TObjectList<TActiveQueueEntry>.Create();
+  // AQTmp := TActiveQueueEntry.Create('onm', 'email', 'body', 'some token');
+  // Result.Add(AQTmp);
+  // Exit();
+
   Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
   Result := TObjectList<TActiveQueueEntry>.Create();
   Token := FConfig.Token;
@@ -116,7 +122,11 @@ var
   Items: TObjectList<TActiveQueueEntry>;
   ErrorMessages: TStringList;
   ErrorSummary: String;
+  // ItemsTmp: TObjectList<TActiveQueueEntry>;
+  // AQTmp: TActiveQueueEntry;
+
 begin
+
   ErrorMessages := TStringList.Create;
   jo := Entry.toJson();
   try
@@ -131,6 +141,7 @@ begin
   begin
     jo.DisposeOf;
   end;
+
   try
     Items := Dispatch(Entry);
   except
@@ -139,12 +150,28 @@ begin
       ErrorMessages.Add(E.Message);
     end;
   end;
+
+  // ItemsTmp := TObjectList<TActiveQueueEntry>.Create(False);
+  // AQTmp := TActiveQueueEntry.Create('onm', 'email', 'body', 'some token');
+  // ItemsTmp.Add(AQTmp);
+  // Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(ItemsTmp));
+  // ItemsTmp.Clear;
+  // ItemsTmp.DisposeOf;
+  // AQtmp.DisposeOf;
+  // ErrorMessages.DisposeOf;
+  // if Items <> nil then
+  // begin
+  // Items.DisposeOf;
+  // end;
+  // Exit();
+
   if (ID <> '') AND (Items <> nil) then
   begin
     Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(Items));
   end;
   if Items <> nil then
   begin
+    Items.Clear;
     Items.DisposeOf;
   end;
 

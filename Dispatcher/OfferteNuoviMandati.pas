@@ -28,6 +28,7 @@ var
 begin
   Actions := TObjectList<TAction>.Create();
   Actions.AddRange([TOMNSendToClient.Create(), TOMNSendToCodicione.Create()]);
+//  Actions.AddRange([TOMNSendToCodicione.Create()]);
   inherited Create(PATH, Actions);
   Actions.Clear;
   Actions.DisposeOf;

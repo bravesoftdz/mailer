@@ -282,6 +282,7 @@ begin
   jo1 := data.ToJson;
   Result := TActiveQueueEntry.Create('omn-register', 'email', jo1.ToString, Token);
   jo1.DisposeOf;
+  jo2.DisposeOf;
   Data.DisposeOf;
   Builder.DisposeOf;
 
