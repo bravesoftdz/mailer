@@ -221,8 +221,8 @@ begin
       ip := Context.Request.ClientIP;
       Items := Model.GetItems(Ip, Token, Qty);
       EntriesAsSingleBlock := TActiveQueueEntries.Create(Items);
-      // Items.Clear;
-      // Items.DisposeOf;
+      Items.Clear;
+      Items.DisposeOf;
 
       Writeln('AQ controller: rendering ' + EntriesAsSingleBlock.Items.Count.ToString + ' items');
       Render(EntriesAsSingleBlock);

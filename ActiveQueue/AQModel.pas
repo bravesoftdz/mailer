@@ -697,7 +697,9 @@ begin
       begin
         Item := FItems.Dequeue;
         Writeln('What to do with file ' + Item.Key + '?');
-        Result.Add(Item.Value);
+        Result.Add(Item.Value.Clone);
+        Item.Value.DisposeOf;
+
       end;
       TMonitor.Exit(FQueueLock);
     end;
