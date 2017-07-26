@@ -359,7 +359,10 @@ begin
                 RequestAndElaborate();
               end
               else
+              begin
                 Writeln('Responce received: failed to subscribe (' + Responce.Msg + ').');
+              end;
+              Responce.DisposeOf;
             end
             else
               Writeln('No responce received...');
@@ -417,7 +420,7 @@ begin
               end
               else
                 Writeln('A mismatch in subscription is found, but not this message is expected: ' + Responce.Msg);
-
+              Responce.DisposeOf;
             end;
           finally
             FSubscriptionRequestIsOn := False;
@@ -432,12 +435,17 @@ begin
 end;
 
 procedure TConsumerModel.UpdateConfigToken(const Token: String);
+var
+  ConfigNew: TConsumerConfig;
 begin
   Writeln('Update config...');
   if FConfig <> nil then
+  begin
+    ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
+      FConfig.ProviderPort, Token <> '', Token, FConfig.BlockSize, FConfig.Category);
     FConfig.DisposeOf;
-  FConfig := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
-    FConfig.ProviderPort, Token <> '', Token, FConfig.BlockSize, FConfig.Category);;
+    FConfig := ConfigNew;
+  end;
   try
     FFileSaver.Save(FConfig);
   except
