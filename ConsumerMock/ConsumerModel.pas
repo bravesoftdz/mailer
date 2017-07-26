@@ -117,7 +117,6 @@ begin
   begin
     Sendmail(item);
   end;
-
 end;
 
 function TConsumerModel.GetBlockSize: Integer;
@@ -232,10 +231,13 @@ begin
     Writeln('Start consuming received items...');
     Consume(Items.Items);
     Writeln('I finished consuming the items, ask some other tasks...');
+  end;
+  if Items <> nil then
+    Items.DisposeOf;
+  if S > 0 then
+  begin
     RequestAndExecute(); // start recursively
   end
-  else
-    Writeln('Ask no items since last time ' + S.ToString + ' items were received.');
 end;
 
 procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);
@@ -259,51 +261,50 @@ begin
     jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(Item.Body), 0) as TJSONObject;
     Data := Mapper.JSONObjectToObject<TSendDataTemplate>(jo);
   finally
-
+    if jo <> nil then
+      jo.DisposeOf;
   end;
-
-  Msg := TIdMessage.Create(NIL);
-  try
-    // MSG.Recipients.Add.Name := Data.From;
-    // MSG.Recipients.Add.Address := Data.RecipTo;
-    with MSG.Recipients.Add do
-    begin
-      Name := Data.From;
-      Address := Data.RecipTo;
-    end;
-
-    Writeln('Adding address');
-
-    // MSG.BccList.Add.Address := Item.recipbcc;
-    // Msg.From.Name := TSendMailConfig.SENDER_NAME;
-    Msg.From.Address := Data.from;
-    Msg.Body.Text := Data.Text;
-    Msg.Subject := Data.Subject;
-
-    for Attachment in Data.attachment do
-    begin
-      AttachFile := TIdAttachmentFile.Create(msg.MessageParts, Attachment.Name);
-      AttachFile.LoadFromStream(Attachment.Content);
-    end;
-
-    Smtp := TIdSMTP.Create(NIL);
+  if Data <> nil then
+  begin
+    Msg := TIdMessage.Create(NIL);
     try
-      Writeln('Trying to connect');
-      Smtp.Host := TSendMailConfig.HOST;
-      Smtp.Port := TSendMailConfig.Port;
-      Smtp.Connect;
+      // MSG.Recipients.Add.Name := Data.From;
+      // MSG.Recipients.Add.Address := Data.RecipTo;
+      with MSG.Recipients.Add do
+      begin
+        Name := Data.From;
+        Address := Data.RecipTo;
+      end;
+      // MSG.BccList.Add.Address := Item.recipbcc;
+      // Msg.From.Name := TSendMailConfig.SENDER_NAME;
+      Msg.From.Address := Data.from;
+      Msg.Body.Text := Data.Text;
+      Msg.Subject := Data.Subject;
+      for Attachment in Data.attachment do
+      begin
+        AttachFile := TIdAttachmentFile.Create(msg.MessageParts, Attachment.Name);
+        AttachFile.LoadFromStream(Attachment.Content);
+      end;
+      Smtp := TIdSMTP.Create(NIL);
       try
-        Smtp.Send(MSG);
-        Writeln('Trying to send');
+        Writeln('Trying to connect');
+        Smtp.Host := TSendMailConfig.HOST;
+        Smtp.Port := TSendMailConfig.Port;
+        Smtp.Connect;
+        try
+          Smtp.Send(MSG);
+          Writeln('Trying to send');
+        finally
+          Writeln('Trying to disconnect');
+          Smtp.Disconnect
+        end
       finally
-        Writeln('Trying to disconnect');
-        Smtp.Disconnect
+        Smtp.DisposeOf();
       end
     finally
-      Smtp.DisposeOf();
-    end
-  finally
-    Msg.DisposeOf;
+      Msg.DisposeOf;
+      Data.DisposeOf;
+    end;
   end;
   Writeln('Message sent');
 end;
