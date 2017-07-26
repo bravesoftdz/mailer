@@ -137,8 +137,14 @@ type
     function GetClients: TObjectList<TClient>;
 
     function GetConsumerIPWhitelist: String;
-  private
+
     procedure SetTargetConfigPath(const Value: String);
+
+    /// <summary>Notify given listener.
+    /// The method creates a separate thread in which notifies the listener.
+    /// NB: in current implementation, it there is N listeners, then N threads are created which may
+    // cause a problem for bigger N. </summary>
+    procedure NotifyListenerInSeparateThread(const Listener: IConsumerProxy);
 
   public
     /// <summary>Create a subscription </summary>
@@ -829,31 +835,40 @@ begin
 
 end;
 
+procedure TActiveQueueModel.NotifyListenerInSeparateThread(const Listener: IConsumerProxy);
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    begin
+      Writeln('Thread: ' + TThread.CurrentThread.ThreadID.ToString);
+      if Listener <> nil then
+      begin
+        try
+          Listener.Notify();
+        except
+          on E: Exception do
+            Writeln(E.Message);
+        end;
+      end
+      else
+        Writeln('Listener is null');
+    end
+    ).Start;
+
+end;
+
 procedure TActiveQueueModel.NotifyListeners;
 var
   Token: String;
-  // Listener: IListenerProxy;
 begin
   Writeln('Notifying the listeners');
   TMonitor.Enter(FConsumerLock);
   try
     for Token in FConsumerProxyIndex.Keys do
-      TThread.CreateAnonymousThread(
-        procedure
-        var
-          Listener: IConsumerProxy;
-        begin
-          Listener := FConsumerProxyIndex[Token];
-          if Listener <> nil then
-            try
-              Listener.Notify();
-              Writeln(Format('Listener at %s:%d is notified.', [FConsumerIndex[Token].IP, FConsumerIndex[Token].Port]));
-            except
-              on E: Exception do
-                Writeln(E.Message);
-            end;
-        end
-        ).Start;
+    begin
+      Writeln('Token: ' + Token);
+      NotifyListenerInSeparateThread(FConsumerProxyIndex[Token]);
+    end;
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -865,17 +880,29 @@ begin
   Writeln('Here, the queue must be saved, but it is yet to be done');
 end;
 
-procedure TActiveQueueModel.SetQueuePath(const Path: String);
+procedure TActiveQueueModel.SetQueuePath(
+
+  const
+  Path:
+  String);
 begin
   FQueueFilePath := Path;
 end;
 
-procedure TActiveQueueModel.SetTargetConfigPath(const Value: String);
+procedure TActiveQueueModel.SetTargetConfigPath(
+
+  const
+  Value:
+  String);
 begin
   FStateSaver := TJsonSaver.Create(Value);
 end;
 
-procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
+procedure TActiveQueueModel.SetConfig(
+
+  const
+  Config:
+  TAQConfigImmutable);
 var
   Consumers: TObjectList<TConsumer>;
   Clients: TObjectList<TClient>;
@@ -936,7 +963,11 @@ begin
   end;
 end;
 
-function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
+function TActiveQueueModel.PersistRequests(
+
+  const
+  Items:
+  TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 var
   Item: TActiveQueueEntry;
   Id: String;
