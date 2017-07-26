@@ -179,8 +179,8 @@ var
   Content: TJsonObject;
 begin
   TMonitor.Enter(FLockObject);
+  Builder := TStringBuilder.Create();
   Try
-    Builder := TStringBuilder.Create();
     OutFileName := GetAvailablePath(FilePath, Suffix);
     Builder.Append('[');
     L := Items.Count;

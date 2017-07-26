@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   AQSubscriptionResponce in 'AQSubscriptionResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -55,7 +55,6 @@ var
   FileContent: String;
   Config: TAQConfig;
   ConfigImm: TAQConfigImmutable;
-  Usage: String;
   CliParams: TArray<TCliParam>;
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;

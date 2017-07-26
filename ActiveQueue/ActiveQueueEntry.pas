@@ -61,7 +61,6 @@ type
 
   var
     FItems: TObjectList<TActiveQueueEntry>;
-    function GetItems: TObjectList<TActiveQueueEntry>;
     procedure SetItems(const Items: TObjectList<TActiveQueueEntry>);
   public
     constructor Create(const Items: TObjectList<TActiveQueueEntry>); overload;
@@ -97,11 +96,6 @@ begin
   FItems.Clear;
   FItems.DisposeOf;
   inherited;
-end;
-
-function TActiveQueueEntries.GetItems: TObjectList<TActiveQueueEntry>;
-begin
-  Result := TObjectList<TActiveQueueEntry>.Create();
 end;
 
 procedure TActiveQueueEntries.SetItems(const Items: TObjectList<TActiveQueueEntry>);

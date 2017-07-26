@@ -99,9 +99,6 @@ type
     /// <sumary>Cancel local items of the queue for which the condition is true.</summary>
     function CancelLocal(const Condition: ICondition): Integer;
 
-    /// a helper function that joins all elements using given delimiter
-    function Join(const Items: TArray<String>; const delimiter: String): String;
-
     /// <summary>Return true if a given string is equal to at least one string in the array.
     /// <param name="Haystack">an array of string to search in. Assume that the haystack remains unchanged during the method's execution.</param>
     /// <param name="Needle">a string to find</param>
@@ -229,7 +226,6 @@ uses
 
 function TActiveQueueModel.Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 var
-  item: TPair<String, TActiveQueueEntry>;
   id: String;
 begin
   Writeln('Enqueueing ' + inttostr(IdToItem.Count) + ' item(s)');
@@ -822,18 +818,6 @@ begin
 
 end;
 
-function TActiveQueueModel.Join(const Items: TArray<String>; const delimiter: String): String;
-var
-  I, L: Integer;
-begin
-  Result := '';
-  L := Length(Items);
-  for I := 0 to L - 2 do
-    Result := Result + Items[I] + delimiter;
-  if L > 0 then
-    Result := Result + Items[L - 1];
-
-end;
 
 procedure TActiveQueueModel.NotifyListenerInSeparateThread(const Listener: IConsumerProxy);
 begin
@@ -942,9 +926,9 @@ begin
 end;
 
 procedure TActiveQueueModel.PersistQueue;
-var
-  Request: TActiveQueueEntry;
-  items: TList<Jsonable>;
+//var
+//  Request: TActiveQueueEntry;
+//  items: TList<Jsonable>;
 begin
   TMonitor.Enter(FQueueLock);
   try

@@ -13,8 +13,7 @@ type
   strict private
     FName: String;
     FContent: TMemoryStream;
-    /// Return a copy of FContent.
-    function GetContentCopy: TMemoryStream;
+
     /// free FContent and set a new value. Assume that FContent has already been intialized.
     procedure FreeAndSetContent(const Value: TMemoryStream);
 
@@ -82,12 +81,6 @@ destructor TAttachment.Destroy;
 begin
   FContent.DisposeOf;
   inherited;
-end;
-
-function TAttachment.GetContentCopy: TMemoryStream;
-begin
-  Result := TMemoryStream.Create;
-  Result.LoadFromStream(FContent);
 end;
 
 procedure TAttachment.FreeAndSetContent(const Value: TMemoryStream);
