@@ -58,6 +58,11 @@ type
     /// and a value that is a proxy server of the listener associated with the token.</summary>
     FConsumerProxyIndex: TDictionary<String, IConsumerProxy>;
 
+    /// <summary>a map from categories to consumer tokens. Each consumer has a category and once
+    /// the subscription process succeeds, the consumer gets assigned a token.
+    /// This variable serves to quickly find all consumers of given category.</summary>
+    FConsumerCategoryToTokens: TDictionary<String, TStringList>;
+
     /// items of the queue
     FItems: TQueue<TPair<String, TActiveQueueEntry>>;
 
@@ -88,10 +93,10 @@ type
     /// <summary>Check the consistency of the reresenation</summary>
     procedure checkRep();
 
-    /// <summary>Notify all subscribed listeners that the queue state has changed.
+    /// <summary>Notify all subscribed listeners of given categories that the queue state has changed.
     /// NB: each listeners is notified in a separate thread. It might be a problem if the
     /// number of listeners is high.</summary>
-    procedure NotifyListeners();
+    procedure NotifyListeners(const Categories: TStringList);
 
     /// <sumary>Inform the listeners that they should cancel items satisfying the condition</summary>
     procedure BroadcastCancel(const Condition: ICondition);
@@ -117,6 +122,9 @@ type
 
     /// <summary>Create an index of consumer proxy servers. </summary>
     function CreateConsumerProxyIndex(const ConsumerIndex: TDictionary<String, TConsumer>): TDictionary<String, IConsumerProxy>;
+
+    /// <summary>Create an index of consumer tokens by consumer's category.</summary>
+    function CreateCategoryToTokenMap(const Index: TDictionary<String, TConsumer>): TDictionary<String, TStringList>;
 
     /// <summary>Create a hash set from a comma seprated string.</summary>
     function CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;
@@ -227,14 +235,22 @@ uses
 function TActiveQueueModel.Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 var
   id: String;
+  Categories: TStringList;
+  Category: String;
 begin
   Writeln('Enqueueing ' + inttostr(IdToItem.Count) + ' item(s)');
   TMonitor.Enter(FQueueLock);
+  Categories := TStringList.Create;
   try
     try
       for id in IdToItem.Keys do
       begin
         FItems.Enqueue(TPair<String, TActiveQueueEntry>.Create(id, IdToItem[id].Clone()));
+        Category := IdToItem[id].Category;
+        if Categories.IndexOf(category) = -1 then
+        begin
+          categories.Add(category);
+        end;
         Writeln('Item added to the queue...');
       end;
       Result := True;
@@ -246,10 +262,12 @@ begin
         Result := False;
       end;
     end;
+    NotifyListeners(Categories);
+    Categories.Clear;
+    Categories.DisposeOf;
   finally
     TMonitor.Exit(FQueueLock);
   end;
-  NotifyListeners();
 
 end;
 
@@ -285,6 +303,14 @@ begin
           // create a copy of the object
           FConsumerIndex.Add(Token, TConsumer.Create(Ip, data.Port, Token, data.Category));
           FConsumerProxyIndex.Add(Token, TRestAdapter<IConsumerProxy>.Create().Build(Ip, Data.Port));
+          if not(FConsumerCategoryToTokens.ContainsKey(data.Category)) then
+          begin
+            FConsumerCategoryToTokens.Add(data.Category, TStringList.Create());
+          end;
+          FConsumerCategoryToTokens[data.Category].Append(Token);
+          Writeln('Add token ' + token + ' to category ' + data.Category);
+          Writeln('category ' + data.Category + ' now contains ' + FConsumerCategoryToTokens[data.Category].Count.ToString + ' tokens');
+
           Result := TAQSubscriptionResponce.Create(True, TAQSubscriptionResponceMessages.SUBSCRIBE_SUCCESS, Token);
         end;
       end;
@@ -350,7 +376,9 @@ end;
 
 function TActiveQueueModel.CancelConsumer(const Ip, Token: String): TAQSubscriptionResponce;
 var
-  subscription: TConsumer;
+  Consumer: TConsumer;
+  Category: String;
+  Pos: Integer;
 begin
   TMonitor.Enter(FConsumerLock);
   try
@@ -361,13 +389,21 @@ begin
     begin
       if (FConsumerIndex.ContainsKey(Token)) then
       begin
-        subscription := FConsumerIndex[Token];
-        if (subscription.Ip = Ip) then
+        Consumer := FConsumerIndex[Token];
+        Category := Consumer.Category;
+        if (Consumer.Ip = Ip) then
         begin
-          subscription.DisposeOf;
+          Consumer.DisposeOf;
           FConsumerIndex.Remove(Token);
           FConsumerProxyIndex[Token] := nil;
           FConsumerProxyIndex.Remove(Token);
+
+          Pos := FConsumerCategoryToTokens[Category].IndexOf(Token);
+          if Pos <> -1 then
+            FConsumerCategoryToTokens[Category].Delete(Pos)
+          else
+            Writeln('Consistency problem: category ' + category + ' contains no token ' + Token);
+
           Writeln('Unsubscribe successefuly ');
           Result := TAQSubscriptionResponce.Create(True, 'unsubscribed', '');
         end
@@ -416,7 +452,6 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
-
 end;
 
 function TActiveQueueModel.CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;
@@ -467,9 +502,29 @@ begin
   FItems := TQueue < TPair < String, TActiveQueueEntry >>.Create();
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
-
+  FConsumerCategoryToTokens := TDictionary<String, TStringList>.Create();
   FStorage := Storage;
   CheckRep();
+end;
+
+function TActiveQueueModel.CreateCategoryToTokenMap(
+  const Index: TDictionary<String, TConsumer>): TDictionary<String, TStringList>;
+var
+  AConsumer: TConsumer;
+  AToken: String;
+  ACategory: String;
+begin
+  Result := TDictionary<String, TStringList>.Create;
+  for AToken in Index.Keys do
+  begin
+    ACategory := Index[AToken].Category;
+    if not(Result.ContainsKey(ACategory)) then
+    begin
+      Result.Add(ACategory, TStringList.Create);
+    end;
+    Result[ACategory].Append(AToken);
+    Writeln('Stub: adding token ' + AToken + ' to the category ' + ACategory);
+  end;
 end;
 
 function TActiveQueueModel.CreateClientIndex(const TheClients: TObjectList<TClient>): TDictionary<String, TClient>;
@@ -558,7 +613,7 @@ end;
 
 destructor TActiveQueueModel.Destroy;
 var
-  Key: String;
+  Key, Category: String;
 begin
   Writeln('Start destroying the model...');
   Writeln('Destroying three lock objects...');
@@ -578,6 +633,13 @@ begin
     Writeln('Cleaning and disposing FConsumerIndex...');
     FConsumerIndex.Clear;
     FConsumerIndex.DisposeOf;
+    for Category in FConsumerCategoryToTokens.Keys do
+    begin
+      FConsumerCategoryToTokens[Category].DisposeOf;
+    end;
+    FConsumerCategoryToTokens.Clear;
+    FConsumerCategoryToTokens.DisposeOf();
+
   end;
 
   Writeln('Iterate over FClientIndex...');
@@ -818,7 +880,6 @@ begin
 
 end;
 
-
 procedure TActiveQueueModel.NotifyListenerInSeparateThread(const Listener: IConsumerProxy);
 begin
   TThread.CreateAnonymousThread(
@@ -841,18 +902,38 @@ begin
 
 end;
 
-procedure TActiveQueueModel.NotifyListeners;
+procedure TActiveQueueModel.NotifyListeners(const Categories: TStringList);
 var
   Token: String;
+  Category: String;
+  Tokens: TStringList;
 begin
   Writeln('Notifying the listeners');
   TMonitor.Enter(FConsumerLock);
   try
-    for Token in FConsumerProxyIndex.Keys do
+    Tokens := TStringList.Create();
+    for Category in Categories do
     begin
-      Writeln('Token: ' + Token);
+      Writeln('Category ' + Category);
+      if FConsumerCategoryToTokens.ContainsKey(Category) then
+      begin
+        Writeln('Category ' + Category + ' contains ' + FConsumerCategoryToTokens[Category].Count.ToString + ' tokens');
+        for Token in FConsumerCategoryToTokens[Category] do
+        begin
+          Tokens.Add(Token);
+          Writeln('Add token: ' + Token);
+        end;
+      end
+      else
+        Writeln('Category ' + Category + ' has no listeners');
+    end;
+    for Token in Tokens do
+    begin
+      Writeln('Notifying consumer with token: ' + Token);
       NotifyListenerInSeparateThread(FConsumerProxyIndex[Token]);
     end;
+    Tokens.Clear;
+    Tokens.DisposeOf;
   finally
     TMonitor.Exit(FConsumerLock);
   end;
@@ -912,6 +993,9 @@ begin
   Consumers := Config.Consumers;
   FConsumerIndex.DisposeOf;
   FConsumerIndex := CreateConsumerIndex(Consumers, FConsumerWhiteListHashSet);
+  FConsumerCategoryToTokens.Clear;
+  FConsumerCategoryToTokens.DisposeOf;
+  FConsumerCategoryToTokens := CreateCategoryToTokenMap(FConsumerIndex);
   Consumers.Clear;
   Consumers.DisposeOf;
 
@@ -926,9 +1010,9 @@ begin
 end;
 
 procedure TActiveQueueModel.PersistQueue;
-//var
-//  Request: TActiveQueueEntry;
-//  items: TList<Jsonable>;
+// var
+// Request: TActiveQueueEntry;
+// items: TList<Jsonable>;
 begin
   TMonitor.Enter(FQueueLock);
   try
