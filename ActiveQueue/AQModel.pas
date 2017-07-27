@@ -433,6 +433,7 @@ var
   Errors: TStringList;
 
 begin
+{$IFDEF DEBUG}
   TMonitor.Enter(FQueueLock);
   try
     Errors := TStringList.Create;
@@ -472,12 +473,15 @@ begin
     Report := Errors.Text;
     Errors.Clear;
     Errors.DisposeOf;
-    if Report <> '' then
+    if Report = '' then
+      Writeln('AQModel internal representation is OK')
+    else
       raise Exception.Create('TActiveQueueModel representation check errors: ' + Report);
 
   finally
     TMonitor.Exit(FQueueLock);
   end;
+{$ENDIF}
 end;
 
 function TActiveQueueModel.CommaSeparatedStrToHashSet(const Data, Separator: String): TDictionary<String, Boolean>;

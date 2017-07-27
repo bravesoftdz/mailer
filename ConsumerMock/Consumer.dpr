@@ -37,7 +37,7 @@ const
   SWITCH_CHAR = '-';
   PROGRAM_NAME = 'Consumer Server';
   DEFAULT_COLOR = 7;
-  APP_COLOR = 752;
+  APP_COLOR = 13;
   HIGHLIGHT_COLOR = 10;
   WARNING_COLOR = 12;
 
@@ -76,13 +76,13 @@ begin
 
   InfoString := Format('%s:%d', [PROGRAM_NAME, Port]);
 
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), APP_COLOR);
   Writeln('');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), APP_COLOR);
   Writeln('  ' + InfoString + '   ');
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   Writeln('');
   SetConsoleTitle(pwidechar(InfoString));
 
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   Write('Data provider: ');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
   Writeln(Format('%s:%d', [Config.ProviderIp, Config.ProviderPort]));
