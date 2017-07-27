@@ -3,7 +3,7 @@ unit ServerConfig;
 interface
 
 uses
-  System.Generics.Collections, Client, ObjectsMappers;
+  System.Generics.Collections, Client, ObjectsMappers, RepositoryConfig;
 
 type
 
@@ -19,6 +19,7 @@ type
     BACKEND_IP_KEY = 'backend-ip';
     BACKEND_PORT_KEY = 'backend-port';
     TOKEN_KEY = 'token';
+    REPO_KEY = 'repository';
   protected
   var
     FPort: Integer;
@@ -26,6 +27,7 @@ type
     FBackEndIP: String;
     FToken: String;
     FClients: TObjectList<TClient>;
+    FRepository: TRepositoryConfig;
 
   public
     /// <summary> Port at which the program accepts the connections.</summary>
@@ -48,6 +50,9 @@ type
     [MapperJSONSer(CLIENTS_KEY)]
     [MapperListOf(TClient)]
     property Clients: TObjectList<TClient> read FClients write FClients;
+
+    [MapperJSONSer(REPO_KEY)]
+    property Repository: TRepositoryConfig read FRepository write FRepository;
 
     constructor Create(); overload;
     constructor Create(const Port: Integer; const Clients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;

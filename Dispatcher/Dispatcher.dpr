@@ -37,7 +37,8 @@ uses
   AQAPIClient in 'AQAPIClient.pas',
   ONMCredentials in 'ONMCredentials.pas',
   RequestStorageInterface in '..\Storage\RequestStorageInterface.pas',
-  RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas';
+  RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas',
+  RepositoryConfig in '..\Config\RepositoryConfig.pas';
 
 {$R *.res}
 
