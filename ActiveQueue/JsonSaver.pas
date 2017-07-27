@@ -3,7 +3,7 @@ unit JsonSaver;
 interface
 
 uses
-  JsonableInterface, System.Generics.Collections;
+  JsonableInterface, System.Generics.Collections, MVCFramework.Logger;
 
 type
   /// A class that saves given state in a file.
@@ -11,6 +11,7 @@ type
   strict private
   const
     Suffix = '-YYYY-mm-dd-hh-nn-ss';
+    TAG = 'TJsonSaver';
 
   var
     FLockObject: TObject;
@@ -69,7 +70,9 @@ begin
   inherited;
 end;
 
-function TJsonSaver.getAvailableName: String;
+function TJsonSaver.GetAvailableName: String;
+const
+  MARKER = 'GetAvailableName';
 var
   FullPath: String;
   Counter: Integer;
@@ -89,12 +92,11 @@ begin
       NewName := Format('%s-%d', [BaseName, Counter]);
       FullPath := FFileFolder + NewName + FFileExtension;;
       Counter := Counter + 1;
-      Writeln('Loop: new name = ' + NewName);
+      Log.info(Marker + ': new name = ' + NewName, TAG);
     end;
     Result := NewName;
-
   end;
-  Writeln('Available name for config file: ' + Result);
+  Log.info(Marker + ': available name for config file is "' + Result + '".', TAG);
 end;
 
 function TJsonSaver.GetAvailablePath(const Path, Format: String): String;
@@ -114,29 +116,9 @@ begin
   Result := TryName;
 end;
 
-// procedure TJsonSaver.Save(const FilePath: String; const Obj: Jsonable);
-// var
-// OutFileName: String;
-// jo: TJsonObject;
-// Text: String;
-// begin
-// TMonitor.Enter(FLockObject);
-// Try
-// OutFileName := GetAvailablePath(FilePath, Suffix);
-// jo := Obj.ToJson();
-// if jo <> nil then
-// begin
-// Text := jo.ToString();
-// TFile.AppendAllText(OutFileName, Text);
-// Text := '';
-// jo.DisposeOf;
-// end;
-// Finally
-// TMonitor.Exit(FLockObject);
-// End;
-// end;
-
 procedure TJsonSaver.Save(const Obj: Jsonable);
+const
+  MARKER = 'TJsonSaver.Save';
 var
   OutFileName: String;
   jo: TJsonObject;
@@ -157,7 +139,7 @@ begin
           LastFullPath := FFileFolder + FLastUsedName + FFileExtension;
           if (FullPath <> LastFullPath) AND (TFile.Exists(LastFullPath)) then
           begin
-            Writeln('Clean up: try to remove file at ' + LastFullPath);
+            Log.info(MARKER + ': try to remove file "' + LastFullPath + '".', TAG);
             TFile.Delete(LastFullPath);
           end;
         end;
