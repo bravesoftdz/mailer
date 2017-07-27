@@ -426,29 +426,55 @@ begin
   end;
 end;
 
-procedure TActiveQueueModel.checkRep;
+procedure TActiveQueueModel.CheckRep;
 var
   IsOk: Boolean;
-  Token: String; { TODO -oAndrew : skip it in the production }
+  Token, Category, Report: String; { TODO -oAndrew : skip it in the production }
+  Errors: TStringList;
+
 begin
   TMonitor.Enter(FQueueLock);
   try
-    IsOk := (FConsumerLock <> nil) AND (FClientLock <> nil)
-      AND (Length(FListenersIPs) >= 0)
-      AND (FConsumerIndex <> nil)
-      AND (FConsumerProxyIndex <> nil)
-      AND (FConsumerProxyIndex.Count = FConsumerIndex.Count);
+    Errors := TStringList.Create;
+    if (FConsumerLock = nil) then
+      Errors.Append('FConsumerLock is expected to be non-nil');
+    if (FClientLock = nil) then
+      Errors.Append('FClientLock is expected to be non-nil');
+    // if (FListenersIPs = nil) then
+    // Errors.Append('FListenersIPs is expected to be non-nil');
+    if not((FConsumerIndex <> nil) AND (FConsumerProxyIndex <> nil) AND (FConsumerProxyIndex.Count = FConsumerIndex.Count)) then
+      Errors.Append('FConsumerProxyIndex and FConsumerIndex must have the same length');
 
-    if IsOk then
+    if FConsumerProxyIndex <> nil then
     begin
       for Token in FConsumerProxyIndex.Keys do
         if Not(FConsumerIndex.ContainsKey(Token)) then
+          Errors.Append('FConsumerProxyIndex contains token ' + Token + ' that FConsumerIndex does not.');
+    end;
+    if (FConsumerIndex <> nil) then
+    begin
+      for Token in FConsumerIndex.Keys do
+        if Token <> FConsumerIndex[Token].token then
+          Errors.Append('Consumer token mismatch: ' + Token);
+    end;
+    if FConsumerCategoryToTokens <> nil then
+    begin
+      for Category in FConsumerCategoryToTokens.Keys do
+      begin
+        for Token in FConsumerCategoryToTokens[Category] do
         begin
-          raise Exception.Create('Inconsistent rep of TActiveQueueModel: token mismatch');
+          if FConsumerIndex[Token].Category <> Category then
+            Errors.Append('Token ' + Token + ':  expected category ' + FConsumerIndex[Token].Category + ', actual: ' + Category);
         end;
-    end
-    else
-      raise Exception.Create('Inconsistent rep of TActiveQueueModel');
+      end;
+    end;
+
+    Report := Errors.Text;
+    Errors.Clear;
+    Errors.DisposeOf;
+    if Report <> '' then
+      raise Exception.Create('TActiveQueueModel representation check errors: ' + Report);
+
   finally
     TMonitor.Exit(FQueueLock);
   end;
