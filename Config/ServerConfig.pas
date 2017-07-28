@@ -51,6 +51,7 @@ type
     [MapperListOf(TClient)]
     property Clients: TObjectList<TClient> read FClients write FClients;
 
+    /// <summary>Repository configuration</summary>
     [MapperJSONSer(REPO_KEY)]
     property Repository: TRepositoryConfig read FRepository write FRepository;
 
@@ -63,6 +64,7 @@ type
   /// <summary>This is an immutable version of TServerConfig type.</summary>
   TServerConfigImmutable = class(TServerConfig)
   strict private
+    function GetRepositoryConfigCopy: TRepositoryConfig;
     function GetClients: TObjectList<TClient>;
 
   public
@@ -81,8 +83,10 @@ type
     /// <summary> Port at which the backend service accepts the connections.</summary>
     property BackEndPort: Integer read FBackEndPort;
 
+    property Repository: TRepositoryConfig read GetRepositoryConfigCopy;
+
     constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>;
-      const BackEndIp: String; const BackEndPort: Integer; const Token: String); overload;
+      const BackEndIp: String; const BackEndPort: Integer; const Token: String; const Repo: TRepositoryConfig); overload;
     constructor Create(const Origin: TServerConfig); overload;
     function Clone(): TServerConfigImmutable;
   end;
@@ -94,6 +98,7 @@ implementation
 constructor TServerConfig.Create;
 begin
   FClients := TObjectList<TClient>.Create();
+  FRepository := TRepositoryConfig.Create;
 end;
 
 constructor TServerConfig.Create(const Port: Integer; const Clients: TObjectList<TClient>; const BackEndIp: String; const BackEndPort: Integer; const Token: String);
@@ -110,13 +115,14 @@ destructor TServerConfig.Destroy;
 begin
   FClients.Clear;
   FClients.DisposeOf;
+  FRepository.DisposeOf;
   inherited;
 end;
 
 { TServerConfigImmutable }
 
 constructor TServerConfigImmutable.Create(const Port: Integer; const TheClients: TObjectList<TClient>;
-  const BackEndIp: String; const BackEndPort: Integer; const Token: String);
+  const BackEndIp: String; const BackEndPort: Integer; const Token: String; const Repo: TRepositoryConfig);
 var
   Client: TClient;
 begin
@@ -129,6 +135,11 @@ begin
   begin
     FClients.Add(TClient.Create(Client.IP, Client.Token));
   end;
+  if Repo <> nil then
+    FRepository := TRepositoryConfig.Create(Repo.TypeName, Repo.Dsn)
+  else
+    FRepository := TRepositoryConfig.Create;
+
 end;
 
 function TServerConfigImmutable.Clone: TServerConfigImmutable;
@@ -136,7 +147,7 @@ var
   TheClients: TObjectList<TClient>;
 begin
   TheClients := Clients; // a copy of client list gets created
-  Result := TServerConfigImmutable.Create(FPort, TheClients, FBackEndIP, FBackEndPort, FToken);
+  Result := TServerConfigImmutable.Create(FPort, TheClients, FBackEndIP, FBackEndPort, FToken, FRepository);
   TheClients.Clear;
   TheClients.DisposeOf;
 end;
@@ -145,7 +156,7 @@ constructor TServerConfigImmutable.Create(const Origin: TServerConfig);
 begin
   // here, Origin.Clients is a reference to the original list, not to a copy. Hence, it should not be
   // destroyed bere.
-  Create(Origin.Port, Origin.Clients, Origin.BackEndIP, Origin.BackEndPort, Origin.Token);
+  Create(Origin.Port, Origin.Clients, Origin.BackEndIP, Origin.BackEndPort, Origin.Token, Origin.Repository);
 end;
 
 function TServerConfigImmutable.GetClients: TObjectList<TClient>;
@@ -155,6 +166,11 @@ begin
   Result := TObjectList<TClient>.Create;
   for Client in FClients do
     Result.Add(TClient.Create(Client.IP, Client.Token));
+end;
+
+function TServerConfigImmutable.GetRepositoryConfigCopy: TRepositoryConfig;
+begin
+  Result := TRepositoryConfig.Create(FRepository.TypeName, FRepository.Dsn);
 end;
 
 end.
