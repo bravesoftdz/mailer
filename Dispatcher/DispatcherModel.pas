@@ -5,7 +5,8 @@ interface
 uses
   DispatcherConfig, DispatcherResponce, DispatcherEntry,
   ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
-  ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON;
+  ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON,
+  RepositoryConfig, RequestSaverFactory;
 
 type
   TModel = class(TObject)
@@ -17,6 +18,7 @@ type
     FFactory: TProviderFactory;
     // persist the requests
     FRequestSaver: IRequestStorage;
+    FRequestSaverFactory: TRequestSaverFactory;
 
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
@@ -27,6 +29,9 @@ type
     function isAuthorised(const IP, Token: String): Boolean;
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
+
+    function GetRepositorySummary(): String;
+
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
@@ -50,7 +55,7 @@ type
     function PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
-    constructor Create(const RequestSaver: IRequestStorage);
+    constructor Create(const RequestSaverFactory: TRequestSaverFactory);
     destructor Destroy(); override;
   end;
 
@@ -58,11 +63,11 @@ implementation
 
 uses
   Provider, VenditoriSimple, SoluzioneAgenti, Actions, OfferteNuoviMandati,
-  System.SysUtils, Client, System.Classes;
+  System.SysUtils, Client, System.Classes, RequestToFileSystemStorage, MVCFramework.Logger;
 
 { TModel }
 
-constructor TModel.Create(const RequestSaver: IRequestStorage);
+constructor TModel.Create(const RequestSaverFactory: TRequestSaverFactory);
 var
   ListOfProviders: TObjectList<TProvider>;
 begin
@@ -71,7 +76,7 @@ begin
   FFactory := TProviderFactory.Create(ListOfProviders);
   ListOfProviders.Clear;
   ListOfProviders.DisposeOf;
-  FRequestSaver := RequestSaver;
+  FRequestSaverFactory := RequestSaverFactory;
 
 end;
 
@@ -232,6 +237,14 @@ begin
     Result := FConfig.Port;
 end;
 
+function TModel.GetRepositorySummary: String;
+begin
+  if FConfig <> nil then
+    Result := FRequestSaver.Summary()
+  else
+    Result := '';
+end;
+
 function TModel.isAuthorised(const IP, Token: String): Boolean;
 begin
   Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
@@ -243,6 +256,8 @@ begin
 end;
 
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);
+const
+  TAG = 'TModel.SetConfig';
 var
   IPs, Tokens: TArray<String>;
   Clients: TObjectList<TClient>;
@@ -254,6 +269,17 @@ begin
   end;
 
   FConfig := Config.Clone;
+
+  try
+    FRequestSaver := FRequestSaverFactory.CreateStorage(FConfig.Repository);
+  except
+    on E: Exception do
+    begin
+      Log.Error('Failed to initialize FRequestSaver: ' + E.Message, TAG);
+      Exit();
+    end;
+  end;
+
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
   Clients := Config.Clients;

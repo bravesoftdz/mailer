@@ -4,7 +4,7 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, AQAPIClient,
-  ServerConfig;
+  ServerConfig, RepositoryConfig, RequestSaverFactory;
 
 type
 
@@ -15,6 +15,7 @@ type
     Model: TModel;
     FBackEndProxy: IAQAPIClient;
     FBackEndAdapter: TRestAdapter<IAQAPIClient>;
+    RequestSaverFactory: TRequestSaverFactory;
     class procedure SetUpBackEndProxy();
 
   public
@@ -33,6 +34,7 @@ type
     class function GetClientIps(): TArray<String>;
     class function GetBackEndPort(): Integer;
     class function GetBackEndIp(): String;
+    class function GetRepositorySummary(): String;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -79,6 +81,11 @@ end;
 class function TDispatcherController.GetPort: Integer;
 begin
   Result := Model.GetPort();
+end;
+
+class function TDispatcherController.GetRepositorySummary: String;
+begin
+  Result := Model.GetRepositorySummary();
 end;
 
 procedure TDispatcherController.PutRequest(Context: TWebContext);
@@ -185,7 +192,8 @@ end;
 
 class procedure TDispatcherController.Setup;
 begin
-  Model := TModel.Create(TRequestToFileSystemStorage.Create('Dispatcher-storage/'));
+  RequestSaverfactory := TRequestSaverFactory.Create();
+  Model := TModel.Create(RequestSaverfactory);
 end;
 
 class procedure TDispatcherController.SetUpBackEndProxy;
@@ -199,10 +207,12 @@ class
   procedure TDispatcherController.TearDown;
 begin
   Model.DisposeOf;
+  RequestSaverFactory.DisposeOf();
   if (FBackEndAdapter <> nil) then
     FBackEndAdapter := nil;
   if (FBackEndProxy <> nil) then
     FBackEndProxy := nil;
+
 end;
 
 initialization

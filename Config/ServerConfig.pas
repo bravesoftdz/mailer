@@ -136,7 +136,7 @@ begin
     FClients.Add(TClient.Create(Client.IP, Client.Token));
   end;
   if Repo <> nil then
-    FRepository := TRepositoryConfig.Create(Repo.TypeName, Repo.Dsn)
+    FRepository := Repo.Clone()
   else
     FRepository := TRepositoryConfig.Create;
 

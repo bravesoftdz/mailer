@@ -38,7 +38,8 @@ uses
   ONMCredentials in 'ONMCredentials.pas',
   RequestStorageInterface in '..\Storage\RequestStorageInterface.pas',
   RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas',
-  RepositoryConfig in '..\Config\RepositoryConfig.pas';
+  RepositoryConfig in '..\Config\RepositoryConfig.pas',
+  RequestSaverFactory in 'RequestSaverFactory.pas';
 
 {$R *.res}
 
@@ -46,6 +47,10 @@ uses
 const
   PROGRAM_NAME = 'Dispatcher server';
   SWITCH_CONFIG = 'c';
+  DEFAULT_COLOR = 7;
+  APP_COLOR = 14;
+  HIGHLIGHT_COLOR = 10;
+  WARNING_COLOR = 12;
 
 var
   ConfigFileName: String;
@@ -66,40 +71,56 @@ var
   APort, BackEndPort, S, I: Integer;
   Info, BackEndIp: String;
   ClientIps: TArray<String>;
+  Repo: String;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
   BackEndPort := TDispatcherController.GetBackEndPort();
   BackEndIp := TDispatcherController.GetBackEndIp();
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+  Repo := TDispatcherController.GetRepositorySummary();
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), APP_COLOR);
   Info := Format('%s:%d', [PROGRAM_NAME, APort]);
   Writeln('');
   Writeln('  ' + Info);
   Writeln('');
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   SetConsoleTitle(pwidechar(Info));
   Write('Backend: ');
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
   Writeln(BackEndIp + ':' + BackEndPort.ToString);
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+
+  if Repo <> '' then
+  begin
+    Write('Repository summary: ');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
+    Writeln(Repo);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  end
+  else
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
+    Writeln('No repository configuration is found.');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  end;
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);
   if S = 0 then
   begin
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); // red
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
     Writeln('No client ip is provided. All requests will be rejected.');
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end
   else
   begin
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10); // green
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
     Writeln(S.toString + ' client ip(s) found:');
     for I := 0 to S - 1 do
     begin
       Writeln(Format('%d: %s', [I + 1, ClientIps[I]]));
     end;
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end;
   SetLength(ClientIps, 0);
 

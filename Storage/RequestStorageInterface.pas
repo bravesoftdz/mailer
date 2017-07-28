@@ -13,6 +13,9 @@ type
     /// Return true if the the object exists and gets deleted, false if it does not exist.
     /// Throw an exception if the it fails to delete existing object.</summary>
     function Delete(const Id: String): Boolean;
+
+    /// <summary>String representation of the storage configuration: name, locations etc</summary>
+    function Summary: String;
   end;
 
 implementation

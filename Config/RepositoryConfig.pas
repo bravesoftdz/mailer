@@ -38,6 +38,8 @@ type
 
     constructor Create(); overload;
     constructor Create(const AType, ADsn: String); overload;
+
+    function Clone(): TRepositoryConfig;
   end;
 
 implementation
@@ -48,6 +50,11 @@ constructor TRepositoryConfig.Create;
 begin
   FType := '';
   FDsn := '';
+end;
+
+function TRepositoryConfig.Clone: TRepositoryConfig;
+begin
+  Result := TRepositoryConfig.Create(FType, FDsn);
 end;
 
 constructor TRepositoryConfig.Create(const AType, ADsn: String);
