@@ -262,6 +262,7 @@ var
   IPs, Tokens: TArray<String>;
   Clients: TObjectList<TClient>;
   L, I: Integer;
+  RepoConfig: TRepositoryConfig;
 begin
   if FConfig <> nil then
   begin
@@ -269,16 +270,8 @@ begin
   end;
 
   FConfig := Config.Clone;
-
-  try
-    FRequestSaver := FRequestSaverFactory.CreateStorage(FConfig.Repository);
-  except
-    on E: Exception do
-    begin
-      Log.Error('Failed to initialize FRequestSaver: ' + E.Message, TAG);
-      Exit();
-    end;
-  end;
+  RepoConfig := FConfig.Repository;
+  FRequestSaver := FRequestSaverFactory.CreateStorage(RepoConfig);
 
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
@@ -296,6 +289,8 @@ begin
   SetLength(Tokens, 0);
   Clients.Clear;
   Clients.DisposeOf();
+  if RepoConfig <> nil then
+    RepoConfig.DisposeOf;
 
 end;
 

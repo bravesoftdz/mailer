@@ -58,7 +58,7 @@ begin
     Temp := TRegEx.Match(Config.Dsn, PATTERN);
     if (Temp.Groups.Count = 2) then
     begin
-      FTargetFolder := Temp.Groups.Item[1].Value;
+      FTargetFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
       if not(TDirectory.Exists(FTargetFolder)) then
         try
           TDirectory.CreateDirectory(FTargetFolder);
@@ -143,7 +143,7 @@ end;
 
 function TRequestToFileSystemStorage.Summary: String;
 begin
-  Result := 'type: file system, folder: ' + FTargetFolder;
+  Result := 'type: filesystem, folder: ''' + FTargetFolder + ''', current folder: ''' + GetCurrentDir + '''.';
 end;
 
 end.
