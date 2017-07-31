@@ -6,7 +6,7 @@ uses
   System.JSON, System.Generics.Collections;
 
 type
-  IRequestStorage<T> = interface(IInvokable)
+  IRequestStorage<T: Class, constructor> = interface(IInvokable)
     ['{71A75CE0-EA76-458E-BD6C-B50F921FAB24}']
     function Save(const Obj: TJsonObject): String;
     /// <summary>Delete a previously saved object by its id.

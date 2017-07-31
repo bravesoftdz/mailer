@@ -7,7 +7,7 @@ uses
   System.SysUtils, System.Generics.Collections;
 
 type
-  TRequestToFileSystemStorage<T> = class(TInterfacedObject, IRequestStorage<T>)
+  TRequestToFileSystemStorage<T: Class, constructor> = class(TInterfacedObject, IRequestStorage<T>)
   strict private
   const
     /// <summary>name of the folder inside the working one in which incoming requests should be stored</summary>
@@ -50,7 +50,7 @@ type
 implementation
 
 uses
-  System.IOUtils, System.RegularExpressions, System.Types;
+  System.IOUtils, System.RegularExpressions, System.Types, System.TypInfo, ObjectsMappers;
 
 { TRequestToFileSystemStorage }
 
@@ -183,10 +183,20 @@ function TRequestToFileSystemStorage<T>.GetPendingRequests: Integer;
 var
   FilePath: String;
   Items: TStringDynArray;
+  JO: TJsonObject;
+  Item: String;
+  obj: T;
+  ListOfT: TObjectList<T>;
 begin
-  FilePath := FWorkingFolder + INCOMING_FOLDER_NAME;
-  Items := TDirectory.GetFiles(FilePath);
-  Result := Length(Items);
+  Items := TDirectory.GetFiles(FIncomingFolder);
+  ListOfT := TObjectList<T>.Create();
+  for Item in Items do
+  begin
+    JO := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(TFile.ReadAllText(Item)), 0) as TJSONObject;
+    obj := Mapper.JSONObjectToObject<T>(JO);
+    ListOfT.Add(obj);
+  end;
+  Result := ListOfT.Count;
 end;
 
 end.

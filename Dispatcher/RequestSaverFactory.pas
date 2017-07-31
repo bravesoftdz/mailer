@@ -6,7 +6,7 @@ uses
   RequestStorageInterface, ServerConfig, RepositoryConfig;
 
 type
-  TRequestSaverFactory<T> = class(TObject)
+  TRequestSaverFactory<T: class, constructor> = class(TObject)
   public
     function CreateStorage(const Config: TRepositoryConfig): IRequestStorage<T>;
   end;
