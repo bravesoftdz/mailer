@@ -7,7 +7,7 @@ uses
   System.SysUtils, System.Generics.Collections;
 
 type
-  TRequestToFileSystemStorage = class(TInterfacedObject, IRequestStorage)
+  TRequestToFileSystemStorage<T> = class(TInterfacedObject, IRequestStorage<T>)
   strict private
   const
     /// <summary>name of the folder inside the working one in which incoming requests should be stored</summary>
@@ -54,7 +54,7 @@ uses
 
 { TRequestToFileSystemStorage }
 
-constructor TRequestToFileSystemStorage.Create(const WorkingFolder: String);
+constructor TRequestToFileSystemStorage<T>.Create(const WorkingFolder: String);
 begin
   Log.Warn('Create: this constructor is deprecated. Use TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig) instead', TAG);
   FWorkingFolder := WorkingFolder;
@@ -62,7 +62,7 @@ begin
     TDirectory.CreateDirectory(FWorkingFolder);
 end;
 
-constructor TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig);
+constructor TRequestToFileSystemStorage<T>.Create(const Config: TRepositoryConfig);
 var
   Temp: TMatch;
 begin
@@ -89,7 +89,7 @@ begin
   end;
 end;
 
-procedure TRequestToFileSystemStorage.CreateFolderIfNotExist(const Path: String);
+procedure TRequestToFileSystemStorage<T>.CreateFolderIfNotExist(const Path: String);
 begin
   if not(TDirectory.Exists(Path)) then
     try
@@ -102,7 +102,7 @@ begin
     end;
 end;
 
-function TRequestToFileSystemStorage.Delete(const Id: String): Boolean;
+function TRequestToFileSystemStorage<T>.Delete(const Id: String): Boolean;
 var
   FullPath: String;
 begin
@@ -125,7 +125,7 @@ begin
 
 end;
 
-function TRequestToFileSystemStorage.GetAvailableName: String;
+function TRequestToFileSystemStorage<T>.GetAvailableName: String;
 var
   FullPath: String;
   Counter: Integer;
@@ -153,7 +153,7 @@ begin
   Writeln('Available file name: ' + Result);
 end;
 
-function TRequestToFileSystemStorage.Save(const Obj: TJsonObject): String;
+function TRequestToFileSystemStorage<T>.Save(const Obj: TJsonObject): String;
 var
   FullPath: String;
 begin
@@ -167,7 +167,7 @@ begin
     TFile.AppendAllText(FullPath, Obj.ToString);
 end;
 
-function TRequestToFileSystemStorage.GetParams: TArray<TPair<String, String>>;
+function TRequestToFileSystemStorage<T>.GetParams: TArray<TPair<String, String>>;
 var
   Pair: TPair<String, String>;
 begin
@@ -179,7 +179,7 @@ begin
   Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER_NAME);
 end;
 
-function TRequestToFileSystemStorage.GetPendingRequests: Integer;
+function TRequestToFileSystemStorage<T>.GetPendingRequests: Integer;
 var
   FilePath: String;
   Items: TStringDynArray;

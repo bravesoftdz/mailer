@@ -5,7 +5,7 @@ interface
 uses
   MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, AQAPIClient,
   ServerConfig, RepositoryConfig, RequestSaverFactory,
-  System.Generics.Collections;
+  System.Generics.Collections, DispatcherEntry;
 
 type
 
@@ -16,7 +16,7 @@ type
     Model: TModel;
     FBackEndProxy: IAQAPIClient;
     FBackEndAdapter: TRestAdapter<IAQAPIClient>;
-    RequestSaverFactory: TRequestSaverFactory;
+    RequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>;
     class procedure SetUpBackEndProxy();
 
   public
@@ -47,7 +47,7 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
-  DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry, AQResponce, Attachment, RequestStorageInterface,
+  DispatcherConfig, DispatcherResponce, ActiveQueueEntry, AQResponce, Attachment, RequestStorageInterface,
   RequestToFileSystemStorage;
 
 procedure TDispatcherController.Index;
@@ -198,7 +198,7 @@ end;
 
 class procedure TDispatcherController.Setup;
 begin
-  RequestSaverfactory := TRequestSaverFactory.Create();
+  RequestSaverfactory := TRequestSaverFactory<TDispatcherEntry>.Create();
   Model := TModel.Create(RequestSaverfactory);
 end;
 

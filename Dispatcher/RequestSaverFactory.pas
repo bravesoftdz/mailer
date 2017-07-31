@@ -6,9 +6,9 @@ uses
   RequestStorageInterface, ServerConfig, RepositoryConfig;
 
 type
-  TRequestSaverFactory = class(TObject)
+  TRequestSaverFactory<T> = class(TObject)
   public
-    function CreateStorage(const Config: TRepositoryConfig): IRequestStorage;
+    function CreateStorage(const Config: TRepositoryConfig): IRequestStorage<T>;
   end;
 
 implementation
@@ -18,12 +18,12 @@ uses
 
 { TRequestSaverFactory }
 
-function TRequestSaverFactory.CreateStorage(const Config: TRepositoryConfig): IRequestStorage;
+function TRequestSaverFactory<T>.CreateStorage(const Config: TRepositoryConfig): IRequestStorage<T>;
 begin
   if (Config <> nil) then
   begin
     if (Config.TypeName = 'filesystem') then
-      Result := TRequestToFileSystemStorage.Create(Config)
+      Result := TRequestToFileSystemStorage<T>.Create(Config)
     else
       raise Exception.Create('Failed to create a request saver: the only supported type is "filesystem", requested "' + Config.TypeName + '".');
   end

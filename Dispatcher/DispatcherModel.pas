@@ -17,15 +17,15 @@ type
     FAuthentication: TIpTokenAuthentication;
     FFactory: TProviderFactory;
     // A class that persist the requests. It gets initialized in SetConfig() method.
-    FRequestSaver: IRequestStorage;
-    FRequestSaverFactory: TRequestSaverFactory;
+    FRequestSaver: IRequestStorage<TDispatcherEntry>;
+    FRequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>;
 
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
 
   public
 
-    constructor Create(const RequestSaverFactory: TRequestSaverFactory);
+    constructor Create(const RequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>);
     destructor Destroy(); override;
 
     function GetPort(): Integer;
@@ -74,7 +74,7 @@ uses
 
 { TModel }
 
-constructor TModel.Create(const RequestSaverFactory: TRequestSaverFactory);
+constructor TModel.Create(const RequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>);
 var
   ListOfProviders: TObjectList<TProvider>;
 begin
