@@ -30,7 +30,7 @@ type
     function GetBackEndIp(): String;
     function GetBackEndPort(): Integer;
 
-    function GetRepositorySummary(): String;
+    function GetRepositorySummary(): TArray<TPair<String, String>>;
 
     /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
     function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
@@ -237,12 +237,12 @@ begin
     Result := FConfig.Port;
 end;
 
-function TModel.GetRepositorySummary: String;
+function TModel.GetRepositorySummary: TArray<TPair<String, String>>;
 begin
   if FConfig <> nil then
     Result := FRequestSaver.Summary()
   else
-    Result := '';
+    Result := nil;
 end;
 
 function TModel.isAuthorised(const IP, Token: String): Boolean;

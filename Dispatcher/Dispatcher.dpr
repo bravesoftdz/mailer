@@ -13,11 +13,10 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   DispatcherModel in 'DispatcherModel.pas',
   CliParam,
   CliUsage,
-  System.Generics.Collections,
   ObjectsMappers,
   DispatcherConfig in 'DispatcherConfig.pas',
   Configuration in '..\Config\Configuration.pas',
@@ -39,7 +38,8 @@ uses
   RequestStorageInterface in '..\Storage\RequestStorageInterface.pas',
   RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas',
   RepositoryConfig in '..\Config\RepositoryConfig.pas',
-  RequestSaverFactory in 'RequestSaverFactory.pas';
+  RequestSaverFactory in 'RequestSaverFactory.pas',
+  System.Generics.Collections;
 
 {$R *.res}
 
@@ -71,13 +71,13 @@ var
   APort, BackEndPort, S, I: Integer;
   Info, BackEndIp: String;
   ClientIps: TArray<String>;
-  Repo: String;
+  Repo: TArray<TPair<String, String>>;
+  Key: TPair<String, String>;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
   BackEndPort := TDispatcherController.GetBackEndPort();
   BackEndIp := TDispatcherController.GetBackEndIp();
-  Repo := TDispatcherController.GetRepositorySummary();
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), APP_COLOR);
   Info := Format('%s:%d', [PROGRAM_NAME, APort]);
   Writeln('');
@@ -90,12 +90,20 @@ begin
   Writeln(BackEndIp + ':' + BackEndPort.ToString);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
 
-  if Repo <> '' then
+  Repo := TDispatcherController.GetRepositorySummary();
+
+  if Repo <> nil then
   begin
-    Write('Repository summary: ');
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
-    Writeln(Repo);
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+    S := Length(Repo);
+    Writeln(sLineBreak + 'Repository summary');
+    for I := 0 to S - 1 do
+    begin
+      Write(Format('%d) %s: ', [I + 1, Repo[I].Key]));
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
+      Writeln(Repo[I].Value);
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+    end;
+    SetLength(Repo, 0);
   end
   else
   begin

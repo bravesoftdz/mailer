@@ -3,7 +3,7 @@ unit RequestStorageInterface;
 interface
 
 uses
-  System.JSON;
+  System.JSON, System.Generics.Collections;
 
 type
   IRequestStorage = interface(IInvokable)
@@ -14,8 +14,12 @@ type
     /// Throw an exception if the it fails to delete existing object.</summary>
     function Delete(const Id: String): Boolean;
 
-    /// <summary>String representation of the storage configuration: name, locations etc</summary>
-    function Summary: String;
+    /// <summary>Storage parameters in the form of a list of pairs consisting of a key name and its value.
+    /// The values are cast to strings.
+    /// I've choosen a list type and not a map (dictionary) in order to have an ordered structure: when
+    /// printing out these parameters, the order migth be important (some parameters are more important,
+    /// so let's print them uot first). </summary>
+    function Summary: TArray<TPair<String, String>>;
   end;
 
 implementation

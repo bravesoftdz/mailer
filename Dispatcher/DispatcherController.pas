@@ -4,7 +4,8 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, DispatcherModel, MVCFramework.RESTAdapter, AQAPIClient,
-  ServerConfig, RepositoryConfig, RequestSaverFactory;
+  ServerConfig, RepositoryConfig, RequestSaverFactory,
+  System.Generics.Collections;
 
 type
 
@@ -34,7 +35,7 @@ type
     class function GetClientIps(): TArray<String>;
     class function GetBackEndPort(): Integer;
     class function GetBackEndIp(): String;
-    class function GetRepositorySummary(): String;
+    class function GetRepositorySummary(): TArray<TPair<String, String>>;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -45,8 +46,7 @@ implementation
 
 uses
   MVCFramework.Logger, System.JSON, System.IOUtils, System.SysUtils,
-  DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry,
-  System.Generics.Collections, AQResponce, Attachment, RequestStorageInterface,
+  DispatcherConfig, DispatcherResponce, DispatcherEntry, ActiveQueueEntry, AQResponce, Attachment, RequestStorageInterface,
   RequestToFileSystemStorage;
 
 procedure TDispatcherController.Index;
@@ -83,7 +83,7 @@ begin
   Result := Model.GetPort();
 end;
 
-class function TDispatcherController.GetRepositorySummary: String;
+class function TDispatcherController.GetRepositorySummary: TArray<TPair<String, String>>;
 begin
   Result := Model.GetRepositorySummary();
 end;

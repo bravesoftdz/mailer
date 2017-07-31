@@ -4,7 +4,7 @@ interface
 
 uses
   RequestStorageInterface, System.JSON, RepositoryConfig, MVCFramework.Logger,
-  System.SysUtils;
+  System.SysUtils, System.Generics.Collections;
 
 type
   TRequestToFileSystemStorage = class(TInterfacedObject, IRequestStorage)
@@ -32,7 +32,7 @@ type
     function Save(const Obj: TJsonObject): String;
     function Delete(const Id: String): Boolean;
 
-    function Summary(): String;
+    function Summary(): TArray<TPair<String, String>>;
 
   end;
 
@@ -68,6 +68,8 @@ begin
     if (Temp.Groups.Count = 2) then
     begin
       FWorkingFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
+      if (TPath.IsRelativePath(FWorkingFolder)) then
+        FWorkingFolder := GetCurrentDir + PathDelim + FWorkingFolder;
       if not(TDirectory.Exists(FWorkingFolder)) then
         try
           TDirectory.CreateDirectory(FWorkingFolder);
@@ -150,9 +152,16 @@ begin
     TFile.AppendAllText(FullPath, Obj.ToString);
 end;
 
-function TRequestToFileSystemStorage.Summary: String;
+function TRequestToFileSystemStorage.Summary: TArray<TPair<String, String>>;
+var
+  Pair: TPair<String, String>;
 begin
-  Result := 'type: filesystem, folder: ''' + FWorkingFolder + ''', current folder: ''' + GetCurrentDir + '''.';
+  Result := TArray < TPair < String, String >>.Create();
+  SetLength(Result, 4);
+  Result[0] := TPair<String, String>.Create('type', 'filesystem');
+  Result[1] := TPair<String, String>.Create('working folder', FWorkingFolder);
+  Result[2] := TPair<String, String>.Create('subfolder for incoming requests', INCOMING_FOLDER);
+  Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER);
 end;
 
 end.
