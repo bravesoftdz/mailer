@@ -71,7 +71,7 @@ var
   APort, BackEndPort, S, I: Integer;
   Info, BackEndIp: String;
   ClientIps: TArray<String>;
-  Repo: TArray<TPair<String, String>>;
+  RepositoryParams: TArray<TPair<String, String>>;
   Key: TPair<String, String>;
 begin
   TDispatcherController.SetConfig(Config);
@@ -90,20 +90,21 @@ begin
   Writeln(BackEndIp + ':' + BackEndPort.ToString);
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
 
-  Repo := TDispatcherController.GetRepositorySummary();
+  RepositoryParams := TDispatcherController.GetRepositoryParams();
 
-  if Repo <> nil then
+  if RepositoryParams <> nil then
   begin
-    S := Length(Repo);
+    S := Length(RepositoryParams);
     Writeln(sLineBreak + 'Repository summary');
     for I := 0 to S - 1 do
     begin
-      Write(Format('%d) %s: ', [I + 1, Repo[I].Key]));
+      Write(Format('%d) %s: ', [I + 1, RepositoryParams[I].Key]));
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
-      Writeln(Repo[I].Value);
+      Writeln(RepositoryParams[I].Value);
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
     end;
-    SetLength(Repo, 0);
+    SetLength(RepositoryParams, 0);
+    Writeln('');
   end
   else
   begin
@@ -111,6 +112,7 @@ begin
     Writeln('No repository configuration is found.');
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end;
+
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);

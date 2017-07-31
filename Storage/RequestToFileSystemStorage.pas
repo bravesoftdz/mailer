@@ -32,7 +32,7 @@ type
     function Save(const Obj: TJsonObject): String;
     function Delete(const Id: String): Boolean;
 
-    function Summary(): TArray<TPair<String, String>>;
+    function GetParams(): TArray<TPair<String, String>>;
 
   end;
 
@@ -152,7 +152,7 @@ begin
     TFile.AppendAllText(FullPath, Obj.ToString);
 end;
 
-function TRequestToFileSystemStorage.Summary: TArray<TPair<String, String>>;
+function TRequestToFileSystemStorage.GetParams: TArray<TPair<String, String>>;
 var
   Pair: TPair<String, String>;
 begin

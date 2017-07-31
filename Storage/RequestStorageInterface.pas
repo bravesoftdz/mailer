@@ -19,7 +19,7 @@ type
     /// I've choosen a list type and not a map (dictionary) in order to have an ordered structure: when
     /// printing out these parameters, the order migth be important (some parameters are more important,
     /// so let's print them uot first). </summary>
-    function Summary: TArray<TPair<String, String>>;
+    function GetParams: TArray<TPair<String, String>>;
   end;
 
 implementation

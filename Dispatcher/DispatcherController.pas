@@ -35,7 +35,7 @@ type
     class function GetClientIps(): TArray<String>;
     class function GetBackEndPort(): Integer;
     class function GetBackEndIp(): String;
-    class function GetRepositorySummary(): TArray<TPair<String, String>>;
+    class function GetRepositoryParams(): TArray<TPair<String, String>>;
 
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
@@ -83,9 +83,9 @@ begin
   Result := Model.GetPort();
 end;
 
-class function TDispatcherController.GetRepositorySummary: TArray<TPair<String, String>>;
+class function TDispatcherController.GetRepositoryParams: TArray<TPair<String, String>>;
 begin
-  Result := Model.GetRepositorySummary();
+  Result := Model.GetRepositoryParams();
 end;
 
 procedure TDispatcherController.PutRequest(Context: TWebContext);
