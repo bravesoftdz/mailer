@@ -20,6 +20,9 @@ type
     /// printing out these parameters, the order migth be important (some parameters are more important,
     /// so let's print them uot first). </summary>
     function GetParams: TArray<TPair<String, String>>;
+
+    /// <summary>Get the number of request that should be elaborated.</summary>
+    function GetPendingRequests(): Integer;
   end;
 
 implementation

@@ -16,7 +16,7 @@ type
     FConfig: TServerConfigImmutable;
     FAuthentication: TIpTokenAuthentication;
     FFactory: TProviderFactory;
-    // persist the requests
+    // A class that persist the requests. It gets initialized in SetConfig() method.
     FRequestSaver: IRequestStorage;
     FRequestSaverFactory: TRequestSaverFactory;
 
@@ -24,6 +24,10 @@ type
     procedure SetConfig(const Config: TServerConfigImmutable);
 
   public
+
+    constructor Create(const RequestSaverFactory: TRequestSaverFactory);
+    destructor Destroy(); override;
+
     function GetPort(): Integer;
     function GetClientIps(): TArray<String>;
     function isAuthorised(const IP, Token: String): Boolean;
@@ -54,9 +58,12 @@ type
     /// <param name="Entry">a dispatcher entry to be elaborated</param>
     function PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 
+    /// <summary>Return the number of requests that have to be elaborated. It delegates its
+    /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
+    function GetPendingRequests(): Integer;
+
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
-    constructor Create(const RequestSaverFactory: TRequestSaverFactory);
-    destructor Destroy(); override;
+
   end;
 
 implementation
@@ -89,11 +96,6 @@ var
   BackEndEntry: TActiveQueueEntry;
   AQTmp: TActiveQueueEntry;
 begin
-  // Result := TObjectList<TActiveQueueEntry>.Create();
-  // AQTmp := TActiveQueueEntry.Create('onm', 'email', 'body', 'some token');
-  // Result.Add(AQTmp);
-  // Exit();
-
   Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
   Result := TObjectList<TActiveQueueEntry>.Create();
   Token := FConfig.Token;
@@ -117,7 +119,14 @@ begin
     Actions.Clear;
     Actions.DisposeOf();
   end;
+end;
 
+function TModel.GetPendingRequests(): Integer;
+begin
+  if FRequestSaver <> nil then
+    Result := FRequestSaver.GetPendingRequests()
+  else
+    Result := -1;
 end;
 
 function TModel.PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
@@ -127,11 +136,7 @@ var
   Items: TObjectList<TActiveQueueEntry>;
   ErrorMessages: TStringList;
   ErrorSummary: String;
-  // ItemsTmp: TObjectList<TActiveQueueEntry>;
-  // AQTmp: TActiveQueueEntry;
-
 begin
-
   ErrorMessages := TStringList.Create;
   jo := Entry.toJson();
   try

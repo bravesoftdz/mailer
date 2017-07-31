@@ -13,3 +13,4 @@ __recovery/
 *.stat
 SenderCredentials.pas
 Dispatcher-storage/
+repository/*

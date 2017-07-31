@@ -73,6 +73,7 @@ var
   ClientIps: TArray<String>;
   RepositoryParams: TArray<TPair<String, String>>;
   Key: TPair<String, String>;
+  PendingRequests: Integer;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
@@ -113,6 +114,8 @@ begin
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end;
 
+  PendingRequests := TDispatcherController.GetPendingRequests();
+  Writeln('Pending requests: ' + PendingRequests.ToString);
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);

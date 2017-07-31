@@ -11,10 +11,10 @@ type
   strict private
   const
     /// <summary>name of the folder inside the working one in which incoming requests should be stored</summary>
-    INCOMING_FOLDER = 'incoming' + PathDelim;
+    INCOMING_FOLDER_NAME = 'incoming' + PathDelim;
 
     /// <summary>name of the folder inside the working one in which requests that have been already elaborated should be stored</summary>
-    ELABORATED_FOLDER = 'elaborated' + PathDelim;
+    ELABORATED_FOLDER_NAME = 'elaborated' + PathDelim;
 
     /// <summary>pattern to extract a name of the working folder from the config instance</summary>
     WORKING_DIR_PATTERN = '^file:\/\/(.*)$';
@@ -23,40 +23,46 @@ type
     FFileName = 'request';
     Suffix = '-YYYY-mm-dd-hh-nn-ss';
 
+    /// tag for the logger
+    TAG = 'TRequestToFileSystemStorage';
+
   var
     FWorkingFolder: String;
+    FIncomingFolder: String;
+    FElaboratedFolder: String;
+
     function GetAvailableName(): String;
+
+    /// <summary>Try to create a folder with given path. If it exists, do nothing.</summary>
+    procedure CreateFolderIfNotExist(const Path: String);
+
   public
     constructor Create(const WorkingFolder: String); overload;
     constructor Create(const Config: TRepositoryConfig); overload;
+
     function Save(const Obj: TJsonObject): String;
     function Delete(const Id: String): Boolean;
-
     function GetParams(): TArray<TPair<String, String>>;
+    function GetPendingRequests(): Integer;
 
   end;
 
 implementation
 
 uses
-  System.IOUtils, System.RegularExpressions;
+  System.IOUtils, System.RegularExpressions, System.Types;
 
 { TRequestToFileSystemStorage }
 
 constructor TRequestToFileSystemStorage.Create(const WorkingFolder: String);
-const
-  TAG = 'TRequestToFileSystemStorage.Create';
 begin
-  Log.Warn('This constructor is deprecated. Use TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig) instead', TAG);
+  Log.Warn('Create: this constructor is deprecated. Use TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig) instead', TAG);
   FWorkingFolder := WorkingFolder;
   if not(TDirectory.Exists(FWorkingFolder)) then
     TDirectory.CreateDirectory(FWorkingFolder);
-
 end;
 
 constructor TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig);
-const
-  TAG = 'TRequestToFileSystemStorage.Create';
 var
   Temp: TMatch;
 begin
@@ -70,21 +76,30 @@ begin
       FWorkingFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
       if (TPath.IsRelativePath(FWorkingFolder)) then
         FWorkingFolder := GetCurrentDir + PathDelim + FWorkingFolder;
-      if not(TDirectory.Exists(FWorkingFolder)) then
-        try
-          TDirectory.CreateDirectory(FWorkingFolder);
-        except
-          on E: Exception do
-          begin
-            Log.Error('Error when creating a repository folder "' + FWorkingFolder + '"', TAG);
-          end;
-        end;
+      FIncomingFolder := FWorkingFolder + INCOMING_FOLDER_NAME;
+      FElaboratedFolder := FWorkingFolder + ELABORATED_FOLDER_NAME;
+      CreateFolderIfNotExist(FWorkingFolder);
+      CreateFolderIfNotExist(FIncomingFolder);
+      CreateFolderIfNotExist(FElaboratedFolder);
     end
     else
     begin
       Log.warn('Problem with matching pattern ''' + WORKING_DIR_PATTERN + ''' against string ''' + Config.Dsn + '''.', TAG);
     end;
   end;
+end;
+
+procedure TRequestToFileSystemStorage.CreateFolderIfNotExist(const Path: String);
+begin
+  if not(TDirectory.Exists(Path)) then
+    try
+      TDirectory.CreateDirectory(Path);
+    except
+      on E: Exception do
+      begin
+        Log.Error('CreateFolderIfNotExist : error when creating a repository folder "' + Path + '"', TAG);
+      end;
+    end;
 end;
 
 function TRequestToFileSystemStorage.Delete(const Id: String): Boolean;
@@ -160,8 +175,18 @@ begin
   SetLength(Result, 4);
   Result[0] := TPair<String, String>.Create('type', 'filesystem');
   Result[1] := TPair<String, String>.Create('working folder', FWorkingFolder);
-  Result[2] := TPair<String, String>.Create('subfolder for incoming requests', INCOMING_FOLDER);
-  Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER);
+  Result[2] := TPair<String, String>.Create('subfolder for incoming requests', INCOMING_FOLDER_NAME);
+  Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER_NAME);
+end;
+
+function TRequestToFileSystemStorage.GetPendingRequests: Integer;
+var
+  FilePath: String;
+  Items: TStringDynArray;
+begin
+  FilePath := FWorkingFolder + INCOMING_FOLDER_NAME;
+  Items := TDirectory.GetFiles(FilePath);
+  Result := Length(Items);
 end;
 
 end.
