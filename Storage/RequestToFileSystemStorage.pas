@@ -3,22 +3,31 @@ unit RequestToFileSystemStorage;
 interface
 
 uses
-  RequestStorageInterface, System.JSON, RepositoryConfig, MVCFramework.Logger;
+  RequestStorageInterface, System.JSON, RepositoryConfig, MVCFramework.Logger,
+  System.SysUtils;
 
 type
   TRequestToFileSystemStorage = class(TInterfacedObject, IRequestStorage)
   strict private
   const
+    /// <summary>name of the folder inside the working one in which incoming requests should be stored</summary>
+    INCOMING_FOLDER = 'incoming' + PathDelim;
+
+    /// <summary>name of the folder inside the working one in which requests that have been already elaborated should be stored</summary>
+    ELABORATED_FOLDER = 'elaborated' + PathDelim;
+
+    /// <summary>pattern to extract a name of the working folder from the config instance</summary>
+    WORKING_DIR_PATTERN = '^file:\/\/(.*)$';
+
     FFileExtension = '.txt';
     FFileName = 'request';
     Suffix = '-YYYY-mm-dd-hh-nn-ss';
-    PATTERN = '^file:\/\/(.*)$';
 
   var
-    FTargetFolder: String;
+    FWorkingFolder: String;
     function GetAvailableName(): String;
   public
-    constructor Create(const TargetFolder: String); overload;
+    constructor Create(const WorkingFolder: String); overload;
     constructor Create(const Config: TRepositoryConfig); overload;
     function Save(const Obj: TJsonObject): String;
     function Delete(const Id: String): Boolean;
@@ -30,18 +39,18 @@ type
 implementation
 
 uses
-  System.SysUtils, System.IOUtils, System.RegularExpressions;
+  System.IOUtils, System.RegularExpressions;
 
 { TRequestToFileSystemStorage }
 
-constructor TRequestToFileSystemStorage.Create(const TargetFolder: String);
+constructor TRequestToFileSystemStorage.Create(const WorkingFolder: String);
 const
   TAG = 'TRequestToFileSystemStorage.Create';
 begin
   Log.Warn('This constructor is deprecated. Use TRequestToFileSystemStorage.Create(const Config: TRepositoryConfig) instead', TAG);
-  FTargetFolder := TargetFolder;
-  if not(TDirectory.Exists(FTargetFolder)) then
-    TDirectory.CreateDirectory(FTargetFolder);
+  FWorkingFolder := WorkingFolder;
+  if not(TDirectory.Exists(FWorkingFolder)) then
+    TDirectory.CreateDirectory(FWorkingFolder);
 
 end;
 
@@ -55,23 +64,23 @@ begin
     Log.Warn('No config file is provided in TRequestToFileSystemStorage constructor', TAG)
   else
   begin
-    Temp := TRegEx.Match(Config.Dsn, PATTERN);
+    Temp := TRegEx.Match(Config.Dsn, WORKING_DIR_PATTERN);
     if (Temp.Groups.Count = 2) then
     begin
-      FTargetFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
-      if not(TDirectory.Exists(FTargetFolder)) then
+      FWorkingFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
+      if not(TDirectory.Exists(FWorkingFolder)) then
         try
-          TDirectory.CreateDirectory(FTargetFolder);
+          TDirectory.CreateDirectory(FWorkingFolder);
         except
           on E: Exception do
           begin
-            Log.Error('Error when creating a repository folder "' + FTargetFolder + '"', TAG);
+            Log.Error('Error when creating a repository folder "' + FWorkingFolder + '"', TAG);
           end;
         end;
     end
     else
     begin
-      Log.warn('Problem with matching pattern ''' + PATTERN + ''' against string ''' + Config.Dsn + '''.', TAG);
+      Log.warn('Problem with matching pattern ''' + WORKING_DIR_PATTERN + ''' against string ''' + Config.Dsn + '''.', TAG);
     end;
   end;
 end;
@@ -80,7 +89,7 @@ function TRequestToFileSystemStorage.Delete(const Id: String): Boolean;
 var
   FullPath: String;
 begin
-  FullPath := FTargetFolder + Id + FFileExtension;
+  FullPath := FWorkingFolder + Id + FFileExtension;
   if not(TFile.Exists(FullPath)) then
     Result := False
   else
@@ -105,19 +114,19 @@ var
   Counter: Integer;
   NewName, BaseName: String;
 begin
-  FullPath := FTargetFolder + FFileName + FFileExtension;
+  FullPath := FWorkingFolder + FFileName + FFileExtension;
   if not(TFile.Exists(FullPath)) then
     Result := FFileName
   else
   begin
     BaseName := FFileName + formatdatetime(Suffix, Now());
     NewName := BaseName;
-    FullPath := FTargetFolder + BaseName + FFileExtension;
+    FullPath := FWorkingFolder + BaseName + FFileExtension;
     Counter := 1;
     while (TFile.Exists(FullPath)) do
     begin
       NewName := Format('%s-%d', [BaseName, Counter]);
-      FullPath := FTargetFolder + NewName + FFileExtension;;
+      FullPath := FWorkingFolder + NewName + FFileExtension;;
       Counter := Counter + 1;
       Writeln('Loop: new name = ' + NewName);
     end;
@@ -132,7 +141,7 @@ var
   FullPath: String;
 begin
   Result := GetAvailableName();
-  FullPath := FTargetFolder + Result + FFileExtension;
+  FullPath := FWorkingFolder + Result + FFileExtension;
   if TFile.Exists(FullPath) then
   begin
     raise Exception.Create('File ' + Result + ' exists. Hence it is not available.');
@@ -143,7 +152,7 @@ end;
 
 function TRequestToFileSystemStorage.Summary: String;
 begin
-  Result := 'type: filesystem, folder: ''' + FTargetFolder + ''', current folder: ''' + GetCurrentDir + '''.';
+  Result := 'type: filesystem, folder: ''' + FWorkingFolder + ''', current folder: ''' + GetCurrentDir + '''.';
 end;
 
 end.
