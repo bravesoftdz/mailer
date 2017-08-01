@@ -2,7 +2,7 @@ unit RepositoryConfig;
 
 interface
 
-uses ObjectsMappers;
+uses ObjectsMappers, System.JSON;
 
 type
 
@@ -40,6 +40,8 @@ type
     constructor Create(const AType, ADsn: String); overload;
 
     function Clone(): TRepositoryConfig;
+
+    function ToJson(): TJsonObject;
   end;
 
 implementation
@@ -61,6 +63,13 @@ constructor TRepositoryConfig.Create(const AType, ADsn: String);
 begin
   FType := AType;
   FDsn := ADsn;
+end;
+
+function TRepositoryConfig.ToJson: TJsonObject;
+begin
+  Result := TJsonObject.Create();
+  Result.AddPair(TYPE_KEY, FType);
+  Result.AddPair(DSN_KEY, FDsn);
 end;
 
 end.

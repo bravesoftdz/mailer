@@ -115,6 +115,8 @@ constructor TAQConfig.Create;
 begin
   FClients := TObjectList<TClient>.Create();
   FConsumers := TObjectList<TConsumer>.Create();
+  FRepoRequests := TRepositoryConfig.Create;
+  FRepoConsumers := TRepositoryConfig.Create;
 end;
 
 constructor TAQConfig.Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String);
@@ -135,6 +137,8 @@ begin
   FClients.DisposeOf;
   FConsumers.Clear;
   FConsumers.DisposeOf;
+  FRepoRequests.DisposeOf;
+  FRepoConsumers.DisposeOf;
   inherited;
 end;
 
