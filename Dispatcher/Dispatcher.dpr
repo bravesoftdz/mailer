@@ -74,6 +74,8 @@ var
   RepositoryParams: TArray<TPair<String, String>>;
   Key: TPair<String, String>;
   PendingRequests: TObjectList<TDispatcherEntry>;
+  Entry: TDispatcherEntry;
+  Entr: Integer;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
@@ -122,6 +124,11 @@ begin
   else
   begin
     Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
+    for Entry in PendingRequests do
+    begin
+      Writeln(Format('origin: %s, action: %s, number of attachments: %d', [Entry.Origin, Entry.Action, Entry.Attachments.Count]));
+    end;
+
     PendingRequests.Clear;
     PendingRequests.DisposeOf;
   end;

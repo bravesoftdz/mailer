@@ -198,7 +198,7 @@ end;
 
 class procedure TDispatcherController.Setup;
 begin
-  RequestSaverfactory := TRequestSaverFactory<TDispatcherEntry>.Create();
+  RequestSaverFactory := TRequestSaverFactory<TDispatcherEntry>.Create();
   Model := TModel.Create(RequestSaverfactory);
 end;
 

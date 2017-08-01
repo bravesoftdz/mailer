@@ -30,6 +30,7 @@ type
     FWorkingFolder: String;
     FIncomingFolder: String;
     FElaboratedFolder: String;
+    FLockObj: TObject;
 
     function GetAvailableName(): String;
 
@@ -40,9 +41,22 @@ type
     constructor Create(const WorkingFolder: String); overload;
     constructor Create(const Config: TRepositoryConfig); overload;
 
+    destructor Destroy();
+
+    /// <summary>save given object in the repository folder.
+    /// Requires a lock.</sumamry>
     function Save(const Obj: TJsonObject): String;
+
+    /// <summary>delete a file with given id in the repository folder.
+    /// Requires a lock.</sumamry>
     function Delete(const Id: String): Boolean;
+
+    /// <summary>Get the repository properties.
+    /// Does not require any lock since it needs just a read-only access.</sumamry>
     function GetParams(): TArray<TPair<String, String>>;
+
+    /// <summary>Return a list of requests that have been saved but have never been deleted.
+    /// Requires a lock.</sumamry>
     function GetPendingRequests(): TObjectList<T>;
 
   end;
@@ -66,6 +80,7 @@ constructor TRequestToFileSystemStorage<T>.Create(const Config: TRepositoryConfi
 var
   Temp: TMatch;
 begin
+  FLockObj := TObject.Create;
   if (Config = nil) then
     Log.Warn('No config file is provided in TRequestToFileSystemStorage constructor', TAG)
   else
@@ -106,21 +121,26 @@ function TRequestToFileSystemStorage<T>.Delete(const Id: String): Boolean;
 var
   FullPath: String;
 begin
-  FullPath := FWorkingFolder + Id + FFileExtension;
-  if not(TFile.Exists(FullPath)) then
-    Result := False
-  else
-  begin
-    try
-      Writeln('Deleting file ' + FullPath);
-      TFile.Delete(FullPath);
-      Result := True;
-    except
-      on E: Exception do
-      begin
-        raise Exception.Create('File system storage failed to remove file ' + id);
-      end;
-    end
+  TMonitor.Enter(FLockObj);
+  try
+    FullPath := FIncomingFolder + Id + FFileExtension;
+    if not(TFile.Exists(FullPath)) then
+      Result := False
+    else
+    begin
+      try
+        Writeln('Deleting file ' + FullPath);
+        TFile.Delete(FullPath);
+        Result := True;
+      except
+        on E: Exception do
+        begin
+          raise Exception.Create('The filesystem storage failed to remove file ' + id);
+        end;
+      end
+    end;
+  finally
+    TMonitor.Exit(FLockObj);
   end;
 
 end;
@@ -157,14 +177,19 @@ function TRequestToFileSystemStorage<T>.Save(const Obj: TJsonObject): String;
 var
   FullPath: String;
 begin
-  Result := GetAvailableName();
-  FullPath := FWorkingFolder + Result + FFileExtension;
-  if TFile.Exists(FullPath) then
-  begin
-    raise Exception.Create('File ' + Result + ' exists. Hence it is not available.');
-  end
-  else
-    TFile.AppendAllText(FullPath, Obj.ToString);
+  TMonitor.Enter(FLockObj);
+  try
+    Result := GetAvailableName();
+    FullPath := FIncomingFolder + Result + FFileExtension;
+    if TFile.Exists(FullPath) then
+    begin
+      raise Exception.Create('File ' + Result + ' exists. Hence it is not available.');
+    end
+    else
+      TFile.AppendAllText(FullPath, Obj.ToString);
+  finally
+    TMonitor.Exit(FLockObj);
+  end;
 end;
 
 function TRequestToFileSystemStorage<T>.GetParams: TArray<TPair<String, String>>;
@@ -182,22 +207,41 @@ end;
 function TRequestToFileSystemStorage<T>.GetPendingRequests: TObjectList<T>;
 var
   FilePath: String;
-  Items: TStringDynArray;
+  TheFiles: TStringDynArray;
   JO: TJsonObject;
-  Item: String;
+  AFile: String;
   obj: T;
-  ListOfT: TObjectList<T>;
 begin
-  Items := TDirectory.GetFiles(FIncomingFolder);
-  ListOfT := TObjectList<T>.Create();
-  for Item in Items do
-  begin
-    JO := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(TFile.ReadAllText(Item)), 0) as TJSONObject;
-    obj := Mapper.JSONObjectToObject<T>(JO);
-    ListOfT.Add(obj);
-    JO.DisposeOf;
+  TMonitor.Enter(FLockObj);
+  try
+    TheFiles := TDirectory.GetFiles(FIncomingFolder);
+    Result := TObjectList<T>.Create();
+    for AFile in TheFiles do
+    begin
+      try
+        try
+          JO := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(TFile.ReadAllText(AFile)), 0) as TJSONObject;
+          obj := Mapper.JSONObjectToObject<T>(JO);
+          Result.Add(obj);
+        except
+          on E: Exception do
+          begin
+            Log.Error('GetPendingRequests: failed to reconstruct an object from the content of file "' + AFile + '". Reason: ' + E.Message, TAG);
+          end;
+        end;
+      finally
+        if JO <> nil then
+          JO.DisposeOf;
+      end;
+    end;
+  finally
+    TMonitor.Exit(FLockObj);
   end;
-  Result := ListOfT;
+end;
+
+destructor TRequestToFileSystemStorage<T>.Destroy();
+begin
+  FLockObj.DisposeOf;
 end;
 
 end.
