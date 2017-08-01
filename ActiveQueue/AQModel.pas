@@ -6,7 +6,7 @@ uses
   AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface,
-  System.Generics.Collections;
+  System.Generics.Collections, RequestSaverFactory;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -20,6 +20,7 @@ type
   strict private
   const
     WHITELIST_IP_SEPARATOR = ',';
+    TAG = 'TActiveQueueModel';
 
   var
     /// a dumb lock object for managing the access to the  subscription register
@@ -81,8 +82,19 @@ type
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
     FStateSaver: TJsonSaver;
 
-    /// <summary>a class responsable for persisting input requests<summary>
-    FStorage: IRequestStorage;
+    /// <summary>a class responsable for persisting incoming requests. It is instantiated by
+    /// the factory FRequestSaverFactory once the configuration is set.<summary>
+    FRequestsStorage: IRequestStorage<TActiveQueueEntry>;
+
+    /// <summary>a class responsable for persisting consumer subscriptions. It is instantiated by
+    /// the factory FRequestSaverFactory once the configuration is set.<summary>
+    FConsumersStorage: IRequestStorage<TConsumer>;
+
+    /// <summary>a factory that produces a required file saver instance based on config file.
+    FRequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
+
+    /// <summary>a factory that produces a required file saver instance based on config file.
+    FConsumerSaverFactory: TRequestSaverFactory<TConsumer>;
 
     /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
@@ -221,7 +233,7 @@ type
     /// <summary>Persist given items and return a map from ids to those items. </summary>
     function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 
-    constructor Create(const Storage: IRequestStorage);
+    constructor Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>; const ConsumerSaverFactory: TRequestSaverFactory<TConsumer>);
     destructor Destroy(); override;
   end;
 
@@ -521,7 +533,8 @@ begin
   end;
 end;
 
-constructor TActiveQueueModel.Create(const Storage: IRequestStorage);
+constructor TActiveQueueModel.Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
+  const ConsumerSaverFactory: TRequestSaverFactory<TConsumer>);
 begin
   Writeln('Creating a model...');
   FConsumerLock := TObject.Create;
@@ -533,7 +546,8 @@ begin
   SetLength(FListenersIPs, 0);
   SetLength(FProvidersIPs, 0);
   FConsumerCategoryToTokens := TDictionary<String, TStringList>.Create();
-  FStorage := Storage;
+  FRequestSaverFactory := RequestSaverFactory;
+  FConsumerSaverFactory := ConsumerSaverFactory;
   CheckRep();
 end;
 
@@ -669,7 +683,6 @@ begin
     end;
     FConsumerCategoryToTokens.Clear;
     FConsumerCategoryToTokens.DisposeOf();
-
   end;
 
   Writeln('Iterate over FClientIndex...');
@@ -715,8 +728,14 @@ begin
     FStateSaver.DisposeOf;
   end;
 
-  Writeln('Setting FStorage to nil...');
-  FStorage := nil;
+  Writeln('Setting storages to nil...');
+  FRequestsStorage := nil;
+  FConsumersStorage := nil;
+
+  Writeln('Setting factories to nil...');
+  FRequestSaverFactory.DisposeOf;
+  FConsumerSaverFactory.DisposeOf;
+
   Writeln('Finish destroying the model...');
   inherited;
 
@@ -975,33 +994,20 @@ begin
   Writeln('Here, the queue must be saved, but it is yet to be done');
 end;
 
-procedure TActiveQueueModel.SetQueuePath(
-
-  const
-  Path:
-  String);
+procedure TActiveQueueModel.SetQueuePath(const Path: String);
 begin
   FQueueFilePath := Path;
 end;
 
-procedure TActiveQueueModel.SetTargetConfigPath(
-
-  const
-  Value:
-  String);
+procedure TActiveQueueModel.SetTargetConfigPath(const Value: String);
 begin
   FStateSaver := TJsonSaver.Create(Value);
 end;
 
-procedure TActiveQueueModel.SetConfig(
-
-  const
-  Config:
-  TAQConfigImmutable);
+procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
 var
   Consumers: TObjectList<TConsumer>;
   Clients: TObjectList<TClient>;
-
 begin
   if Config = nil then
     raise Exception.Create('Can not set configuration to a null object!');
@@ -1036,6 +1042,9 @@ begin
     FConsumerProxyIndex.DisposeOf;
   end;
   FConsumerProxyIndex := CreateConsumerProxyIndex(FConsumerIndex);
+
+  FRequestsStorage := FRequestSaverFactory.CreateStorage(Config.RepositoryRequests);
+  FConsumersStorage := FConsumerSaverFactory.CreateStorage(Config.RepositoryConsumers);
 
 end;
 
@@ -1076,7 +1085,7 @@ begin
   begin
     try
       Jo := Item.ToJson;
-      Id := FStorage.Save(Jo);
+      Id := FRequestsStorage.Save(Jo);
       Jo.DisposeOf;
     except
       on E: Exception do

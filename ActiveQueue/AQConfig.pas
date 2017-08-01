@@ -4,7 +4,8 @@ interface
 
 uses
   System.JSON, System.Classes, ObjectsMappers,
-  System.SysUtils, JsonableInterface, System.Generics.Collections, Client, Consumer;
+  System.SysUtils, JsonableInterface, System.Generics.Collections, Client, Consumer,
+  RepositoryConfig;
 
 type
   StringMapper = reference to function(const From: String): String;
@@ -25,6 +26,8 @@ type
     TOKEN_KEY = 'token';
     CONSUMER_IP_WHITELIST_KEY = 'consumer-ip-whitelist';
     CONSUMERS_KEY = 'consumers';
+    REPO_REQUESTS_KEY = 'repository-requests';
+    REPO_CONSUMERS_KEY = 'repository-consumers';
   protected
   var
     FPort: Integer;
@@ -32,6 +35,8 @@ type
     FClients: TObjectList<TClient>;
     FConsumerWhiteListIps: String;
     FConsumers: TObjectList<TConsumer>;
+    FRepoRequests: TRepositoryConfig;
+    FRepoConsumers: TRepositoryConfig;
 
   public
     constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String); overload;
@@ -61,6 +66,15 @@ type
     [MapperJSONSer(CONSUMERS_KEY)]
     [MapperListOf(TConsumer)]
     property Consumers: TObjectList<TConsumer> read FConsumers write FConsumers;
+
+    /// <summary>Configuration for request repository</summary>
+    [MapperJSONSer(REPO_REQUESTS_KEY)]
+    property RepositoryRequests: TRepositoryConfig read FRepoRequests write FRepoRequests;
+
+    /// <summary>Configuration for consumer repository</summary>
+    [MapperJSONSer(REPO_CONSUMERS_KEY)]
+    property RepositoryConsumers: TRepositoryConfig read FRepoConsumers write FRepoConsumers;
+
   end;
 
 type
@@ -145,7 +159,7 @@ begin
   begin
     ja2.AddElement(AClient.toJson());
   end;
-    Result.AddPair(CLIENTS_KEY, ja2);
+  Result.AddPair(CLIENTS_KEY, ja2);
 
 end;
 

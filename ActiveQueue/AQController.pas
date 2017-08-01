@@ -4,7 +4,8 @@ interface
 
 uses
   MVCFramework, MVCFramework.Commons, AQModel, ActiveQueueEntry, ObjectsMappers,
-  System.Generics.Collections, Consumer, AQConfig, System.JSON, Client;
+  System.Generics.Collections, Consumer, AQConfig, System.JSON, Client,
+  RequestSaverFactory;
 
 type
 
@@ -14,7 +15,11 @@ type
   strict private
   const
     TAG = 'Active Queue';
-    class var Model: TActiveQueueModel;
+
+  class var
+    Model: TActiveQueueModel;
+    FRequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
+    FConsumerSaverFactory: TRequestSaverFactory<TConsumer>;
 
     /// enqueue the requests and persist the queue in case of success
     class function EnqueueAndPersist(const IP: String; const Items: TObjectList<TActiveQueueEntry>): Boolean;
@@ -347,7 +352,9 @@ end;
 
 class procedure TController.Setup;
 begin
-  Model := TActiveQueueModel.Create(TRequestToFileSystemStorage.Create('ActiveQueue-storage/'));
+  FRequestSaverFactory := TRequestSaverFactory<TActiveQueueEntry>.Create();
+  FConsumerSaverFactory := TRequestSaverFactory<TConsumer>.Create();
+  Model := TActiveQueueModel.Create(FRequestSaverFactory, FConsumerSaverFactory);
 end;
 
 procedure TController.Subscribe(const Context: TWebContext);
