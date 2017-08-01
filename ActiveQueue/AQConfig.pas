@@ -36,10 +36,8 @@ type
     FConsumerWhiteListIps: String;
     FConsumers: TObjectList<TConsumer>;
     FRepoRequests: TRepositoryConfig;
-    FRepoConsumers: TRepositoryConfig;
 
   public
-    constructor Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String); overload;
     constructor Create(); overload;
     destructor Destroy; override;
 
@@ -69,12 +67,7 @@ type
 
     /// <summary>Configuration for request repository</summary>
     [MapperJSONSer(REPO_REQUESTS_KEY)]
-    property RepositoryRequests: TRepositoryConfig read FRepoRequests write FRepoRequests;
-
-    /// <summary>Configuration for consumer repository</summary>
-    [MapperJSONSer(REPO_CONSUMERS_KEY)]
-    property RepositoryConsumers: TRepositoryConfig read FRepoConsumers write FRepoConsumers;
-
+    property RequestsRepository: TRepositoryConfig read FRepoRequests write FRepoRequests;
   end;
 
 type
@@ -85,13 +78,18 @@ type
   strict private
     function GetClients: TObjectList<TClient>;
     function GetConsumers: TObjectList<TConsumer>;
+  private
+    function GetRepoRequests: TRepositoryConfig;
   public
-    constructor Create(const Port: Integer; const Token, WhiteList: String; const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>); overload;
+    // constructor Create(const Port: Integer; const Token, WhiteList: String; const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>); overload;
     constructor Create(const Config: TAQConfig); overload;
     function Clone(): TAQConfigImmutable;
 
     /// override the parent fields by making them read-only
     [MapperTransient]
+    constructor Create(const Port: Integer; const Token, WhiteList: String;
+      const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>;
+      const RepoRequests: TRepositoryConfig); overload;
     property Port: Integer read FPort;
     [MapperTransient]
     property Token: String read FToken;
@@ -101,6 +99,8 @@ type
     property Clients: TObjectList<TClient> read GetClients;
     [MapperTransient]
     property Consumers: TObjectList<TConsumer> read GetConsumers;
+    [MapperTransient]
+    property RequestsRepository: TRepositoryConfig read GetRepoRequests;
 
   end;
 
@@ -116,19 +116,6 @@ begin
   FClients := TObjectList<TClient>.Create();
   FConsumers := TObjectList<TConsumer>.Create();
   FRepoRequests := TRepositoryConfig.Create;
-  FRepoConsumers := TRepositoryConfig.Create;
-end;
-
-constructor TAQConfig.Create(const Port: Integer; const TheClients: TObjectList<TClient>; const Token: String; const ConsumerWhiteList: String);
-var
-  Client: TClient;
-begin
-  Create();
-  FPort := Port;
-  FToken := Token;
-  FConsumerWhiteListIps := ConsumerWhiteList;
-  for Client in TheClients do
-    FClients.Add(TClient.Create(Client.IP, Client.Token));
 end;
 
 destructor TAQConfig.Destroy;
@@ -138,7 +125,6 @@ begin
   FConsumers.Clear;
   FConsumers.DisposeOf;
   FRepoRequests.DisposeOf;
-  FRepoConsumers.DisposeOf;
   inherited;
 end;
 
@@ -164,25 +150,25 @@ begin
     ja2.AddElement(AClient.toJson());
   end;
   Result.AddPair(CLIENTS_KEY, ja2);
-
+  Result.AddPair(REPO_REQUESTS_KEY, FRepoRequests.ToJson);
 end;
 
 { TAQConfigImmutable }
 
 function TAQConfigImmutable.Clone: TAQConfigImmutable;
 begin
-  Result := TAQConfigImmutable.Create(Fport, FToken, FConsumerWhiteListIps, FClients, FConsumers);
+  Result := TAQConfigImmutable.Create(Fport, FToken, FConsumerWhiteListIps, FClients, FConsumers, FRepoRequests);
 end;
 
 constructor TAQConfigImmutable.Create(const Config: TAQConfig);
 begin
   if Config = nil then
     raise Exception.Create('Can not create an immutable config from a nil object!');
-  Create(Config.Port, Config.Token, Config.ConsumerWhitelist, Config.Clients, Config.Consumers);
+  Create(Config.Port, Config.Token, Config.ConsumerWhitelist, Config.Clients, Config.Consumers, Config.RequestsRepository);
 end;
 
 constructor TAQConfigImmutable.Create(const Port: Integer; const Token, WhiteList: String;
-  const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>);
+  const TheClients: TObjectList<TClient>; const TheConsumers: TObjectList<TConsumer>; const RepoRequests: TRepositoryConfig);
 var
   AClient: TClient;
   AConsumer: TConsumer;
@@ -203,6 +189,7 @@ begin
     for AConsumer in TheConsumers do
       FConsumers.Add(AConsumer.Clone());
   end;
+  FRepoRequests := RepoRequests.Clone;
 
 end;
 
@@ -226,6 +213,11 @@ begin
   begin
     Result.Add(AConsumer.Clone());
   end;
+end;
+
+function TAQConfigImmutable.GetRepoRequests: TRepositoryConfig;
+begin
+  Result := FRepoRequests.Clone();
 end;
 
 end.

@@ -6,7 +6,7 @@ uses
   AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface,
-  System.Generics.Collections, RequestSaverFactory;
+  System.Generics.Collections, RequestSaverFactory, RepositoryConfig;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -81,20 +81,19 @@ type
 
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
     FStateSaver: TJsonSaver;
+    /// / ?????? do i need it?
 
     /// <summary>a class responsable for persisting incoming requests. It is instantiated by
     /// the factory FRequestSaverFactory once the configuration is set.<summary>
     FRequestsStorage: IRequestStorage<TActiveQueueEntry>;
-
-    /// <summary>a class responsable for persisting consumer subscriptions. It is instantiated by
-    /// the factory FRequestSaverFactory once the configuration is set.<summary>
-    FConsumersStorage: IRequestStorage<TConsumer>;
 
     /// <summary>a factory that produces a required file saver instance based on config file.
     FRequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
 
     /// <summary>a factory that produces a required file saver instance based on config file.
     FConsumerSaverFactory: TRequestSaverFactory<TConsumer>;
+
+    FRequestRepoConfig: TRepositoryConfig;
 
     /// <summary>The number of the subscriptions</sumamry>
     function GetNumOfSubscriptions: Integer;
@@ -730,7 +729,6 @@ begin
 
   Writeln('Setting storages to nil...');
   FRequestsStorage := nil;
-  FConsumersStorage := nil;
 
   Writeln('Setting factories to nil...');
   FRequestSaverFactory.DisposeOf;
@@ -762,7 +760,7 @@ var
 begin
   TheClients := GetClients();
   TheConsumers := GetConsumers();
-  Result := TAQConfigImmutable.Create(FPort, FToken, ConsumerIPWhitelist, TheClients, TheConsumers);
+  Result := TAQConfigImmutable.Create(FPort, FToken, ConsumerIPWhitelist, TheClients, TheConsumers, FRequestRepoConfig);
   TheClients.Clear;
   TheClients.DisposeOf;
   TheConsumers.Clear;
@@ -1042,9 +1040,8 @@ begin
     FConsumerProxyIndex.DisposeOf;
   end;
   FConsumerProxyIndex := CreateConsumerProxyIndex(FConsumerIndex);
-
-  FRequestsStorage := FRequestSaverFactory.CreateStorage(Config.RepositoryRequests);
-  FConsumersStorage := FConsumerSaverFactory.CreateStorage(Config.RepositoryConsumers);
+  FRequestRepoConfig := Config.RequestsRepository;
+  FRequestsStorage := FRequestSaverFactory.CreateStorage(Config.RequestsRepository);
 
 end;
 
