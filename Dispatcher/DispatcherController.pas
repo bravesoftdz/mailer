@@ -35,7 +35,7 @@ type
     class function GetClientIps(): TArray<String>;
     class function GetBackEndPort(): Integer;
     class function GetBackEndIp(): String;
-    class function GetPendingRequests(): Integer;
+    class function GetPendingRequests(): TObjectList<TDispatcherEntry>;
     class function GetRepositoryParams(): TArray<TPair<String, String>>;
 
   protected
@@ -69,7 +69,7 @@ begin
   Result := Model.GetBackEndIp();
 end;
 
-class function TDispatcherController.GetPendingRequests: Integer;
+class function TDispatcherController.GetPendingRequests: TObjectList<TDispatcherEntry>;
 begin
   Result := Model.GetPendingRequests();
 end;

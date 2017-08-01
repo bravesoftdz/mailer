@@ -58,9 +58,9 @@ type
     /// <param name="Entry">a dispatcher entry to be elaborated</param>
     function PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 
-    /// <summary>Return the number of requests that have to be elaborated. It delegates its
+    /// <summary>Return requests that have to be elaborated. It delegates its
     /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
-    function GetPendingRequests(): Integer;
+    function GetPendingRequests(): TObjectList<TDispatcherEntry>;
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
 
@@ -121,12 +121,12 @@ begin
   end;
 end;
 
-function TModel.GetPendingRequests(): Integer;
+function TModel.GetPendingRequests(): TObjectList<TDispatcherEntry>;
 begin
   if FRequestSaver <> nil then
     Result := FRequestSaver.GetPendingRequests()
   else
-    Result := -1;
+    Result := nil;
 end;
 
 function TModel.PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;

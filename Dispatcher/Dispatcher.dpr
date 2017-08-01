@@ -73,7 +73,7 @@ var
   ClientIps: TArray<String>;
   RepositoryParams: TArray<TPair<String, String>>;
   Key: TPair<String, String>;
-  PendingRequests: Integer;
+  PendingRequests: TObjectList<TDispatcherEntry>;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
@@ -115,7 +115,16 @@ begin
   end;
 
   PendingRequests := TDispatcherController.GetPendingRequests();
-  Writeln('Pending requests: ' + PendingRequests.ToString);
+  if PendingRequests = nil then
+  begin
+    Writeln('No pending requests found.');
+  end
+  else
+  begin
+    Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
+    PendingRequests.Clear;
+    PendingRequests.DisposeOf;
+  end;
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);

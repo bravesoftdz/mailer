@@ -43,7 +43,7 @@ type
     function Save(const Obj: TJsonObject): String;
     function Delete(const Id: String): Boolean;
     function GetParams(): TArray<TPair<String, String>>;
-    function GetPendingRequests(): Integer;
+    function GetPendingRequests(): TObjectList<T>;
 
   end;
 
@@ -179,7 +179,7 @@ begin
   Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER_NAME);
 end;
 
-function TRequestToFileSystemStorage<T>.GetPendingRequests: Integer;
+function TRequestToFileSystemStorage<T>.GetPendingRequests: TObjectList<T>;
 var
   FilePath: String;
   Items: TStringDynArray;
@@ -195,8 +195,9 @@ begin
     JO := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(TFile.ReadAllText(Item)), 0) as TJSONObject;
     obj := Mapper.JSONObjectToObject<T>(JO);
     ListOfT.Add(obj);
+    JO.DisposeOf;
   end;
-  Result := ListOfT.Count;
+  Result := ListOfT;
 end;
 
 end.

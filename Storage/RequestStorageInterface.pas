@@ -22,7 +22,7 @@ type
     function GetParams: TArray<TPair<String, String>>;
 
     /// <summary>Get the number of request that should be elaborated.</summary>
-    function GetPendingRequests(): Integer;
+    function GetPendingRequests(): TObjectList<T>;
   end;
 
 implementation
