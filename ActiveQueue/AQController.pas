@@ -56,6 +56,9 @@ type
     /// <summary>Get config of the repository that is responsable for saving incoming requests</summary>
     class function GetRepositoryParams: TArray<TPair<String, String>>;
 
+    /// <summary>Get requests from the repository that have to be elaborated</summary>
+    class function GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference  corresponding to the model
     /// </summary>
@@ -142,6 +145,11 @@ end;
 class function TController.GetRepositoryParams: TArray<TPair<String, String>>;
 begin
   Result := Model.RequestRepositoryParams;
+end;
+
+class function TController.GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+begin
+  Result := Model.GetPendingRequests();
 end;
 
 class function TController.JSonArrayToObjectList(

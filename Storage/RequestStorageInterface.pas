@@ -21,7 +21,7 @@ type
     /// so let's print them uot first). </summary>
     function GetParams: TArray<TPair<String, String>>;
 
-    /// <summary>Get the number of request that should be elaborated.</summary>
+    /// <summary>Get requests that should be elaborated.</summary>
     function GetPendingRequests(): TObjectList<T>;
   end;
 

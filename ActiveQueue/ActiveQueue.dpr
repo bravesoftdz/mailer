@@ -81,6 +81,9 @@ var
   I, L, S: Integer;
   InfoString: String;
   RepositoryParams: TArray<TPair<String, String>>;
+  PendingRequests: TObjectList<TActiveQueueEntry>;
+  Entry: TActiveQueueEntry;
+
 begin
   TController.SetConfig(Config, TargetConfig);
   APort := TController.GetPort();
@@ -158,6 +161,24 @@ begin
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
     Writeln('No repository configuration is found.');
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  end;
+
+  PendingRequests := TController.GetPendingRequests();
+  if PendingRequests = nil then
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
+    Writeln('No storage is configured, hence no pending requests are found.');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  end
+  else
+  begin
+    Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
+    for Entry in PendingRequests do
+    begin
+      Writeln(Format('origin: %s, category: %s', [Entry.Origin, Entry.Category]));
+    end;
+    PendingRequests.Clear;
+    PendingRequests.DisposeOf;
   end;
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);

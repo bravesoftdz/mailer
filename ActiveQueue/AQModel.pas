@@ -204,6 +204,9 @@ type
     /// computer with non-allowed IP.</summary>
     function Cancel(const IP: string; const Condition: ICondition): Integer;
 
+    /// <summary>Get the requests from the repository that have to be elaborated</summary>
+    function GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+
     procedure SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 
     /// <summary> the number of subscriptions </summary>
@@ -364,6 +367,19 @@ begin
   end
   else
     Result := -1;
+end;
+
+function TActiveQueueModel.GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+begin
+  TMonitor.Enter(FQueueLock);
+  try
+    if FRequestsStorage <> nil then
+      Result := FRequestsStorage.GetPendingRequests
+    else
+      Result := nil;
+  finally
+    TMonitor.Exit(FQueueLock);
+  end;
 end;
 
 function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
