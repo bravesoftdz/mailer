@@ -1028,6 +1028,7 @@ procedure TActiveQueueModel.SetConfig(const Config: TAQConfigImmutable);
 var
   Consumers: TObjectList<TConsumer>;
   Clients: TObjectList<TClient>;
+  Requests: TDictionary<String, TActiveQueueEntry>;
 begin
   if Config = nil then
     raise Exception.Create('Can not set configuration to a null object!');
@@ -1065,6 +1066,17 @@ begin
 
   FRequestRepoConfig := Config.RequestsRepository;
   FRequestsStorage := FRequestSaverFactory.CreateStorage(FRequestRepoConfig);
+  try
+    Requests := FRequestsStorage.GetPendingRequests;
+    Enqueue(Requests);
+  finally
+    if Requests <> nil then
+    begin
+      Requests.Clear;
+      Requests.Destroy;
+    end;
+
+  end;
 
 end;
 
