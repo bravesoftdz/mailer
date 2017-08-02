@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   AQSubscriptionResponce in 'AQSubscriptionResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -38,7 +38,8 @@ uses
   Client,
   AQSubscriptionEntry in 'AQSubscriptionEntry.pas',
   AQResponce in 'AQResponce.pas',
-  RequestSaverFactory in '..\Storage\RequestSaverFactory.pas';
+  RequestSaverFactory in '..\Storage\RequestSaverFactory.pas',
+  RepositoryConfig;
 
 {$R *.res}
 
@@ -49,6 +50,10 @@ const
   SWITCH_QUEUE = 'q';
   SWITCH_CHAR = '-';
   PROGRAM_NAME = 'Active Queue Server';
+  DEFAULT_COLOR = 7;
+  HIGHLIGHT_COLOR = 10;
+  APP_COLOR = 14;
+  WARNING_COLOR = 12;
 
 var
   OriginConfig, TargetConfig, QueueFileName: String;
@@ -73,17 +78,18 @@ var
   Consumer: TConsumer;
   Consumers: TObjectList<TConsumer>;
   ConsumerWhiteList: String;
-  L: Integer;
+  I, L, S: Integer;
   InfoString: String;
+  RepositoryParams: TArray<TPair<String, String>>;
 begin
   TController.SetConfig(Config, TargetConfig);
   APort := TController.GetPort();
   InfoString := Format('%s:%d', [PROGRAM_NAME, APort]);
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), APP_COLOR);
   Writeln('');
   Writeln('  ' + InfoString);
   Writeln('');
-  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   SetConsoleTitle(pwidechar(InfoString));
 
   Clients := TController.GetClients;
@@ -98,9 +104,9 @@ begin
     for Client in Clients do
     begin
       Write('ip: ');
-      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
       Write(Format('%15s', [Client.IP]));
-      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
       Writeln(', token: (not shown)');
     end;
   end;
@@ -131,6 +137,28 @@ begin
   end;
   Consumers.Clear;
   Consumers.DisposeOf;
+
+  RepositoryParams := TController.GetRepositoryParams;
+  if RepositoryParams <> nil then
+  begin
+    S := Length(RepositoryParams);
+    Writeln(sLineBreak + 'Repository summary');
+    for I := 0 to S - 1 do
+    begin
+      Write(Format('%d) %s: ', [I + 1, RepositoryParams[I].Key]));
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
+      Writeln(RepositoryParams[I].Value);
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+    end;
+    SetLength(RepositoryParams, 0);
+    Writeln('');
+  end
+  else
+  begin
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
+    Writeln('No repository configuration is found.');
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
+  end;
 
   LServer := TIdHTTPWebBrokerBridge.Create(nil);
   try

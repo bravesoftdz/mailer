@@ -5,7 +5,7 @@ interface
 uses
   MVCFramework, MVCFramework.Commons, AQModel, ActiveQueueEntry, ObjectsMappers,
   System.Generics.Collections, Consumer, AQConfig, System.JSON, Client,
-  RequestSaverFactory;
+  RequestSaverFactory, RepositoryConfig;
 
 type
 
@@ -52,6 +52,9 @@ type
 
     /// <summary> Get port number to which this service is bound. It is defined in the configuration file.</summary>
     class function GetPort(): Integer;
+
+    /// <summary>Get config of the repository that is responsable for saving incoming requests</summary>
+    class function GetRepositoryParams: TArray<TPair<String, String>>;
 
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference  corresponding to the model
@@ -134,6 +137,11 @@ begin
     Result := TArray<String>.Create();
     SetLength(Result, 0);
   end;
+end;
+
+class function TController.GetRepositoryParams: TArray<TPair<String, String>>;
+begin
+  Result := Model.RequestRepositoryParams;
 end;
 
 class function TController.JSonArrayToObjectList(
@@ -353,8 +361,7 @@ end;
 class procedure TController.Setup;
 begin
   FRequestSaverFactory := TRequestSaverFactory<TActiveQueueEntry>.Create();
-  FConsumerSaverFactory := TRequestSaverFactory<TConsumer>.Create();
-  Model := TActiveQueueModel.Create(FRequestSaverFactory, FConsumerSaverFactory);
+  Model := TActiveQueueModel.Create(FRequestSaverFactory);
 end;
 
 procedure TController.Subscribe(const Context: TWebContext);

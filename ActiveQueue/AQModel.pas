@@ -90,9 +90,6 @@ type
     /// <summary>a factory that produces a required file saver instance based on config file.
     FRequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
 
-    /// <summary>a factory that produces a required file saver instance based on config file.
-    FConsumerSaverFactory: TRequestSaverFactory<TConsumer>;
-
     FRequestRepoConfig: TRepositoryConfig;
 
     /// <summary>The number of the subscriptions</sumamry>
@@ -162,6 +159,9 @@ type
     // cause a problem for bigger N. </summary>
     procedure NotifyListenerInSeparateThread(const Listener: IConsumerProxy);
 
+    /// <summary>Get a copy of the configuration of the repository responsable for storing incoming requests
+    function GetRequestRepositoryParams: TArray<TPair<String, String>>;
+
   public
     /// <summary>Create a subscription </summary>
     /// <param name="IP">IP from which the subscription request has arrived</param>
@@ -221,6 +221,8 @@ type
     /// <summary>A copy of  the clients</summary>
     property Clients: TObjectList<TClient> read GetClients;
 
+    property RequestRepositoryParams: TArray < TPair < String, String >> read GetRequestRepositoryParams;
+
     /// <summary>Save the state of the Active Queue server into a file</summary>
     procedure PersistState();
 
@@ -232,7 +234,7 @@ type
     /// <summary>Persist given items and return a map from ids to those items. </summary>
     function PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 
-    constructor Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>; const ConsumerSaverFactory: TRequestSaverFactory<TConsumer>);
+    constructor Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>);
     destructor Destroy(); override;
   end;
 
@@ -532,8 +534,7 @@ begin
   end;
 end;
 
-constructor TActiveQueueModel.Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>;
-  const ConsumerSaverFactory: TRequestSaverFactory<TConsumer>);
+constructor TActiveQueueModel.Create(const RequestSaverFactory: TRequestSaverFactory<TActiveQueueEntry>);
 begin
   Writeln('Creating a model...');
   FConsumerLock := TObject.Create;
@@ -546,7 +547,6 @@ begin
   SetLength(FProvidersIPs, 0);
   FConsumerCategoryToTokens := TDictionary<String, TStringList>.Create();
   FRequestSaverFactory := RequestSaverFactory;
-  FConsumerSaverFactory := ConsumerSaverFactory;
   CheckRep();
 end;
 
@@ -729,10 +729,10 @@ begin
 
   Writeln('Setting storages to nil...');
   FRequestsStorage := nil;
+  FRequestRepoConfig.DisposeOf;
 
   Writeln('Setting factories to nil...');
   FRequestSaverFactory.DisposeOf;
-  FConsumerSaverFactory.DisposeOf;
 
   Writeln('Finish destroying the model...');
   inherited;
@@ -867,6 +867,14 @@ begin
   finally
     TMonitor.Exit(FClientLock);
   end;
+end;
+
+function TActiveQueueModel.GetRequestRepositoryParams: TArray<TPair<String, String>>;
+begin
+  if FRequestsStorage <> nil then
+    Result := FRequestsStorage.GetParams
+  else
+    Result := nil;
 end;
 
 function TActiveQueueModel.GetConsumers: TObjectList<TConsumer>;
@@ -1040,8 +1048,9 @@ begin
     FConsumerProxyIndex.DisposeOf;
   end;
   FConsumerProxyIndex := CreateConsumerProxyIndex(FConsumerIndex);
+
   FRequestRepoConfig := Config.RequestsRepository;
-  FRequestsStorage := FRequestSaverFactory.CreateStorage(Config.RequestsRepository);
+  FRequestsStorage := FRequestSaverFactory.CreateStorage(FRequestRepoConfig);
 
 end;
 
