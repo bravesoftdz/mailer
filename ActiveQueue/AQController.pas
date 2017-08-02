@@ -341,7 +341,7 @@ begin
     if Model.IsAllowedProvider(IP) then
     begin
       try
-        Status := Model.Enqueue(IP, Ids);
+        Status := Model.Enqueue(Ids);
       except
         on E: Exception do
         begin

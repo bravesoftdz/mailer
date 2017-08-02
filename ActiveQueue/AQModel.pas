@@ -180,10 +180,9 @@ type
 
     /// <summary>Add multiple items (that are supposed to be already saved into the storage) to the queue.
     /// </summary>
-    /// <param name="IP">ip of the computer from which the request originates</param>
     /// <param name="Ids">map of ids to corresponding items. </param>
     /// <returns>True in case of success, False otherwise</returns>
-    function Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
+    function Enqueue(const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 
     /// <summary> Get the IPs from which the subscriptions can be accepted.</summary>
     function GetListenersIPs: TArray<String>;
@@ -247,7 +246,7 @@ uses
   JsonableInterface, System.RegularExpressions;
 { TActiveQueueModel }
 
-function TActiveQueueModel.Enqueue(const IP: String; const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
+function TActiveQueueModel.Enqueue(const IdToItem: TDictionary<String, TActiveQueueEntry>): Boolean;
 var
   id: String;
   Categories: TStringList;
