@@ -338,13 +338,20 @@ begin
   end;
   if Outcome = nil then
   begin
-    try
-      Status := Model.Enqueue(IP, Ids);
-    except
-      on E: Exception do
-      begin
-        Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
+    if Model.IsAllowedProvider(IP) then
+    begin
+      try
+        Status := Model.Enqueue(IP, Ids);
+      except
+        on E: Exception do
+        begin
+          Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
+        end;
       end;
+    end
+    else
+    begin
+      Outcome := TAQResponce.Create(False, TAQResponceMessages.ERROR_MISSING_AUTHORISATION);
     end;
   end;
   if Outcome = nil then

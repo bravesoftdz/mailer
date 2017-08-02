@@ -81,7 +81,6 @@ type
 
     /// <summary>a class instance by means of which the AQ state is persisted<summary>
     FStateSaver: TJsonSaver;
-    /// / ?????? do i need it?
 
     /// <summary>a class responsable for persisting incoming requests. It is instantiated by
     /// the factory FRequestSaverFactory once the configuration is set.<summary>
@@ -1092,32 +1091,34 @@ begin
   end;
 end;
 
-function TActiveQueueModel.PersistRequests(
-
-  const
-  Items:
-  TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
+function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;
 var
   Item: TActiveQueueEntry;
   Id: String;
   Jo: TJsonObject;
 begin
-  Result := TDictionary<String, TActiveQueueEntry>.Create;
-  for Item in Items do
-  begin
-    try
-      Jo := Item.ToJson;
-      Id := FRequestsStorage.Save(Jo);
-      Jo.DisposeOf;
-    except
-      on E: Exception do
-      begin
-        Result.DisposeOf;
-        raise Exception.Create('AQ model storage failed to save an item. Reason: ' + E.Message);
+  TMonitor.Enter(FQueueLock);
+  try
+    Result := TDictionary<String, TActiveQueueEntry>.Create;
+    for Item in Items do
+    begin
+      try
+        Jo := Item.ToJson;
+        Id := FRequestsStorage.Save(Jo);
+        Jo.DisposeOf;
+      except
+        on E: Exception do
+        begin
+          Result.DisposeOf;
+          raise Exception.Create('AQ model storage failed to save an item. Reason: ' + E.Message);
+        end;
       end;
+      Result.Add(Id, Item);
     end;
-    Result.Add(Id, Item);
+  finally
+    TMonitor.Exit(FQueueLock);
   end;
+
 end;
 
 procedure TActiveQueueModel.PersistState;

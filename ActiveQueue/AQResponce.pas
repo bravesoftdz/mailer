@@ -12,6 +12,7 @@ type
     ERROR_CAST_REPORT = 'AQ: failed to cast the request body into TActiveQueueEntries. Reason: %s';
     ERROR_PERSIST_REPORT = 'AQ: failed to save the requests. Reason: %s';
     ERROR_ENQUEUE_REPORT = 'AQ: failed to enqueue the requests. Reason: %s';
+    ERROR_MISSING_AUTHORISATION = 'AQ: not authorised';
     SUCCESS = 'AQ has successfully enqueued the items.';
     FAILURE = 'AQ has failed to enqueu the items.';
   end;
