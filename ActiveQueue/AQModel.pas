@@ -821,7 +821,7 @@ begin
       for I := 0 to ReturnSize - 1 do
       begin
         Item := FItems.Dequeue;
-        Writeln('What to do with file ' + Item.Key + '?');
+        FRequestsStorage.Delete(Item.Key);
         Result.Add(Item.Value.Clone);
         Item.Value.DisposeOf;
       end;
