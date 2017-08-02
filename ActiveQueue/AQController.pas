@@ -57,7 +57,7 @@ type
     class function GetRepositoryParams: TArray<TPair<String, String>>;
 
     /// <summary>Get requests from the repository that have to be elaborated</summary>
-    class function GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+    class function GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 
     /// <summary> Initialize the model. Since this controller is added in a static manner,
     /// I have to create a static method that instantiate a static reference  corresponding to the model
@@ -147,7 +147,7 @@ begin
   Result := Model.RequestRepositoryParams;
 end;
 
-class function TController.GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+class function TController.GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 begin
   Result := Model.GetPendingRequests();
 end;

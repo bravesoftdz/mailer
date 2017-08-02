@@ -203,7 +203,7 @@ type
     function Cancel(const IP: string; const Condition: ICondition): Integer;
 
     /// <summary>Get the requests from the repository that have to be elaborated</summary>
-    function GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+    function GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 
     procedure SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 
@@ -367,7 +367,7 @@ begin
     Result := -1;
 end;
 
-function TActiveQueueModel.GetPendingRequests(): TObjectList<TActiveQueueEntry>;
+function TActiveQueueModel.GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 begin
   TMonitor.Enter(FQueueLock);
   try

@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in 'DispatcherController.pas',
-  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in 'DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   DispatcherModel in 'DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -73,9 +73,8 @@ var
   ClientIps: TArray<String>;
   RepositoryParams: TArray<TPair<String, String>>;
   Key: TPair<String, String>;
-  PendingRequests: TObjectList<TDispatcherEntry>;
-  Entry: TDispatcherEntry;
-  Entr: Integer;
+  PendingRequests: TDictionary<String, TDispatcherEntry>;
+  RequestID: String;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
@@ -124,9 +123,10 @@ begin
   else
   begin
     Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
-    for Entry in PendingRequests do
+    for RequestID in PendingRequests.Keys do
     begin
-      Writeln(Format('origin: %s, action: %s, number of attachments: %d', [Entry.Origin, Entry.Action, Entry.Attachments.Count]));
+      Writeln(Format('origin: %s, action: %s, number of attachments: %d, id: %s',
+        [PendingRequests[RequestID].Origin, PendingRequests[RequestID].Action, PendingRequests[RequestID].Attachments.Count, RequestID]));
     end;
 
     PendingRequests.Clear;

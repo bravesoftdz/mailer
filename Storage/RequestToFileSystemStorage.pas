@@ -56,8 +56,9 @@ type
     function GetParams(): TArray<TPair<String, String>>;
 
     /// <summary>Return a list of requests that have been saved but have never been deleted.
+    ///  The keys are file names without extensions that are located in the incoming folder.
     /// Requires a lock.</sumamry>
-    function GetPendingRequests(): TObjectList<T>;
+    function GetPendingRequests(): TDictionary<String, T>;
 
   end;
 
@@ -204,7 +205,7 @@ begin
   Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER_NAME);
 end;
 
-function TRequestToFileSystemStorage<T>.GetPendingRequests: TObjectList<T>;
+function TRequestToFileSystemStorage<T>.GetPendingRequests: TDictionary<String, T>;
 var
   FilePath: String;
   TheFiles: TStringDynArray;
@@ -215,14 +216,14 @@ begin
   TMonitor.Enter(FLockObj);
   try
     TheFiles := TDirectory.GetFiles(FIncomingFolder);
-    Result := TObjectList<T>.Create();
+    Result := TDictionary<String, T>.Create();
     for AFile in TheFiles do
     begin
       try
         try
           JO := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(TFile.ReadAllText(AFile)), 0) as TJSONObject;
           obj := Mapper.JSONObjectToObject<T>(JO);
-          Result.Add(obj);
+          Result.Add(TPath.GetFileNameWithoutExtension(AFile), obj);
         except
           on E: Exception do
           begin

@@ -60,7 +60,7 @@ type
 
     /// <summary>Return requests that have to be elaborated. It delegates its
     /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
-    function GetPendingRequests(): TObjectList<TDispatcherEntry>;
+    function GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
 
@@ -121,7 +121,7 @@ begin
   end;
 end;
 
-function TModel.GetPendingRequests(): TObjectList<TDispatcherEntry>;
+function TModel.GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 begin
   if FRequestSaver <> nil then
     Result := FRequestSaver.GetPendingRequests()

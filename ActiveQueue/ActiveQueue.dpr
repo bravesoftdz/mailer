@@ -81,8 +81,8 @@ var
   I, L, S: Integer;
   InfoString: String;
   RepositoryParams: TArray<TPair<String, String>>;
-  PendingRequests: TObjectList<TActiveQueueEntry>;
-  Entry: TActiveQueueEntry;
+  PendingRequests: TDictionary<String, TActiveQueueEntry>;
+  RequestID: String;
 
 begin
   TController.SetConfig(Config, TargetConfig);
@@ -173,9 +173,9 @@ begin
   else
   begin
     Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
-    for Entry in PendingRequests do
+    for RequestID in PendingRequests.Keys do
     begin
-      Writeln(Format('origin: %s, category: %s', [Entry.Origin, Entry.Category]));
+      Writeln(Format('origin: %s, category: %s, id: %s', [PendingRequests[RequestID].Origin, PendingRequests[RequestID].Category, RequestID]));
     end;
     PendingRequests.Clear;
     PendingRequests.DisposeOf;

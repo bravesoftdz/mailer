@@ -21,8 +21,10 @@ type
     /// so let's print them uot first). </summary>
     function GetParams: TArray<TPair<String, String>>;
 
-    /// <summary>Get requests that should be elaborated.</summary>
-    function GetPendingRequests(): TObjectList<T>;
+    /// <summary>Get requests that should be elaborated.
+    /// The keys are the ids under which the requests have been saved in the repository.
+    /// </summary>
+    function GetPendingRequests(): TDictionary<String, T>;
   end;
 
 implementation
