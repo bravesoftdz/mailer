@@ -56,7 +56,7 @@ type
     function GetParams(): TArray<TPair<String, String>>;
 
     /// <summary>Return a list of requests that have been saved but have never been deleted.
-    ///  The keys are file names without extensions that are located in the incoming folder.
+    /// The keys are file names without extensions that are located in the incoming folder.
     /// Requires a lock.</sumamry>
     function GetPendingRequests(): TDictionary<String, T>;
 
@@ -113,26 +113,35 @@ begin
     except
       on E: Exception do
       begin
-        Log.Error('CreateFolderIfNotExist : error when creating a repository folder "' + Path + '"', TAG);
+        Log.Error('CreateFolderIfNotExist: error when creating a repository folder "' + Path + '"', TAG);
       end;
     end;
 end;
 
 function TRequestToFileSystemStorage<T>.Delete(const Id: String): Boolean;
 var
-  FullPath: String;
+  SourceFullPath, TargetFullPath: String;
 begin
   TMonitor.Enter(FLockObj);
+  SourceFullPath := FIncomingFolder + Id + FFileExtension;
+  TargetFullPath := FElaboratedFolder + Id + FFileExtension;
   try
-    FullPath := FIncomingFolder + Id + FFileExtension;
-    if not(TFile.Exists(FullPath)) then
+    if not(TFile.Exists(SourceFullPath)) then
       Result := False
     else
     begin
       try
-        Writeln('Deleting file ' + FullPath);
-        TFile.Delete(FullPath);
-        Result := True;
+        if not(TFile.Exists(TargetFullPath)) then
+        begin
+          TFile.Move(SourceFullPath, TargetFullPath);
+          Result := True;
+        end
+        else
+        begin
+          Log.Warn('Delete: target file ' + TargetFullPath + ' already exists. Therefore, the source file ' + SourceFullPath + ' gets removed.', TAG);
+          TFile.Delete(SourceFullPath);
+          Result := True
+        end;
       except
         on E: Exception do
         begin
