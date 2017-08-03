@@ -6,7 +6,7 @@ uses
   AQSubscriptionResponce, AQSubscriptionEntry, ActiveQueueEntry,
   System.Classes, Consumer, ListenerProxyInterface,
   ConditionInterface, AQConfig, JsonSaver, Client, RequestStorageInterface,
-  System.Generics.Collections, RequestSaverFactory, RepositoryConfig;
+  System.Generics.Collections, RequestSaverFactory, RepositoryConfig, MVCFramework.Logger;
 
 type
   /// <summary> A model corresponding to the ActiveQueue controller. </summary>
@@ -146,6 +146,8 @@ type
 
     function GetPort: Integer;
 
+    function GetToken: String;
+
     function GetClients: TObjectList<TClient>;
 
     function GetConsumerIPWhitelist: String;
@@ -193,14 +195,14 @@ type
     /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
     function IsIpInWhiteList(const IP: String): Boolean;
 
-    /// <summary>Return true iff given IP is among those from which data can be enqueued.</summary>
-    function IsAllowedProvider(const IP: String): Boolean;
+    /// <summary>Return true iff given IP corresponds to the token.</summary>
+    function IsAllowedClient(const Token, IP: String): Boolean;
 
     /// <summary>Cancel local items of the queue for which the condition is true. Then informs the
     /// listeners to cancel the items that satisfy the condition.
     /// Returns the number of items cancelled from the local storage, or -1 of the request comes from a
     /// computer with non-allowed IP.</summary>
-    function Cancel(const IP: string; const Condition: ICondition): Integer;
+    // function Cancel(const IP: string; const Condition: ICondition): Integer;
 
     /// <summary>Get the requests from the repository that have to be elaborated</summary>
     function GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
@@ -212,6 +214,9 @@ type
 
     /// <summary>the number of a port to which this service is bound</summary>
     property Port: Integer read GetPort;
+
+    /// <summary>AQ token used for authentification</summary>
+    property Token: String read GetToken;
 
     property Config: TAQConfigImmutable read GetConfig write SetConfig;
 
@@ -252,7 +257,6 @@ var
   Categories: TStringList;
   Category: String;
 begin
-  Writeln('Enqueueing ' + inttostr(IdToItem.Count) + ' item(s)');
   TMonitor.Enter(FQueueLock);
   Categories := TStringList.Create;
   try
@@ -265,14 +269,12 @@ begin
         begin
           categories.Add(category);
         end;
-        Writeln('Item added to the queue...');
       end;
       Result := True;
-      Writeln('returning true');
     except
       on E: Exception do
       begin
-        Writeln('Error while adding to the queue: ' + E.Message);
+        Log.error('Enqueue: Error while adding to the queue: ' + E.Message, TAG);
         Result := False;
       end;
     end;
@@ -356,16 +358,16 @@ begin
   end;
 end;
 
-function TActiveQueueModel.Cancel(const IP: string; const Condition: ICondition): Integer;
-begin
-  if (IsAllowedProvider(IP)) then
-  begin
-    Result := CancelLocal(Condition);
-    BroadcastCancel(Condition);
-  end
-  else
-    Result := -1;
-end;
+// function TActiveQueueModel.Cancel(const IP: string; const Condition: ICondition): Integer;
+// begin
+// if (IsAllowedClient(IP)) then
+// begin
+// Result := CancelLocal(Condition);
+// BroadcastCancel(Condition);
+// end
+// else
+// Result := -1;
+// end;
 
 function TActiveQueueModel.GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 begin
@@ -864,6 +866,11 @@ begin
   Result := FPort
 end;
 
+function TActiveQueueModel.GetToken: String;
+begin
+  Result := FToken
+end;
+
 function TActiveQueueModel.GetProvidersIPs: TArray<String>;
 var
   I, S: Integer;
@@ -906,11 +913,11 @@ begin
 
 end;
 
-function TActiveQueueModel.IsAllowedProvider(const IP: String): Boolean;
+function TActiveQueueModel.IsAllowedClient(const Token, IP: String): Boolean;
 begin
   TMonitor.Enter(FClientLock);
   try
-    Result := Contains(FProvidersIPs, IP);
+    Result := FClientIndex.ContainsKey(Token) AND (FClientIndex[Token].IP = IP)
   finally
     TMonitor.Exit(FClientLock);
   end;
@@ -977,20 +984,16 @@ var
   Category: String;
   Tokens: TStringList;
 begin
-  Writeln('Notifying the listeners');
   TMonitor.Enter(FConsumerLock);
   try
     Tokens := TStringList.Create();
     for Category in Categories do
     begin
-      Writeln('Category ' + Category);
       if FConsumerCategoryToTokens.ContainsKey(Category) then
       begin
-        Writeln('Category ' + Category + ' contains ' + FConsumerCategoryToTokens[Category].Count.ToString + ' tokens');
         for Token in FConsumerCategoryToTokens[Category] do
         begin
           Tokens.Add(Token);
-          Writeln('Add token: ' + Token);
         end;
       end
       else
@@ -998,7 +1001,6 @@ begin
     end;
     for Token in Tokens do
     begin
-      Writeln('Notifying consumer with token: ' + Token);
       NotifyListenerInSeparateThread(FConsumerProxyIndex[Token]);
     end;
     Tokens.Clear;

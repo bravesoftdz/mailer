@@ -10,11 +10,11 @@ type
   TRequestToFileSystemStorage<T: Class, constructor> = class(TInterfacedObject, IRequestStorage<T>)
   strict private
   const
-    /// <summary>name of the folder inside the working one in which incoming requests should be stored</summary>
-    INCOMING_FOLDER_NAME = 'incoming' + PathDelim;
+    /// <summary>name of the folder inside the working one in which the requests should be saved</summary>
+    STORAGE_FOLDER_NAME = 'incoming' + PathDelim;
 
-    /// <summary>name of the folder inside the working one in which requests that have been already elaborated should be stored</summary>
-    ELABORATED_FOLDER_NAME = 'elaborated' + PathDelim;
+    /// <summary>name of the folder inside the working one in which requests are placed when "deleting"</summary>
+    RECYCLE_BIN_FOLDER_NAME = 'recycled' + PathDelim;
 
     /// <summary>pattern to extract a name of the working folder from the config instance</summary>
     WORKING_DIR_PATTERN = '^file:\/\/(.*)$';
@@ -32,7 +32,15 @@ type
     FElaboratedFolder: String;
     FLockObj: TObject;
 
-    function GetAvailableName(): String;
+    /// <summary>Generate available name (i.e. a file that does not exist and hence can be created)
+    /// for a file in the given folder using given name as a suggestion.
+    /// It does not require any lock since it is a private method and it is called from
+    /// public ones that might require a lock.
+    /// </summary>
+    /// <param name="Seed">a suggested name (without extension)</param>
+    /// <param name="Folder">path to the folder in which a file might be created</param>
+    /// <param name="Extension">extension for the available name</param>
+    function GetAvailableName(const Seed, Folder, Extension: String): String;
 
     /// <summary>Try to create a folder with given path. If it exists, do nothing.</summary>
     procedure CreateFolderIfNotExist(const Path: String);
@@ -92,8 +100,8 @@ begin
       FWorkingFolder := StringReplace(Temp.Groups.Item[1].Value, '/', PathDelim, [rfReplaceAll, rfIgnoreCase]);
       if (TPath.IsRelativePath(FWorkingFolder)) then
         FWorkingFolder := GetCurrentDir + PathDelim + FWorkingFolder;
-      FIncomingFolder := FWorkingFolder + INCOMING_FOLDER_NAME;
-      FElaboratedFolder := FWorkingFolder + ELABORATED_FOLDER_NAME;
+      FIncomingFolder := FWorkingFolder + STORAGE_FOLDER_NAME;
+      FElaboratedFolder := FWorkingFolder + RECYCLE_BIN_FOLDER_NAME;
       CreateFolderIfNotExist(FWorkingFolder);
       CreateFolderIfNotExist(FIncomingFolder);
       CreateFolderIfNotExist(FElaboratedFolder);
@@ -124,13 +132,13 @@ var
 begin
   TMonitor.Enter(FLockObj);
   SourceFullPath := FIncomingFolder + Id + FFileExtension;
-  TargetFullPath := FElaboratedFolder + Id + FFileExtension;
   try
     if not(TFile.Exists(SourceFullPath)) then
       Result := False
     else
     begin
       try
+        TargetFullPath := FElaboratedFolder + GetAvailableName(Id, FElaboratedFolder, FFileExtension) + FFileExtension;
         if not(TFile.Exists(TargetFullPath)) then
         begin
           TFile.Move(SourceFullPath, TargetFullPath);
@@ -155,32 +163,29 @@ begin
 
 end;
 
-function TRequestToFileSystemStorage<T>.GetAvailableName: String;
+function TRequestToFileSystemStorage<T>.GetAvailableName(const Seed, Folder, Extension: String): String;
 var
   FullPath: String;
   Counter: Integer;
   NewName, BaseName: String;
 begin
-  FullPath := FWorkingFolder + FFileName + FFileExtension;
+  FullPath := Folder + Seed + Extension;
   if not(TFile.Exists(FullPath)) then
-    Result := FFileName
+    Result := Seed
   else
   begin
-    BaseName := FFileName + formatdatetime(Suffix, Now());
+    BaseName := Seed + formatdatetime(Suffix, Now());
     NewName := BaseName;
-    FullPath := FWorkingFolder + BaseName + FFileExtension;
+    FullPath := Folder + BaseName + Extension;
     Counter := 1;
     while (TFile.Exists(FullPath)) do
     begin
       NewName := Format('%s-%d', [BaseName, Counter]);
-      FullPath := FWorkingFolder + NewName + FFileExtension;;
+      FullPath := Folder + NewName + Extension;;
       Counter := Counter + 1;
-      Writeln('Loop: new name = ' + NewName);
     end;
     Result := NewName;
-
   end;
-  Writeln('Available file name: ' + Result);
 end;
 
 function TRequestToFileSystemStorage<T>.Save(const Obj: TJsonObject): String;
@@ -189,7 +194,7 @@ var
 begin
   TMonitor.Enter(FLockObj);
   try
-    Result := GetAvailableName();
+    Result := GetAvailableName(FFileName, FIncomingFolder, FFileExtension);
     FullPath := FIncomingFolder + Result + FFileExtension;
     if TFile.Exists(FullPath) then
     begin
@@ -210,8 +215,8 @@ begin
   SetLength(Result, 4);
   Result[0] := TPair<String, String>.Create('type', 'filesystem');
   Result[1] := TPair<String, String>.Create('working folder', FWorkingFolder);
-  Result[2] := TPair<String, String>.Create('subfolder for incoming requests', INCOMING_FOLDER_NAME);
-  Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', ELABORATED_FOLDER_NAME);
+  Result[2] := TPair<String, String>.Create('subfolder for incoming requests', STORAGE_FOLDER_NAME);
+  Result[3] := TPair<String, String>.Create('subfolder for elaborated requests', RECYCLE_BIN_FOLDER_NAME);
 end;
 
 function TRequestToFileSystemStorage<T>.GetPendingRequests: TDictionary<String, T>;

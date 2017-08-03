@@ -161,23 +161,9 @@ begin
     end;
   end;
 
-  // ItemsTmp := TObjectList<TActiveQueueEntry>.Create(False);
-  // AQTmp := TActiveQueueEntry.Create('onm', 'email', 'body', 'some token');
-  // ItemsTmp.Add(AQTmp);
-  // Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(ItemsTmp));
-  // ItemsTmp.Clear;
-  // ItemsTmp.DisposeOf;
-  // AQtmp.DisposeOf;
-  // ErrorMessages.DisposeOf;
-  // if Items <> nil then
-  // begin
-  // Items.DisposeOf;
-  // end;
-  // Exit();
-
   if (ID <> '') AND (Items <> nil) then
   begin
-    Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(Items));
+    Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(FConfig.Token, Items));
   end;
   if Items <> nil then
   begin

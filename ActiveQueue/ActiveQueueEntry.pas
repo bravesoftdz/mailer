@@ -58,17 +58,21 @@ type
   strict private
   const
     ITEMS_KEY = 'items';
+    TOKEN_KEY = 'token';
 
   var
     FItems: TObjectList<TActiveQueueEntry>;
+    FToken: String;
     procedure SetItems(const Items: TObjectList<TActiveQueueEntry>);
   public
-    constructor Create(const Items: TObjectList<TActiveQueueEntry>); overload;
+    constructor Create(const Token: String; const Items: TObjectList<TActiveQueueEntry>); overload;
     constructor Create; overload;
     destructor Destroy; override;
     [MapperJSONSer(ITEMS_KEY)]
     [MapperListOf(TActiveQueueEntry)]
     property Items: TObjectList<TActiveQueueEntry> read FItems write FItems;
+    [MapperJSONSer(TOKEN_KEY)]
+    property Token: String read FToken write FToken;
   end;
 
 implementation
@@ -78,10 +82,11 @@ uses
 
 { TActiveQueueEntries }
 
-constructor TActiveQueueEntries.Create(const Items: TObjectList<TActiveQueueEntry>);
+constructor TActiveQueueEntries.Create(const Token: String; const Items: TObjectList<TActiveQueueEntry>);
 begin
   Create();
   SetItems(Items);
+  FToken := Token;
 end;
 
 constructor TActiveQueueEntries.Create;

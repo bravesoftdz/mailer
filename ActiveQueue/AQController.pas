@@ -97,11 +97,6 @@ type
     [MVCHTTPMethod([httpPOST])]
     procedure PostItem(const Context: TWebContext);
 
-    /// cancel items from the ActiveQueue.
-    [MVCPath('/items/cancel')]
-    [MVCHTTPMethod([httpPUT])]
-    procedure CancelItems(const Context: TWebContext);
-
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -190,27 +185,6 @@ begin
   Model.TargetConfigPath := TargetConfig;
 end;
 
-procedure TController.CancelItems(const Context: TWebContext);
-var
-  Ip: String;
-  jo: TJsonObject;
-  Condition: ICondition;
-begin
-  IP := Context.Request.ClientIP;
-  jo := Context.Request.BodyAsJSONObject;
-  if (Assigned(jo)) then
-  begin
-    try
-      Condition := Mapper.JSONObjectToObject<TTokenBasedCondition>(jo);
-      Model.Cancel(IP, Condition);
-    except
-      on e: Exception do
-        Condition := nil;
-    end;
-  end;
-
-end;
-
 class function TController.EnqueueAndPersist(const IP: String;
   const Items: TObjectList<TActiveQueueEntry>): Boolean;
 begin
@@ -241,11 +215,9 @@ begin
     begin
       ip := Context.Request.ClientIP;
       Items := Model.GetItems(Ip, Token, Qty);
-      EntriesAsSingleBlock := TActiveQueueEntries.Create(Items);
+      EntriesAsSingleBlock := TActiveQueueEntries.Create(Model.Token, items);
       Items.Clear;
       Items.DisposeOf;
-
-      Writeln('AQ controller: rendering ' + EntriesAsSingleBlock.Items.Count.ToString + ' items');
       Render(EntriesAsSingleBlock);
     end;
 
@@ -325,6 +297,12 @@ begin
       end;
     end;
   end;
+
+  if not(Model.IsAllowedClient(Entries.Token, IP)) then
+  begin
+    Outcome := TAQResponce.Create(False, TAQResponceMessages.ERROR_MISSING_AUTHORISATION);
+  end;
+
   if Outcome = nil then
   begin
     try
@@ -338,20 +316,13 @@ begin
   end;
   if Outcome = nil then
   begin
-    if Model.IsAllowedProvider(IP) then
-    begin
-      try
-        Status := Model.Enqueue(Ids);
-      except
-        on E: Exception do
-        begin
-          Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
-        end;
+    try
+      Status := Model.Enqueue(Ids);
+    except
+      on E: Exception do
+      begin
+        Outcome := TAQResponce.Create(False, Format(TAQResponceMessages.ERROR_ENQUEUE_REPORT, [E.Message]));
       end;
-    end
-    else
-    begin
-      Outcome := TAQResponce.Create(False, TAQResponceMessages.ERROR_MISSING_AUTHORISATION);
     end;
   end;
   if Outcome = nil then
@@ -366,8 +337,8 @@ begin
     Entries.DisposeOf;
   if Ids <> nil then
   begin
-    Ids.Clear;
-    Ids.DisposeOf;
+    // Ids.Clear;
+    // Ids.DisposeOf;
   end;
 
   Render(Outcome);

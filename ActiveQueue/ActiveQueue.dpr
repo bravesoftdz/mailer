@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
   AQSubscriptionResponce in 'AQSubscriptionResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -39,7 +39,8 @@ uses
   AQSubscriptionEntry in 'AQSubscriptionEntry.pas',
   AQResponce in 'AQResponce.pas',
   RequestSaverFactory in '..\Storage\RequestSaverFactory.pas',
-  RepositoryConfig;
+  RepositoryConfig,
+  RequestToFileSystemStorage in '..\Storage\RequestToFileSystemStorage.pas';
 
 {$R *.res}
 
