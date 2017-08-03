@@ -4,7 +4,7 @@ interface
 
 uses
   ConsumerConfig, AQSubscriptionResponce, ActiveQueueEntry, JsonSaver,
-  MVCFramework.RESTAdapter, AQAPIConsumer, MVCFramework.Logger,
+  MVCFramework.RESTAdapter, AQAPIConsumer,
   System.Generics.Collections;
 
 type
@@ -205,28 +205,28 @@ var
   Items: TActiveQueueEntries;
   S: Integer;
 begin
-  Log.info('Request data from the data provider', TAG);
+  Writeln('Request data from the data provider', TAG);
   try
     Items := FServer.GetItems(FConfig.SubscriptionToken, FConfig.BlockSize);
     if Items = nil then
     begin
-      Log.info('Received null from the server.', TAG);
+      Writeln('Received null from the server.', TAG);
       S := 0;
     end
     else
     begin
       S := Items.Items.Count;
-      Log.info('Received ' + S.ToString + ' item(s) from the server', TAG);
+      Writeln('Received ' + S.ToString + ' item(s) from the server', TAG);
     end;
 
   except
     on E: Exception do
     begin
-      Log.error('Error while getting items from the data provider: ' + E.Message, TAG);
+      Writeln('Error while getting items from the data provider: ' + E.Message, TAG);
       S := 0;
     end;
   end;
-  Log.info('Received ' + S.toString() + ' task(s).', TAG);
+  Writeln('Received ' + S.toString() + ' task(s).', TAG);
   if S > 0 then
   begin
     Consume(Items.Items);
@@ -240,8 +240,6 @@ begin
 end;
 
 procedure TConsumerModel.SendMail(const Item: TActiveQueueEntry);
-const
-  TAG = 'TConsumerModel.SendMail';
 var
   Smtp: TIdSMTP;
   Msg: TIdMessage;
@@ -251,10 +249,10 @@ var
   AttachFile: TIdAttachmentFile;
   AStream: TStream;
 begin
-  Log.info('Sending a message', TAG);
+  Writeln('Sending a message');
   if (Item = nil) then
   begin
-    Log.info('Null item to send... Exiting.', TAG);
+    Writeln('Null item to send... Exiting.');
     Exit();
   end;
 
@@ -288,15 +286,15 @@ begin
       end;
       Smtp := TIdSMTP.Create(NIL);
       try
-        Log.info('Trying to connect', TAG);
+        Writeln('Trying to connect');
         Smtp.Host := TSendMailConfig.HOST;
         Smtp.Port := TSendMailConfig.Port;
         Smtp.Connect;
         try
           Smtp.Send(MSG);
-          Log.info('Trying to send', TAG);
+          Writeln('Trying to send');
         finally
-          Log.info('Trying to disconnect', TAG);
+          Writeln('Trying to disconnect');
           Smtp.Disconnect
         end
       finally
@@ -307,7 +305,7 @@ begin
       Data.DisposeOf;
     end;
   end;
-  Log.info('Message sent', TAG);
+  Writeln('Message sent');
 end;
 
 procedure TConsumerModel.SetConfig(const Config: TConsumerConfig; const TargetConfigFileName: String);
@@ -436,12 +434,10 @@ begin
 end;
 
 procedure TConsumerModel.UpdateConfigToken(const Token: String);
-const
-  TAG = 'TConsumerModel.UpdateConfigToken';
 var
   ConfigNew: TConsumerConfig;
 begin
-  Log.info('Update config...', TAG);
+  Writeln('Update config...');
   if FConfig <> nil then
   begin
     ConfigNew := TConsumerConfig.Create(FConfig.Port, FConfig.ProviderIP,
@@ -453,7 +449,7 @@ begin
     FFileSaver.Save(FConfig);
   except
     on E: Exception do
-      Log.Error('An error occurred while saving updated config: ' + E.Message, TAG);
+      Writeln('An error occurred while saving updated config: ' + E.Message);
   end;
 
 end;

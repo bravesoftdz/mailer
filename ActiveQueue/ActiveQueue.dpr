@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   AQController in 'AQController.pas',
-  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule},
+  ActiveQueueModule in 'ActiveQueueModule.pas' {ActiveQueueModule: TWebModule} ,
   AQSubscriptionResponce in 'AQSubscriptionResponce.pas',
   ActiveQueueSettings in 'ActiveQueueSettings.pas',
   AQModel in 'AQModel.pas',
@@ -48,7 +48,6 @@ uses
 const
   SWITCH_ORIGIN_CONFIG = 'c';
   SWITCH_TARGET_CONFIG = 't';
-  SWITCH_QUEUE = 'q';
   SWITCH_CHAR = '-';
   PROGRAM_NAME = 'Active Queue Server';
   DEFAULT_COLOR = 7;
@@ -66,7 +65,7 @@ var
   ParamUsage: TCliUsage;
   ParamValues: TDictionary<String, String>;
 
-procedure RunServer(const Config: TAQConfigImmutable; const TargetConfig, QueueFileName: String);
+procedure RunServer(const Config: TAQConfigImmutable; const TargetConfig: String);
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -208,15 +207,13 @@ end;
 begin
   ReportMemoryLeaksOnShutdown := True;
   CliParams := [TCliParam.Create(SWITCH_ORIGIN_CONFIG, 'path', 'path to a file to load the configuration', True),
-    TCliParam.Create(SWITCH_TARGET_CONFIG, 'path', 'path to a file to save the configuration', True),
-    TCliParam.Create(SWITCH_QUEUE, 'queue', 'path to a file in which the queues received from the reception have been saved', True)];
+    TCliParam.Create(SWITCH_TARGET_CONFIG, 'path', 'path to a file to save the configuration', True)];
   ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   try
     try
       ParamValues := ParamUsage.Parse();
       OriginConfig := ParamValues[SWITCH_ORIGIN_CONFIG];
       TargetConfig := ParamValues[SWITCH_TARGET_CONFIG];
-      QueueFileName := ParamValues[SWITCH_QUEUE];
       if Not(TFile.Exists(OriginConfig)) then
       begin
         Writeln('Error: config file ' + OriginConfig + 'not found.');
@@ -242,7 +239,7 @@ begin
             if WebRequestHandler <> nil then
               WebRequestHandler.WebModuleClass := WebModuleClass;
             WebRequestHandlerProc.MaxConnections := 1024;
-            RunServer(ConfigImm, TargetConfig, QueueFileName);
+            RunServer(ConfigImm, TargetConfig);
           end
           else
             Writeln('No config is created. Failed to start the service.');
