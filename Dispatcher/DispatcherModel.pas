@@ -337,12 +337,8 @@ begin
 end;
 
 function TModel.Persist(const Item: TDispatcherEntry): String;
-var
-  jo: TJsonObject;
 begin
-  jo := Item.toJson();
-  Result := FRequestSaver.Save(jo);
-  jo.DisposeOf;
+  Result := FRequestSaver.Save(Item);
 end;
 
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);

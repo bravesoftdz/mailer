@@ -100,12 +100,9 @@ end;
 
 procedure TDispatcherController.PutRequest(Context: TWebContext);
 var
-  IP, ID: String;
+  IP: String;
   Request: TDispatcherEntry;
-  IdToEntries: TPair<String, TActiveQueueEntries>;
-  Entries: TActiveQueueEntries;
   Responce: TDispatcherResponce;
-  BackEndResponce: TAQResponce;
 begin
   IP := Context.Request.ClientIP;
   Responce := nil;

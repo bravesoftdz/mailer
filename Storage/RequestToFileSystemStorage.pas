@@ -53,7 +53,7 @@ type
 
     /// <summary>save given object in the repository folder.
     /// Requires a lock.</sumamry>
-    function Save(const Obj: TJsonObject): String;
+    function Save(const Obj: T): String;
 
     /// <summary>delete a file with given id in the repository folder.
     /// Requires a lock.</sumamry>
@@ -188,12 +188,14 @@ begin
   end;
 end;
 
-function TRequestToFileSystemStorage<T>.Save(const Obj: TJsonObject): String;
+function TRequestToFileSystemStorage<T>.Save(const Obj: T): String;
 var
   FullPath: String;
+  Jo: TJsonObject;
 begin
   TMonitor.Enter(FLockObj);
   try
+
     Result := GetAvailableName(FFileName, FIncomingFolder, FFileExtension);
     FullPath := FIncomingFolder + Result + FFileExtension;
     if TFile.Exists(FullPath) then
@@ -201,7 +203,14 @@ begin
       raise Exception.Create('File ' + Result + ' exists. Hence it is not available.');
     end
     else
-      TFile.AppendAllText(FullPath, Obj.ToString);
+    begin
+      try
+        JO := Mapper.ObjectToJSONObject(Obj);
+        TFile.AppendAllText(FullPath, Jo.ToString);
+      finally
+        JO.DisposeOf;
+      end;
+    end;
   finally
     TMonitor.Exit(FLockObj);
   end;

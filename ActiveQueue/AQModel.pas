@@ -1114,7 +1114,6 @@ function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueue
 var
   Item: TActiveQueueEntry;
   Id: String;
-  Jo: TJsonObject;
 begin
   TMonitor.Enter(FQueueLock);
   try
@@ -1122,9 +1121,7 @@ begin
     for Item in Items do
     begin
       try
-        Jo := Item.ToJson;
-        Id := FRequestsStorage.Save(Jo);
-        Jo.DisposeOf;
+        Id := FRequestsStorage.Save(Item);
       except
         on E: Exception do
         begin

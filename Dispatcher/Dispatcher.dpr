@@ -72,7 +72,6 @@ var
   Info, BackEndIp: String;
   ClientIps: TArray<String>;
   RepositoryParams: TArray<TPair<String, String>>;
-  Key: TPair<String, String>;
   PendingRequests: TDictionary<String, TDispatcherEntry>;
   RequestID: String;
 begin
