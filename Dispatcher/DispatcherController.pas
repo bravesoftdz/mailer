@@ -136,64 +136,6 @@ begin
     Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.MISSING_BODY);
   end;
 
-  // if (Responce = nil) AND not(Model.isAuthorised(IP, Request.Token)) then
-  // begin
-  // Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.NOT_AUTHORISED);
-  // end;
-
-  // if Responce = nil then
-  // begin
-  // try
-  // IdToEntries := Model.PersistDispatchConvert(Request);
-
-  /// decompose the pair immediately since afterwords you have no way to know whether it
-  /// has been instantiated or not
-  // ID := IdToEntries.Key;
-  // Entries := IdToEntries.Value;
-
-  // except
-  // on E: Exception do
-  // begin
-  // Responce := TDispatcherResponce.Create(False, E.Message);
-  // end;
-  // end;
-  // end;
-  //
-  // if Responce = nil then
-  // begin
-  // try
-  // BackEndResponce := FBackEndProxy.PostItems(Entries);
-  // except
-  // on E: Exception do
-  // begin
-  // Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
-  // end;
-  // end;
-  // end;
-  //
-  // if Responce = nil then
-  // begin
-  // if BackEndResponce = nil then
-  // begin
-  // Responce := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE_NO_BACKEND_RESPONSE)
-  // end
-  // else if BackEndResponce.status then
-  // begin
-  // Responce := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
-  // Model.Delete(Id);
-  // end
-  // else
-  // Responce := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [BackEndResponce.Msg]))
-  // end;
-
-  /// clean up the objects that might have been created
-  // if Request <> nil then
-  // Request.DisposeOf;
-  // if Entries <> nil then
-  // Entries.DisposeOf;
-  // if BackEndResponce <> nil then
-  // BackEndResponce.DisposeOf;
-  //
   Render(Responce);
 end;
 
@@ -206,13 +148,7 @@ begin
   inherited;
 end;
 
-procedure TDispatcherController.OnBeforeAction(Context: TWebContext;
-  const
-  AActionName:
-  string;
-  var
-  Handled:
-  Boolean);
+procedure TDispatcherController.OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean);
 begin
   { Executed before each action
     if handled is true (or an exception is raised) the actual
