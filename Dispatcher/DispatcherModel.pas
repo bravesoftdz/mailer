@@ -6,7 +6,8 @@ uses
   DispatcherConfig, DispatcherResponce, DispatcherEntry,
   ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
   ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON,
-  RepositoryConfig, RequestSaverFactory, AQAPIClient, MVCFramework.RESTAdapter;
+  RepositoryConfig, RequestSaverFactory, AQAPIClient, MVCFramework.RESTAdapter,
+  AQResponce;
 
 type
   TModel = class(TObject)
@@ -29,7 +30,7 @@ type
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
 
-    function SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
+    function SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
 
     /// <summary>Dispatch the input request and transform it in a form that the back end server can accept.
     /// <summary>
@@ -86,6 +87,8 @@ type
     /// <param name="IP">IP address from wich the request comes from</param>
     /// <param name="Request">received request. Assume it is not null.</param>
     function ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
+
+    procedure ElaboratePendingRequests();
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
 
@@ -151,12 +154,7 @@ function TModel.GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 begin
   if FRequestSaver <> nil then
   begin
-    TMonitor.Enter(FPendingRequestLock);
-    try
-      Result := FRequestSaver.GetPendingRequests()
-    finally
-      TMonitor.Exit(FPendingRequestLock);
-    end;
+    Result := FRequestSaver.GetPendingRequests()
   end
   else
     Result := nil;
@@ -165,19 +163,19 @@ end;
 function TModel.ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
 var
   SavedAndConverted: TActiveQueueEntries;
-  Outcome: Boolean;
+  Outcome: TAQResponce;
 begin
   SavedAndConverted := DispatchConvert(Request);
   try
     try
       Outcome := SendToBackEnd(SavedAndConverted);
-      if Outcome then
+      if Outcome.status then
       begin
         Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
         Delete(Id);
       end
       else
-        Result := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE);
+        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Outcome.Msg]));
     except
       on E: Exception do
       begin
@@ -186,6 +184,32 @@ begin
     end;
   finally
     SavedAndConverted.DisposeOf;
+  end;
+end;
+
+procedure TModel.ElaboratePendingRequests;
+var
+  PendingRequests: TDictionary<String, TDispatcherEntry>;
+  RequestId: String;
+begin
+  if FRequestSaver <> nil then
+  begin
+    TMonitor.Enter(FPendingRequestLock);
+    try
+      PendingRequests := GetPendingRequests();
+      if (PendingRequests <> nil) then
+      begin
+        for RequestId in PendingRequests.Keys do
+        begin
+          Writeln('Send a pending request ' + RequestId + ' to the back end server');
+          ElaborateSinglePersistedRequest(RequestId, PendingRequests[RequestId]);
+        end;
+        PendingRequests.Clear;
+        PendingRequests.DisposeOf;
+      end;
+    finally
+      TMonitor.Exit(FPendingRequestLock);
+    end;
   end;
 
 end;
@@ -330,6 +354,7 @@ var
   L, I: Integer;
   RepoConfig: TRepositoryConfig;
   PendingRequests: TDictionary<String, TDispatcherEntry>;
+  RequestId: String;
 begin
   if FConfig <> nil then
   begin
@@ -343,19 +368,6 @@ begin
   Writeln(Format('Set up the proxy:  url = %s, port = %d', [GetBackEndIp, GetBackEndPort]));
   FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
   FBackEndProxy := FBackEndAdapter.Build(GetBackEndIp(), GetBackEndPort());
-
-  if FRequestSaver <> nil then
-  begin
-    PendingRequests := FRequestSaver.GetPendingRequests();
-    if (PendingRequests <> nil) then
-    begin
-      // SendToBackEnd(PendingRequests);
-      Writeln('At this point I should have sent the pending requests to the back end server.');
-      PendingRequests.Clear;
-      PendingRequests.DisposeOf;
-    end;
-
-  end;
 
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
@@ -378,9 +390,9 @@ begin
 
 end;
 
-function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
+function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
 begin
-  FBackEndProxy.PostItems(Requests);
+  Result := FBackEndProxy.PostItems(Requests);
 end;
 
 end.

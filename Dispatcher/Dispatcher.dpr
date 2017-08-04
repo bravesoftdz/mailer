@@ -114,6 +114,7 @@ begin
     Writeln('No repository configuration is found.');
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end;
+  TDispatcherController.ElaboratePendingRequests();
 
   PendingRequests := TDispatcherController.GetPendingRequests();
   if PendingRequests = nil then

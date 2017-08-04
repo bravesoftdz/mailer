@@ -13,7 +13,7 @@ type
     NOT_AUTHORISED = 'Not authorized';
     SUCCESS = 'Dispatcher successfully passed data to the backend server.';
     EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
-    FAILURE = 'Sent to the back end server, but received false';
+    FAILURE_REPORT = 'Dispatcher has sent to the back end server, but the back end server failed: %s';
   end;
 
 type

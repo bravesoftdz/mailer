@@ -960,8 +960,11 @@ procedure TActiveQueueModel.NotifyListenerInSeparateThread(const Listener: ICons
 begin
   TThread.CreateAnonymousThread(
     procedure
+    var
+      id: Integer;
     begin
-      Writeln('Thread: ' + TThread.CurrentThread.ThreadID.ToString);
+      id := TThread.CurrentThread.ThreadID;
+      Writeln(Format('Thread %d started', [id]));
       if Listener <> nil then
       begin
         try
@@ -973,6 +976,7 @@ begin
       end
       else
         Writeln('Listener is null');
+      Writeln(Format('Thread %d finished', [id]));
     end
     ).Start;
 
@@ -1001,7 +1005,9 @@ begin
     end;
     for Token in Tokens do
     begin
+      Writeln(Format('Notify listener %3s', [Token]));
       NotifyListenerInSeparateThread(FConsumerProxyIndex[Token]);
+      Writeln(Format('Listener %3s has been notified', [Token]));
     end;
     Tokens.Clear;
     Tokens.DisposeOf;
