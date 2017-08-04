@@ -28,6 +28,11 @@ type
 
     function SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
 
+    /// <summary>Dispatch the request and transform it in a form that the back end server can accept.
+    /// <summary>
+    /// <param name="Entry">a dispatcher entry to be elaborated</param>
+    function DispatchConvert(const Entry: TDispatcherEntry): TActiveQueueEntries;
+
   public
 
     constructor Create(const RequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>);
@@ -46,22 +51,12 @@ type
 
     /// <summary>Save given object and return its id.
     /// Throw an  exception in case of failure.</summary>
-    function Persist(const Obj: TJsonObject): String;
+    function Persist(const Item: TDispatcherEntry): String;
 
     /// <summary>Delete persisted object by its id.
     /// This method serves just for clean up. If it fails, nothing serious happens.
     /// Return true in case of success, false otherwise. </summary>
     function Delete(const Id: String): Boolean;
-
-    /// <summary>Persist the given request and transform it in a form that the back end server can accept.
-    /// The method first tries to persist the request. If it fails, it remembers the error and tries
-    /// to accomplish the second step - dispatch the request and convert the result into a form for the
-    /// back end server.
-    /// Return a pair whose key is an id under which the entry has been persisted (in case of success)
-    /// and value is an instance for the back end server.<summary>
-    ///
-    /// <param name="Entry">a dispatcher entry to be elaborated</param>
-    function PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 
     /// <summary>Return requests that have to be elaborated. It delegates its
     /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
@@ -150,8 +145,9 @@ end;
 
 function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
 var
-  SavedAndConverted: TPair<String, TActiveQueueEntries>;
+  SavedAndConverted: TActiveQueueEntries;
   Outcome: Boolean;
+  Id: String;
 begin
   if not(isAuthorised(IP, Request.Token)) then
   begin
@@ -159,17 +155,18 @@ begin
   end
   else
   begin
-    SavedAndConverted := PersistDispatchConvert(Request);
+    Id := Persist(Request);
+    SavedAndConverted := DispatchConvert(Request);
     try
       try
-        Outcome := SendToBackEnd(SavedAndConverted.Value);
+        Outcome := SendToBackEnd(SavedAndConverted);
         if Outcome then
         begin
-          Result := TDispatcherResponce.Create(True, 'Successfuly sent request to the back end server.');
-          Delete(SavedAndConverted.Key);
+          Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
+          Delete(Id);
         end
         else
-          Result := TDispatcherResponce.Create(False, 'Sent to the back end server, but received false');
+          Result := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE);
       except
         on E: Exception do
         begin
@@ -177,34 +174,18 @@ begin
         end;
       end;
     finally
-      SavedAndConverted.value.DisposeOf;
+      SavedAndConverted.DisposeOf;
     end;
   end;
 end;
 
-function TModel.PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
+function TModel.DispatchConvert(const Entry: TDispatcherEntry): TActiveQueueEntries;
 var
-  jo: TJsonObject;
-  ID: String;
   Items: TObjectList<TActiveQueueEntry>;
   ErrorMessages: TStringList;
   ErrorSummary: String;
 begin
   ErrorMessages := TStringList.Create;
-  jo := Entry.toJson();
-  try
-    ID := Persist(jo);
-  except
-    on E: Exception do
-    begin
-      ErrorMessages.Add(E.Message);
-    end;
-  end;
-  if jo <> nil then
-  begin
-    jo.DisposeOf;
-  end;
-
   try
     Items := Dispatch(Entry);
   except
@@ -214,9 +195,9 @@ begin
     end;
   end;
 
-  if (ID <> '') AND (Items <> nil) then
+  if (Items <> nil) then
   begin
-    Result := TPair<String, TActiveQueueEntries>.Create(ID, TActiveQueueEntries.Create(FConfig.Token, Items));
+    Result := TActiveQueueEntries.Create(FConfig.Token, Items);
   end;
   if Items <> nil then
   begin
@@ -300,9 +281,13 @@ begin
   Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
 end;
 
-function TModel.Persist(const Obj: TJsonObject): String;
+function TModel.Persist(const Item: TDispatcherEntry): String;
+var
+  jo: TJsonObject;
 begin
-  Result := FRequestSaver.Save(Obj);
+  jo := Item.toJson();
+  Result := FRequestSaver.Save(jo);
+  jo.DisposeOf;
 end;
 
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);

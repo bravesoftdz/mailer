@@ -12,10 +12,8 @@ type
     EMPTY_BODY = 'Null request body found.';
     NOT_AUTHORISED = 'Not authorized';
     SUCCESS = 'Dispatcher successfully passed data to the backend server.';
-    FAILURE_REPORT = 'Dispatcher received a failure from the back end server. Reason: %s';
     EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
-    PERSIST_EXCEPTION_REPORT = 'Dispatcher encountered an error when persisting items: %s';
-    FAILURE_NO_BACKEND_RESPONSE = 'Dispatcher has received nil from the back end server';
+    FAILURE = 'Sent to the back end server, but received false';
   end;
 
 type
