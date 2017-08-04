@@ -240,6 +240,7 @@ begin
   try
     TheFiles := TDirectory.GetFiles(FIncomingFolder);
     Result := TDictionary<String, T>.Create();
+
     for AFile in TheFiles do
     begin
       try

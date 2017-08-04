@@ -191,18 +191,28 @@ procedure TModel.ElaboratePendingRequests;
 var
   PendingRequests: TDictionary<String, TDispatcherEntry>;
   RequestId: String;
+  ResponceLocal: TDispatcherResponce;
 begin
   if FRequestSaver <> nil then
   begin
     TMonitor.Enter(FPendingRequestLock);
     try
       PendingRequests := GetPendingRequests();
+
       if (PendingRequests <> nil) then
       begin
         for RequestId in PendingRequests.Keys do
         begin
           Writeln('Send a pending request ' + RequestId + ' to the back end server');
-          ElaborateSinglePersistedRequest(RequestId, PendingRequests[RequestId]);
+          ResponceLocal := ElaborateSinglePersistedRequest(RequestId, PendingRequests[RequestId]);
+          if ResponceLocal <> nil then
+          begin
+            Writeln(Format('request %s outcome: status %s, message %s', [RequestId, ResponceLocal.Status.ToString, ResponceLocal.msg]));
+            ResponceLocal.DisposeOf;
+            PendingRequests[RequestId].DisposeOf;
+          end
+          else
+            Writeln('No responce received from the back end server.');
         end;
         PendingRequests.Clear;
         PendingRequests.DisposeOf;
