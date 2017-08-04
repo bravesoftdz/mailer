@@ -28,10 +28,25 @@ type
 
     function SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
 
-    /// <summary>Dispatch the request and transform it in a form that the back end server can accept.
+    /// <summary>Dispatch the input request and transform it in a form that the back end server can accept.
     /// <summary>
     /// <param name="Entry">a dispatcher entry to be elaborated</param>
     function DispatchConvert(const Entry: TDispatcherEntry): TActiveQueueEntries;
+
+    /// <summary> Elaborate a single request that has been already:
+    /// 1. dispatch the request
+    /// 2. convert it to a back-end server compatible format
+    /// 3. send to the back-end server
+    /// 4. delete the requests that were successefuly passed to the back-end server
+    /// </summary>
+    function ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
+
+    /// <summary>Save given object and return its id.
+    /// Throw an  exception in case of failure.</summary>
+    function Persist(const Item: TDispatcherEntry): String;
+
+    /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
+    function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
   public
 
@@ -45,13 +60,6 @@ type
     function GetBackEndPort(): Integer;
 
     function GetRepositoryParams(): TArray<TPair<String, String>>;
-
-    /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
-    function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
-
-    /// <summary>Save given object and return its id.
-    /// Throw an  exception in case of failure.</summary>
-    function Persist(const Item: TDispatcherEntry): String;
 
     /// <summary>Delete persisted object by its id.
     /// This method serves just for clean up. If it fails, nothing serious happens.
@@ -143,10 +151,36 @@ begin
     Result := nil;
 end;
 
-function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
+function TModel.ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
 var
   SavedAndConverted: TActiveQueueEntries;
   Outcome: Boolean;
+begin
+  SavedAndConverted := DispatchConvert(Request);
+  try
+    try
+      Outcome := SendToBackEnd(SavedAndConverted);
+      if Outcome then
+      begin
+        Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
+        Delete(Id);
+      end
+      else
+        Result := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE);
+    except
+      on E: Exception do
+      begin
+        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
+      end;
+    end;
+  finally
+    SavedAndConverted.DisposeOf;
+  end;
+
+end;
+
+function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
+var
   Id: String;
 begin
   if not(isAuthorised(IP, Request.Token)) then
@@ -156,26 +190,7 @@ begin
   else
   begin
     Id := Persist(Request);
-    SavedAndConverted := DispatchConvert(Request);
-    try
-      try
-        Outcome := SendToBackEnd(SavedAndConverted);
-        if Outcome then
-        begin
-          Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
-          Delete(Id);
-        end
-        else
-          Result := TDispatcherResponce.Create(False, TDispatcherResponceMessages.FAILURE);
-      except
-        on E: Exception do
-        begin
-          Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
-        end;
-      end;
-    finally
-      SavedAndConverted.DisposeOf;
-    end;
+    Result := ElaborateSinglePersistedRequest(Id, Request);
   end;
 end;
 
