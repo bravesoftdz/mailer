@@ -9,6 +9,7 @@ type
   const
     INVALID_BODY_REPORT = 'Dispatcher failed to cast the request: %s';
     MISSING_BODY = 'No request body found.';
+    EMPTY_BODY = 'Null request body found.';
     NOT_AUTHORISED = 'Not authorized';
     SUCCESS = 'Dispatcher successfully passed data to the backend server.';
     FAILURE_REPORT = 'Dispatcher received a failure from the back end server. Reason: %s';

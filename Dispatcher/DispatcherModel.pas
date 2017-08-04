@@ -6,7 +6,7 @@ uses
   DispatcherConfig, DispatcherResponce, DispatcherEntry,
   ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
   ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON,
-  RepositoryConfig, RequestSaverFactory;
+  RepositoryConfig, RequestSaverFactory, AQAPIClient, MVCFramework.RESTAdapter;
 
 type
   TModel = class(TObject)
@@ -20,8 +20,13 @@ type
     FRequestSaver: IRequestStorage<TDispatcherEntry>;
     FRequestSaverFactory: TRequestSaverFactory<TDispatcherEntry>;
 
+    FBackEndProxy: IAQAPIClient;
+    FBackEndAdapter: TRestAdapter<IAQAPIClient>;
+
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
+
+    function SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
 
   public
 
@@ -61,6 +66,20 @@ type
     /// <summary>Return requests that have to be elaborated. It delegates its
     /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
     function GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
+
+    /// <summary>Performs operations required by the logic of the dispatcher regarding incoming requests.
+    /// Throws various exception in case something gets wrong. Otherwise, it must produce a non-null responce.
+    /// It does the following:
+    /// 1. check authentification
+    /// 2. persist the request
+    /// 3. dispatch the request
+    /// 4. convert it to a back-end server compatible format
+    /// 5. send to the back-end server
+    /// 6. delete the requests that were successefuly passed to the back-end server
+    /// </summary>
+    /// <param name="IP">IP address from wich the request comes from</param>
+    /// <param name="Request">received request. Assume it is not null.</param>
+    function ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
 
@@ -129,6 +148,40 @@ begin
     Result := nil;
 end;
 
+function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
+var
+  SavedAndConverted: TPair<String, TActiveQueueEntries>;
+  Outcome: Boolean;
+begin
+  if not(isAuthorised(IP, Request.Token)) then
+  begin
+    Result := TDispatcherResponce.Create(False, TDispatcherResponceMessages.NOT_AUTHORISED);
+  end
+  else
+  begin
+    SavedAndConverted := PersistDispatchConvert(Request);
+    try
+      try
+        Outcome := SendToBackEnd(SavedAndConverted.Value);
+        if Outcome then
+        begin
+          Result := TDispatcherResponce.Create(True, 'Successfuly sent request to the back end server.');
+          Delete(SavedAndConverted.Key);
+        end
+        else
+          Result := TDispatcherResponce.Create(False, 'Sent to the back end server, but received false');
+      except
+        on E: Exception do
+        begin
+          Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
+        end;
+      end;
+    finally
+      SavedAndConverted.value.DisposeOf;
+    end;
+  end;
+end;
+
 function TModel.PersistDispatchConvert(const Entry: TDispatcherEntry): TPair<String, TActiveQueueEntries>;
 var
   jo: TJsonObject;
@@ -175,7 +228,7 @@ begin
   begin
     ErrorSummary := ErrorMessages.Text;
     ErrorMessages.DisposeOf;
-    raise Exception.Create('Dispatcher has encountered the following errors: ' + ErrorSummary);
+    raise Exception.Create('Dispatcher has encountered the following error: ' + ErrorSummary);
   end
   else
   begin
@@ -199,6 +252,12 @@ begin
     FAuthentication.DisposeOf;
   FFactory.DisposeOf;
   FRequestSaver := nil;
+
+  if (FBackEndAdapter <> nil) then
+    FBackEndAdapter := nil;
+  if (FBackEndProxy <> nil) then
+    FBackEndProxy := nil;
+
   inherited;
 end;
 
@@ -254,6 +313,7 @@ var
   Clients: TObjectList<TClient>;
   L, I: Integer;
   RepoConfig: TRepositoryConfig;
+  PendingRequests: TDictionary<String, TDispatcherEntry>;
 begin
   if FConfig <> nil then
   begin
@@ -263,6 +323,23 @@ begin
   FConfig := Config.Clone;
   RepoConfig := FConfig.Repository;
   FRequestSaver := FRequestSaverFactory.CreateStorage(RepoConfig);
+
+  Writeln(Format('Set up the proxy:  url = %s, port = %d', [GetBackEndIp, GetBackEndPort]));
+  FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
+  FBackEndProxy := FBackEndAdapter.Build(GetBackEndIp(), GetBackEndPort());
+
+  if FRequestSaver <> nil then
+  begin
+    PendingRequests := FRequestSaver.GetPendingRequests();
+    if (PendingRequests <> nil) then
+    begin
+      // SendToBackEnd(PendingRequests);
+      Writeln('At this point I should have sent the pending requests to the back end server.');
+      PendingRequests.Clear;
+      PendingRequests.DisposeOf;
+    end;
+
+  end;
 
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
@@ -283,6 +360,11 @@ begin
   if RepoConfig <> nil then
     RepoConfig.DisposeOf;
 
+end;
+
+function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): Boolean;
+begin
+  FBackEndProxy.PostItems(Requests);
 end;
 
 end.
