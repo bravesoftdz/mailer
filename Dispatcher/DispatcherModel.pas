@@ -23,6 +23,9 @@ type
     FBackEndProxy: IAQAPIClient;
     FBackEndAdapter: TRestAdapter<IAQAPIClient>;
 
+    /// a dumb object to have a thread-safe access to request-related data
+    FPendingRequestLock: TObject;
+
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
 
@@ -100,6 +103,7 @@ constructor TModel.Create(const RequestSaverFactory: TRequestSaverFactory<TDispa
 var
   ListOfProviders: TObjectList<TProvider>;
 begin
+  FPendingRequestLock := TObject.Create;
   ListOfProviders := TObjectList<TProvider>.Create;
   ListOfProviders.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create, TOfferteNuoviMandati.Create]);
   FFactory := TProviderFactory.Create(ListOfProviders);
@@ -146,7 +150,14 @@ end;
 function TModel.GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 begin
   if FRequestSaver <> nil then
-    Result := FRequestSaver.GetPendingRequests()
+  begin
+    TMonitor.Enter(FPendingRequestLock);
+    try
+      Result := FRequestSaver.GetPendingRequests()
+    finally
+      TMonitor.Exit(FPendingRequestLock);
+    end;
+  end
   else
     Result := nil;
 end;
@@ -189,8 +200,13 @@ begin
   end
   else
   begin
-    Id := Persist(Request);
-    Result := ElaborateSinglePersistedRequest(Id, Request);
+    try
+      TMonitor.Enter(FPendingRequestLock);
+      Id := Persist(Request);
+      Result := ElaborateSinglePersistedRequest(Id, Request);
+    finally
+      TMonitor.Exit(FPendingRequestLock);
+    end;
   end;
 end;
 
@@ -253,7 +269,7 @@ begin
     FBackEndAdapter := nil;
   if (FBackEndProxy <> nil) then
     FBackEndProxy := nil;
-
+  FPendingRequestLock.DisposeOf;
   inherited;
 end;
 
