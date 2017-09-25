@@ -19,3 +19,4 @@ Reception.conf
 Reception.res
 QueueStorage*.txt
 test_requests.bat
+repository/*
