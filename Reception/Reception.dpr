@@ -117,6 +117,7 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
   ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
+
   try
     try
       ParamValues := ParamUsage.Parse();
@@ -151,7 +152,7 @@ begin
         if WebRequestHandler <> nil then
           WebRequestHandler.WebModuleClass := WebModuleClass;
         WebRequestHandlerProc.MaxConnections := 1024;
-        RunServer(ConfigImm);
+         RunServer(ConfigImm);
       end
       else
         Writeln('No config is created. Failed to start the service.');

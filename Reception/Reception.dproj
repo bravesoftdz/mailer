@@ -73,6 +73,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Debugger_RunParams>-c Reception.conf</Debugger_RunParams>
         <Debugger_CWD>C:\Dev\Mailer\Reception</Debugger_CWD>
         <VerInfo_Build>1</VerInfo_Build>
         <VerInfo_Keys>CompanyName=Ritoll;FileDescription=;FileVersion=0.0.0.1;InternalName=Reception;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=0.0.0.1;Comments=This is a very first version of the reception microservice.</VerInfo_Keys>
@@ -80,7 +81,6 @@
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_UnitSearchPath>..\ActiveQueue;..\Dispatcher;..\Config;..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <Debugger_RunParams>-c Reception.conf</Debugger_RunParams>
         <DCC_MapFile>3</DCC_MapFile>
         <Manifest_File>..\(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -106,7 +106,6 @@
         <DCCReference Include="Authentication.pas"/>
         <DCCReference Include="ReceptionModule.pas">
             <Form>ReceptionModule</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\Emailtemplate\Attachment.pas"/>
@@ -640,16 +639,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
                         <RemoteDir>Contents\Resources</RemoteDir>
@@ -960,7 +950,16 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                </DeployClass>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
