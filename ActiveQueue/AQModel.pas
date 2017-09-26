@@ -257,6 +257,7 @@ var
   Categories: TStringList;
   Category: String;
 begin
+  Writeln('Start TActiveQueueModel.Enqueue');
   TMonitor.Enter(FQueueLock);
   Categories := TStringList.Create;
   try
@@ -284,6 +285,7 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
+  Writeln('End TActiveQueueModel.Enqueue');
 
 end;
 
@@ -988,6 +990,7 @@ var
   Category: String;
   Tokens: TStringList;
 begin
+  Writeln('Start TTActiveQueueModel.NotifyListeners');
   TMonitor.Enter(FConsumerLock);
   try
     Tokens := TStringList.Create();
@@ -1014,6 +1017,7 @@ begin
   finally
     TMonitor.Exit(FConsumerLock);
   end;
+  Writeln('End TTActiveQueueModel.NotifyListeners');
 end;
 
 procedure TActiveQueueModel.SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
@@ -1115,6 +1119,7 @@ var
   Item: TActiveQueueEntry;
   Id: String;
 begin
+  Writeln('Start TActiveQueueModel.PersistRequests');
   TMonitor.Enter(FQueueLock);
   try
     Result := TDictionary<String, TActiveQueueEntry>.Create;
@@ -1125,6 +1130,7 @@ begin
       except
         on E: Exception do
         begin
+          Writeln('TActiveQueueModel.PersistRequests exception: ' + E.Message);
           Result.DisposeOf;
           raise Exception.Create('AQ model storage failed to save an item. Reason: ' + E.Message);
         end;
@@ -1134,6 +1140,7 @@ begin
   finally
     TMonitor.Exit(FQueueLock);
   end;
+  Writeln('End TActiveQueueModel.PersistRequests');
 
 end;
 

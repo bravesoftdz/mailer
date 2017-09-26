@@ -280,6 +280,7 @@ var
   Status: Boolean;
   Ids: TDictionary<String, TActiveQueueEntry>;
 begin
+  Writeln('Start TController.PostItems');
   IP := Context.Request.ClientIP;
   Outcome := nil;
   if not(Context.Request.ThereIsRequestBody) then
@@ -342,6 +343,7 @@ begin
   end;
 
   Render(Outcome);
+  Writeln('End TController.PostItems');
 end;
 
 class procedure TController.Setup;

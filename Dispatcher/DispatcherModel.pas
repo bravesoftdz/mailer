@@ -165,6 +165,7 @@ var
   SavedAndConverted: TActiveQueueEntries;
   Outcome: TAQResponce;
 begin
+  Writeln('start TModel.ElaborateSinglePersistedRequest');
   SavedAndConverted := DispatchConvert(Request);
   try
     try
@@ -184,7 +185,9 @@ begin
     end;
   finally
     SavedAndConverted.DisposeOf;
+    Outcome.DisposeOf;
   end;
+  Writeln('Finish TModel.ElaborateSinglePersistedRequest');
 end;
 
 procedure TModel.ElaboratePendingRequests;
@@ -250,6 +253,7 @@ var
   ErrorMessages: TStringList;
   ErrorSummary: String;
 begin
+  Writeln('Start TModel.DispatchConvert');
   ErrorMessages := TStringList.Create;
   try
     Items := Dispatch(Entry);
@@ -280,6 +284,8 @@ begin
   begin
     ErrorMessages.DisposeOf;
   end;
+
+  Writeln('Finish TModel.DispatchConvert');
 
 end;
 
@@ -348,7 +354,9 @@ end;
 
 function TModel.Persist(const Item: TDispatcherEntry): String;
 begin
+  Writeln('Start persisting the entry');
   Result := FRequestSaver.Save(Item);
+  Writeln('Finished persisting the entry');
 end;
 
 procedure TModel.SetConfig(const Config: TServerConfigImmutable);
@@ -398,7 +406,9 @@ end;
 
 function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
 begin
+  Writeln('Start: TModel.SendToBackEnd');
   Result := FBackEndProxy.PostItems(Requests);
+  Writeln('End: TModel.SendToBackEnd');
 end;
 
 end.
