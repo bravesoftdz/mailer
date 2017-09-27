@@ -173,7 +173,7 @@ type
     function GetConsumers(): TObjectList<TConsumer>;
 
     /// <summary>Cancel the subscription corresponding to given ip</summary>
-    /// <param name="Ip">Ip of the computer which subscription is to be cancelled</param>
+    /// <param name="Ip">Ip of the computer which subscrifption is to be cancelled</param>
     /// <param name="Token">token associated with the subscription</param>
     function CancelConsumer(const Ip, Token: String): TAQSubscriptionResponce;
 
@@ -258,7 +258,9 @@ var
   Category: String;
 begin
   Writeln('Start TActiveQueueModel.Enqueue');
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   Categories := TStringList.Create;
   try
     try
@@ -283,7 +285,9 @@ begin
     Categories.Clear;
     Categories.DisposeOf;
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
   Writeln('End TActiveQueueModel.Enqueue');
 
@@ -294,7 +298,9 @@ var
   Token: String;
   Guid: TGUID;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Writeln('Subscribe: ' + ip + ', data: port ' + data.Port.ToString + ', category' + data.Category);
     if Data = nil then
@@ -335,16 +341,19 @@ begin
     end;
     CheckRep();
   finally
+    Writeln('Releasing FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('FConsumerLock released');
   end;
-
 end;
 
 procedure TActiveQueueModel.BroadcastCancel(const Condition: ICondition);
 var
   Listener: TPair<String, IConsumerProxy>;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     for Listener in FConsumerProxyIndex do
     begin
@@ -356,7 +365,9 @@ begin
       end;
     end;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -373,14 +384,18 @@ end;
 
 function TActiveQueueModel.GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 begin
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   try
     if FRequestsStorage <> nil then
       Result := FRequestsStorage.GetPendingRequests
     else
       Result := nil;
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
 end;
 
@@ -388,7 +403,9 @@ function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
 // var
 // item: TActiveQueueEntry;
 begin
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   Result := 0;
   try
     Writeln('cancelling an item is not yet implemented when FItems is of TQueue type');
@@ -401,7 +418,9 @@ begin
     // end;
     // end;
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
 end;
 
@@ -411,7 +430,9 @@ var
   Category: String;
   Pos: Integer;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Writeln('Unsubscribe: ip = ' + ip + ', token ' + Token);
     if Not(IsIpInWhiteList(Ip)) then
@@ -453,7 +474,9 @@ begin
       CheckRep();
     end;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -465,7 +488,9 @@ var
 
 begin
 {$IFDEF DEBUG}
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   try
     Errors := TStringList.Create;
     if (FConsumerLock = nil) then
@@ -510,7 +535,9 @@ begin
       raise Exception.Create('TActiveQueueModel representation check errors: ' + Report);
 
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
 {$ENDIF}
 end;
@@ -520,7 +547,9 @@ var
   Item, Key: String;
   Items: TArray<string>;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Result := TDictionary<String, Boolean>.Create();
     Items := Data.Split([Separator]);
@@ -532,7 +561,9 @@ begin
     end;
     Items := nil;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -594,7 +625,9 @@ var
   Token: String;
   ErrorMessage: String;
 begin
+  Writeln('Acquiring FClientLock');
   TMonitor.Enter(FClientLock);
+  Writeln('FClientLock Acquired');
   try
     ErrorMessage := '';
     Result := TDictionary<String, TClient>.Create();
@@ -624,7 +657,9 @@ var
   item: TConsumer;
   Token, ErrorMessage: String;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     ErrorMessage := '';
     Result := TDictionary<String, TConsumer>.Create();
@@ -646,7 +681,9 @@ begin
         end;
       end;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
   if ErrorMessage <> '' then
     raise Exception.Create(ErrorMessage);
@@ -658,7 +695,9 @@ var
   Adapter: TRestAdapter<IConsumerProxy>;
   Token: String;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Result := TDictionary<String, IConsumerProxy>.Create();
     for Token in ConsumerIndex.Keys do
@@ -668,7 +707,9 @@ begin
       // Adapter := nil;
     end;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -761,7 +802,9 @@ function TActiveQueueModel.GetClients: TObjectList<TClient>;
 var
   Item: String;
 begin
+  Writeln('Acquiring FClientLock');
   TMonitor.Enter(FClientLock);
+  Writeln('FClientLock Acquired');
   try
     Result := TObjectList<TClient>.Create();
     for Item in FClientIndex.Keys do
@@ -790,7 +833,9 @@ var
   builder: TStringBuilder;
   Key, ExtraSymbolAtEnd: String;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Builder := TStringBuilder.Create();
     for Key in FConsumerWhiteListHashSet.Keys do
@@ -802,7 +847,9 @@ begin
       Result := ExtraSymbolAtEnd;
     Builder.DisposeOf;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -812,11 +859,15 @@ var
   Item: TPair<String, TActiveQueueEntry>;
 begin
   Result := TObjectList<TActiveQueueEntry>.Create();
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     if (N >= 0) AND FConsumerIndex.ContainsKey(Token) then
     begin
+      Writeln('Acquiring FQueueLock');
       TMonitor.Enter(FQueueLock);
+      Writeln('FQueueLock Acquired');
       Size := FItems.Count;
       if Size < N then
         ReturnSize := Size
@@ -829,10 +880,14 @@ begin
         Result.Add(Item.Value.Clone);
         Item.Value.DisposeOf;
       end;
+      Writeln('Releasing FQueueLock');
       TMonitor.Exit(FQueueLock);
+      Writeln('FQueueLock Released');
     end;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
   Writeln('Returning ' + Result.Count.ToString + ' item in request for ' + N.ToString + ' ones.');
 end;
@@ -841,7 +896,9 @@ function TActiveQueueModel.GetListenersIPs: TArray<String>;
 var
   I, S: Integer;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     If Assigned(FListenersIPs) then
       S := Length(FListenersIPs)
@@ -852,15 +909,21 @@ begin
     for I := 0 to S - 1 do
       Result[I] := FListenersIPs[I];
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
 function TActiveQueueModel.GetNumOfSubscriptions: Integer;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   Result := FConsumerIndex.Count;
+  Writeln('Releasing the lock FConsumerLock');
   TMonitor.Exit(FConsumerLock);
+  Writeln('Lock FConsumerLock released');
 end;
 
 function TActiveQueueModel.GetPort: Integer;
@@ -877,7 +940,9 @@ function TActiveQueueModel.GetProvidersIPs: TArray<String>;
 var
   I, S: Integer;
 begin
+  Writeln('Acquiring FClientLock');
   TMonitor.Enter(FClientLock);
+  Writeln('FClientLock Acquired');
   try
     If Assigned(FProvidersIPs) then
       S := Length(FProvidersIPs)
@@ -888,7 +953,9 @@ begin
     for I := 0 to S - 1 do
       Result[I] := FProvidersIPs[I];
   finally
+    Writeln('Releasing FClientLock');
     TMonitor.Exit(FClientLock);
+    Writeln('FClientLock Released');
   end;
 end;
 
@@ -904,34 +971,46 @@ function TActiveQueueModel.GetConsumers: TObjectList<TConsumer>;
 var
   Token: String;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Result := TObjectList<TConsumer>.Create();
     for Token in FConsumerIndex.Keys do
       Result.Add(FConsumerIndex[Token].Clone())
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 
 end;
 
 function TActiveQueueModel.IsAllowedClient(const Token, IP: String): Boolean;
 begin
+  Writeln('Acquiring FClientLock');
   TMonitor.Enter(FClientLock);
+  Writeln('FClientLock Acquired');
   try
     Result := FClientIndex.ContainsKey(Token) AND (FClientIndex[Token].IP = IP)
   finally
+    Writeln('Releasing FClientLock');
     TMonitor.Exit(FClientLock);
+    Writeln('FClientLock released');
   end;
 end;
 
 function TActiveQueueModel.IsIpInWhiteList(const IP: String): Boolean;
 begin
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Result := FConsumerWhiteListHashSet.ContainsKey(IP);
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
 end;
 
@@ -939,9 +1018,13 @@ function TActiveQueueModel.IsSubscribed(const IP: String; const Port: Integer): 
 var
   aConsumer: TConsumer;
   Key: String;
+  Obj: TObject;
 begin
+  Obj := FConsumerLock;
   Result := False;
-  TMonitor.Enter(FConsumerLock);
+  Writeln('Acquiring the lock FConsumerLock');
+  TMonitor.Enter(Obj);
+  Writeln('Lock FConsumerLock acquired');
   try
     for Key in FConsumerIndex.Keys do
     begin
@@ -953,7 +1036,9 @@ begin
       end;
     end;
   finally
-    TMonitor.Exit(FConsumerLock);
+    Writeln('Releasing the lock FConsumerLock');
+    TMonitor.Exit(Obj);
+    Writeln('Lock FConsumerLock released');
   end;
 
 end;
@@ -991,7 +1076,9 @@ var
   Tokens: TStringList;
 begin
   Writeln('Start TTActiveQueueModel.NotifyListeners');
+  Writeln('Acquiring the lock FConsumerLock');
   TMonitor.Enter(FConsumerLock);
+  Writeln('Lock FConsumerLock acquired');
   try
     Tokens := TStringList.Create();
     for Category in Categories do
@@ -1015,7 +1102,9 @@ begin
     Tokens.Clear;
     Tokens.DisposeOf;
   finally
+    Writeln('Releasing the lock FConsumerLock');
     TMonitor.Exit(FConsumerLock);
+    Writeln('Lock FConsumerLock released');
   end;
   Writeln('End TTActiveQueueModel.NotifyListeners');
 end;
@@ -1097,7 +1186,9 @@ procedure TActiveQueueModel.PersistQueue;
 // Request: TActiveQueueEntry;
 // items: TList<Jsonable>;
 begin
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   try
     raise Exception.Create('TActiveQueueModel.PersistQueue is deprecated.');
     // Items := TList<Jsonable>.Create();
@@ -1110,7 +1201,9 @@ begin
     // Items.Clear;
     // Items.DisposeOf;
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
 end;
 
@@ -1120,7 +1213,9 @@ var
   Id: String;
 begin
   Writeln('Start TActiveQueueModel.PersistRequests');
+  Writeln('Acquiring FQueueLock');
   TMonitor.Enter(FQueueLock);
+  Writeln('FQueueLock Acquired');
   try
     Result := TDictionary<String, TActiveQueueEntry>.Create;
     for Item in Items do
@@ -1138,7 +1233,9 @@ begin
       Result.Add(Id, Item);
     end;
   finally
+    Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);
+    Writeln('FQueueLock Released');
   end;
   Writeln('End TActiveQueueModel.PersistRequests');
 

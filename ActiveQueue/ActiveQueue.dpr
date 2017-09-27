@@ -176,6 +176,7 @@ begin
     for RequestID in PendingRequests.Keys do
     begin
       Writeln(Format('origin: %s, category: %s, id: %s', [PendingRequests[RequestID].Origin, PendingRequests[RequestID].Category, RequestID]));
+      PendingRequests[RequestID] := nil;
     end;
     PendingRequests.Clear;
     PendingRequests.DisposeOf;
