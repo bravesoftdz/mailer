@@ -142,8 +142,6 @@ begin
         for Attach in DispatcherEntry.Attachments do
         begin
           Writeln('name: ' + Attach.Name);
-          Writeln('content: ' + Attach.ContentAsString);
-
         end;
 
         try
