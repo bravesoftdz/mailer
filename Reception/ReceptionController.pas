@@ -141,7 +141,7 @@ begin
         Writeln('Prepared a request with ' + DispatcherEntry.Attachments.Count.ToString + ' attachment(s).');
         for Attach in DispatcherEntry.Attachments do
         begin
-          Writeln('name: ' + Attach.Name);
+          Writeln(Format('name: %s, size: %d', [Attach.Name, Attach.Content.Size]));
         end;
 
         try
