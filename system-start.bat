@@ -5,6 +5,6 @@ start cmd /c %~dp0\ConsumerMock\start.bat
 
 pause
 
-start cmd /c %~dp0\multi-thread-requests.bat
+start cmd /c %~dp0\multi-thread-requests.bat 1 5
 
 

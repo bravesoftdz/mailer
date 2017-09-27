@@ -163,6 +163,9 @@ type
     /// <summary>Get a copy of the configuration of the repository responsable for storing incoming requests
     function GetRequestRepositoryParams: TArray<TPair<String, String>>;
 
+    /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
+    function IsIpInWhiteList(const IP: String): Boolean;
+
   public
     /// <summary>Create a subscription </summary>
     /// <param name="IP">IP from which the subscription request has arrived</param>
@@ -191,9 +194,6 @@ type
 
     /// <summary> Get the IPs from which the requests to enqueue the data can be accepted.</summary>
     function GetProvidersIPs: TArray<String>;
-
-    /// <summary>Return true iff given IP is among those from which a subscription can be accepted.</summary>
-    function IsIpInWhiteList(const IP: String): Boolean;
 
     /// <summary>Return true iff given IP corresponds to the token.</summary>
     function IsAllowedClient(const Token, IP: String): Boolean;
@@ -1002,16 +1002,10 @@ end;
 
 function TActiveQueueModel.IsIpInWhiteList(const IP: String): Boolean;
 begin
-  Writeln('Acquiring the lock FConsumerLock');
-  TMonitor.Enter(FConsumerLock);
-  Writeln('Lock FConsumerLock acquired');
-  try
-    Result := FConsumerWhiteListHashSet.ContainsKey(IP);
-  finally
-    Writeln('Releasing the lock FConsumerLock');
-    TMonitor.Exit(FConsumerLock);
-    Writeln('Lock FConsumerLock released');
-  end;
+  /// do not acquire the lock of FConsumerLock,
+  /// since this method gets called from methods that has already acquired the lock.
+  /// If you try to acquire the lock, the application enters in a deadlock.
+  Result := FConsumerWhiteListHashSet.ContainsKey(IP);
 end;
 
 function TActiveQueueModel.IsSubscribed(const IP: String; const Port: Integer): Boolean;
