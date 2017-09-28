@@ -27,7 +27,9 @@ uses
   Authentication in '..\Src\Authentication.pas',
   ReceptionModule in '..\Src\ReceptionModule.pas' {ReceptionModule: TWebModule},
   Attachment in '..\..\Emailtemplate\Attachment.pas',
-  DispatcherProxyInterface in '..\Src\DispatcherProxyInterface.pas';
+  DispatcherProxyInterface in '..\Src\DispatcherProxyInterface.pas',
+  ClientRequest in '..\Src\ClientRequest.pas',
+  ClientFullRequest in '..\Src\ClientFullRequest.pas';
 
 const
   SWITCH_CONFIG = 'c';

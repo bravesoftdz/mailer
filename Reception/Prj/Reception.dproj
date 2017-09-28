@@ -81,7 +81,7 @@
         <Icon_MainIcon>Reception_Icon.ico</Icon_MainIcon>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DCC_UnitSearchPath>..\..\ActiveQueue;..\..\Dispatcher;..\..\Config;..\..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\ActiveQueue;..\..\Dispatcher\Src;..\..\Config;..\..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_MapFile>3</DCC_MapFile>
         <Manifest_File>..\..\(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -111,6 +111,8 @@
         </DCCReference>
         <DCCReference Include="..\..\Emailtemplate\Attachment.pas"/>
         <DCCReference Include="..\Src\DispatcherProxyInterface.pas"/>
+        <DCCReference Include="..\Src\ClientRequest.pas"/>
+        <DCCReference Include="..\Src\ClientFullRequest.pas"/>
         <None Include="..\..\ModelSupport_Source\default.txvpck"/>
         <None Include="..\..\ModelSupport_Source\MailerController\default.txvpck"/>
         <None Include="..\..\ModelSupport_Source\Source\default.txvpck"/>
@@ -512,7 +514,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\Reception.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\Exe\Win32\Debug\Reception.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>Reception.exe</RemoteName>
                         <Overwrite>true</Overwrite>
