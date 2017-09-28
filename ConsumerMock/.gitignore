@@ -1,1 +1,6 @@
-SendmailConfig.pas
+__history/
+__recovery/
+Exe/
+config_folder/
+logs/
+

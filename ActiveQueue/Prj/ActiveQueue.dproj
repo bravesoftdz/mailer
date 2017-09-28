@@ -73,10 +73,11 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_ExeOutput>..\Exe\$(Platform)\$(Config)</DCC_ExeOutput>
         <Debugger_CWD>C:\Dev\Mailer\ActiveQueue\</Debugger_CWD>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <Debugger_RunParams>-c config_folder\ActiveQueue.conf -t config_folder\AQ.conf -q config_folder\QueueStorage.txt</Debugger_RunParams>
-        <DCC_UnitSearchPath>..\Config;..\Dispatcher;..\ConsumerMock;..\Storage;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\Config;..\..\ConsumerMock;..\..\Storage;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Manifest_File>..\(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -91,30 +92,30 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\AQController.pas"/>
-        <DCCReference Include="..\ActiveQueueModule.pas">
+        <DCCReference Include="..\Src\AQController.pas"/>
+        <DCCReference Include="..\Src\ActiveQueueModule.pas">
             <Form>ActiveQueueModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\AQSubscriptionResponce.pas"/>
-        <DCCReference Include="..\ActiveQueueSettings.pas"/>
-        <DCCReference Include="..\AQModel.pas"/>
-        <DCCReference Include="..\AQConfig.pas"/>
-        <DCCReference Include="..\SubscriptionOutcomeData.pas"/>
-        <DCCReference Include="..\Consumer.pas"/>
-        <DCCReference Include="..\ListenerProxyInterface.pas"/>
-        <DCCReference Include="..\ConditionInterface.pas"/>
-        <DCCReference Include="..\TokenBasedCondition.pas"/>
-        <DCCReference Include="..\JsonSaver.pas"/>
-        <DCCReference Include="..\JsonableInterface.pas"/>
+        <DCCReference Include="..\Src\AQSubscriptionResponce.pas"/>
+        <DCCReference Include="..\Src\ActiveQueueSettings.pas"/>
+        <DCCReference Include="..\Src\AQModel.pas"/>
+        <DCCReference Include="..\Src\AQConfig.pas"/>
+        <DCCReference Include="..\Src\SubscriptionOutcomeData.pas"/>
+        <DCCReference Include="..\Src\Consumer.pas"/>
+        <DCCReference Include="..\Src\ListenerProxyInterface.pas"/>
+        <DCCReference Include="..\Src\ConditionInterface.pas"/>
+        <DCCReference Include="..\Src\TokenBasedCondition.pas"/>
+        <DCCReference Include="..\Src\JsonSaver.pas"/>
+        <DCCReference Include="..\Src\JsonableInterface.pas"/>
         <DCCReference Include="..\..\Cli\CliParam.pas"/>
         <DCCReference Include="..\..\Cli\CliUsage.pas"/>
         <DCCReference Include="..\..\EmailTemplate\Attachment.pas"/>
-        <DCCReference Include="..\ActiveQueueEntry.pas"/>
+        <DCCReference Include="..\Src\ActiveQueueEntry.pas"/>
         <DCCReference Include="..\..\Config\ServerConfig.pas"/>
-        <DCCReference Include="..\AQConfigBuilder.pas"/>
-        <DCCReference Include="..\AQSubscriptionEntry.pas"/>
-        <DCCReference Include="..\AQResponce.pas"/>
+        <DCCReference Include="..\Src\AQConfigBuilder.pas"/>
+        <DCCReference Include="..\Src\AQSubscriptionEntry.pas"/>
+        <DCCReference Include="..\Src\AQResponce.pas"/>
         <DCCReference Include="..\..\Storage\RequestSaverFactory.pas"/>
         <DCCReference Include="..\..\Storage\RequestToFileSystemStorage.pas"/>
         <BuildConfiguration Include="Release">

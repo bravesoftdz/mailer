@@ -8,7 +8,7 @@ uses
 type
 
   [TestFixture]
-  TSubscriptionDataTest = class(TObject)
+  TSubscriptionOutcomeDataTest = class(TObject)
   public
     // Test suit for creating an instance from json
     // Partition the input as follows:
@@ -85,41 +85,41 @@ type
 implementation
 
 uses
-  System.SysUtils, ObjectsMappers, SubscriptionData;
+  System.SysUtils, ObjectsMappers, SubscriptionOutcomeData;
 
-procedure TSubscriptionDataTest.testCreateFromJson(const input: String);
+procedure TSubscriptionOutcomeDataTest.testCreateFromJson(const input: String);
 var
-  jo: TJsonObject;
-  obj: TSubscriptionData;
+  jo: TSubscriptionOutcomeData;
+  obj: TSubscriptionOutcomeData;
 begin
-  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+  jo := TSubscriptionOutcomeData.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TSubscriptionOutcomeData;
+  obj := Mapper.JSONObjectToObject<TSubscriptionOutcomeData>(jo);
   Assert.IsNotNull(obj);
 end;
 
-procedure TSubscriptionDataTest.testCreateFromJsonWithExtraField;
+procedure TSubscriptionOutcomeDataTest.testCreateFromJsonWithExtraField;
 var
-  jo: TJsonObject;
-  obj: TSubscriptionData;
+  jo: TSubscriptionOutcomeData;
+  obj: TSubscriptionOutcomeData;
   input: String;
 begin
   input := '{"url": "www.google.com", "port": 12345, "path": "/manage/notify", "extra": true}';
-  jo := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TJSONObject;
-  obj := Mapper.JSONObjectToObject<TSubscriptionData>(jo);
+  jo := TSubscriptionOutcomeData.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TSubscriptionOutcomeData;
+  obj := Mapper.JSONObjectToObject<TSubscriptionOutcomeData>(jo);
   Assert.IsNotNull(obj);
 end;
 
-procedure TSubscriptionDataTest.testObjectToJsonAllFields;
+procedure TSubscriptionOutcomeDataTest.testObjectToJsonAllFields;
 const
   Url = 'http://www.google.com';
   Port = 2346;
   Path = 'abc/efg';
   Ip = '123.32.11.55';
 var
-  jo: TJsonObject;
-  obj: TSubscriptionData;
+  jo: TSubscriptionOutcomeData;
+  obj: TSubscriptionOutcomeData;
 begin
-  obj := TSubscriptionData.Create(Ip, Url, Port, Path);
+  obj := TSubscriptionOutcomeData.Create(Ip, Url, Port, Path);
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.AreEqual(Ip, jo.GetValue('ip').value);
   Assert.AreEqual(url, jo.GetValue('url').value);
@@ -128,22 +128,22 @@ begin
 
 end;
 
-procedure TSubscriptionDataTest.testObjectToJsonFromDefault;
+procedure TSubscriptionOutcomeDataTest.testObjectToJsonFromDefault;
 var
-  jo: TJsonObject;
-  obj: TSubscriptionData;
+  jo: TSubscriptionOutcomeData;
+  obj: TSubscriptionOutcomeData;
 begin
-  obj := TSubscriptionData.Create();
+  obj := TSubscriptionOutcomeData.Create();
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.IsNotNull(jo);
 end;
 
-procedure TSubscriptionDataTest.testObjectToJsonFromPath;
+procedure TSubscriptionOutcomeDataTest.testObjectToJsonFromPath;
 var
-  jo: TJsonObject;
-  obj: TSubscriptionData;
+  jo: TSubscriptionOutcomeData;
+  obj: TSubscriptionOutcomeData;
 begin
-  obj := TSubscriptionData.Create('111', '', 0, ' news / ');
+  obj := TSubscriptionOutcomeData.Create('111', '', 0, ' news / ');
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.IsNotNull(jo);
   Assert.AreEqual('news/', jo.GetValue('path').value, 'Path must be equal to "news/"');
@@ -151,6 +151,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TSubscriptionDataTest);
+TDUnitX.RegisterTestFixture(TSubscriptionOutcomeDataTest);
 
 end.
