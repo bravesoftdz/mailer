@@ -15,7 +15,7 @@
         <Projects Include="ConsumerMock\Consumer.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Dispatcher\Dispatcher.dproj">
+        <Projects Include="Dispatcher\Prj\Dispatcher.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -63,13 +63,13 @@
         <MSBuild Projects="ConsumerMock\Consumer.dproj" Targets="Make"/>
     </Target>
     <Target Name="Dispatcher">
-        <MSBuild Projects="Dispatcher\Dispatcher.dproj"/>
+        <MSBuild Projects="Dispatcher\Prj\Dispatcher.dproj"/>
     </Target>
     <Target Name="Dispatcher:Clean">
-        <MSBuild Projects="Dispatcher\Dispatcher.dproj" Targets="Clean"/>
+        <MSBuild Projects="Dispatcher\Prj\Dispatcher.dproj" Targets="Clean"/>
     </Target>
     <Target Name="Dispatcher:Make">
-        <MSBuild Projects="Dispatcher\Dispatcher.dproj" Targets="Make"/>
+        <MSBuild Projects="Dispatcher\Prj\Dispatcher.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
         <CallTarget Targets="Reception;Tests;ActiveQueue;Consumer;Dispatcher"/>

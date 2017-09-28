@@ -73,10 +73,11 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_ExeOutput>..\Exe\$(Platform)\$(Config)</DCC_ExeOutput>
         <Debugger_CWD>C:\Dev\Mailer\Dispatcher</Debugger_CWD>
         <Debugger_RunParams>-c dispatcher.conf</Debugger_RunParams>
-        <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>..\;..\Cli;..\Reception;..\ActiveQueue;..\Config;..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <Manifest_File>..\(None)</Manifest_File>
+        <DCC_UnitSearchPath>..\;..\..\Cli;..\..\Reception;..\..\ActiveQueue;..\..\Config;..\..\EmailTemplate;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -90,31 +91,31 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="DispatcherController.pas"/>
-        <DCCReference Include="DispatcherProject.pas">
+        <DCCReference Include="..\Src\DispatcherController.pas"/>
+        <DCCReference Include="..\Src\DispatcherProject.pas">
             <Form>DispatcherModule</Form>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="DispatcherModel.pas"/>
-        <DCCReference Include="DispatcherConfig.pas"/>
-        <DCCReference Include="..\Config\Configuration.pas"/>
-        <DCCReference Include="DispatcherResponce.pas"/>
-        <DCCReference Include="DispatcherEntry.pas"/>
-        <DCCReference Include="Actions.pas"/>
-        <DCCReference Include="Provider.pas"/>
-        <DCCReference Include="ProviderFactory.pas"/>
-        <DCCReference Include="..\Config\ServerConfig.pas"/>
-        <DCCReference Include="SoluzioneAgenti.pas"/>
-        <DCCReference Include="VenditoriSimple.pas"/>
-        <DCCReference Include="OfferteNuoviMandati.pas"/>
-        <DCCReference Include="..\EmailTemplate\SendDataTemplate.pas"/>
-        <DCCReference Include="..\Authentication\IpTokenAuthentication.pas"/>
-        <DCCReference Include="AQAPIClient.pas"/>
-        <DCCReference Include="ONMCredentials.pas"/>
-        <DCCReference Include="..\Storage\RequestStorageInterface.pas"/>
-        <DCCReference Include="..\Storage\RequestToFileSystemStorage.pas"/>
-        <DCCReference Include="..\Config\RepositoryConfig.pas"/>
-        <DCCReference Include="..\Storage\RequestSaverFactory.pas"/>
+        <DCCReference Include="..\Src\DispatcherModel.pas"/>
+        <DCCReference Include="..\Src\DispatcherConfig.pas"/>
+        <DCCReference Include="..\..\Config\Configuration.pas"/>
+        <DCCReference Include="..\Src\DispatcherResponce.pas"/>
+        <DCCReference Include="..\Src\DispatcherEntry.pas"/>
+        <DCCReference Include="..\Src\Actions.pas"/>
+        <DCCReference Include="..\Src\Provider.pas"/>
+        <DCCReference Include="..\Src\ProviderFactory.pas"/>
+        <DCCReference Include="..\..\Config\ServerConfig.pas"/>
+        <DCCReference Include="..\Src\SoluzioneAgenti.pas"/>
+        <DCCReference Include="..\Src\VenditoriSimple.pas"/>
+        <DCCReference Include="..\Src\OfferteNuoviMandati.pas"/>
+        <DCCReference Include="..\..\EmailTemplate\SendDataTemplate.pas"/>
+        <DCCReference Include="..\..\Authentication\IpTokenAuthentication.pas"/>
+        <DCCReference Include="..\Src\AQAPIClient.pas"/>
+        <DCCReference Include="..\Src\ONMCredentials.pas"/>
+        <DCCReference Include="..\..\Storage\RequestStorageInterface.pas"/>
+        <DCCReference Include="..\..\Storage\RequestToFileSystemStorage.pas"/>
+        <DCCReference Include="..\..\Config\RepositoryConfig.pas"/>
+        <DCCReference Include="..\..\Storage\RequestSaverFactory.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
