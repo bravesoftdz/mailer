@@ -17,17 +17,17 @@ uses
   ObjectsMappers,
   System.IOUtils,
   System.Generics.Collections,
-  CliParam in '..\Cli\CliParam.pas',
-  CliUsage in '..\Cli\CliUsage.pas',
-  ReceptionController in 'ReceptionController.pas',
-  ReceptionModel in 'ReceptionModel.pas',
-  ServerConfig in '..\Config\ServerConfig.pas',
-  ReceptionResponce in 'ReceptionResponce.pas',
-  Client in '..\Config\Client.pas',
-  Authentication in 'Authentication.pas',
-  ReceptionModule in 'ReceptionModule.pas' {ReceptionModule: TWebModule} ,
-  Attachment in '..\Emailtemplate\Attachment.pas',
-  DispatcherProxyInterface in 'DispatcherProxyInterface.pas';
+  CliParam in '..\..\Cli\CliParam.pas',
+  CliUsage in '..\..\Cli\CliUsage.pas',
+  ReceptionController in '..\Src\ReceptionController.pas',
+  ReceptionModel in '..\Src\ReceptionModel.pas',
+  ServerConfig in '..\..\Config\ServerConfig.pas',
+  ReceptionResponce in '..\Src\ReceptionResponce.pas',
+  Client in '..\..\Config\Client.pas',
+  Authentication in '..\Src\Authentication.pas',
+  ReceptionModule in '..\Src\ReceptionModule.pas' {ReceptionModule: TWebModule},
+  Attachment in '..\..\Emailtemplate\Attachment.pas',
+  DispatcherProxyInterface in '..\Src\DispatcherProxyInterface.pas';
 
 const
   SWITCH_CONFIG = 'c';
