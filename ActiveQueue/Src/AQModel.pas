@@ -1168,7 +1168,7 @@ begin
     if Requests <> nil then
     begin
       Requests.Clear;
-      Requests.Destroy;
+      Requests.DisposeOf;
     end;
 
   end;

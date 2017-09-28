@@ -1,5 +1,10 @@
+__history/
+__recovery/
+Win32/
+Win64/
 *.local
 *.stat
 *.res
 *.identcache
+*.tvsconfig
 

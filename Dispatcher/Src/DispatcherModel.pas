@@ -241,6 +241,7 @@ begin
       TMonitor.Enter(FPendingRequestLock);
       Id := Persist(Request);
       Result := ElaborateSinglePersistedRequest(Id, Request);
+      Writeln('request has been saved, its id = ' + Id);
     finally
       TMonitor.Exit(FPendingRequestLock);
     end;
@@ -330,7 +331,13 @@ end;
 
 function TModel.GetConfig: TServerConfigImmutable;
 begin
-  Result := TServerConfigImmutable.Create(FConfig.Port, FConfig.Clients, FConfig.BackEndIP, FConfig.BackEndPort, FConfig.Token);
+  Result := TServerConfigImmutable.Create(
+    FConfig.Port,
+    FConfig.Clients,
+    FConfig.BackEndIP,
+    FConfig.BackEndPort,
+    FConfig.Token
+    );
 end;
 
 function TModel.GetPort: Integer;

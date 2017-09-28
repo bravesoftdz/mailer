@@ -207,6 +207,7 @@ begin
       try
         JO := Mapper.ObjectToJSONObject(Obj);
         TFile.AppendAllText(FullPath, Jo.ToString);
+        Writeln('File ' + FullPath + ' is saved.');
       finally
         JO.DisposeOf;
       end;

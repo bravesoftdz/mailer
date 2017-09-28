@@ -338,8 +338,8 @@ begin
     Entries.DisposeOf;
   if Ids <> nil then
   begin
-    // Ids.Clear;
-    // Ids.DisposeOf;
+    Ids.Clear;
+    Ids.DisposeOf;
   end;
 
   Render(Outcome);
