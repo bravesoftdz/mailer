@@ -6,13 +6,13 @@
         <Projects Include="..\Reception\Prj\Reception.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="..\Dispatcher\Prj\Dispatcher.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="..\ActiveQueue\Prj\ActiveQueue.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="..\ConsumerMock\Prj\Consumer.dproj">
-            <Dependencies/>
-        </Projects>
-        <Projects Include="..\Dispatcher\Prj\Dispatcher.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="..\Tests\Tests.dproj">
@@ -35,6 +35,15 @@
     <Target Name="Reception:Make">
         <MSBuild Projects="..\Reception\Prj\Reception.dproj" Targets="Make"/>
     </Target>
+    <Target Name="Dispatcher">
+        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj"/>
+    </Target>
+    <Target Name="Dispatcher:Clean">
+        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Dispatcher:Make">
+        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj" Targets="Make"/>
+    </Target>
     <Target Name="ActiveQueue">
         <MSBuild Projects="..\ActiveQueue\Prj\ActiveQueue.dproj"/>
     </Target>
@@ -53,15 +62,6 @@
     <Target Name="Consumer:Make">
         <MSBuild Projects="..\ConsumerMock\Prj\Consumer.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Dispatcher">
-        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj"/>
-    </Target>
-    <Target Name="Dispatcher:Clean">
-        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Dispatcher:Make">
-        <MSBuild Projects="..\Dispatcher\Prj\Dispatcher.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Tests">
         <MSBuild Projects="..\Tests\Tests.dproj"/>
     </Target>
@@ -72,10 +72,10 @@
         <MSBuild Projects="..\Tests\Tests.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Reception;ActiveQueue;Consumer;Dispatcher;Tests"/>
+        <CallTarget Targets="Reception;Dispatcher;ActiveQueue;Consumer;Tests"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Reception:Clean;ActiveQueue:Clean;Consumer:Clean;Dispatcher:Clean;Tests:Clean"/>
+        <CallTarget Targets="Reception:Clean;Dispatcher:Clean;ActiveQueue:Clean;Consumer:Clean;Tests:Clean"/>
     </Target>
     <Target Name="Make">
         <CallTarget Targets="Reception:Make;Dispatcher:Make;ActiveQueue:Make;Consumer:Make;Tests:Make"/>
