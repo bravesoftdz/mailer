@@ -85,41 +85,41 @@ type
 implementation
 
 uses
-  System.SysUtils, ObjectsMappers, SubscriptionOutcomeData;
+  System.SysUtils, ObjectsMappers, AQSubscriptionEntry;
 
 procedure TSubscriptionOutcomeDataTest.testCreateFromJson(const input: String);
 var
-  jo: TSubscriptionOutcomeData;
-  obj: TSubscriptionOutcomeData;
+  jo: TAQSubscriptionEntry;
+  obj: TAQSubscriptionEntry;
 begin
-  jo := TSubscriptionOutcomeData.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TSubscriptionOutcomeData;
-  obj := Mapper.JSONObjectToObject<TSubscriptionOutcomeData>(jo);
+  jo := TAQSubscriptionEntry.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TAQSubscriptionEntry;
+  obj := Mapper.JSONObjectToObject<TAQSubscriptionEntry>(jo);
   Assert.IsNotNull(obj);
 end;
 
-procedure TSubscriptionOutcomeDataTest.testCreateFromJsonWithExtraField;
+procedure TAQSubscriptionEntryTest.testCreateFromJsonWithExtraField;
 var
-  jo: TSubscriptionOutcomeData;
-  obj: TSubscriptionOutcomeData;
+  jo: TAQSubscriptionEntry;
+  obj: TAQSubscriptionEntry;
   input: String;
 begin
   input := '{"url": "www.google.com", "port": 12345, "path": "/manage/notify", "extra": true}';
-  jo := TSubscriptionOutcomeData.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TSubscriptionOutcomeData;
-  obj := Mapper.JSONObjectToObject<TSubscriptionOutcomeData>(jo);
+  jo := TAQSubscriptionEntry.ParseJSONValue(TEncoding.ASCII.GetBytes(input), 0) as TAQSubscriptionEntry;
+  obj := Mapper.JSONObjectToObject<TAQSubscriptionEntry>(jo);
   Assert.IsNotNull(obj);
 end;
 
-procedure TSubscriptionOutcomeDataTest.testObjectToJsonAllFields;
+procedure TAQSubscriptionEntryTest.testObjectToJsonAllFields;
 const
   Url = 'http://www.google.com';
   Port = 2346;
   Path = 'abc/efg';
   Ip = '123.32.11.55';
 var
-  jo: TSubscriptionOutcomeData;
-  obj: TSubscriptionOutcomeData;
+  jo: TAQSubscriptionEntry;
+  obj: TAQSubscriptionEntry;
 begin
-  obj := TSubscriptionOutcomeData.Create(Ip, Url, Port, Path);
+  obj := TAQSubscriptionEntry.Create(Ip, Url, Port, Path);
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.AreEqual(Ip, jo.GetValue('ip').value);
   Assert.AreEqual(url, jo.GetValue('url').value);
@@ -128,22 +128,22 @@ begin
 
 end;
 
-procedure TSubscriptionOutcomeDataTest.testObjectToJsonFromDefault;
+procedure TAQSubscriptionEntryTest.testObjectToJsonFromDefault;
 var
-  jo: TSubscriptionOutcomeData;
-  obj: TSubscriptionOutcomeData;
+  jo: TAQSubscriptionEntry;
+  obj: TAQSubscriptionEntry;
 begin
-  obj := TSubscriptionOutcomeData.Create();
+  obj := TAQSubscriptionEntry.Create();
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.IsNotNull(jo);
 end;
 
-procedure TSubscriptionOutcomeDataTest.testObjectToJsonFromPath;
+procedure TAQSubscriptionEntryTest.testObjectToJsonFromPath;
 var
-  jo: TSubscriptionOutcomeData;
-  obj: TSubscriptionOutcomeData;
+  jo: TAQSubscriptionEntry;
+  obj: TAQSubscriptionEntry;
 begin
-  obj := TSubscriptionOutcomeData.Create('111', '', 0, ' news / ');
+  obj := TAQSubscriptionEntry.Create('111', '', 0, ' news / ');
   jo := Mapper.ObjectToJSONObject(obj);
   Assert.IsNotNull(jo);
   Assert.AreEqual('news/', jo.GetValue('path').value, 'Path must be equal to "news/"');
@@ -151,6 +151,6 @@ end;
 
 initialization
 
-TDUnitX.RegisterTestFixture(TSubscriptionOutcomeDataTest);
+TDUnitX.RegisterTestFixture(TAQSubscriptionEntryTest);
 
 end.
