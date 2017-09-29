@@ -129,12 +129,10 @@ begin
       Writeln(Format('origin: %s, action: %s, number of attachments: %d, id: %s',
         [PendingRequests[RequestID].Origin, PendingRequests[RequestID].Action, PendingRequests[RequestID].Attachments.Count, RequestID]));
     end;
-
-    PendingRequests.Clear;
-    PendingRequests.DisposeOf;
-
-    TDispatcherController.ElaboratePendingRequests();
   end;
+  TDispatcherController.ElaboratePendingRequests();
+  PendingRequests.Clear;
+  PendingRequests.DisposeOf;
 
   ClientIps := TDispatcherController.GetClientIps();
   S := Length(ClientIPs);

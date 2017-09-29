@@ -169,29 +169,38 @@ var
 begin
   SavedAndConverted := DispatchConvert(Request);
   try
-    try
-      Outcome := SendToBackEnd(SavedAndConverted);
-      // extract the values that will be used later in order to be able to destroy the object
-      Status := Outcome.status;
-      Msg := Outcome.Msg;
-      Outcome.DisposeOf;
-      if Status then
-      begin
-        Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
-        Delete(Id);
-      end
-      else
-      begin
-        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Msg]));
-      end;
-    except
-      on E: Exception do
-      begin
-        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [E.Message]));
-      end;
+    Outcome := SendToBackEnd(SavedAndConverted);
+  except
+    on E: Exception do
+    begin
+      Result := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [Id, E.Message]));
+      Outcome := nil;
     end;
-  finally
-    SavedAndConverted.DisposeOf;
+  end;
+  SavedAndConverted.DisposeOf;
+  if Outcome <> nil then
+  begin
+    // extract the values that will be used later in order to be able to destroy the object
+    Status := Outcome.status;
+    Msg := Outcome.Msg;
+    Outcome.DisposeOf;
+    if Status then
+    begin
+      try
+        Delete(Id);
+        Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
+      except
+        on E: Exception do
+        begin
+          Result := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.FAILED_TO_DELETE, [Id, E.Message]));
+        end;
+      end;
+    end
+    else
+    begin
+      Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Id, Msg]));
+    end;
+
   end;
   Writeln('Finish TModel.ElaborateSinglePersistedRequest');
 end;
@@ -233,7 +242,13 @@ begin
 
 end;
 
-function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
+function TModel.ElaborateSingleRequest(
+  const
+  IP:
+  String;
+  const
+  Request:
+  TDispatcherEntry): TDispatcherResponce;
 var
   Id: String;
 begin
@@ -245,15 +260,29 @@ begin
   begin
     TMonitor.Enter(FPendingRequestLock);
     try
-      Id := Persist(Request);
-      Result := ElaborateSinglePersistedRequest(Id, Request);
+      try
+        Id := Persist(Request);
+      except
+        on E: Exception do
+        begin
+          Result := TDispatcherResponce.Create(False, 'Failed to persist the request');
+          Id := '';
+        end;
+      end;
+      if (Id <> '') then
+      begin
+        Result := ElaborateSinglePersistedRequest(Id, Request);
+      end;
     finally
       TMonitor.Exit(FPendingRequestLock);
     end;
   end;
 end;
 
-function TModel.DispatchConvert(const Entry: TDispatcherEntry): TActiveQueueEntries;
+function TModel.DispatchConvert(
+  const
+  Entry:
+  TDispatcherEntry): TActiveQueueEntries;
 var
   Items: TObjectList<TActiveQueueEntry>;
   ErrorMessages: TStringList;
@@ -295,7 +324,10 @@ begin
 
 end;
 
-function TModel.Delete(const Id: String): Boolean;
+function TModel.Delete(
+  const
+  Id:
+  String): Boolean;
 begin
   Result := FRequestSaver.Delete(Id);
 end;
@@ -359,19 +391,27 @@ begin
     Result := nil;
 end;
 
-function TModel.isAuthorised(const IP, Token: String): Boolean;
+function TModel.isAuthorised(
+  const
+  IP, Token: String): Boolean;
 begin
   Result := (FAuthentication <> nil) AND FAuthentication.isAuthorised(IP, Token);
 end;
 
-function TModel.Persist(const Item: TDispatcherEntry): String;
+function TModel.Persist(
+  const
+  Item:
+  TDispatcherEntry): String;
 begin
   Writeln('Start persisting the entry');
   Result := FRequestSaver.Save(Item);
   Writeln('Finished persisting the entry');
 end;
 
-procedure TModel.SetConfig(const Config: TServerConfigImmutable);
+procedure TModel.SetConfig(
+  const
+  Config:
+  TServerConfigImmutable);
 const
   TAG = 'TModel.SetConfig';
 var
@@ -416,7 +456,10 @@ begin
 
 end;
 
-function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
+function TModel.SendToBackEnd(
+  const
+  Requests:
+  TActiveQueueEntries): TAQResponce;
 begin
   Writeln('Start: TModel.SendToBackEnd');
   Result := FBackEndProxy.PostItems(Requests);

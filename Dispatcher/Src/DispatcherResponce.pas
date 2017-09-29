@@ -12,8 +12,9 @@ type
     EMPTY_BODY = 'Null request body found.';
     NOT_AUTHORISED = 'Not authorized';
     SUCCESS = 'Dispatcher successfully passed data to the backend server.';
-    EXCEPTION_REPORT = 'Dispatcher encountered an error when sending items to the back end server: %s';
-    FAILURE_REPORT = 'Dispatcher has sent to the back end server, but the back end server failed: %s';
+    EXCEPTION_REPORT = 'Dispatcher has saved the request %s, but failed to connect to the back end server: %s';
+    FAILURE_REPORT = 'Dispatcher has saved the request %s, but the back end server failed: %s';
+    FAILED_TO_DELETE = 'Dispather failed to delete the previously saved request %s due to %s. When possible it will be sent to the back end server again.';
   end;
 
 type
