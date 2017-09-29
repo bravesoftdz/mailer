@@ -369,7 +369,7 @@ begin
     if FRequestsStorage <> nil then
       Result := FRequestsStorage.GetPendingRequests
     else
-      Result := nil;
+      Result := TDictionary<String, TActiveQueueEntry>.Create;
   finally
     Writeln('Releasing FQueueLock');
     TMonitor.Exit(FQueueLock);

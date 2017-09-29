@@ -164,10 +164,10 @@ begin
   end;
 
   PendingRequests := TController.GetPendingRequests();
-  if PendingRequests = nil then
+  if PendingRequests.Count = 0 then
   begin
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WARNING_COLOR);
-    Writeln('No storage is configured, hence no pending requests are found.');
+    Writeln('No pending requests are found.');
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end
   else
