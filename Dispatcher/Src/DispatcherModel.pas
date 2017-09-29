@@ -157,26 +157,33 @@ begin
     Result := FRequestSaver.GetPendingRequests()
   end
   else
-    Result := nil;
+    Result := TDictionary<String, TDispatcherEntry>.Create();
 end;
 
 function TModel.ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
 var
   SavedAndConverted: TActiveQueueEntries;
   Outcome: TAQResponce;
+  Status: Boolean;
+  Msg: String;
 begin
-  Writeln('start TModel.ElaborateSinglePersistedRequest');
   SavedAndConverted := DispatchConvert(Request);
   try
     try
       Outcome := SendToBackEnd(SavedAndConverted);
-      if Outcome.status then
+      // extract the values that will be used later in order to be able to destroy the object
+      Status := Outcome.status;
+      Msg := Outcome.Msg;
+      Outcome.DisposeOf;
+      if Status then
       begin
         Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
         Delete(Id);
       end
       else
-        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Outcome.Msg]));
+      begin
+        Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Msg]));
+      end;
     except
       on E: Exception do
       begin
@@ -185,7 +192,6 @@ begin
     end;
   finally
     SavedAndConverted.DisposeOf;
-    Outcome.DisposeOf;
   end;
   Writeln('Finish TModel.ElaborateSinglePersistedRequest');
 end;
@@ -237,11 +243,10 @@ begin
   end
   else
   begin
+    TMonitor.Enter(FPendingRequestLock);
     try
-      TMonitor.Enter(FPendingRequestLock);
       Id := Persist(Request);
       Result := ElaborateSinglePersistedRequest(Id, Request);
-      Writeln('request has been saved, its id = ' + Id);
     finally
       TMonitor.Exit(FPendingRequestLock);
     end;

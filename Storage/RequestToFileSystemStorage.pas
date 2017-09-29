@@ -142,6 +142,7 @@ begin
         if not(TFile.Exists(TargetFullPath)) then
         begin
           TFile.Move(SourceFullPath, TargetFullPath);
+          Writeln(Format('Moved file %s to %s', [SourceFullPath, TargetFullPath]));
           Result := True;
         end
         else
@@ -195,7 +196,6 @@ var
 begin
   TMonitor.Enter(FLockObj);
   try
-
     Result := GetAvailableName(FFileName, FIncomingFolder, FFileExtension);
     FullPath := FIncomingFolder + Result + FFileExtension;
     if TFile.Exists(FullPath) then

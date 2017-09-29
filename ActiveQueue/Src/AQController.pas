@@ -279,6 +279,7 @@ var
   IP: String;
   Status: Boolean;
   Ids: TDictionary<String, TActiveQueueEntry>;
+  Key: String;
 begin
   Writeln('Start TController.PostItems');
   IP := Context.Request.ClientIP;

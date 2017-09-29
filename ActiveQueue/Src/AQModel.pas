@@ -108,8 +108,6 @@ type
     /// <sumary>Inform the listeners that they should cancel items satisfying the condition</summary>
     procedure BroadcastCancel(const Condition: ICondition);
 
-    /// <sumary>Cancel local items of the queue for which the condition is true.</summary>
-    function CancelLocal(const Condition: ICondition): Integer;
 
     /// <summary>Return true if a given string is equal to at least one string in the array.
     /// <param name="Haystack">an array of string to search in. Assume that the haystack remains unchanged during the method's execution.</param>
@@ -198,16 +196,8 @@ type
     /// <summary>Return true iff given IP corresponds to the token.</summary>
     function IsAllowedClient(const Token, IP: String): Boolean;
 
-    /// <summary>Cancel local items of the queue for which the condition is true. Then informs the
-    /// listeners to cancel the items that satisfy the condition.
-    /// Returns the number of items cancelled from the local storage, or -1 of the request comes from a
-    /// computer with non-allowed IP.</summary>
-    // function Cancel(const IP: string; const Condition: ICondition): Integer;
-
     /// <summary>Get the requests from the repository that have to be elaborated</summary>
     function GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
-
-    procedure SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
 
     /// <summary> the number of subscriptions </summary>
     property numOfSubscriptions: Integer read GetNumOfSubscriptions;
@@ -232,8 +222,6 @@ type
     /// <summary>Save the state of the Active Queue server into a file</summary>
     procedure PersistState();
 
-    /// <summary>Persist the queue in its current state</summary>
-    procedure PersistQueue();
 
     procedure SetQueuePath(const path: String);
 
@@ -371,16 +359,6 @@ begin
   end;
 end;
 
-// function TActiveQueueModel.Cancel(const IP: string; const Condition: ICondition): Integer;
-// begin
-// if (IsAllowedClient(IP)) then
-// begin
-// Result := CancelLocal(Condition);
-// BroadcastCancel(Condition);
-// end
-// else
-// Result := -1;
-// end;
 
 function TActiveQueueModel.GetPendingRequests(): TDictionary<String, TActiveQueueEntry>;
 begin
@@ -399,30 +377,6 @@ begin
   end;
 end;
 
-function TActiveQueueModel.CancelLocal(const Condition: ICondition): Integer;
-// var
-// item: TActiveQueueEntry;
-begin
-  Writeln('Acquiring FQueueLock');
-  TMonitor.Enter(FQueueLock);
-  Writeln('FQueueLock Acquired');
-  Result := 0;
-  try
-    Writeln('cancelling an item is not yet implemented when FItems is of TQueue type');
-    // for Item in FItems do
-    // begin
-    // if Condition.Satisfy(Item) then
-    // begin
-    // FItems.Remove(Item);
-    // Result := Result + 1;
-    // end;
-    // end;
-  finally
-    Writeln('Releasing FQueueLock');
-    TMonitor.Exit(FQueueLock);
-    Writeln('FQueueLock Released');
-  end;
-end;
 
 function TActiveQueueModel.CancelConsumer(const Ip, Token: String): TAQSubscriptionResponce;
 var
@@ -1103,11 +1057,6 @@ begin
   Writeln('End TTActiveQueueModel.NotifyListeners');
 end;
 
-procedure TActiveQueueModel.SetQueue(const FilePath: String; const Items: TObjectList<TActiveQueueEntry>);
-begin
-  // raise Exception.Create('TActiveQueueModel.SetQueue is not implemented');
-  Writeln('Here, the queue must be saved, but it is yet to be done');
-end;
 
 procedure TActiveQueueModel.SetQueuePath(const Path: String);
 begin
@@ -1173,32 +1122,6 @@ begin
 
   end;
 
-end;
-
-procedure TActiveQueueModel.PersistQueue;
-// var
-// Request: TActiveQueueEntry;
-// items: TList<Jsonable>;
-begin
-  Writeln('Acquiring FQueueLock');
-  TMonitor.Enter(FQueueLock);
-  Writeln('FQueueLock Acquired');
-  try
-    raise Exception.Create('TActiveQueueModel.PersistQueue is deprecated.');
-    // Items := TList<Jsonable>.Create();
-    // for Request in FItems do
-    // begin
-    // Items.Add(Request as Jsonable);
-    // end;
-    // Writeln('At this moment, the queue must be saved somewhere, but it is not...');
-    // FQueueSaver.SaveMulti(FQueueFilePath, Items);
-    // Items.Clear;
-    // Items.DisposeOf;
-  finally
-    Writeln('Releasing FQueueLock');
-    TMonitor.Exit(FQueueLock);
-    Writeln('FQueueLock Released');
-  end;
 end;
 
 function TActiveQueueModel.PersistRequests(const Items: TObjectList<TActiveQueueEntry>): TDictionary<String, TActiveQueueEntry>;

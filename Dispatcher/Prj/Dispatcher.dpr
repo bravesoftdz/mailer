@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in '..\Src\DispatcherController.pas',
-  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   DispatcherModel in '..\Src\DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -74,6 +74,7 @@ var
   RepositoryParams: TArray<TPair<String, String>>;
   PendingRequests: TDictionary<String, TDispatcherEntry>;
   RequestID: String;
+  PendingRequestsNum: Integer;
 begin
   TDispatcherController.SetConfig(Config);
   APort := TDispatcherController.GetPort();
@@ -113,16 +114,16 @@ begin
     Writeln('No repository configuration is found.');
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   end;
-  TDispatcherController.ElaboratePendingRequests();
 
   PendingRequests := TDispatcherController.GetPendingRequests();
-  if PendingRequests = nil then
+  PendingRequestsNum := PendingRequests.Count;
+  if PendingRequestsNum = 0 then
   begin
     Writeln('No pending requests found.');
   end
   else
   begin
-    Writeln(Format('%d pending request(s) found.', [PendingRequests.Count]));
+    Writeln(Format('%d pending request(s) found.', [PendingRequestsNum]));
     for RequestID in PendingRequests.Keys do
     begin
       Writeln(Format('origin: %s, action: %s, number of attachments: %d, id: %s',
@@ -131,6 +132,8 @@ begin
 
     PendingRequests.Clear;
     PendingRequests.DisposeOf;
+
+    TDispatcherController.ElaboratePendingRequests();
   end;
 
   ClientIps := TDispatcherController.GetClientIps();
