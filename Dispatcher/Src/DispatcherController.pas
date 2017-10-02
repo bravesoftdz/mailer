@@ -35,9 +35,6 @@ type
     class function GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
     class function GetRepositoryParams(): TArray<TPair<String, String>>;
 
-    /// <summary>Delegate to the model to elaborate pending requests (if any)</summary>
-    class procedure ElaboratePendingRequests();
-
   protected
     procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
     procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
@@ -91,11 +88,6 @@ end;
 class function TDispatcherController.GetRepositoryParams: TArray<TPair<String, String>>;
 begin
   Result := Model.GetRepositoryParams();
-end;
-
-class procedure TDispatcherController.ElaboratePendingRequests;
-begin
-  Model.ElaboratePendingRequests();
 end;
 
 procedure TDispatcherController.PutRequest(Context: TWebContext);

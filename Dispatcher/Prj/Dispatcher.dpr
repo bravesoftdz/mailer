@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in '..\Src\DispatcherController.pas',
-  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule},
+  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule} ,
   DispatcherModel in '..\Src\DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -131,7 +131,6 @@ begin
         [PendingRequests[RequestID].Origin, PendingRequests[RequestID].Action, PendingRequests[RequestID].Attachments.Count, RequestID]));
     end;
   end;
-  TDispatcherController.ElaboratePendingRequests();
   PendingRequests.Clear;
   PendingRequests.DisposeOf;
 

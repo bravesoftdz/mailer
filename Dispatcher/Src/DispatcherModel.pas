@@ -33,27 +33,11 @@ type
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
 
-    function SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
-
-    /// <summary>Dispatch the input request and transform it in a form that the back end server can accept.
-    /// <summary>
-    /// <param name="Entry">a dispatcher entry to be elaborated</param>
-    function DispatchConvert(const Entry: TDispatcherEntry): TActiveQueueEntries;
-
-    /// <summary> Elaborate a single request that has been already:
-    /// 1. dispatch the request
-    /// 2. convert it to a back-end server compatible format
-    /// 3. send to the back-end server
-    /// 4. delete the requests that were successefuly passed to the back-end server
-    /// </summary>
-    function ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
+    // function SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
 
     /// <summary>Save given object and return its id.
     /// Throw an  exception in case of failure.</summary>
     function Persist(const Item: TDispatcherEntry): String;
-
-    /// <summary>Split the entry into a set of single actions and pass them to the back end server.</summary>
-    function Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
 
   public
 
@@ -68,30 +52,15 @@ type
 
     function GetRepositoryParams(): TArray<TPair<String, String>>;
 
-    /// <summary>Delete persisted object by its id.
-    /// This method serves just for clean up. If it fails, nothing serious happens.
-    /// Return true in case of success, false otherwise. </summary>
-    function Delete(const Id: String): Boolean;
-
     /// <summary>Return requests that have to be elaborated. It delegates its
     /// functionality to FRequestSaver which might not be initialized at the moment of this request.</summary>
     function GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 
-    /// <summary>Performs operations required by the logic of the dispatcher regarding incoming requests.
-    /// Throws various exception in case something gets wrong. Otherwise, it must produce a non-null responce.
-    /// It does the following:
-    /// 1. check authentification
-    /// 2. persist the request
-    /// 3. dispatch the request
-    /// 4. convert it to a back-end server compatible format
-    /// 5. send to the back-end server
-    /// 6. delete the requests that were successefuly passed to the back-end server
-    /// </summary>
+    /// <summary>Perform authentication check and if it passes, persist the request.
+    /// Once the request is persisted, then it is a dispatcher sender to take care of the request.
     /// <param name="IP">IP address from wich the request comes from</param>
     /// <param name="Request">received request. Assume it is not null.</param>
     function ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
-
-    procedure ElaboratePendingRequests();
 
     property Config: TServerConfigImmutable read GetConfig write SetConfig;
 
@@ -121,40 +90,6 @@ begin
 
 end;
 
-function TModel.Dispatch(const Entry: TDispatcherEntry): TObjectList<TActiveQueueEntry>;
-var
-  Actions: TObjectList<TAction>;
-  Action: TAction;
-  Token: String;
-  Attachments: TObjectList<TAttachment>;
-  BackEndEntry: TActiveQueueEntry;
-  AQTmp: TActiveQueueEntry;
-begin
-  Actions := FFactory.FindActions(Entry.Origin, Entry.Action);
-  Result := TObjectList<TActiveQueueEntry>.Create();
-  Token := FConfig.Token;
-  try
-    for Action in Actions do
-    begin
-      Attachments := Entry.Attachments;
-      try
-        BackEndEntry := Action.MapToBackEndEntry(Entry.Content, Attachments, Token);
-        Result.Add(BackEndEntry);
-      except
-        on E: Exception do
-        begin
-          Actions.Clear;
-          Actions.DisposeOf();
-          raise Exception.Create('Failed to create back-end entries: ' + e.Message);
-        end;
-      end;
-    end;
-  finally
-    Actions.Clear;
-    Actions.DisposeOf();
-  end;
-end;
-
 function TModel.GetPendingRequests(): TDictionary<String, TDispatcherEntry>;
 begin
   if FRequestSaver <> nil then
@@ -165,95 +100,7 @@ begin
     Result := TDictionary<String, TDispatcherEntry>.Create();
 end;
 
-function TModel.ElaborateSinglePersistedRequest(const Id: String; const Request: TDispatcherEntry): TDispatcherResponce;
-var
-  SavedAndConverted: TActiveQueueEntries;
-  Outcome: TAQResponce;
-  Status: Boolean;
-  Msg: String;
-begin
-  SavedAndConverted := DispatchConvert(Request);
-  try
-    Outcome := SendToBackEnd(SavedAndConverted);
-  except
-    on E: Exception do
-    begin
-      Result := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.EXCEPTION_REPORT, [Id, E.Message]));
-      Outcome := nil;
-    end;
-  end;
-  SavedAndConverted.DisposeOf;
-  if Outcome <> nil then
-  begin
-    // extract the values that will be used later in order to be able to destroy the object
-    Status := Outcome.status;
-    Msg := Outcome.Msg;
-    Outcome.DisposeOf;
-    if Status then
-    begin
-      try
-        Delete(Id);
-        Result := TDispatcherResponce.Create(True, TDispatcherResponceMessages.SUCCESS);
-      except
-        on E: Exception do
-        begin
-          Result := TDispatcherResponce.Create(True, Format(TDispatcherResponceMessages.FAILED_TO_DELETE, [Id, E.Message]));
-        end;
-      end;
-    end
-    else
-    begin
-      Result := TDispatcherResponce.Create(False, Format(TDispatcherResponceMessages.FAILURE_REPORT, [Id, Msg]));
-    end;
-
-  end;
-  Writeln('Finish TModel.ElaborateSinglePersistedRequest');
-end;
-
-procedure TModel.ElaboratePendingRequests;
-var
-  PendingRequests: TDictionary<String, TDispatcherEntry>;
-  RequestId: String;
-  ResponceLocal: TDispatcherResponce;
-begin
-  if FRequestSaver <> nil then
-  begin
-    TMonitor.Enter(FPendingRequestLock);
-    try
-      PendingRequests := GetPendingRequests();
-
-      if (PendingRequests <> nil) then
-      begin
-        for RequestId in PendingRequests.Keys do
-        begin
-          Writeln('Send a pending request ' + RequestId + ' to the back end server');
-          ResponceLocal := ElaborateSinglePersistedRequest(RequestId, PendingRequests[RequestId]);
-          if ResponceLocal <> nil then
-          begin
-            Writeln(Format('request %s outcome: status %s, message %s', [RequestId, ResponceLocal.Status.ToString, ResponceLocal.msg]));
-            ResponceLocal.DisposeOf;
-            PendingRequests[RequestId].DisposeOf;
-          end
-          else
-            Writeln('No responce received from the back end server.');
-        end;
-        PendingRequests.Clear;
-        PendingRequests.DisposeOf;
-      end;
-    finally
-      TMonitor.Exit(FPendingRequestLock);
-    end;
-  end;
-
-end;
-
-function TModel.ElaborateSingleRequest(
-  const
-  IP:
-  String;
-  const
-  Request:
-  TDispatcherEntry): TDispatcherResponce;
+function TModel.ElaborateSingleRequest(const IP: String; const Request: TDispatcherEntry): TDispatcherResponce;
 var
   Id: String;
 begin
@@ -267,6 +114,7 @@ begin
     try
       try
         Id := Persist(Request);
+        Result := TDispatcherResponce.Create(True, Format('The request has been persisted, id="%s".', [id]));
       except
         on E: Exception do
         begin
@@ -274,67 +122,14 @@ begin
           Id := '';
         end;
       end;
-      if (Id <> '') then
-      begin
-        Result := ElaborateSinglePersistedRequest(Id, Request);
-      end;
+      // if (Id <> '') then
+      // begin
+      // Result := ElaborateSinglePersistedRequest(Id, Request);
+      // end;
     finally
       TMonitor.Exit(FPendingRequestLock);
     end;
   end;
-end;
-
-function TModel.DispatchConvert(
-  const
-  Entry:
-  TDispatcherEntry): TActiveQueueEntries;
-var
-  Items: TObjectList<TActiveQueueEntry>;
-  ErrorMessages: TStringList;
-  ErrorSummary: String;
-begin
-  Writeln('Start TModel.DispatchConvert');
-  ErrorMessages := TStringList.Create;
-  try
-    Items := Dispatch(Entry);
-  except
-    on E: Exception do
-    begin
-      ErrorMessages.Add(E.Message);
-    end;
-  end;
-
-  if (Items <> nil) then
-  begin
-    Result := TActiveQueueEntries.Create(FConfig.Token, Items);
-  end;
-  if Items <> nil then
-  begin
-    Items.Clear;
-    Items.DisposeOf;
-  end;
-
-  if ErrorMessages.Count > 0 then
-  begin
-    ErrorSummary := ErrorMessages.Text;
-    ErrorMessages.DisposeOf;
-    raise Exception.Create('Dispatcher has encountered the following error: ' + ErrorSummary);
-  end
-  else
-  begin
-    ErrorMessages.DisposeOf;
-  end;
-
-  Writeln('Finish TModel.DispatchConvert');
-
-end;
-
-function TModel.Delete(
-  const
-  Id:
-  String): Boolean;
-begin
-  Result := FRequestSaver.Delete(Id);
 end;
 
 destructor TModel.Destroy;
@@ -441,7 +236,7 @@ begin
   FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
   FBackEndProxy := FBackEndAdapter.Build(GetBackEndIp(), GetBackEndPort());
 
-  FSender := TDispatcherEntrySender.Create(FrequestSaver, FBackEndProxy);
+  FSender := TDispatcherEntrySender.Create(FrequestSaver, FBackEndProxy, FConfig.Token);
 
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
@@ -462,13 +257,6 @@ begin
   if RepoConfig <> nil then
     RepoConfig.DisposeOf;
 
-end;
-
-function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
-begin
-  Writeln('Start: TModel.SendToBackEnd');
-  Result := FBackEndProxy.PostItems(Requests);
-  Writeln('End: TModel.SendToBackEnd');
 end;
 
 end.
