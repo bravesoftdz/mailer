@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   DispatcherController in '..\Src\DispatcherController.pas',
-  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule} ,
+  DispatcherProject in '..\Src\DispatcherProject.pas' {DispatcherModule: TWebModule},
   DispatcherModel in '..\Src\DispatcherModel.pas',
   CliParam,
   CliUsage,
@@ -39,7 +39,8 @@ uses
   RequestToFileSystemStorage in '..\..\Storage\RequestToFileSystemStorage.pas',
   RepositoryConfig in '..\..\Config\RepositoryConfig.pas',
   RequestSaverFactory in '..\..\Storage\RequestSaverFactory.pas',
-  System.Generics.Collections;
+  System.Generics.Collections,
+  DispatcherEntrySender in 'DispatcherEntrySender.pas';
 
 {$R *.res}
 

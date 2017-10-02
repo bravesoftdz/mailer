@@ -7,7 +7,7 @@ uses
   ProviderFactory, System.Generics.Collections, ActiveQueueEntry, Attachment,
   ServerConfig, IpTokenAuthentication, RequestStorageInterface, System.JSON,
   RepositoryConfig, RequestSaverFactory, AQAPIClient, MVCFramework.RESTAdapter,
-  AQResponce;
+  AQResponce, DispatcherEntrySender;
 
 type
   TModel = class(TObject)
@@ -26,6 +26,9 @@ type
 
     /// a dumb object to have a thread-safe access to request-related data
     FPendingRequestLock: TObject;
+
+    /// monitors the repository and sends the items to the back end server
+    FSender: TDispatcherEntrySender;
 
     function GetConfig(): TServerConfigImmutable;
     procedure SetConfig(const Config: TServerConfigImmutable);
@@ -113,6 +116,8 @@ begin
   ListOfProviders.Clear;
   ListOfProviders.DisposeOf;
   FRequestSaverFactory := RequestSaverFactory;
+
+  FSender := nil;
 
 end;
 
@@ -348,6 +353,10 @@ begin
   if (FBackEndProxy <> nil) then
     FBackEndProxy := nil;
   FPendingRequestLock.DisposeOf;
+
+  if FSender <> nil then
+    FSender.DisposeOf;
+
   inherited;
 end;
 
@@ -408,10 +417,7 @@ begin
   Writeln('Finished persisting the entry');
 end;
 
-procedure TModel.SetConfig(
-  const
-  Config:
-  TServerConfigImmutable);
+procedure TModel.SetConfig(const Config: TServerConfigImmutable);
 const
   TAG = 'TModel.SetConfig';
 var
@@ -435,6 +441,8 @@ begin
   FBackEndAdapter := TRestAdapter<IAQAPIClient>.Create();
   FBackEndProxy := FBackEndAdapter.Build(GetBackEndIp(), GetBackEndPort());
 
+  FSender := TDispatcherEntrySender.Create(FrequestSaver, FBackEndProxy);
+
   IPs := TArray<String>.Create();
   Tokens := TArray<String>.Create();
   Clients := Config.Clients;
@@ -456,10 +464,7 @@ begin
 
 end;
 
-function TModel.SendToBackEnd(
-  const
-  Requests:
-  TActiveQueueEntries): TAQResponce;
+function TModel.SendToBackEnd(const Requests: TActiveQueueEntries): TAQResponce;
 begin
   Writeln('Start: TModel.SendToBackEnd');
   Result := FBackEndProxy.PostItems(Requests);
