@@ -112,10 +112,14 @@ end;
 procedure TConsumerModel.Consume(const Items: TObjectList<TActiveQueueEntry>);
 var
   item: TActiveQueueEntry;
+  Counter: Integer;
 begin
+  Counter := 1;
   for Item in Items do
   begin
+    Writeln(Format('Sending item %d', [Counter]));
     Sendmail(item);
+    Counter := Counter + 1;
   end;
 end;
 
@@ -235,6 +239,7 @@ begin
     Items.DisposeOf;
   if S > 0 then
   begin
+    Writeln('Start over...');
     RequestAndExecute(); // start recursively
   end
 end;
@@ -291,8 +296,17 @@ begin
         Smtp.Port := TSendMailConfig.Port;
         Smtp.Connect;
         try
-          Smtp.Send(MSG);
-          Writeln('Trying to send');
+          try
+            Smtp.Send(MSG);
+            Writeln('Message has been sent.');
+          except
+            on E: Exception do
+            begin
+              Writeln('Failed to send: ' + E.Message);
+            end;
+
+          end;
+
         finally
           Writeln('Trying to disconnect');
           Smtp.Disconnect

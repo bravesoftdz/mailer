@@ -53,14 +53,6 @@ type
     /// </summary>
     function isAuthenticated(const IP, Token: String): Boolean;
 
-    /// <summary>
-    /// Elaborate an action from a client.</summary>
-    /// <param name="Requestor">client name</param>
-    /// <param name="anAction">an action name that the client requests to perform</param>
-    /// <param name="IP">client IP</param>
-    /// <param name="Request">request obtained from the client</param>
-    // function Elaborate(const Requestor: string; const anAction: string; const IP: String; const Token: String; const Request: TClientFullRequest): TResponce;
-
     /// <summary>Extract a value corresponding to a key in a set of key-value pairs. The pairs
     /// are separated by semicolon, while the key and value are separated by equality sign. A key is
     /// optional in the key-value pairs. Example:
@@ -95,11 +87,7 @@ type
 implementation
 
 uses
-  // Provider,
-  // Action,
-  // VenditoriSimple, SoluzioneAgenti,
-  System.SysUtils,
-  ObjectsMappers, ClientRequest;
+  System.SysUtils, ObjectsMappers, ClientRequest;
 
 { TMailerModel }
 
@@ -119,16 +107,9 @@ begin
 end;
 
 constructor TReceptionModel.Create;
-// var
-// Providers: TObjectList<TProvider>;
 begin
   Writeln('Model create');
-  // Providers := TObjectList<TProvider>.Create;
-  // Providers.addRange([TVenditoriSimple.Create, TSoluzioneAgenti.Create]);
-  // FFactory := TProviderFactory.Create(Providers);
   FClients := TArray<TClient>.Create();
-  // Providers.Clear;
-  // Providers.DisposeOf;
 end;
 
 destructor TReceptionModel.Destroy;
@@ -140,44 +121,11 @@ begin
   for I := 0 to S - 1 do
     FClients[I].DisposeOf();
   SetLength(FClients, 0);
-  // FFactory.DisposeOf;
   FSettings.DisposeOf;
   if FAuthentication <> nil then
     FAuthentication.DisposeOf;
 
 end;
-
-// function TReceptionModel.Elaborate(const Requestor, anAction, IP, Token: String;
-// const Request: TClientFullRequest): TResponce;
-// var
-// Provider: TProvider;
-// Action: TAction;
-// Responce: TResponce;
-// begin
-// if isAuthenticated(IP, Token) then
-// begin
-// Provider := FFactory.FindByName(Requestor);
-// if (Provider <> nil) then
-// begin
-// Action := Provider.FindByName(anAction);
-// end;
-// if (Action <> nil) then
-// begin
-// Responce := Action.Elaborate(Request, FSettings);
-// end
-// else
-// begin
-// Responce := TResponce.Create(False, 'Action not allowed.');
-//
-// end;
-// end
-// else
-// begin
-// Responce := TResponce.Create(False, 'Access denied');
-// end;
-// Result := Responce;
-//
-// end;
 
 function TReceptionModel.ExtractBody(const Boundary, RawBody, ContentType, KeyName: String): String;
 var

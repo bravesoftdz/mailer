@@ -13,7 +13,7 @@ uses
   Web.WebBroker,
   IdHTTPWebBrokerBridge,
   ConsumerController in '..\Src\ConsumerController.pas',
-  ConsumerWebModule in '..\Src\ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule},
+  ConsumerWebModule in '..\Src\ConsumerWebModule.pas' {ConsumerMockWebModule: TWebModule} ,
   AQAPIConsumer in '..\Src\AQAPIConsumer.pas',
   SendmailConfig in '..\Src\SendmailConfig.pas',
   ConsumerModel in '..\Src\ConsumerModel.pas',
@@ -25,9 +25,11 @@ uses
   SendDataTemplate in '..\..\EmailTemplate\SendDataTemplate.pas',
   System.IOUtils,
   System.JSON,
+  System.DateUtils,
   AQSubscriptionEntry in '..\..\ActiveQueue\Src\AQSubscriptionEntry.pas',
   KeyStroke in '..\Src\KeyStroke.pas',
-  AQResponce in '..\..\ActiveQueue\Src\AQResponce.pas';
+  AQResponce in '..\..\ActiveQueue\Src\AQResponce.pas',
+  CustomTime in '..\..\DateTime\CustomTime.pas';
 
 {$R *.res}
 
@@ -52,6 +54,7 @@ var
   Config: TConsumerConfig;
 
 procedure RunServer(const Config: TConsumerConfig; const ConfigFileName: String);
+
 var
   LInputRecord: TInputRecord;
   LEvent: DWord;
@@ -62,8 +65,9 @@ var
   SubscriptionStatus: Boolean;
   KeyStrokeContainer: TKeyStroke;
   Action1, Action2, Action3: IKeyStrokeAction;
-
+  CustomTime: TCustomTime;
 begin
+
   TConsumerController.SetConfig(Config, ConfigFileName);
   with TConsumerController do
   begin
@@ -82,6 +86,11 @@ begin
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULT_COLOR);
   Writeln('');
   SetConsoleTitle(pwidechar(InfoString));
+
+  CustomTime := TCustomTime.Create();
+  Writeln(Format('Compile time: %s', [CustomTime.LastAccessTime(paramstr(0))]));
+  CustomTime.DisposeOf;
+
 
   Write('Data provider: ');
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), HIGHLIGHT_COLOR);
@@ -171,6 +180,7 @@ end;
 
 begin
   ReportMemoryLeaksOnShutdown := True;
+
   CliParams := [TCliParam.Create(SWITCH_CONFIG, 'path', 'path to the config file', True)];
   ParamUsage := TCliUsage.Create(ExtractFileName(paramstr(0)), CliParams);
   FindCmdLineSwitch(SWITCH_CONFIG, ConfigFileName, False);
